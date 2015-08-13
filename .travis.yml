@@ -1,0 +1,21 @@
+branches:
+  only:
+    - master
+
+language: android
+sudo: false
+
+android:
+  components:
+    - build-tools-22.0.1
+    - android-22
+    - doc-MNC
+    - extra-android-support
+    - extra-android-m2repository
+
+script:
+  - ./gradlew clean testDebug --info
+
+after_success:
+  - ./gradlew jacocoTestReport coveralls
+  - ./scripts/publish_snapshot.sh
