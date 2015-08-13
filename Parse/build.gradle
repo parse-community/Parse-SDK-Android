@@ -1,0 +1,208 @@
+import com.android.builder.core.BuilderConstants
+
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.kt3k.coveralls'
+
+group = 'com.parse'
+version = VERSION_NAME
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1x'
+    }
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName VERSION_NAME
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+    }
+}
+
+dependencies {
+    compile 'com.parse.bolts:bolts-android:1.2.1'
+
+    provided 'com.squareup.okhttp:okhttp:2.4.0'
+
+    testCompile 'org.robolectric:robolectric:3.0'
+    testCompile 'org.skyscreamer:jsonassert:1.2.3'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'com.squareup.okhttp:mockwebserver:2.4.0'
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
+        dependsOn variant.javaCompile
+        from variant.javaCompile.destinationDir
+
+        manifest {
+            attributes(
+                    "Bundle-Name": 'parse-android',
+                    "Bundle-Version": project.version
+            )
+        }
+
+        exclude '**/R.class'
+        exclude '**/R\$*.class'
+        exclude '**/Manifest.class'
+        exclude '**/Manifest\$*.class'
+        exclude '**/BuildConfig.class'
+    }
+
+    def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
+        description "Generates Javadoc for $variant.name."
+        source = variant.javaCompile.source
+        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+
+        options.docletpath = [rootProject.file("./gradle/ExcludeDoclet.jar")]
+        options.doclet = "me.grantland.doclet.ExcludeDoclet"
+
+        options.linksOffline("http://d.android.com/reference", "${android.sdkDirectory}/docs/reference")
+        options.links("http://boltsframework.github.io/docs/android/")
+
+        exclude '**/BuildConfig.java'
+        exclude '**/R.java'
+        exclude '**/internal/**'
+    }
+
+    def javadocJar = task("javadocJar${variant.name.capitalize()}", type: Jar, dependsOn: "javadoc${variant.name.capitalize()}") {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    if (name.equals(BuilderConstants.RELEASE)) {
+        artifacts.add('archives', jar);
+        artifacts.add('archives', javadocJar);
+    }
+}
+
+//region Maven
+
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def isSnapshot = version.endsWith('-SNAPSHOT')
+def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
+def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
+
+uploadArchives {
+    repositories.mavenDeployer {
+        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+            authentication(userName: ossrhUsername, password: ossrhPassword)
+        }
+
+        pom.project {
+            name 'Parse-Android'
+            artifactId = 'parse-android'
+            packaging 'jar'
+            description 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
+            url 'https://github.com/ParsePlatform/Parse-SDK-Android'
+
+            scm {
+                connection 'scm:git@github.com:ParsePlatform/Parse-SDK-Android.git'
+                developerConnection 'scm:git@github.com:ParsePlatform/Parse-SDK-Android.git'
+                url 'https://github.com/ParsePlatform/Parse-SDK-Androidd'
+            }
+
+            licenses {
+                license {
+                    name 'BSD License'
+                    url 'https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+
+            developers {
+                developer {
+                    id 'parse'
+                    name 'Parse'
+                }
+            }
+        }
+    }
+}
+
+signing {
+    required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.sourceFiles
+}
+
+artifacts {
+    archives androidSourcesJar
+}
+
+//endregion
+
+//region Code Coverage
+
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion "0.7.1.201405082137"
+}
+
+task jacocoTestReport(type:JacocoReport, dependsOn: "testDebug") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports"
+
+    classDirectories = fileTree(
+            dir: "${buildDir}/intermediates/classes/debug",
+            excludes: ['**/R.class',
+                       '**/R$*.class',
+                       '**/*$ViewInjector*.*',
+                       '**/BuildConfig.*',
+                       '**/Manifest*.*']
+    )
+
+    sourceDirectories = files("${buildDir.parent}/src/main/java")
+    additionalSourceDirs = files([
+            "${buildDir}/generated/source/buildConfig/debug",
+            "${buildDir}/generated/source/r/debug"
+    ])
+    executionData = files("${buildDir}/jacoco/testDebug.exec")
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+//endregion
+
+//region Coveralls
+
+coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+
+//endregion
