@@ -11,10 +11,12 @@ package com.parse;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import bolts.Continuation;
@@ -36,12 +38,13 @@ public class ParseInstallation extends ParseObject {
   private static final String KEY_DEVICE_TOKEN = "deviceToken";
   private static final String KEY_PUSH_TYPE = "pushType";
   private static final String KEY_TIME_ZONE = "timeZone";
+  private static final String KEY_LOCALE = "localeIdentifier";
   private static final String KEY_APP_VERSION = "appVersion";
   /* package */ static final String KEY_CHANNELS = "channels";
 
   private static final List<String> READ_ONLY_FIELDS = Collections.unmodifiableList(
       Arrays.asList(KEY_DEVICE_TYPE, KEY_INSTALLATION_ID, KEY_DEVICE_TOKEN, KEY_PUSH_TYPE,
-          KEY_TIME_ZONE, KEY_APP_VERSION, KEY_APP_NAME, KEY_PARSE_VERSION,
+          KEY_TIME_ZONE, KEY_LOCALE, KEY_APP_VERSION, KEY_APP_NAME, KEY_PARSE_VERSION,
           KEY_APP_IDENTIFIER));
 
   // TODO(mengyan): Inject into ParseInstallationInstanceController
@@ -108,6 +111,7 @@ public class ParseInstallation extends ParseObject {
       updateTimezone();
       updateVersionInfo();
       updateDeviceInfo();
+      updateLocaleIdentifier();
     }
   }
 
@@ -165,8 +169,8 @@ public class ParseInstallation extends ParseObject {
   // time zones from devices reporting other formats.
   private void updateTimezone() {
     String zone = TimeZone.getDefault().getID();
-    if ((zone.indexOf('/') > 0 || zone.equals("GMT")) && !zone.equals(get("timeZone"))) {
-      performPut("timeZone", zone);
+    if ((zone.indexOf('/') > 0 || zone.equals("GMT")) && !zone.equals(get(KEY_TIME_ZONE))) {
+      performPut(KEY_TIME_ZONE, zone);
     }
   }
 
@@ -180,22 +184,62 @@ public class ParseInstallation extends ParseObject {
         String appVersion = pkgInfo.versionName;
         String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
 
-        if (packageName != null && !packageName.equals(get("appIdentifier"))) {
+        if (packageName != null && !packageName.equals(get(KEY_APP_IDENTIFIER))) {
           performPut(KEY_APP_IDENTIFIER, packageName);
         }
-        if (appName != null && !appName.equals(get("appName"))) {
+        if (appName != null && !appName.equals(get(KEY_APP_NAME))) {
           performPut(KEY_APP_NAME, appName);
         }
-        if (appVersion != null && !appVersion.equals(get("appVersion"))) {
+        if (appVersion != null && !appVersion.equals(get(KEY_APP_VERSION))) {
           performPut(KEY_APP_VERSION, appVersion);
         }
       } catch (PackageManager.NameNotFoundException e) {
         PLog.w(TAG, "Cannot load package info; will not be saved to installation");
       }
 
-      if (!VERSION_NAME.equals(get("parseVersion"))) {
+      if (!VERSION_NAME.equals(get(KEY_PARSE_VERSION))) {
         performPut(KEY_PARSE_VERSION, VERSION_NAME);
       }
+    }
+  }
+
+  /*
+   * Save locale in the following format:
+   *   [language code]-[country code]
+   *
+   * The language codes are two-letter lowercase ISO language codes (such as "en") as defined by
+   * <a href="http://en.wikipedia.org/wiki/ISO_639-1">ISO 639-1</a>.
+   * The country codes are two-letter uppercase ISO country codes (such as "US") as defined by
+   * <a href="http://en.wikipedia.org/wiki/ISO_3166-1_alpha-3">ISO 3166-1</a>.
+   *
+   * Note that Java uses several deprecated two-letter codes. The Hebrew ("he") language
+   * code is rewritten as "iw", Indonesian ("id") as "in", and Yiddish ("yi") as "ji". This
+   * rewriting happens even if you construct your own {@code Locale} object, not just for
+   * instances returned by the various lookup methods.
+   */
+  private void updateLocaleIdentifier() {
+    final Locale locale = Locale.getDefault();
+
+    String language = locale.getLanguage();
+    String country = locale.getCountry();
+
+    if (TextUtils.isEmpty(language)) {
+      return;
+    }
+
+    // rewrite depreciated two-letter codes
+    if (language.equals("iw")) language = "he"; // Hebrew
+    if (language.equals("in")) language = "id"; // Indonesian
+    if (language.equals("ji")) language = "yi"; // Yiddish
+
+    String localeString = language;
+
+    if (!TextUtils.isEmpty(country)) {
+      localeString = String.format(Locale.US, "%s-%s", language, country);
+    }
+    
+    if (!localeString.equals(get(KEY_LOCALE))) {
+      performPut(KEY_LOCALE, localeString);
     }
   }
 

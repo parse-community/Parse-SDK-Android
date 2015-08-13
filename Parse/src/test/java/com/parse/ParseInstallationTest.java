@@ -23,6 +23,7 @@ import org.robolectric.annotation.Config;
 import org.robolectric.res.builder.RobolectricPackageManager;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import bolts.Task;
@@ -46,17 +47,25 @@ public class ParseInstallationTest {
   private static final String KEY_APP_NAME = "appName";
   private static final String KEY_APP_IDENTIFIER = "appIdentifier";
   private static final String KEY_TIME_ZONE = "timeZone";
+  private static final String KEY_LOCALE_IDENTIFIER = "localeIdentifier";
   private static final String KEY_APP_VERSION = "appVersion";
+
+  private Locale defaultLocale;
 
   @Before
   public void setUp() {
     ParseObject.registerSubclass(ParseInstallation.class);
+
+    defaultLocale = Locale.getDefault();
   }
 
   @After
   public void tearDown() {
     ParseObject.unregisterSubclass(ParseInstallation.class);
     ParseCorePlugins.getInstance().reset();
+    ParsePlugins.reset();
+
+    Locale.setDefault(defaultLocale);
   }
 
   @Test
@@ -71,6 +80,7 @@ public class ParseInstallationTest {
         "deviceTokenLastModified",
         "pushType",
         "timeZone",
+        "localeIdentifier",
         "appVersion"
     };
 
@@ -146,24 +156,9 @@ public class ParseInstallationTest {
 
   @Test
   public void testUpdateBeforeSave() throws Exception {
-    // Mock currentInstallationController to make setAsync work
-    ParseCurrentInstallationController controller =
-        mock(ParseCurrentInstallationController.class);
-    when(controller.isCurrent(any(ParseInstallation.class))).thenReturn(true);
-    ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
-    // Mock package manager
-    RobolectricPackageManager packageManager =
-        spy(RuntimeEnvironment.getRobolectricPackageManager());
-    doReturn("parseTest").when(packageManager).getApplicationLabel(any(ApplicationInfo.class));
-    RuntimeEnvironment.setRobolectricPackageManager(packageManager);
-    ParsePlugins.Android plugins = mock(ParsePlugins.Android.class);
-    // Mock installationId
-    InstallationId installationId = mock(InstallationId.class);
-    when(installationId.get()).thenReturn("installationId");
-    when(plugins.installationId()).thenReturn(installationId);
-    // Mock application context
-    when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
-    ParsePlugins.set(plugins);
+    mocksForUpdateBeforeSave();
+
+    Locale.setDefault(new Locale("en", "US"));
 
     ParseInstallation installation = new ParseInstallation();
     installation.updateBeforeSave();
@@ -183,7 +178,9 @@ public class ParseInstallationTest {
     assertEquals(appVersion, installation.getString(KEY_APP_VERSION));
     // Make sure we update device info
     assertEquals("android", installation.getString(KEY_DEVICE_TYPE));
-    assertEquals(installationId.get(), installation.getString(KEY_INSTALLATION_ID));
+    assertEquals("installationId", installation.getString(KEY_INSTALLATION_ID));
+    // Make sure we update the locale identifier
+    assertEquals("en-US", installation.getString(KEY_LOCALE_IDENTIFIER));
   }
 
   // TODO(mengyan): Add other testUpdateBeforeSave cases to cover all branches
@@ -255,6 +252,54 @@ public class ParseInstallationTest {
     verify(controller, times(1)).getAsync();
   }
 
+  @Test
+  public void testLocaleIdentifierSpecialCases() throws Exception {
+    mocksForUpdateBeforeSave();
+
+    ParseInstallation installation = new ParseInstallation();
+
+    // Deprecated two-letter codes (Java issue).
+    Locale.setDefault(new Locale("iw", "US"));
+    installation.updateBeforeSave();
+    assertEquals("he-US", installation.getString(KEY_LOCALE_IDENTIFIER));
+
+    Locale.setDefault(new Locale("in", "US"));
+    installation.updateBeforeSave();
+    assertEquals("id-US", installation.getString(KEY_LOCALE_IDENTIFIER));
+
+    Locale.setDefault(new Locale("ji", "US"));
+    installation.updateBeforeSave();
+    assertEquals("yi-US", installation.getString(KEY_LOCALE_IDENTIFIER));
+
+    // No country code.
+    Locale.setDefault(new Locale("en"));
+    installation.updateBeforeSave();
+    assertEquals("en", installation.getString(KEY_LOCALE_IDENTIFIER));
+  }
+
+
+
   // TODO(mengyan): Add testFetchAsync, right now we can not test super methods inside
   // testFetchAsync
+
+  private static void mocksForUpdateBeforeSave() {
+    // Mock currentInstallationController to make setAsync work
+    ParseCurrentInstallationController controller =
+            mock(ParseCurrentInstallationController.class);
+    when(controller.isCurrent(any(ParseInstallation.class))).thenReturn(true);
+    ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
+    // Mock package manager
+    RobolectricPackageManager packageManager =
+            spy(RuntimeEnvironment.getRobolectricPackageManager());
+    doReturn("parseTest").when(packageManager).getApplicationLabel(any(ApplicationInfo.class));
+    RuntimeEnvironment.setRobolectricPackageManager(packageManager);
+    ParsePlugins.Android plugins = mock(ParsePlugins.Android.class);
+    // Mock installationId
+    InstallationId installationId = mock(InstallationId.class);
+    when(installationId.get()).thenReturn("installationId");
+    when(plugins.installationId()).thenReturn(installationId);
+    // Mock application context
+    when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+    ParsePlugins.set(plugins);
+  }
 }
