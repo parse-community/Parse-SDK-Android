@@ -19,3 +19,8 @@ script:
 after_success:
   - ./gradlew jacocoTestReport coveralls
   - ./scripts/publish_snapshot.sh
+
+cache:
+  directories:
+    - $HOME/.gradle
+    - $HOME/.m2/repository
