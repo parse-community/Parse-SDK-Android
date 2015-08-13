@@ -13,6 +13,7 @@ import com.parse.ParseQuery.QueryConstraints;
 import com.parse.ParseQuery.RelationConstraint;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -178,6 +179,24 @@ import bolts.Task;
   }
 
   /**
+   * Returns true if decider returns true for any value in the given list.
+   */
+  private static boolean compareArray(Object constraint, JSONArray values, Decider decider) {
+    for (int i = 0; i < values.length(); ++i) {
+      try {
+        if (decider.decide(constraint, values.get(i))) {
+          return true;
+        }
+      } catch (JSONException e) {
+        // This can literally never happen.
+        throw new RuntimeException(e);
+      }
+    }
+    return false;
+  }
+
+  /**
+   *
    * Returns true if the decider returns true for the given value and the given constraint. This
    * method handles Mongo's logic where an item can match either an item itself, or any item within
    * the item, if the item is an array.
@@ -185,6 +204,8 @@ import bolts.Task;
   private static boolean compare(Object constraint, Object value, Decider decider) {
     if (value instanceof List) {
       return compareList(constraint, (List<?>) value, decider);
+    } else if (value instanceof JSONArray) {
+      return compareArray(constraint, (JSONArray) value, decider);
     } else {
       return decider.decide(constraint, value);
     }

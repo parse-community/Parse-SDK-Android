@@ -510,6 +510,56 @@ public class OfflineQueryLogicTest {
 
   //endregion
 
+  //region compare
+
+  @Test
+  public void testCompareList() throws Exception {
+    ParseObject object = new ParseObject("SomeObject");
+    List<Integer> list = new ArrayList<>();
+    list.add(1);
+    list.add(2);
+    list.add(3);
+    object.put("list", list);
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+
+    query = new ParseQuery.State.Builder<>("SomeObject")
+        .whereEqualTo("list", 2)
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("SomeObject")
+        .whereEqualTo("list", 4)
+        .build();
+    assertFalse(matches(logic, query, object));
+  }
+
+  @Test
+  public void testCompareJSONArray() throws Exception {
+    ParseObject object = new ParseObject("SomeObject");
+    JSONArray array = new JSONArray();
+    array.put(1);
+    array.put(2);
+    array.put(3);
+    object.put("array", array);
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+
+    query = new ParseQuery.State.Builder<>("SomeObject")
+        .whereEqualTo("array", 2)
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("SomeObject")
+        .whereEqualTo("array", 4)
+        .build();
+    assertFalse(matches(logic, query, object));
+  }
+
+  //endregion
+
   //region compareTo
 
   @Test
