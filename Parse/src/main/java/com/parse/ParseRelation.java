@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +25,13 @@ public class ParseRelation<T extends ParseObject> {
   private final Object mutex = new Object();
 
   // The owning object of this ParseRelation.
-  private ParseObject parent;
+  private WeakReference<ParseObject> parent;
+
+  // The object Id of the parent.
+  private String parentObjectId;
+
+  // The classname of the parent to retrieve the parent ParseObject in case the parent is GC'ed.
+  private String parentClassName;
 
   // The key of the relation in the parent object.
   private String key;
@@ -36,13 +43,17 @@ public class ParseRelation<T extends ParseObject> {
   private Set<ParseObject> knownObjects = new HashSet<>();
 
   /* package */ ParseRelation(ParseObject parent, String key) {
-    this.parent = parent;
+    this.parent = new WeakReference<>(parent);
+    this.parentObjectId = parent.getObjectId();
+    this.parentClassName = parent.getClassName();
     this.key = key;
     this.targetClass = null;
   }
 
   /* package */ ParseRelation(String targetClass) {
     this.parent = null;
+    this.parentObjectId = null;
+    this.parentClassName = null;
     this.key = null;
     this.targetClass = targetClass;
   }
@@ -52,6 +63,8 @@ public class ParseRelation<T extends ParseObject> {
    */
   /* package */ ParseRelation(JSONObject jsonObject, ParseDecoder decoder) {
     this.parent = null;
+    this.parentObjectId = null;
+    this.parentClassName = null;
     this.key = null;
     this.targetClass = jsonObject.optString("className", null);
     JSONArray objectsArray = jsonObject.optJSONArray("objects");
@@ -65,12 +78,14 @@ public class ParseRelation<T extends ParseObject> {
   /* package */ void ensureParentAndKey(ParseObject someParent, String someKey) {
     synchronized (mutex) {
       if (parent == null) {
-        parent = someParent;
+        parent = new WeakReference<>(someParent);
+        parentObjectId = someParent.getObjectId();
+        parentClassName = someParent.getClassName();
       }
       if (key == null) {
         key = someKey;
       }
-      if (parent != someParent) {
+      if (parent.get() != someParent) {
         throw new IllegalStateException(
             "Internal error. One ParseRelation retrieved from two different ParseObjects.");
       }
@@ -92,7 +107,7 @@ public class ParseRelation<T extends ParseObject> {
       ParseRelationOperation<T> operation =
           new ParseRelationOperation<>(Collections.singleton(object), null);
       targetClass = operation.getTargetClass();
-      parent.performOperation(key, operation);
+      getParent().performOperation(key, operation);
       
       knownObjects.add(object);
     }
@@ -109,7 +124,7 @@ public class ParseRelation<T extends ParseObject> {
       ParseRelationOperation<T> operation =
           new ParseRelationOperation<>(null, Collections.singleton(object));
       targetClass = operation.getTargetClass();
-      parent.performOperation(key, operation);
+      getParent().performOperation(key, operation);
   
       knownObjects.remove(object);
     }
@@ -124,12 +139,12 @@ public class ParseRelation<T extends ParseObject> {
     synchronized (mutex) {
       ParseQuery.State.Builder<T> builder;
       if (targetClass == null) {
-        builder = new ParseQuery.State.Builder<T>(parent.getClassName())
+        builder = new ParseQuery.State.Builder<T>(parentClassName)
             .redirectClassNameForKey(key);
       } else {
         builder = new ParseQuery.State.Builder<>(targetClass);
       }
-      builder.whereRelatedTo(parent, key);
+      builder.whereRelatedTo(getParent(), key);
       return new ParseQuery<>(builder);
     }
   }
@@ -193,7 +208,13 @@ public class ParseRelation<T extends ParseObject> {
   }
 
   /* package for tests */ ParseObject getParent() {
-    return parent;
+    if(parent == null){
+      return null;
+    }
+    if(parent.get() == null){
+      return ParseObject.createWithoutData(parentClassName, parentObjectId);
+    }
+    return parent.get();
   }
 
   /* package for tests */ String getKey() {
