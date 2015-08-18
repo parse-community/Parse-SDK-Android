@@ -11,7 +11,6 @@ package com.parse;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 public class ParseCloudCodeControllerTest {
 
@@ -57,21 +55,6 @@ public class ParseCloudCodeControllerTest {
     Object result = controller.convertCloudResponse(null);
 
     assertNull(result);
-  }
-
-  @Test
-  public void testConvertCloudResponseJsonResponseWithoutResultField() throws Exception {
-    ParseHttpClient restClient = mock(ParseHttpClient.class);
-    ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
-    JSONObject response = new JSONObject();
-    response.put("foo", "bar");
-    response.put("yarr", 1);
-
-    Object result = controller.convertCloudResponse(response);
-
-    assertThat(result, instanceOf(JSONObject.class));
-    JSONObject jsonResult = (JSONObject)result;
-    assertEquals(response, jsonResult, JSONCompareMode.NON_EXTENSIBLE);
   }
 
   @Test
