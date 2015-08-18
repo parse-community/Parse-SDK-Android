@@ -1059,6 +1059,41 @@ public class ParseUserTest {
     verify(currentUserController, times(1)).setAsync(user);
   }
 
+  @Test
+  public void testDontOverwriteSessionTokenForCurrentUser() throws Exception {
+    ParseUser.State sessionTokenState = new ParseUser.State.Builder()
+            .sessionToken("sessionToken")
+            .put("key0", "value0")
+            .put("key1", "value1")
+            .isComplete(true)
+            .build();
+    ParseUser.State newState = new ParseUser.State.Builder()
+            .put("key0", "newValue0")
+            .put("key2", "value2")
+            .isComplete(true)
+            .build();
+    ParseUser.State emptyState = new ParseUser.State.Builder().isComplete(true).build();
+
+    ParseUser user = ParseObject.from(sessionTokenState);
+    user.setIsCurrentUser(true);
+    assertEquals(user.getSessionToken(), "sessionToken");
+    assertEquals(user.getString("key0"), "value0");
+    assertEquals(user.getString("key1"), "value1");
+
+    user.setState(newState);
+    assertEquals(user.getSessionToken(), "sessionToken");
+    assertEquals(user.getString("key0"), "newValue0");
+    assertNull(user.getString("key1"));
+    assertEquals(user.getString("key2"), "value2");
+
+    user.setIsCurrentUser(false);
+    user.setState(emptyState);
+    assertNull(user.getSessionToken());
+    assertNull(user.getString("key0"));
+    assertNull(user.getString("key1"));
+    assertNull(user.getString("key2"));
+  }
+
   //endregion
 
   //region testUnlinkFromAsync

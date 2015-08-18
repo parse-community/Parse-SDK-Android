@@ -501,6 +501,16 @@ public class ParseUser extends ParseObject {
   }
 
   @Override
+  /* package */ void setState(ParseObject.State newState) {
+    // Avoid clearing sessionToken when updating the current user's State via ParseQuery result
+    if (isCurrentUser() && getSessionToken() != null
+            && newState.get("sessionToken") == null) {
+      newState = newState.newBuilder().put("sessionToken", getSessionToken()).build();
+    }
+    super.setState(newState);
+  }
+
+  @Override
   /* package */ void validateDelete() {
     synchronized (mutex) {
       super.validateDelete();
