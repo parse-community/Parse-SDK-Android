@@ -116,7 +116,7 @@ public class ParseCloudCodeControllerTest {
   }
 
   @Test
-  public void testCallFunctionInBackgroundSuccess() throws Exception {
+  public void testCallFunctionInBackgroundSuccessWithResult() throws Exception {
     JSONObject json = new JSONObject();
     json.put("result", "test");
     String content = json.toString();
@@ -135,6 +135,27 @@ public class ParseCloudCodeControllerTest {
 
     verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
     assertEquals("test", cloudCodeTask.getResult());
+  }
+
+  @Test
+  public void testCallFunctionInBackgroundSuccessWithoutResult() throws Exception {
+    JSONObject json = new JSONObject();
+    String content = json.toString();
+
+    ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
+    when(mockResponse.getStatusCode()).thenReturn(200);
+    when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
+    when(mockResponse.getTotalSize()).thenReturn(content.length());
+
+    ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
+    ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
+
+    Task<String> cloudCodeTask = controller.callFunctionInBackground(
+        "test", new HashMap<String, Object>(), "sessionToken");
+    ParseTaskUtils.wait(cloudCodeTask);
+
+    verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
+    assertNull(cloudCodeTask.getResult());
   }
 
   @Test

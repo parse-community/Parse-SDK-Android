@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -46,11 +45,7 @@ import bolts.Task;
   /* package for test */ Object convertCloudResponse(Object result) {
     if (result instanceof JSONObject) {
       JSONObject jsonResult = (JSONObject)result;
-      try {
-        result = jsonResult.get("result");
-      } catch (JSONException e) {
-        return result;
-      }
+      result = jsonResult.opt("result");
     }
 
     ParseDecoder decoder = ParseDecoder.get();
