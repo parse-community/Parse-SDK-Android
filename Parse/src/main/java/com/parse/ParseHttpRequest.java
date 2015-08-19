@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +22,7 @@ import java.util.Map;
   protected ParseHttpRequest(Builder builder) {
     this.url = builder.url;
     this.method = builder.method;
-    this.headers = builder.headers;
+    this.headers = Collections.unmodifiableMap(new HashMap<>(builder.headers));
     this.body = builder.body;
   }
 
@@ -59,8 +60,6 @@ import java.util.Map;
       this.url = request.url;
       this.method = request.method;
       this.headers = new HashMap<>(request.headers);
-      // TODO(mengyan) This direct copy make ParseHttpRequest not truly immutable.
-      // We need to 'clone' a ParseHttpBody here.
       this.body = request.body;
     }
 
