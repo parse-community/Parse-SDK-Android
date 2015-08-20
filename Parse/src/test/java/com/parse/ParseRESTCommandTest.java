@@ -21,6 +21,8 @@ import org.robolectric.annotation.Config;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import bolts.Task;
 
@@ -29,7 +31,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -448,5 +453,62 @@ public class ParseRESTCommandTest {
     assertEquals(sessionToken, command.getSessionToken());
     assertEquals(localId, command.getLocalId());
     assertEquals(jsonParameters, command.jsonParameters, JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  @Test
+  public void testOnResponseCloseNetworkStreamWithNormalResponse() throws Exception {
+    // Mock response stream
+    int statusCode = 200;
+    JSONObject bodyJson = new JSONObject();
+    bodyJson.put("key", "value");
+    String bodyStr = bodyJson.toString();
+    ByteArrayInputStream bodyStream = new ByteArrayInputStream(bodyStr.getBytes());
+    InputStream mockResponseStream = spy(bodyStream);
+    doNothing()
+        .when(mockResponseStream)
+        .close();
+    // Mock response
+    ParseHttpResponse response = mock(ParseHttpResponse.class);
+    when(response.getStatusCode()).thenReturn(statusCode);
+    when(response.getContent()).thenReturn(mockResponseStream);
+    when(response.getTotalSize()).thenReturn(bodyStr.length());
+
+    ParseRESTCommand command = new ParseRESTCommand.Builder().build();
+    JSONObject json = ParseTaskUtils.wait(command.onResponseAsync(response, null));
+
+    verify(mockResponseStream, times(1)).close();
+    assertEquals(bodyJson, json, JSONCompareMode.NON_EXTENSIBLE);
+  }
+
+  @Test
+  public void testOnResposneCloseNetworkStreamWithIOException() throws Exception {
+    // Mock response stream
+    int statusCode = 200;
+    InputStream mockResponseStream = mock(InputStream.class);
+    doNothing()
+        .when(mockResponseStream)
+        .close();
+    IOException readException = new IOException("Error");
+    doThrow(readException)
+        .when(mockResponseStream)
+        .read();
+    doThrow(readException)
+        .when(mockResponseStream)
+        .read(any(byte[].class));
+    // Mock response
+    ParseHttpResponse response = mock(ParseHttpResponse.class);
+    when(response.getStatusCode()).thenReturn(statusCode);
+    when(response.getContent()).thenReturn(mockResponseStream);
+
+    ParseRESTCommand command = new ParseRESTCommand.Builder().build();
+    // We can not use ParseTaskUtils here since it will replace the original exception with runtime
+    // exception
+    Task<JSONObject> responseTask = command.onResponseAsync(response, null);
+    responseTask.waitForCompletion();
+
+    assertTrue(responseTask.isFaulted());
+    assertTrue(responseTask.getError() instanceof IOException);
+    assertEquals("Error", responseTask.getError().getMessage());
+    verify(mockResponseStream, times(1)).close();
   }
 }
