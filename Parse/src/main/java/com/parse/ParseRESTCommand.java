@@ -250,11 +250,14 @@ import bolts.Task;
   protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
       ProgressCallback downloadProgressCallback) {
     String content;
+    InputStream responseStream = null;
     try {
-      InputStream responseStream = response.getContent();
+      responseStream = response.getContent();
       content = new String(ParseIOUtils.toByteArray(responseStream));
     } catch (IOException e) {
       return Task.forError(e);
+    } finally {
+      ParseIOUtils.closeQuietly(responseStream);
     }
 
     // We need to check for errors differently in /1/ than /2/ since object data in /2/ was
