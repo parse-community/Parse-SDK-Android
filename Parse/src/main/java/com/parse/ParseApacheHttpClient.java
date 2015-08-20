@@ -35,7 +35,6 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,7 +115,9 @@ import java.util.Map;
     int statusCode = apacheResponse.getStatusLine().getStatusCode();
 
     // Content
-    InputStream content = AndroidHttpClient.getUngzippedContent(apacheResponse.getEntity());
+    InputStream content = disableHttpLibraryAutoDecompress() ?
+        apacheResponse.getEntity().getContent() :
+        AndroidHttpClient.getUngzippedContent(apacheResponse.getEntity());
 
     // Total size
     int totalSize = -1;

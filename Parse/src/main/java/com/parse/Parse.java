@@ -596,6 +596,9 @@ public class Parse {
 
     // Add interceptors to http clients
     for (ParseHttpClient parseHttpClient : clients) {
+      // We need to add the decompress interceptor before the external interceptors to return
+      // a decompressed response to Parse.
+      parseHttpClient.addInternalInterceptor(new ParseDecompressInterceptor());
       for (ParseNetworkInterceptor interceptor : interceptors) {
         parseHttpClient.addExternalInterceptor(interceptor);
       }
