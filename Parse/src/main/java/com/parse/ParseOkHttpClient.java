@@ -13,6 +13,7 @@ import android.net.SSLSessionCache;
 
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -23,12 +24,21 @@ import com.squareup.okhttp.ResponseBody;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import bolts.Capture;
 import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 
 /** package */ class ParseOkHttpClient extends ParseHttpClient<Request, Response> {
+
+  private final static String OKHTTP_GET = "GET";
+  private final static String OKHTTP_POST = "POST";
+  private final static String OKHTTP_PUT = "PUT";
+  private final static String OKHTTP_DELETE = "DELETE";
 
   private OkHttpClient okHttpClient;
 
@@ -131,9 +141,9 @@ import okio.BufferedSink;
 
     // Set Body
     ParseHttpBody parseBody = parseRequest.getBody();
-    CountingOkHttpRequestBody okHttpRequestBody = null;
+    ParseOkHttpRequestBody okHttpRequestBody = null;
     if(parseBody instanceof ParseByteArrayHttpBody) {
-      okHttpRequestBody = new CountingOkHttpRequestBody(parseBody);
+      okHttpRequestBody = new ParseOkHttpRequestBody(parseBody);
     }
     switch (method) {
       case PUT:
@@ -146,11 +156,129 @@ import okio.BufferedSink;
     return okHttpRequestBuilder.build();
   }
 
-  private static class CountingOkHttpRequestBody extends RequestBody {
+  private ParseHttpRequest getParseHttpRequest(Request okHttpRequest) {
+    ParseHttpRequest.Builder parseRequestBuilder = new ParseHttpRequest.Builder();
+    // Set method
+    switch (okHttpRequest.method()) {
+       case OKHTTP_GET:
+           parseRequestBuilder.setMethod(ParseRequest.Method.GET);
+           break;
+       case OKHTTP_DELETE:
+           parseRequestBuilder.setMethod(ParseRequest.Method.DELETE);
+           break;
+       case OKHTTP_POST:
+           parseRequestBuilder.setMethod(ParseRequest.Method.POST);
+           break;
+       case OKHTTP_PUT:
+           parseRequestBuilder.setMethod(ParseRequest.Method.PUT);
+           break;
+       default:
+           // This should never happen
+           throw new IllegalArgumentException(
+               "Invalid http method " + okHttpRequest.method());
+     }
+
+    // Set url
+    parseRequestBuilder.setUrl(okHttpRequest.urlString());
+
+    // Set Header
+    for (Map.Entry<String, List<String>> entry : okHttpRequest.headers().toMultimap().entrySet()) {
+      parseRequestBuilder.addHeader(entry.getKey(), entry.getValue().get(0));
+    }
+
+    // Set Body
+    ParseOkHttpRequestBody okHttpBody = (ParseOkHttpRequestBody) okHttpRequest.body();
+    if (okHttpBody != null) {
+      parseRequestBuilder.setBody(okHttpBody.getParseHttpBody());
+    }
+    return parseRequestBuilder.build();
+  }
+
+  /**
+   * For OKHttpClient, since it does not expose any interface for us to check the raw response
+   * stream, we have to use OKHttp networkInterceptors. Instead of using our own interceptor list,
+   * we use OKHttp inner interceptor list.
+   * @param parseNetworkInterceptor
+   */
+  @Override
+  /* package */ void addExternalInterceptor(final ParseNetworkInterceptor parseNetworkInterceptor) {
+    okHttpClient.networkInterceptors().add(new Interceptor() {
+      @Override
+      public Response intercept(final Chain okHttpChain) throws IOException {
+        Request okHttpRequest = okHttpChain.request();
+        // Transfer OkHttpRequest to ParseHttpRequest
+        final ParseHttpRequest parseRequest = getParseHttpRequest(okHttpRequest);
+        // Capture OkHttpResponse
+        final Capture<Response> okHttpResponseCapture = new Capture<>();
+        final ParseHttpResponse parseResponse =
+            parseNetworkInterceptor.intercept(new ParseNetworkInterceptor.Chain() {
+          @Override
+          public ParseHttpRequest getRequest() {
+            return parseRequest;
+          }
+
+          @Override
+          public ParseHttpResponse proceed(ParseHttpRequest parseRequest) throws IOException {
+            // Use OKHttpClient to send request
+            Request okHttpRequest = ParseOkHttpClient.this.getRequest(parseRequest);
+            Response okHttpResponse = okHttpChain.proceed(okHttpRequest);
+            okHttpResponseCapture.set(okHttpResponse);
+            return getResponse(okHttpResponse);
+          }
+        });
+        final Response okHttpResponse = okHttpResponseCapture.get();
+        // Ideally we should build newOkHttpResponse only based on parseResponse, however
+        // ParseHttpResponse does not have all the info we need to build the newOkHttpResponse, so
+        // we rely on the okHttpResponse to generate the builder and change the necessary info
+        // inside
+        Response.Builder newOkHttpResponseBuilder =  okHttpResponse.newBuilder();
+        // Set status
+        newOkHttpResponseBuilder
+            .code(parseResponse.getStatusCode())
+            .message(parseResponse.getReasonPhrase());
+        // Set headers
+        if (parseResponse.getAllHeaders() != null) {
+          for (Map.Entry<String, String> entry : parseResponse.getAllHeaders().entrySet()) {
+            newOkHttpResponseBuilder.header(entry.getKey(), entry.getValue());
+          }
+        }
+        // Set body
+        newOkHttpResponseBuilder.body(new ResponseBody() {
+          @Override
+          public MediaType contentType() {
+            if (parseResponse.getContentType() == null) {
+              return null;
+            }
+            return MediaType.parse(parseResponse.getContentType());
+          }
+
+          @Override
+          public long contentLength() throws IOException {
+            return parseResponse.getTotalSize();
+          }
+
+          @Override
+          public BufferedSource source() throws IOException {
+            // We need to use the proxy stream from interceptor to replace the origin network
+            // stream, so when the stream is read by Parse, the network stream is proxyed in the
+            // interceptor.
+            if (parseResponse.getContent() == null) {
+              return null;
+            }
+            return Okio.buffer(Okio.source(parseResponse.getContent()));
+          }
+        });
+
+        return newOkHttpResponseBuilder.build();
+      }
+    });
+  }
+
+  private static class ParseOkHttpRequestBody extends RequestBody {
 
     private ParseHttpBody parseBody;
 
-    public CountingOkHttpRequestBody(ParseHttpBody parseBody) {
+    public ParseOkHttpRequestBody(ParseHttpBody parseBody) {
       this.parseBody = parseBody;
     }
 
@@ -168,6 +296,10 @@ import okio.BufferedSink;
     @Override
     public void writeTo(BufferedSink bufferedSink) throws IOException {
       parseBody.writeTo(bufferedSink.outputStream());
+    }
+
+    public ParseHttpBody getParseHttpBody() {
+      return parseBody;
     }
   }
 }
