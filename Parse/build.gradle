@@ -42,6 +42,7 @@ dependencies {
     compile 'com.parse.bolts:bolts-android:1.2.1'
 
     provided 'com.squareup.okhttp:okhttp:2.4.0'
+    provided 'com.facebook.stetho:stetho:1.1.1'
 
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.skyscreamer:jsonassert:1.2.3'
