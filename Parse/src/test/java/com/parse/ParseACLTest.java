@@ -18,6 +18,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -141,7 +144,7 @@ public class ParseACLTest {
     ParseACL acl = new ParseACL();
     acl.setReadAccess("userId", true);
     ParseUser unresolvedUser = new ParseUser();
-    unresolvedUser.isLazy = true;
+    setLazy(unresolvedUser);
     acl.setReadAccess(unresolvedUser, true);
     // Mock decoder
     ParseEncoder mockEncoder = mock(ParseEncoder.class);
@@ -188,7 +191,7 @@ public class ParseACLTest {
   @Test
   public void testResolveUserWithNewUser() throws Exception {
     ParseUser unresolvedUser = new ParseUser();
-    unresolvedUser.isLazy = true;
+    setLazy(unresolvedUser);
     ParseACL acl = new ParseACL();
     acl.setReadAccess(unresolvedUser, true);
 
@@ -202,7 +205,7 @@ public class ParseACLTest {
   public void testResolveUserWithUnresolvedUser() throws Exception {
     ParseACL acl = new ParseACL();
     ParseUser unresolvedUser = new ParseUser();
-    unresolvedUser.isLazy = true;
+    setLazy(unresolvedUser);
     // This will set the unresolvedUser in acl
     acl.setReadAccess(unresolvedUser, true);
     acl.setWriteAccess(unresolvedUser, true);
@@ -211,8 +214,8 @@ public class ParseACLTest {
     acl.resolveUser(unresolvedUser);
 
     assertNull(acl.getUnresolvedUser());
-    assertFalse(acl.getReadAccess(unresolvedUser));
-    assertFalse(acl.getWriteAccess(unresolvedUser));
+    assertTrue(acl.getReadAccess(unresolvedUser));
+    assertTrue(acl.getWriteAccess(unresolvedUser));
     assertEquals(1, acl.getPermissionsById().length());
     assertFalse(acl.getPermissionsById().has(UNRESOLVED_KEY));
   }
@@ -525,7 +528,7 @@ public class ParseACLTest {
   public void testGetUserReadAccessWithUnresolvedUser() throws Exception {
     ParseACL acl = new ParseACL();
     ParseUser user = new ParseUser();
-    user.isLazy = true;
+    setLazy(user);
     // Since user is a lazy user, this will set the acl's unresolved user and give it read access
     acl.setReadAccess(user ,true);
 
@@ -536,7 +539,7 @@ public class ParseACLTest {
   public void testGetUserReadAccessWithLazyUser() throws Exception {
     ParseACL acl = new ParseACL();
     ParseUser user = new ParseUser();
-    user.isLazy = true;
+    setLazy(user);
 
     assertFalse(acl.getReadAccess(user));
   }
@@ -563,7 +566,7 @@ public class ParseACLTest {
   public void testGetUserWriteAccessWithUnresolvedUser() throws Exception {
     ParseACL acl = new ParseACL();
     ParseUser user = new ParseUser();
-    user.isLazy = true;
+    setLazy(user);
     // Since user is a lazy user, this will set the acl's unresolved user and give it write access
     acl.setWriteAccess(user, true);
 
@@ -613,7 +616,7 @@ public class ParseACLTest {
   public void testUnresolvedUser() throws Exception {
     ParseACL acl = new ParseACL();
     ParseUser user = new ParseUser();
-    user.isLazy = true;
+    setLazy(user);
     // This will set unresolvedUser in acl
     acl.setReadAccess(user, true);
 
@@ -622,4 +625,10 @@ public class ParseACLTest {
   }
 
   //endregion
+
+  private static void setLazy(ParseUser user) {
+    Map<String, String> anonymousAuthData = new HashMap<>();
+    anonymousAuthData.put("anonymousToken", "anonymousTest");
+    user.putAuthData(ParseAnonymousUtils.AUTH_TYPE, anonymousAuthData);
+  }
 }

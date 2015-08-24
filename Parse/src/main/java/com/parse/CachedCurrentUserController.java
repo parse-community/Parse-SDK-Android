@@ -241,8 +241,6 @@ import bolts.Task;
                 if (current != null) {
                   synchronized (current.mutex) {
                     current.setIsCurrentUser(true);
-                    current.isLazy = current.getObjectId() == null
-                        && ParseAnonymousUtils.isLinked(current);
                   }
                   return current;
                 }
@@ -267,10 +265,10 @@ import bolts.Task;
   }
 
   /* package for tests */ ParseUser lazyLogIn(String authType, Map<String, String> authData) {
+    // Note: if authType != ParseAnonymousUtils.AUTH_TYPE the user is not "lazy".
     ParseUser user = ParseObject.create(ParseUser.class);
     synchronized (user.mutex) {
       user.setIsCurrentUser(true);
-      user.isLazy = true;
       user.putAuthData(authType, authData);
     }
 
