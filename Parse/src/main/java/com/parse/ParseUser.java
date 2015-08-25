@@ -149,8 +149,6 @@ public class ParseUser extends ParseObject {
     }
   }
 
-  /* package */ boolean isLazy;
-
   // Whether the object is a currentUser. If so, it will always be persisted to disk on updates.
   private boolean isCurrentUser;
 
@@ -159,7 +157,6 @@ public class ParseUser extends ParseObject {
    * have an objectId and will not persist to the database until {@link #signUp} is called.
    */
   public ParseUser() {
-    isLazy = false;
     isCurrentUser = false;
   }
 
@@ -190,7 +187,7 @@ public class ParseUser extends ParseObject {
    */
   /* package */ boolean isLazy() {
     synchronized (mutex) {
-      return isLazy;
+      return getObjectId() == null && ParseAnonymousUtils.isLinked(this);
     }
   }
 
@@ -673,9 +670,6 @@ public class ParseUser extends ParseObject {
                 @Override
                 public Task<Void> then(Task<Void> task) throws Exception {
                   if (!signUpTask.isCancelled() && !signUpTask.isFaulted()) {
-                    synchronized (mutex) {
-                      isLazy = false;
-                    }
                     return saveCurrentUserAsync(ParseUser.this);
                   }
                   return signUpTask.makeVoid();
@@ -1302,7 +1296,6 @@ public class ParseUser extends ParseObject {
           @Override
           public ParseUser then(Task<Void> task) throws Exception {
             synchronized (mutex) {
-              isLazy = false;
               return ParseUser.this;
             }
           }
@@ -1347,12 +1340,6 @@ public class ParseUser extends ParseObject {
                         return newUser;
                       }
                     });
-                  }
-
-                  // Otherwise, merge it into the current user.
-                  // This is in Android, but not iOS because iOS has handleSignUpOrLogInResult.
-                  synchronized (mutex) {
-                    isLazy = false;
                   }
                   return Task.forResult(ParseUser.this);
                 }
