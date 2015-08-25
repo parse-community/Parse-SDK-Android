@@ -302,6 +302,7 @@ public class ParseFileControllerTest {
 
     ParseFile.State state = new ParseFile.State.Builder()
         .name("file_name")
+        .url("url")
         .build();
     Task<File> task = controller.fetchAsync(state, null, null, null);
     File result = ParseTaskUtils.wait(task);
@@ -309,6 +310,7 @@ public class ParseFileControllerTest {
     verify(awsClient, times(1)).execute(any(ParseHttpRequest.class));
     assertTrue(result.exists());
     assertEquals("hello", ParseFileUtils.readFileToString(result, "UTF-8"));
+    assertFalse(controller.getTempFile(state).exists());
   }
 
   @Test
@@ -322,7 +324,9 @@ public class ParseFileControllerTest {
     File root = temporaryFolder.getRoot();
     ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
 
+    // We need to set url to make getTempFile() work and check it
     ParseFile.State state = new ParseFile.State.Builder()
+        .url("test")
         .build();
     Task<File> task = controller.fetchAsync(state, null, null, null);
     task.waitForCompletion();
@@ -334,6 +338,7 @@ public class ParseFileControllerTest {
     assertThat(error, instanceOf(ParseException.class));
     assertEquals(ParseException.CONNECTION_FAILED, ((ParseException) error).getCode());
     assertEquals(0, root.listFiles().length);
+    assertFalse(controller.getTempFile(state).exists());
   }
 
   //endregion

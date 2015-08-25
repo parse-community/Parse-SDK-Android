@@ -12,8 +12,10 @@ import junit.framework.TestCase;
 
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 
 import bolts.Task;
@@ -44,8 +46,9 @@ public class ParseAWSRequestTest extends TestCase {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
-    ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, "http://parse.com");
-    Task<byte[]> task = request.executeAsync(mockHttpClient);
+    ParseAWSRequest request =
+        new ParseAWSRequest(ParseHttpRequest.Method.GET, "http://parse.com", null);
+    Task<Void> task = request.executeAsync(mockHttpClient);
     task.waitForCompletion();
 
     assertTrue(task.isFaulted());
