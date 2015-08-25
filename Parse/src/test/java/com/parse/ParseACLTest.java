@@ -59,7 +59,7 @@ public class ParseACLTest {
   public void testConstructor() throws Exception {
     ParseACL acl = new ParseACL();
 
-    assertEquals(0, acl.getPermissionsById().length());
+    assertEquals(0, acl.getPermissionsById().size());
   }
 
   @Test
@@ -90,8 +90,8 @@ public class ParseACLTest {
 
     ParseACL copiedACL = acl.copy();
 
-    assertEquals(1, copiedACL.getPermissionsById().length());
-    assertTrue(copiedACL.getPermissionsById().has(UNRESOLVED_KEY));
+    assertEquals(1, copiedACL.getPermissionsById().size());
+    assertTrue(copiedACL.getPermissionsById().containsKey(UNRESOLVED_KEY));
     assertTrue(copiedACL.getReadAccess(unresolvedUser));
     assertTrue(copiedACL.getWriteAccess(unresolvedUser));
     assertFalse(copiedACL.isShared());
@@ -126,12 +126,12 @@ public class ParseACLTest {
 
     // Makre sure we unregister the callback
     verify(unresolvedUser, times(1)).unregisterSaveListener(any(GetCallback.class));
-    assertEquals(1, copiedACL.getPermissionsById().length());
+    assertEquals(1, copiedACL.getPermissionsById().size());
     assertTrue(copiedACL.getReadAccess(unresolvedUser));
     assertTrue(copiedACL.getWriteAccess(unresolvedUser));
     assertFalse(copiedACL.isShared());
     // No more unresolved permissions since it has been resolved in the callback.
-    assertFalse(copiedACL.getPermissionsById().has(UNRESOLVED_KEY));
+    assertFalse(copiedACL.getPermissionsById().containsKey(UNRESOLVED_KEY));
     assertNull(copiedACL.getUnresolvedUser());
   }
 
@@ -153,9 +153,11 @@ public class ParseACLTest {
     JSONObject aclJson = acl.toJSONObject(mockEncoder);
 
     assertEquals("unresolvedUserJson", aclJson.getString("unresolvedUser"));
-    aclJson.remove("unresolvedUser");
-    // Without the unresolvedUser, two json objects should be the same
-    assertEquals(acl.getPermissionsById(), aclJson, JSONCompareMode.NON_EXTENSIBLE);
+    assertEquals(aclJson.getJSONObject("userId").getBoolean("read"), true);
+    assertEquals(aclJson.getJSONObject("userId").has("write"), false);
+    assertEquals(aclJson.getJSONObject("*unresolved").getBoolean("read"), true);
+    assertEquals(aclJson.getJSONObject("*unresolved").has("write"), false);
+    assertEquals(aclJson.length(), 3);
   }
 
   //endregion
@@ -181,7 +183,7 @@ public class ParseACLTest {
     assertSame(unresolvedUser, acl.getUnresolvedUser());
     assertTrue(acl.getReadAccess("userId"));
     assertTrue(acl.getWriteAccess("userId"));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   //endregion
@@ -216,8 +218,8 @@ public class ParseACLTest {
     assertNull(acl.getUnresolvedUser());
     assertTrue(acl.getReadAccess(unresolvedUser));
     assertTrue(acl.getWriteAccess(unresolvedUser));
-    assertEquals(1, acl.getPermissionsById().length());
-    assertFalse(acl.getPermissionsById().has(UNRESOLVED_KEY));
+    assertEquals(1, acl.getPermissionsById().size());
+    assertFalse(acl.getPermissionsById().containsKey(UNRESOLVED_KEY));
   }
 
   //endregion
@@ -231,7 +233,7 @@ public class ParseACLTest {
     acl.setReadAccess("userId", false);
 
     // Make sure noting is set
-    assertEquals(0, acl.getPermissionsById().length());
+    assertEquals(0, acl.getPermissionsById().size());
   }
 
   @Test
@@ -241,7 +243,7 @@ public class ParseACLTest {
     acl.setReadAccess("userId", true);
 
     assertTrue(acl.getReadAccess("userId"));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test
@@ -253,7 +255,7 @@ public class ParseACLTest {
 
     // Make sure we remove the read access
     assertFalse(acl.getReadAccess("userId"));
-    assertEquals(0, acl.getPermissionsById().length());
+    assertEquals(0, acl.getPermissionsById().size());
   }
 
   @Test
@@ -272,7 +274,7 @@ public class ParseACLTest {
     acl.setPublicReadAccess(false);
 
     // Make sure noting is set
-    assertEquals(0, acl.getPermissionsById().length());
+    assertEquals(0, acl.getPermissionsById().size());
   }
 
   @Test
@@ -282,7 +284,7 @@ public class ParseACLTest {
     acl.setPublicWriteAccess(true);
 
     assertTrue(acl.getPublicWriteAccess());
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test
@@ -292,7 +294,7 @@ public class ParseACLTest {
     acl.setPublicWriteAccess(false);
 
     // Make sure noting is set
-    assertEquals(0, acl.getPermissionsById().length());
+    assertEquals(0, acl.getPermissionsById().size());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -330,7 +332,7 @@ public class ParseACLTest {
     acl.setRoleReadAccess(role, true);
 
     assertTrue(acl.getRoleReadAccess(role));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -352,7 +354,7 @@ public class ParseACLTest {
     acl.setRoleWriteAccess(role, true);
 
     assertTrue(acl.getRoleWriteAccess(role));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -373,9 +375,9 @@ public class ParseACLTest {
 
     assertSame(unresolvedUser, acl.getUnresolvedUser());
     verify(unresolvedUser, times(1)).registerSaveListener(any(GetCallback.class));
-    assertTrue(acl.getPermissionsById().has(UNRESOLVED_KEY));
+    assertTrue(acl.getPermissionsById().containsKey(UNRESOLVED_KEY));
     assertTrue(acl.getReadAccess(unresolvedUser));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test
@@ -387,7 +389,7 @@ public class ParseACLTest {
     acl.setReadAccess(user, true);
 
     assertTrue(acl.getReadAccess(user));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -408,9 +410,9 @@ public class ParseACLTest {
 
     assertSame(user, acl.getUnresolvedUser());
     verify(user, times(1)).registerSaveListener(any(GetCallback.class));
-    assertTrue(acl.getPermissionsById().has(UNRESOLVED_KEY));
+    assertTrue(acl.getPermissionsById().containsKey(UNRESOLVED_KEY));
     assertTrue(acl.getWriteAccess(user));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
 
   @Test
@@ -422,7 +424,7 @@ public class ParseACLTest {
     acl.setWriteAccess(user, true);
 
     assertTrue(acl.getWriteAccess(user));
-    assertEquals(1, acl.getPermissionsById().length());
+    assertEquals(1, acl.getPermissionsById().size());
   }
   //endregion
 

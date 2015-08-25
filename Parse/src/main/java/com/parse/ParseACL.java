@@ -12,6 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A {@code ParseACL} is used to control which users can access or modify a particular object. Each
@@ -23,9 +25,56 @@ import java.lang.ref.WeakReference;
 public class ParseACL {
   private static final String PUBLIC_KEY = "*";
   private final static String UNRESOLVED_KEY = "*unresolved";
-  private static final String READ_PERMISSION = "read";
-  private static final String WRITE_PERMISSION = "write";
   private static final String KEY_ROLE_PREFIX = "role:";
+  private static final String UNRESOLVED_USER_JSON_KEY = "unresolvedUser";
+
+  private static class Permissions {
+    private static final String READ_PERMISSION = "read";
+    private static final String WRITE_PERMISSION = "write";
+
+    private final boolean readPermission;
+    private final boolean writePermission;
+
+    /* package */ Permissions(boolean readPermission, boolean write) {
+      this.readPermission = readPermission;
+      this.writePermission = write;
+    }
+
+    /* package */ Permissions(Permissions permissions) {
+      this.readPermission = permissions.readPermission;
+      this.writePermission = permissions.writePermission;
+    }
+
+    /* package */ JSONObject toJSONObject() {
+      JSONObject json = new JSONObject();
+
+      try {
+        if (readPermission) {
+          json.put(READ_PERMISSION, true);
+        }
+        if (writePermission) {
+          json.put(WRITE_PERMISSION, true);
+        }
+      } catch (JSONException e) {
+        throw new RuntimeException(e);
+      }
+      return json;
+    }
+
+    /* package */ boolean getReadPermission() {
+      return readPermission;
+    }
+
+    /* package */ boolean getWritePermission() {
+      return writePermission;
+    }
+
+    /* package */ static Permissions createPermissionsFromJSONObject(JSONObject object) {
+      boolean read = object.optBoolean(READ_PERMISSION, false);
+      boolean write = object.optBoolean(WRITE_PERMISSION, false);
+      return new Permissions(read, write);
+    }
+  }
 
   private static ParseDefaultACLController getDefaultACLController() {
     return ParseCorePlugins.getInstance().getDefaultACLController();
@@ -60,21 +109,20 @@ public class ParseACL {
    */
   //TODO (grantland): This should be a list for multiple lazy users with read/write permissions.
   private ParseUser unresolvedUser;
-  private JSONObject permissionsById;
+
+  private Map<String, Permissions> permissionsById;
 
   /**
    * Creates an ACL with no permissions granted.
    */
   public ParseACL() {
-    permissionsById = new JSONObject();
+    permissionsById = new HashMap<>();
   }
 
   /* package */ ParseACL copy() {
     ParseACL copy = new ParseACL();
-    try {
-      copy.permissionsById = new JSONObject(permissionsById.toString());
-    } catch (JSONException e) {
-      throw new RuntimeException(e);
+    for (String id : permissionsById.keySet()) {
+      copy.permissionsById.put(id, new Permissions(permissionsById.get(id)));
     }
     copy.unresolvedUser = unresolvedUser;
     if (unresolvedUser != null) {
@@ -93,12 +141,14 @@ public class ParseACL {
 
   // Internally we expose the json object this wraps
   /* package */ JSONObject toJSONObject(ParseEncoder objectEncoder) {
-    JSONObject json;
+    JSONObject json = new JSONObject();
     try {
-      json = new JSONObject(permissionsById.toString());
+      for (String id: permissionsById.keySet()) {
+        json.put(id, permissionsById.get(id).toJSONObject());
+      }
       if (unresolvedUser != null) {
         Object encoded = objectEncoder.encode(unresolvedUser);
-        json.put("unresolvedUser", encoded);
+        json.put(UNRESOLVED_USER_JSON_KEY, encoded);
       }
     } catch (JSONException e) {
       throw new RuntimeException(e);
@@ -113,7 +163,7 @@ public class ParseACL {
     ParseACL acl = new ParseACL();
 
     for (String key : ParseJSONUtils.keys(object)) {
-      if (key.equals("unresolvedUser")) {
+      if (key.equals(UNRESOLVED_USER_JSON_KEY)) {
         JSONObject unresolvedUser;
         try {
           unresolvedUser = object.getJSONObject(key);
@@ -122,15 +172,11 @@ public class ParseACL {
         }
         acl.unresolvedUser = (ParseUser) decoder.decode(unresolvedUser);
       } else {
-        String userId = key;
-        JSONObject permissions;
         try {
-          permissions = object.getJSONObject(userId);
+          Permissions permissions = Permissions.createPermissionsFromJSONObject(object.getJSONObject(key));
+          acl.permissionsById.put(key, permissions);
         } catch (JSONException e) {
           throw new RuntimeException("could not decode ACL: " + e.getMessage());
-        }
-        for (String accessType : ParseJSONUtils.keys(permissions)) {
-          acl.setAccess(accessType, userId, true);
         }
       }
     }
@@ -153,15 +199,11 @@ public class ParseACL {
     if (user != unresolvedUser) {
       return;
     }
-    try {
-      if (permissionsById.has(UNRESOLVED_KEY)) {
-        permissionsById.put(user.getObjectId(), permissionsById.get(UNRESOLVED_KEY));
-        permissionsById.remove(UNRESOLVED_KEY);
-      }
-      unresolvedUser = null;
-    } catch (JSONException e) {
-      throw new RuntimeException(e);
+    if (permissionsById.containsKey(UNRESOLVED_KEY)) {
+      permissionsById.put(user.getObjectId(), permissionsById.get(UNRESOLVED_KEY));
+      permissionsById.remove(UNRESOLVED_KEY);
     }
+    unresolvedUser = null;
   }
 
   /* package */ boolean hasUnresolvedUser() {
@@ -173,47 +215,12 @@ public class ParseACL {
   }
 
   // Helper for setting stuff
-  private void setAccess(String accessType, String userId, boolean allowed) {
-    try {
-      JSONObject permissions = permissionsById.optJSONObject(userId);
-      if (permissions == null) {
-        if (!allowed) {
-          // The user already doesn't have this permission, so no action is
-          // needed.
-          return;
-        }
-        permissions = new JSONObject();
-        permissionsById.put(userId, permissions);
-      }
-
-      if (allowed) {
-        permissions.put(accessType, true);
-      } else {
-        permissions.remove(accessType);
-        if (permissions.length() == 0) {
-          permissionsById.remove(userId);
-        }
-      }
-    } catch (JSONException e) {
-      throw new RuntimeException("JSON failure with ACL: " + e.getMessage());
+  private void setPermissionsIfNonEmpty(String userId, boolean readPermission, boolean writePermission) {
+    if (!(readPermission || writePermission)) {
+      permissionsById.remove(userId);
     }
-  }
-
-  // Helper for getting stuff
-  private boolean getAccess(String accessType, String userId) {
-    try {
-      JSONObject permissions = permissionsById.optJSONObject(userId);
-      if (permissions == null) {
-        return false;
-      }
-
-      if (!permissions.has(accessType)) {
-        return false;
-      }
-
-      return permissions.getBoolean(accessType);
-    } catch (JSONException e) {
-      throw new RuntimeException("JSON failure with ACL: " + e.getMessage());
+    else {
+      permissionsById.put(userId, new Permissions(readPermission, writePermission));
     }
   }
 
@@ -252,7 +259,8 @@ public class ParseACL {
     if (userId == null) {
       throw new IllegalArgumentException("cannot setReadAccess for null userId");
     }
-    setAccess(READ_PERMISSION, userId, allowed);
+    boolean writePermission = getWriteAccess(userId);
+    setPermissionsIfNonEmpty(userId, allowed, writePermission);
   }
 
   /**
@@ -264,7 +272,8 @@ public class ParseACL {
     if (userId == null) {
       throw new IllegalArgumentException("cannot getReadAccess for null userId");
     }
-    return getAccess(READ_PERMISSION, userId);
+    Permissions permissions = permissionsById.get(userId);
+    return permissions != null && permissions.getReadPermission();
   }
 
   /**
@@ -274,7 +283,8 @@ public class ParseACL {
     if (userId == null) {
       throw new IllegalArgumentException("cannot setWriteAccess for null userId");
     }
-    setAccess(WRITE_PERMISSION, userId, allowed);
+    boolean readPermission = getReadAccess(userId);
+    setPermissionsIfNonEmpty(userId, readPermission, allowed);
   }
 
   /**
@@ -286,7 +296,8 @@ public class ParseACL {
     if (userId == null) {
       throw new IllegalArgumentException("cannot getWriteAccess for null userId");
     }
-    return getAccess(WRITE_PERMISSION, userId);
+    Permissions permissions = permissionsById.get(userId);
+    return permissions != null && permissions.getWritePermission();
   }
 
   /**
@@ -513,7 +524,7 @@ public class ParseACL {
 
   }
 
-  /* package for tests */ JSONObject getPermissionsById() {
+  /* package for tests */ Map<String, Permissions> getPermissionsById() {
     return permissionsById;
   }
 }
