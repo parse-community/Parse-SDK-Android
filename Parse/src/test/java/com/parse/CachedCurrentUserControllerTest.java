@@ -331,7 +331,7 @@ public class CachedCurrentUserControllerTest {
     CachedCurrentUserController controller =
         new CachedCurrentUserController(null);
 
-    String authType = ParseAnonymousUtils.AUTH_TYPE;
+    String authType = "test";
     Map<String, String> authData = new HashMap<>();
     authData.put("sessionToken", "testSessionToken");
 
@@ -342,7 +342,7 @@ public class CachedCurrentUserControllerTest {
     assertTrue(user.isCurrentUser());
     Map<String, Map<String, String>> authPair = user.getMap(KEY_AUTH_DATA);
     assertEquals(1, authPair.size());
-    Map<String, String> authDataAgain = authPair.get(authType);
+    Map<String, String> authDataAgain = authPair.get("test");
     assertEquals(1, authDataAgain.size());
     assertEquals("testSessionToken", authDataAgain.get("sessionToken"));
     // Make sure controller state is correct
