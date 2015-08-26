@@ -22,7 +22,7 @@ import java.util.Map;
   /* package */ static abstract class Init<T extends Init<T>> {
     private int statusCode;
     private InputStream content;
-    private int totalSize;
+    private long totalSize;
     private String reasonPhrase;
     private Map<String, String> headers;
     private String contentType;
@@ -39,7 +39,7 @@ import java.util.Map;
       return self();
     }
 
-    public T setTotalSize(int totalSize) {
+    public T setTotalSize(long totalSize) {
       this.totalSize = totalSize;
       return self();
     }
@@ -74,7 +74,7 @@ import java.util.Map;
 
   /* package */ int statusCode;
   /* package */ InputStream content;
-  /* package */ int totalSize;
+  /* package */ long totalSize;
   /* package */ String reasonPhrase;
   /* package */ Map<String, String> headers;
   /* package */ String contentType;
@@ -96,7 +96,7 @@ import java.util.Map;
     return content;
   }
 
-  public int getTotalSize() {
+  public long getTotalSize() {
     return totalSize;
   }
 

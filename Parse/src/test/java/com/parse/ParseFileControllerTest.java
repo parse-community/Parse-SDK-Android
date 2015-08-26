@@ -130,7 +130,7 @@ public class ParseFileControllerTest {
     ParseHttpResponse response = mock(ParseHttpResponse.class);
     when(response.getStatusCode()).thenReturn(200);
     when(response.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(response.getTotalSize()).thenReturn(content.length());
+    when(response.getTotalSize()).thenReturn((long) content.length());
 
     ParseHttpClient restClient = mock(ParseHttpClient.class);
     when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
@@ -229,7 +229,7 @@ public class ParseFileControllerTest {
     ParseHttpResponse response = mock(ParseHttpResponse.class);
     when(response.getStatusCode()).thenReturn(200);
     when(response.getContent()).thenReturn(new ByteArrayInputStream(data));
-    when(response.getTotalSize()).thenReturn(data.length);
+    when(response.getTotalSize()).thenReturn((long) data.length);
 
     ParseHttpClient awsClient = mock(ParseHttpClient.class);
     when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(response);

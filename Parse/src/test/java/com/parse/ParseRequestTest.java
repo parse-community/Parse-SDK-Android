@@ -73,7 +73,7 @@ public class ParseRequestTest {
     ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
     when(mockResponse.getStatusCode()).thenReturn(200);
     when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(data));
-    when(mockResponse.getTotalSize()).thenReturn(data.length);
+    when(mockResponse.getTotalSize()).thenReturn((long) data.length);
 
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);

@@ -212,7 +212,7 @@ import java.util.Map;
   private static class ParseApacheHttpEntity extends InputStreamEntity {
     private ParseHttpBody parseBody;
 
-    public ParseApacheHttpEntity(ParseHttpBody parseBody) {
+    public ParseApacheHttpEntity(ParseHttpBody parseBody) throws IOException {
       super(parseBody.getContent(), parseBody.getContentLength());
       super.setContentType(parseBody.getContentType());
       this.parseBody = parseBody;

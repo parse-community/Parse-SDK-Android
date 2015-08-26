@@ -37,7 +37,7 @@ public class ParseAWSRequestTest extends TestCase {
         "An Error occurred while saving".getBytes());
     ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
     when(mockResponse.getStatusCode()).thenReturn(400);
-    when(mockResponse.getTotalSize()).thenReturn(0);
+    when(mockResponse.getTotalSize()).thenReturn(0L);
     when(mockResponse.getReasonPhrase()).thenReturn("Bad Request");
     when(mockResponse.getContent()).thenReturn(mockInputStream);
 

@@ -54,7 +54,7 @@ public class ParseRESTCommandTest {
     ParseHttpResponse response = mock(ParseHttpResponse.class);
     when(response.getStatusCode()).thenReturn(statusCode);
     when(response.getContent()).thenReturn(new ByteArrayInputStream(body.getBytes()));
-    when(response.getTotalSize()).thenReturn(body.length());
+    when(response.getTotalSize()).thenReturn((long) body.length());
     return response;
   }
 
@@ -471,7 +471,7 @@ public class ParseRESTCommandTest {
     ParseHttpResponse response = mock(ParseHttpResponse.class);
     when(response.getStatusCode()).thenReturn(statusCode);
     when(response.getContent()).thenReturn(mockResponseStream);
-    when(response.getTotalSize()).thenReturn(bodyStr.length());
+    when(response.getTotalSize()).thenReturn((long) bodyStr.length());
 
     ParseRESTCommand command = new ParseRESTCommand.Builder().build();
     JSONObject json = ParseTaskUtils.wait(command.onResponseAsync(response, null));
