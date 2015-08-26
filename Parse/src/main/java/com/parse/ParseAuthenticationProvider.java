@@ -51,8 +51,6 @@ import bolts.Task;
    */
   public abstract boolean restoreAuthentication(Map<String, String> authData);
 
-  public abstract void cancel();
-
   public Task<ParseUser> logInAsync() {
     return authenticateAsync().onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
       @Override

@@ -42,11 +42,6 @@ import bolts.Task;
   }
 
   @Override
-  public void cancel() {
-    // do nothing
-  }
-
-  @Override
   public String getAuthType() {
     return ParseAnonymousUtils.AUTH_TYPE;
   }
