@@ -82,13 +82,4 @@ import bolts.Task;
   public Task<Void> unlinkAsync(ParseUser user) {
     return user.unlinkFromAsync(getAuthType());
   }
-
-  //TODO (grantland): Remove and convert (Facebook|Twitter)AuthenticationProvider to async
-  interface ParseAuthenticationCallback {
-    void onSuccess(Map<String, String> authData);
-
-    void onCancel();
-
-    void onError(Throwable error);
-  }
 }
