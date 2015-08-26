@@ -114,7 +114,54 @@ import bolts.Task;
 
         return newState;
       }
-    }, Task.BACKGROUND_EXECUTOR);
+    }, ParseExecutors.io());
+  }
+
+  public Task<ParseFile.State> saveAsync(
+      final ParseFile.State state,
+      final File file,
+      String sessionToken,
+      ProgressCallback uploadProgressCallback,
+      Task<Void> cancellationToken) {
+    if (state.url() != null) { // !isDirty
+      return Task.forResult(state);
+    }
+    if (cancellationToken != null && cancellationToken.isCancelled()) {
+      return Task.cancelled();
+    }
+
+    final ParseRESTCommand command = new ParseRESTFileCommand.Builder()
+        .fileName(state.name())
+        .file(file)
+        .contentType(state.mimeType())
+        .sessionToken(sessionToken)
+        .build();
+    command.enableRetrying();
+
+    return command.executeAsync(
+        restClient,
+        uploadProgressCallback,
+        null,
+        cancellationToken
+    ).onSuccess(new Continuation<JSONObject, ParseFile.State>() {
+      @Override
+      public ParseFile.State then(Task<JSONObject> task) throws Exception {
+        JSONObject result = task.getResult();
+        ParseFile.State newState = new ParseFile.State.Builder(state)
+            .name(result.getString("name"))
+            .url(result.getString("url"))
+            .build();
+
+        // Write data to cache
+        try {
+          ParseFileUtils.copyFile(file, getCacheFile(newState));
+        } catch (IOException e) {
+          // do nothing
+        }
+
+        return newState;
+      }
+    }, ParseExecutors.io());
   }
 
   public Task<File> fetchAsync(
