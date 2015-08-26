@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
@@ -217,10 +218,11 @@ public class ParseUserTest {
     ParseUser currentUser = mock(ParseUser.class);
     when(currentUser.getUsername()).thenReturn("oldUserName");
     when(currentUser.getPassword()).thenReturn("oldPassword");
+    when(currentUser.isLazy()).thenReturn(false);
     when(currentUser.isLinked(ParseAnonymousUtils.AUTH_TYPE)).thenReturn(true);
     when(currentUser.getSessionToken()).thenReturn("oldSessionToken");
     when(currentUser.getAuthData()).thenReturn(new HashMap<String, Map<String, String>>());
-    when(currentUser.saveAsync(anyString(), Matchers.<Task<Void>>any()))
+    when(currentUser.saveAsync(anyString(), eq(false), Matchers.<Task<Void>>any()))
         .thenReturn(Task.<Void>forResult(null));
     ParseUser.State state = new ParseUser.State.Builder()
         .put("oldKey", "oldValue")
@@ -248,7 +250,8 @@ public class ParseUserTest {
     verify(currentUser, times(1)).setUsername("userName");
     verify(currentUser, times(1)).setPassword("password");
     // Make sure we save currentUser
-    verify(currentUser, times(1)).saveAsync(eq("oldSessionToken"), Matchers.<Task<Void>>any());
+    verify(currentUser, times(1))
+        .saveAsync(eq("oldSessionToken"), eq(false), Matchers.<Task<Void>>any());
     // Make sure we merge currentUser with user after save
     assertEquals("oldValue", user.get("oldKey"));
     // Make sure set currentUser
@@ -262,14 +265,15 @@ public class ParseUserTest {
     Map<String, String> oldAnonymousAuthData = new HashMap<>();
     oldAnonymousAuthData.put("oldKey", "oldToken");
     currentUser.putAuthData(ParseAnonymousUtils.AUTH_TYPE, oldAnonymousAuthData);
-    ParseUser partialMockCurrentUser = spy(currentUser);
+    ParseUser partialMockCurrentUser = spy(currentUser); // Spy since we need mutex
     when(partialMockCurrentUser.getUsername()).thenReturn("oldUserName");
     when(partialMockCurrentUser.getPassword()).thenReturn("oldPassword");
     when(partialMockCurrentUser.getSessionToken()).thenReturn("oldSessionToken");
+    when(partialMockCurrentUser.isLazy()).thenReturn(false);
     ParseException saveException = new ParseException(ParseException.OTHER_CAUSE, "");
     doReturn(Task.<Void>forError(saveException))
         .when(partialMockCurrentUser)
-        .saveAsync(anyString(), Matchers.<Task<Void>>any());
+        .saveAsync(anyString(), eq(false), Matchers.<Task<Void>>any());
     ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
     when(currentUserController.getAsync(anyBoolean()))
         .thenReturn(Task.forResult(partialMockCurrentUser));
@@ -294,7 +298,7 @@ public class ParseUserTest {
     verify(partialMockCurrentUser, times(1)).copyChangesFrom(eq(user));
     // Make sure we save currentUser
     verify(partialMockCurrentUser, times(1))
-        .saveAsync(eq("oldSessionToken"), Matchers.<Task<Void>>any());
+        .saveAsync(eq("oldSessionToken"), eq(false), Matchers.<Task<Void>>any());
     // Make sure we restore old username and password after save fails
     verify(partialMockCurrentUser, times(1)).setUsername("oldUserName");
     verify(partialMockCurrentUser, times(1)).setPassword("oldPassword");
@@ -574,7 +578,7 @@ public class ParseUserTest {
     ParseUser partialMockUser = spy(user);
     doReturn(Task.<Void>forResult(null))
         .when(partialMockUser)
-        .saveAsync(anyString(), Matchers.<Task<Void>>any());
+        .saveAsync(anyString(), eq(false), Matchers.<Task<Void>>any());
     String authType = "facebook";
     Map<String, String> authData = new HashMap<>();
     authData.put("token", "test");
@@ -586,7 +590,8 @@ public class ParseUserTest {
     // Make sure new authData is added
     assertSame(authData, partialMockUser.getAuthData().get("facebook"));
     // Make sure we save the user
-    verify(partialMockUser, times(1)).saveAsync(eq("sessionTokenAgain"), Matchers.<Task<Void>>any());
+    verify(partialMockUser, times(1))
+        .saveAsync(eq("sessionTokenAgain"), eq(false), Matchers.<Task<Void>>any());
     // Make sure synchronizeAuthData() is called
     verify(provider, times(1)).restoreAuthentication(authData);
   }
@@ -609,7 +614,7 @@ public class ParseUserTest {
     Exception saveException = new Exception();
     doReturn(Task.<Void>forError(saveException))
         .when(partialMockUser)
-        .saveAsync(anyString(), Matchers.<Task<Void>>any());
+        .saveAsync(anyString(), eq(false), Matchers.<Task<Void>>any());
     String facebookAuthType = "facebook";
     Map<String, String> facebookAuthData = new HashMap<>();
     facebookAuthData.put("facebookToken", "facebookTest");
@@ -621,7 +626,8 @@ public class ParseUserTest {
     // Make sure new authData is added
     assertSame(facebookAuthData, partialMockUser.getAuthData().get("facebook"));
     // Make sure we save the user
-    verify(partialMockUser, times(1)).saveAsync(eq("sessionTokenAgain"), Matchers.<Task<Void>>any());
+    verify(partialMockUser, times(1))
+        .saveAsync(eq("sessionTokenAgain"), eq(false), Matchers.<Task<Void>>any());
     // Make sure old authData is restored
     assertSame(anonymousAuthData, partialMockUser.getAuthData().get(ParseAnonymousUtils.AUTH_TYPE));
     // Verify exception
@@ -631,13 +637,6 @@ public class ParseUserTest {
   //endregion
 
   //region testResolveLazinessAsync
-
-  @Test
-  public void testResolveLazinessAsyncWithNotLazyUser() throws Exception {
-    ParseUser user = new ParseUser();
-
-    ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
-  }
 
   @Test
   public void testResolveLazinessAsyncWithAuthDataAndNotNewUser() throws Exception {
@@ -660,14 +659,16 @@ public class ParseUserTest {
         .thenReturn(Task.<Void>forResult(null));
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
-    ParseUser userAfterResolveLaziness =
-        ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
+    ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
+    ArgumentCaptor<ParseUser> userAfterResolveLazinessCaptor =
+        ArgumentCaptor.forClass(ParseUser.class);
 
     // Make sure we logIn the lazy user
     verify(userController, times(1)).logInAsync(
         any(ParseUser.State.class), any(ParseOperationSet.class));
     // Make sure we save currentUser
-    verify(currentUserController, times(1)).setAsync(any(ParseUser.class));
+    verify(currentUserController, times(1)).setAsync(userAfterResolveLazinessCaptor.capture());
+    ParseUser userAfterResolveLaziness = userAfterResolveLazinessCaptor.getValue();
     // Make sure user's data is correct
     assertEquals("newSessionToken", userAfterResolveLaziness.getSessionToken());
     assertEquals("newValue", userAfterResolveLaziness.get("newKey"));
@@ -697,8 +698,7 @@ public class ParseUserTest {
     ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
-    ParseUser userAfterResolveLaziness =
-        ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
+    ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
 
     // Make sure we logIn the lazy user
     verify(userController, times(1)).logInAsync(
@@ -706,12 +706,10 @@ public class ParseUserTest {
     // Make sure we do not save currentUser
     verify(currentUserController, never()).setAsync(any(ParseUser.class));
     // Make sure userAfterResolveLaziness's data is correct
-    assertEquals("newSessionToken", userAfterResolveLaziness.getSessionToken());
-    assertEquals("newValue", userAfterResolveLaziness.get("newKey"));
+    assertEquals("newSessionToken", user.getSessionToken());
+    assertEquals("newValue", user.get("newKey"));
     // Make sure userAfterResolveLaziness is not lazy
-    assertFalse(userAfterResolveLaziness.isLazy());
-    // Make sure we do not create new user
-    assertSame(user, userAfterResolveLaziness);
+    assertFalse(user.isLazy());
   }
 
   @Test
@@ -739,8 +737,9 @@ public class ParseUserTest {
     // Enable LDS
     Parse.enableLocalDatastore(null);
 
-    ParseUser userAfterResolveLaziness =
-        ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
+    ParseTaskUtils.wait(user.resolveLazinessAsync(Task.<Void>forResult(null)));
+    ArgumentCaptor<ParseUser> userAfterResolveLazinessCaptor =
+        ArgumentCaptor.forClass(ParseUser.class);
 
     // Make sure we logIn the lazy user
     verify(userController, times(1)).logInAsync(
@@ -749,7 +748,8 @@ public class ParseUserTest {
     // field should be cleaned
     assertEquals("password", user.getPassword());
     // Make sure we do not save currentUser
-    verify(currentUserController, times(1)).setAsync(any(ParseUser.class));
+    verify(currentUserController, times(1)).setAsync(userAfterResolveLazinessCaptor.capture());
+    ParseUser userAfterResolveLaziness = userAfterResolveLazinessCaptor.getValue();
     // Make sure userAfterResolveLaziness's data is correct
     assertEquals("newSessionToken", userAfterResolveLaziness.getSessionToken());
     assertEquals("newValue", userAfterResolveLaziness.get("newKey"));
