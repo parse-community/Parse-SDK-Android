@@ -59,8 +59,8 @@ public class ParseCountingByteArrayHttpBodyTest {
     assertTrue(Arrays.equals(content, output.toByteArray()));
 
     // Check progress callback
-    didReportIntermediateProgress.tryAcquire(5, TimeUnit.SECONDS);
-    finish.tryAcquire(5, TimeUnit.SECONDS);
+    assertTrue(didReportIntermediateProgress.tryAcquire(5, TimeUnit.SECONDS));
+    assertTrue(finish.tryAcquire(5, TimeUnit.SECONDS));
   }
 
   private static byte[] getData() {
