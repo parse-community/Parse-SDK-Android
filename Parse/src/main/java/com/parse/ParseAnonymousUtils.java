@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import java.util.Map;
+
+import bolts.Continuation;
 import bolts.Task;
 
 /**
@@ -62,7 +65,13 @@ public final class ParseAnonymousUtils {
    * @return A Task that will be resolved when logging in is completed.
    */
   public static Task<ParseUser> logInInBackground() {
-    return getProvider().logInAsync();
+    final ParseAuthenticationProvider provider = getProvider();
+    return provider.authenticateAsync().onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
+      @Override
+      public Task<ParseUser> then(Task<Map<String, String>> task) throws Exception {
+        return ParseUser.logInWithAsync(provider.getAuthType(), task.getResult());
+      }
+    });
   }
 
   /**
