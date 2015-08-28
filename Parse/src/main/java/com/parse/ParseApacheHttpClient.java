@@ -157,7 +157,7 @@ import java.util.Map;
         .setStatusCode(statusCode)
         .setContent(content)
         .setTotalSize(totalSize)
-        .setReasonPhase(reasonPhrase)
+        .setReasonPhrase(reasonPhrase)
         .setHeaders(headers)
         .setContentType(contentType)
         .build();

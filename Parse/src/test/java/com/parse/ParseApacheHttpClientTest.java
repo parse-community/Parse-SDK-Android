@@ -152,7 +152,7 @@ public class ParseApacheHttpClientTest {
 
     // Verify status code
     assertEquals(statusCode, parseResponse.getStatusCode());
-    // Verify reason phase
+    // Verify reason phrase
     assertEquals(reasonPhrase, parseResponse.getReasonPhrase());
     // Verify content length
     assertEquals(7, parseResponse.getTotalSize());

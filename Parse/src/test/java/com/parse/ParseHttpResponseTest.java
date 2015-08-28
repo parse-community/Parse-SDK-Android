@@ -19,6 +19,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 public class ParseHttpResponseTest {
 
@@ -43,7 +44,7 @@ public class ParseHttpResponseTest {
     headers.put(name, value);
     String content = "content";
     String contentType = "application/json";
-    String reasonPhase = "OK";
+    String reasonPhrase = "OK";
     int statusCode = 200;
     int totalSize = content.length();
 
@@ -51,17 +52,52 @@ public class ParseHttpResponseTest {
         .setContent(new ByteArrayInputStream(content.getBytes()))
         .setContentType(contentType)
         .setHeaders(headers)
-        .setReasonPhase(reasonPhase)
+        .setReasonPhrase(reasonPhrase)
         .setStatusCode(statusCode)
         .setTotalSize(totalSize)
         .build();
 
     assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(response.getContent()));
     assertEquals(contentType, response.getContentType());
-    assertEquals(reasonPhase, response.getReasonPhrase());
+    assertEquals(reasonPhrase, response.getReasonPhrase());
     assertEquals(statusCode, response.getStatusCode());
     assertEquals(totalSize, response.getTotalSize());
     assertEquals(value, response.getHeader(name));
     assertEquals(1, response.getAllHeaders().size());
+  }
+
+  @Test
+  public void testParseHttpResponseBuildWithParseHttpResponse() throws IOException {
+    Map<String, String> headers = new HashMap<>();
+    String name = "name";
+    String value = "value";
+    headers.put(name, value);
+    String content = "content";
+    String contentType = "application/json";
+    String reasonPhrase = "OK";
+    int statusCode = 200;
+    int totalSize = content.length();
+
+    ParseHttpResponse response = new ParseHttpResponse.Builder()
+        .setContent(new ByteArrayInputStream(content.getBytes()))
+        .setContentType(contentType)
+        .setHeaders(headers)
+        .setReasonPhrase(reasonPhrase)
+        .setStatusCode(statusCode)
+        .setTotalSize(totalSize)
+        .build();
+
+    String newReasonPhrase = "Failed";
+    ParseHttpResponse newResponse = response.newBuilder()
+        .setReasonPhrase(newReasonPhrase)
+        .build();
+    
+    assertEquals(contentType, newResponse.getContentType());
+    assertEquals(newReasonPhrase, newResponse.getReasonPhrase());
+    assertEquals(statusCode, newResponse.getStatusCode());
+    assertEquals(totalSize, newResponse.getTotalSize());
+    assertEquals(value, newResponse.getHeader(name));
+    assertEquals(1, newResponse.getAllHeaders().size());
+    assertSame(response.getContent(), newResponse.getContent());
   }
 }

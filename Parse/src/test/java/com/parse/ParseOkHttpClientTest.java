@@ -188,7 +188,7 @@ public class ParseOkHttpClientTest {
 
     // Verify status code
     assertEquals(statusCode, parseResponse.getStatusCode());
-    // Verify reason phase
+    // Verify reason phrase
     assertEquals(reasonPhrase, parseResponse.getReasonPhrase());
     // Verify content length
     assertEquals(contentLength, parseResponse.getTotalSize());
@@ -409,7 +409,7 @@ public class ParseOkHttpClientTest {
     newResponseHeaders.put(newResponseHeaderKey, newResponseHeaderValue);
     return new ParseHttpResponse.Builder()
         .setStatusCode(201)
-        .setReasonPhase("Fine")
+        .setReasonPhrase("Fine")
         .setContent(new ByteArrayInputStream("content".getBytes()))
         .setTotalSize("content".length())
         .setHeaders(newResponseHeaders)

@@ -48,8 +48,8 @@ import java.util.Map;
       return self();
     }
 
-    public T setReasonPhase(String reasonPhase) {
-      this.reasonPhrase = reasonPhase;
+    public T setReasonPhrase(String reasonPhrase) {
+      this.reasonPhrase = reasonPhrase;
       return self();
     }
 
@@ -81,17 +81,31 @@ import java.util.Map;
       return this;
     }
 
+    /* package */ Builder() {
+      super();
+    }
+
+    /* package */ Builder(ParseHttpResponse response) {
+      super();
+      this.setStatusCode(response.getStatusCode());
+      this.setContent(response.getContent());
+      this.setTotalSize(response.getTotalSize());
+      this.setContentType(response.getContentType());
+      this.setHeaders(response.getAllHeaders());
+      this.setReasonPhrase(response.getReasonPhrase());
+    }
+
     public ParseHttpResponse build() {
       return new ParseHttpResponse(this);
     }
   }
 
-  /* package */ int statusCode;
-  /* package */ InputStream content;
-  /* package */ long totalSize;
-  /* package */ String reasonPhrase;
-  /* package */ Map<String, String> headers;
-  /* package */ String contentType;
+  /* package */ final int statusCode;
+  /* package */ final InputStream content;
+  /* package */ final long totalSize;
+  /* package */ final String reasonPhrase;
+  /* package */ final Map<String, String> headers;
+  /* package */ final String contentType;
 
   /* package */ ParseHttpResponse(Init<?> builder) {
     this.statusCode = builder.statusCode;
@@ -100,6 +114,10 @@ import java.util.Map;
     this.reasonPhrase = builder.reasonPhrase;
     this.headers = Collections.unmodifiableMap(new HashMap<>(builder.headers));
     this.contentType = builder.contentType;
+  }
+
+  public Builder newBuilder() {
+    return new Builder(this);
   }
 
   public int getStatusCode() {

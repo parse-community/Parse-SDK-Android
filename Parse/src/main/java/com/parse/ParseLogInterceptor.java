@@ -41,7 +41,7 @@ import bolts.Task;
   private final static String KEY_CONTENT_TYPE = "Content-Type";
   private final static String KEY_BODY = "Body";
   private final static String KEY_STATUS_CODE = "Status-Code";
-  private final static String KEY_REASON_PHASE = "Reason-Phase";
+  private final static String KEY_REASON_PHRASE = "Reason-Phrase";
   private final static String KEY_ERROR = "Error";
   private final static String TYPE_REQUEST = "Request";
   private final static String TYPE_RESPONSE = "Response";
@@ -269,13 +269,8 @@ import bolts.Task;
     }
 
     //TODO(mengyan) Add builder constructor with state parameter
-    return new ParseHttpResponse.Builder()
+    return response.newBuilder()
         .setContent(newResponseBodyStream)
-        .setContentType(response.getContentType())
-        .setHeaders(response.getAllHeaders())
-        .setReasonPhase(response.getReasonPhrase())
-        .setStatusCode(response.getStatusCode())
-        .setTotalSize(response.getTotalSize())
         .build();
   }
 
@@ -321,7 +316,7 @@ import bolts.Task;
     logger.writeLine(KEY_TYPE, TYPE_RESPONSE);
     logger.writeLine(KEY_REQUEST_ID, requestId);
     logger.writeLine(KEY_STATUS_CODE, String.valueOf(response.getStatusCode()));
-    logger.writeLine(KEY_REASON_PHASE, response.getReasonPhrase());
+    logger.writeLine(KEY_REASON_PHRASE, response.getReasonPhrase());
     logger.writeLine(KEY_HEADERS, response.getAllHeaders().toString());
 
     // Body

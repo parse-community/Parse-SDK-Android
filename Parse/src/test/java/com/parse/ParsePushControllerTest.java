@@ -314,7 +314,7 @@ public class ParsePushControllerTest {
   //endregion
 
   private ParseHttpClient mockParseHttpClientWithResponse(JSONObject content, int statusCode,
-      String reasonPhase) throws IOException {
+      String reasonPhrase) throws IOException {
     byte[] contentBytes = content.toString().getBytes();
     ParseHttpResponse response = new ParseHttpResponse.Builder()
         .setContent(new ByteArrayInputStream(contentBytes))

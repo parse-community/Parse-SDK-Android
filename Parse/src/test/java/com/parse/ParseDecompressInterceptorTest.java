@@ -51,7 +51,7 @@ public class ParseDecompressInterceptorTest {
         return new ParseHttpResponse.Builder()
             .setStatusCode(200)
             .setTotalSize(responseContent.length())
-            .setReasonPhase("Success")
+            .setReasonPhrase("Success")
             .setContentType("text/plain")
             .setContent(new ByteArrayInputStream(responseContent.getBytes()))
             .build();
@@ -97,7 +97,7 @@ public class ParseDecompressInterceptorTest {
         return new ParseHttpResponse.Builder()
             .setStatusCode(200)
             .setTotalSize(byteOut.toByteArray().length)
-            .setReasonPhase("Success")
+            .setReasonPhrase("Success")
             .setContentType("text/plain")
             .setContent(new ByteArrayInputStream(byteOut.toByteArray()))
             .setHeaders(headers)
