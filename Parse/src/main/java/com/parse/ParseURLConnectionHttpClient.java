@@ -24,6 +24,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 /** package */ class ParseURLConnectionHttpClient extends ParseHttpClient<HttpURLConnection, HttpURLConnection> {
 
+  private static final String ACCEPT_ENCODING_HEADER = "Accept-encoding";
+  private static final String GZIP_ENCODING = "gzip";
+  private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+  private static final String CONTENT_TYPE_HEADER = "Content-Type";
+
   private int socketOperationTimeout;
 
   public ParseURLConnectionHttpClient(int socketOperationTimeout, SSLSessionCache sslSessionCache) {
@@ -71,12 +76,17 @@ import javax.net.ssl.HttpsURLConnection;
       connection.setRequestProperty(entry.getKey(), entry.getValue());
     }
 
+    // When URLConnection is powered by OkHttp, by adding this head, OkHttp will turn off its
+    // transparent decompress which will expose the raw network stream to our interceptors.
+    if (disableHttpLibraryAutoDecompress()) {
+      connection.setRequestProperty(ACCEPT_ENCODING_HEADER, GZIP_ENCODING);
+    }
     // Set body
     ParseHttpBody body = parseRequest.getBody();
     if (body != null) {
       // Content type and content length
-      connection.setRequestProperty("Content-Length", String.valueOf(body.getContentLength()));
-      connection.setRequestProperty("Content-Type", body.getContentType());
+      connection.setRequestProperty(CONTENT_LENGTH_HEADER, String.valueOf(body.getContentLength()));
+      connection.setRequestProperty(CONTENT_TYPE_HEADER, body.getContentType());
       // We need to set this in order to make URLConnection not buffer our request body so that our
       // upload progress callback works.
       connection.setFixedLengthStreamingMode(body.getContentLength());

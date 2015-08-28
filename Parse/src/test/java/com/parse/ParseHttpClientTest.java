@@ -13,23 +13,25 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
+
+import okio.Buffer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricGradleTestRunner.class)
@@ -42,34 +44,50 @@ public class ParseHttpClientTest {
 
   @Test
   public void testParseApacheHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(200, "OK", "Success",
-        new ParseApacheHttpClient(10000, null));
+    doSingleParseHttpClientExecuteWithResponse(
+        200, "OK", "Success", new ParseApacheHttpClient(10000, null));
   }
 
   @Test
   public void testParseURLConnectionHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(200, "OK", "Success",
-        new ParseApacheHttpClient(10000, null));  }
+    doSingleParseHttpClientExecuteWithResponse(
+        200, "OK", "Success", new ParseURLConnectionHttpClient(10000, null));  }
 
   @Test
   public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(200, "OK", "Success",
-        new ParseApacheHttpClient(10000, null));  }
+    doSingleParseHttpClientExecuteWithResponse(
+        200, "OK", "Success", new ParseOkHttpClient(10000, null));  }
 
   @Test
   public void testParseApacheHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(404, "NOT FOUND", "Error",
-        new ParseApacheHttpClient(10000, null));  }
+    doSingleParseHttpClientExecuteWithResponse(
+        404, "NOT FOUND", "Error", new ParseApacheHttpClient(10000, null));  }
 
   @Test
   public void testParseURLConnectionHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(404, "NOT FOUND", "Error",
-        new ParseURLConnectionHttpClient(10000, null));  }
+    doSingleParseHttpClientExecuteWithResponse(
+        404, "NOT FOUND", "Error", new ParseURLConnectionHttpClient(10000, null));  }
 
   @Test
   public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(404, "NOT FOUND", "Error",
-        new ParseOkHttpClient(10000, null));  }
+    doSingleParseHttpClientExecuteWithResponse(
+        404, "NOT FOUND", "Error", new ParseOkHttpClient(10000, null));  }
+
+  @Test
+  public void testParseApacheHttpClientExecuteWithGzipResponse() throws Exception {
+    doSingleParseHttpClientExecuteWithGzipResponse(
+        200, "OK", "Success", new ParseApacheHttpClient(10000, null));
+  }
+
+  // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
+  // not do that since in unit test env, URLConnection does not use OKHttp internally, so there is
+  // no transparent ungzip
+
+  @Test
+  public void testParseOkHttpClientExecuteWithGzipResponse() throws Exception {
+    doSingleParseHttpClientExecuteWithGzipResponse(
+        200, "OK", "Success", new ParseOkHttpClient(10000, null));
+  }
 
   private void doSingleParseHttpClientExecuteWithResponse(int responseCode, String responseStatus,
       String responseContent, ParseHttpClient client) throws Exception {
@@ -137,6 +155,55 @@ public class ParseHttpClientTest {
     assertArrayEquals(responseContent.getBytes(), content);
     // Verify response body size
     assertEquals(responseContentLength, content.length);
+
+    // Shutdown mock server
+    server.shutdown();
+  }
+
+  private void doSingleParseHttpClientExecuteWithGzipResponse(
+      int responseCode, String responseStatus, final String responseContent, ParseHttpClient client)
+      throws Exception {
+    MockWebServer server = new MockWebServer();
+
+    // Make mock response
+    Buffer buffer = new Buffer();
+    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    GZIPOutputStream gzipOut = new GZIPOutputStream(byteOut);
+    gzipOut.write(responseContent.getBytes());
+    gzipOut.close();
+    buffer.write(byteOut.toByteArray());
+    MockResponse mockResponse = new MockResponse()
+        .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
+        .setBody(buffer)
+        .setHeader("Content-Encoding", "gzip");
+
+    // Start mock server
+    server.enqueue(mockResponse);
+    server.start();
+
+    // We do not need to add Accept-Encoding header manually, httpClient library should do that.
+    String requestUrl = server.getUrl("/").toString();
+    ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
+        .setUrl(requestUrl)
+        .setMethod(ParseRequest.Method.GET)
+        .build();
+
+    // Execute request
+    ParseHttpResponse parseResponse = client.execute(parseRequest);
+
+    RecordedRequest recordedRequest = server.takeRequest();
+
+    // Verify request method
+    assertEquals(ParseRequest.Method.GET.toString(), recordedRequest.getMethod());
+
+    // Verify request headers
+    Headers recordedHeaders = recordedRequest.getHeaders();
+
+    assertEquals("gzip", recordedHeaders.get("Accept-Encoding"));
+
+    // Verify response body
+    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+    assertArrayEquals(responseContent.getBytes(), content);
 
     // Shutdown mock server
     server.shutdown();
