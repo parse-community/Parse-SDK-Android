@@ -8,24 +8,31 @@
  */
 package com.parse;
 
-import com.squareup.okhttp.Call;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.squareup.okhttp.ResponseBody;
+import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.MockWebServer;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPOutputStream;
 
 import okio.Buffer;
 import okio.BufferedSource;
@@ -33,12 +40,15 @@ import okio.BufferedSource;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 public class ParseOkHttpClientTest {
+
+  private MockWebServer server = new MockWebServer();
+
+  //region testTransferRequest/Response
 
   @Test
   public void testGetOkHttpRequestType() throws IOException {
@@ -185,4 +195,238 @@ public class ParseOkHttpClientTest {
     // Verify content
     assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(parseResponse.getContent()));
   }
+
+  //endregion
+
+  //region testOkHttpClientWithInterceptor
+
+  @Test
+  public void testParseOkHttpClientExecuteWithInternalInterceptor() throws Exception {
+    testParseOkHttpClientExecuteWithInterceptor(true);
+  }
+
+  @Test
+  public void testParseOkHttpClientExecuteWithExternalInterceptor() throws Exception {
+    testParseOkHttpClientExecuteWithInterceptor(false);
+  }
+
+  @Test
+  public void testParseOkHttpClientExecuteWithExternalInterceptorAndGZIPResponse() throws Exception {
+    // Make mock response
+    Buffer buffer = new Buffer();
+    final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+    GZIPOutputStream gzipOut = new GZIPOutputStream(byteOut);
+    gzipOut.write("content".getBytes());
+    gzipOut.close();
+    buffer.write(byteOut.toByteArray());
+    MockResponse mockResponse = new MockResponse()
+        .setStatus("HTTP/1.1 " + 201 + " " + "OK")
+        .setBody(buffer)
+        .setHeader("Content-Encoding", "gzip");
+
+    // Start mock server
+    server.enqueue(mockResponse);
+    server.start();
+
+    ParseHttpClient client = new ParseOkHttpClient(10000, null);
+
+    final Semaphore done = new Semaphore(0);
+    // Add plain interceptor to disable decompress response stream
+    client.addExternalInterceptor(new ParseNetworkInterceptor() {
+      @Override
+      public ParseHttpResponse intercept(Chain chain) throws IOException {
+        done.release();
+        ParseHttpResponse parseResponse =  chain.proceed(chain.getRequest());
+        // Make sure the response we get from the interceptor is the raw gzip stream
+        byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+        assertArrayEquals(byteOut.toByteArray(), content);
+
+        // We need to set a new stream since we have read it
+        return new ParseHttpResponse.Builder()
+            .setContent(new ByteArrayInputStream(byteOut.toByteArray()))
+            .build();
+      }
+    });
+
+    // We do not need to add Accept-Encoding header manually, httpClient library should do that.
+    String requestUrl = server.getUrl("/").toString();
+    ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
+        .setUrl(requestUrl)
+        .setMethod(ParseRequest.Method.GET)
+        .build();
+
+    // Execute request
+    ParseHttpResponse parseResponse = client.execute(parseRequest);
+
+    // Make sure the response we get is ungziped by OkHttp library
+    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+    assertArrayEquals("content".getBytes(), content);
+    // Make sure interceptor is called
+    assertTrue(done.tryAcquire(10, TimeUnit.SECONDS));
+
+    server.shutdown();
+  }
+
+  // This test is used to test okHttp interceptors. The difference between external and
+  // internal interceptor is the external interceptor is added to OkHttpClient level, an internal
+  // interceptor is added to ParseHttpClient level.
+  // In the interceptor, we change request and response to see whether our server and
+  // ParseHttpClient can receive the correct value.
+  private void testParseOkHttpClientExecuteWithInterceptor(
+      boolean isInternalInterceptorTest) throws Exception {
+    // Start mock server
+    server.enqueue(generateServerResponse());
+    server.start();
+
+    ParseHttpClient client = new ParseOkHttpClient(10000, null);
+
+    // Make ParseHttpRequest
+    ParseHttpRequest parseRequest = generateClientRequest();
+
+    final Semaphore done = new Semaphore(0);
+    ParseNetworkInterceptor interceptor = new ParseNetworkInterceptor() {
+      @Override
+      public ParseHttpResponse intercept(Chain chain) throws IOException {
+        done.release();
+
+        ParseHttpRequest request = chain.getRequest();
+
+        // Verify original request
+        verifyClientRequest(request);
+
+        // Change request
+        ParseHttpRequest requestAgain = generateInterceptorRequest();
+
+        // Proceed
+        ParseHttpResponse parseResponse = chain.proceed(requestAgain);
+
+        // Verify original response
+        verifyServerResponse(parseResponse);
+
+        // Change response
+        return generateInterceptorResponse();
+      }
+    };
+
+    // Add interceptor
+    if (isInternalInterceptorTest) {
+      client.addInternalInterceptor(interceptor);
+    } else {
+      client.addExternalInterceptor(interceptor);
+    }
+
+    // Execute request
+    ParseHttpResponse parseResponse = client.execute(parseRequest);
+
+    // Make sure interceptor is called
+    assertTrue(done.tryAcquire(5, TimeUnit.SECONDS));
+
+    RecordedRequest recordedRequest = server.takeRequest();
+    // Verify request changed by interceptor
+    verifyInterceptorRequest(recordedRequest);
+
+    // Verify response changed by interceptor
+    verifyInterceptorResponse(parseResponse);
+  }
+
+  // Generate a mocked Server response
+  private MockResponse generateServerResponse() {
+    MockResponse mockServerResponse = new MockResponse()
+        .setStatus("HTTP/1.1 " + 200 + " " + "OK")
+        .setBody("Success")
+        .setHeader("responseKey", "responseValue");
+    return mockServerResponse;
+  }
+
+  // Verify the mocked server response, if you change the data in generateServerResponse, make
+  // sure you also change the condition in this method otherwise tests will fail
+  private void verifyServerResponse(ParseHttpResponse parseResponse) throws IOException {
+    assertEquals(200, parseResponse.getStatusCode());
+    assertEquals("OK", parseResponse.getReasonPhrase());
+    assertEquals("responseValue", parseResponse.getHeader("responseKey"));
+    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+    assertArrayEquals("Success".getBytes(), content);
+    assertEquals(7, content.length);
+  }
+
+  // Generate a ParseHttpRequest sent to server
+  private ParseHttpRequest generateClientRequest() throws Exception {
+    Map<String, String> headers = new HashMap<>();
+    headers.put("requestKey", "requestValue");
+    JSONObject json = new JSONObject();
+    json.put("key", "value");
+    ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
+        .setUrl(server.getUrl("/").toString())
+        .setMethod(ParseRequest.Method.POST)
+        .setBody(new ParseByteArrayHttpBody(json.toString().getBytes(), "application/json"))
+        .setHeaders(headers)
+        .build();
+    return parseRequest;
+  }
+
+  // Verify the request from client, if you change the data in generateClientRequest, make
+  // sure you also change the condition in this method otherwise tests will fail
+  private void verifyClientRequest(ParseHttpRequest parseRequest) throws IOException {
+    assertEquals(server.getUrl("/").toString(), parseRequest.getUrl());
+    assertEquals(ParseRequest.Method.POST, parseRequest.getMethod());
+    assertEquals("requestValue", parseRequest.getHeader("requestKey"));
+    assertEquals("application/json", parseRequest.getBody().getContentType());
+    JSONObject json = new JSONObject();
+    try {
+      json.put("key", "value");
+    } catch (JSONException e) {
+      // do no
+    }
+    assertArrayEquals(
+        json.toString().getBytes(),
+        ParseIOUtils.toByteArray(parseRequest.getBody().getContent()));
+  }
+
+  // Generate a ParseHttpRequest sent from interceptor
+  private ParseHttpRequest generateInterceptorRequest() {
+    ParseHttpRequest requestAgain =
+        new ParseHttpRequest.Builder()
+            .addHeader("requestKeyAgain", "requestValueAgain")
+            .setUrl(server.getUrl("/test").toString())
+            .setMethod(ParseRequest.Method.GET)
+            .build();
+    return requestAgain;
+  }
+
+  // Verify the request from interceptor, if you change the data in generateInterceptorRequest, make
+  // sure you also change the condition in this method otherwise tests will fail
+  private void verifyInterceptorRequest(RecordedRequest recordedRequest) throws IOException {
+    assertEquals("/test", recordedRequest.getPath());
+    assertEquals(ParseRequest.Method.GET.toString(), recordedRequest.getMethod());
+    assertEquals("requestValueAgain", recordedRequest.getHeader("requestKeyAgain"));
+  }
+
+  // Generate a ParseHttpResponse returned from interceptor
+  private ParseHttpResponse generateInterceptorResponse() {
+    final String newResponseHeaderKey = "responseKey";
+    final String newResponseHeaderValue = "responseValue";
+    final Map<String, String> newResponseHeaders = new HashMap<>();
+    newResponseHeaders.put(newResponseHeaderKey, newResponseHeaderValue);
+    return new ParseHttpResponse.Builder()
+        .setStatusCode(201)
+        .setReasonPhase("Fine")
+        .setContent(new ByteArrayInputStream("content".getBytes()))
+        .setTotalSize("content".length())
+        .setHeaders(newResponseHeaders)
+        .build();
+  }
+
+  // Verify the response from interceptor, if you change the data in generateInterceptorResponse,
+  // make sure you also change the condition in this method otherwise tests will fail
+  private void verifyInterceptorResponse(ParseHttpResponse parseResponse)
+      throws IOException {
+    assertEquals(201, parseResponse.getStatusCode());
+    assertEquals("Fine", parseResponse.getReasonPhrase());
+    assertEquals("responseValue", parseResponse.getHeader("responseKey"));
+    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+    assertArrayEquals("content".getBytes(), content);
+    assertEquals("content".length(), content.length);
+  }
+
+  //endregion
 }
