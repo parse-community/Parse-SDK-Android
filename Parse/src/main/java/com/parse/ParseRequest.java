@@ -10,8 +10,6 @@ package com.parse;
 
 import android.os.Build;
 
-import org.apache.http.client.ClientProtocolException;
-
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -200,9 +198,7 @@ import bolts.Task;
       public Task<Response> then(Task<Response> task) throws Exception {
         if (task.isFaulted()) {
           Exception error = task.getError();
-          if (error instanceof ClientProtocolException) {
-            return Task.forError(newTemporaryException("bad protocol", error));
-          } else if (error instanceof IOException) {
+          if (error instanceof IOException) {
             return Task.forError(newTemporaryException("i/o failure", error));
           }
         }
