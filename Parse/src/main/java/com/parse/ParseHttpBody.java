@@ -18,17 +18,17 @@ import java.io.OutputStream;
  */
 /** package */ abstract class ParseHttpBody {
   protected final String contentType;
-  protected final int contentLength;
+  protected final long contentLength;
 
-  public abstract InputStream getContent();
+  public abstract InputStream getContent() throws IOException;
   public abstract void writeTo(OutputStream out) throws IOException;
 
-  public ParseHttpBody(String contentType, int contentLength) {
+  public ParseHttpBody(String contentType, long contentLength) {
     this.contentType = contentType;
     this.contentLength = contentLength;
   }
 
-  public int getContentLength() {
+  public long getContentLength() {
     return contentLength;
   }
 

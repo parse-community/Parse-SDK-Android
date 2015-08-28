@@ -107,7 +107,7 @@ public class ParseCloudCodeControllerTest {
     ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
     when(mockResponse.getStatusCode()).thenReturn(200);
     when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(mockResponse.getTotalSize()).thenReturn(content.length());
+    when(mockResponse.getTotalSize()).thenReturn((long) content.length());
 
     ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
     ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
@@ -128,7 +128,7 @@ public class ParseCloudCodeControllerTest {
     ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
     when(mockResponse.getStatusCode()).thenReturn(200);
     when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(mockResponse.getTotalSize()).thenReturn(content.length());
+    when(mockResponse.getTotalSize()).thenReturn((long) content.length());
 
     ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
     ParseCloudCodeController controller = new ParseCloudCodeController(restClient);

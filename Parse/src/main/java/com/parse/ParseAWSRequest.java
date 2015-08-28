@@ -41,7 +41,7 @@ import bolts.Task;
       return null;
     }
 
-    int totalSize = response.getTotalSize();
+    long totalSize = response.getTotalSize();
     int downloadedSize = 0;
     InputStream responseStream = null;
     try {
