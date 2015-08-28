@@ -29,6 +29,10 @@ import java.util.Map;
 
     /* package */ abstract T self();
 
+    public Init() {
+      this.headers = new HashMap<>();
+    }
+
     public T setStatusCode(int statusCode) {
       this.statusCode = statusCode;
       return self();
@@ -50,7 +54,17 @@ import java.util.Map;
     }
 
     public T setHeaders(Map<String, String> headers) {
-      this.headers = Collections.unmodifiableMap(new HashMap<>(headers));
+      this.headers = new HashMap<>(headers);
+      return self();
+    }
+
+    public T addHeaders(Map<String, String> headers) {
+      this.headers.putAll(headers);
+      return self();
+    }
+
+    public T addHeader(String key, String value) {
+      this.headers.put(key, value);
       return self();
     }
 
@@ -84,7 +98,7 @@ import java.util.Map;
     this.content = builder.content;
     this.totalSize = builder.totalSize;
     this.reasonPhrase = builder.reasonPhrase;
-    this.headers = builder.headers;
+    this.headers = Collections.unmodifiableMap(new HashMap<>(builder.headers));
     this.contentType = builder.contentType;
   }
 

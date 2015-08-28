@@ -31,7 +31,7 @@ public class ParseHttpResponseTest {
     assertNull(response.getReasonPhrase());
     assertEquals(0, response.getStatusCode());
     assertEquals(0, response.getTotalSize());
-    assertNull(response.getAllHeaders());
+    assertEquals(0, response.getAllHeaders().size());
     assertNull(response.getHeader("test"));
   }
 

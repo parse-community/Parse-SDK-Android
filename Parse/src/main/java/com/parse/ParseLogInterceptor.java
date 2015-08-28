@@ -14,13 +14,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.zip.GZIPInputStream;
+
+import bolts.Task;
 
 // TODO(mengyan): Add java doc and make it public before we launch it
 /** package */ class ParseLogInterceptor implements ParseNetworkInterceptor {
@@ -37,12 +42,16 @@ import java.util.concurrent.locks.ReentrantLock;
   private final static String KEY_BODY = "Body";
   private final static String KEY_STATUS_CODE = "Status-Code";
   private final static String KEY_REASON_PHASE = "Reason-Phase";
+  private final static String KEY_ERROR = "Error";
   private final static String TYPE_REQUEST = "Request";
   private final static String TYPE_RESPONSE = "Response";
+  private final static String TYPE_ERROR = "Error";
 
   private final static String IGNORED_BODY_INFO = "Ignored";
 
-  private static abstract class Logger {
+  private static final String GZIP_ENCODING = "gzip";
+
+  /* package for tests */ static abstract class Logger {
     public static String NEW_LINE = "\n";
 
     // The reason we need a lock here is because since multiple network threads may write to the
@@ -80,9 +89,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
   private static class LogcatLogger extends Logger {
 
+    private static int MAX_MESSAGE_LENGTH = 4000;
+
     @Override
     public void write(String str) {
-      Log.i(TAG, str);
+      int start = 0;
+      while (start < str.length()) {
+        int end = Math.min(start + MAX_MESSAGE_LENGTH, str.length());
+        Log.i(TAG, str.substring(start, end));
+        start = end;
+      }
     }
 
     @Override
@@ -93,67 +109,63 @@ import java.util.concurrent.locks.ReentrantLock;
   }
 
   private static class ProxyInputStream extends InputStream {
+    // Helper stream to proxy the original input stream to other input stream
+    private final InputStream originalInput;
+    private final PipedInputStream proxyInput;
+    private final PipedOutputStream proxyOutput;
 
-    private ParseHttpResponse response;
-    private String requestId;
-    private boolean hasBeenPrinted;
-    private ByteArrayOutputStream bodyOutput;
-    private Logger logger;
-    private boolean needsToBePrinted;
+    public ProxyInputStream(
+        InputStream originalInput, final InterceptCallback callback) throws IOException {
+      this.originalInput = originalInput;
+      PipedInputStream tempProxyInput = new PipedInputStream();
+      PipedOutputStream tempProxyOutput = null;
+      try {
+        tempProxyOutput = new PipedOutputStream(tempProxyInput);
+      } catch (IOException e) {
+        callback.done(null, e);
+        ParseIOUtils.closeQuietly(tempProxyOutput);
+        ParseIOUtils.closeQuietly(tempProxyInput);
+        throw e;
+      }
+      proxyInput = tempProxyInput;
+      proxyOutput = tempProxyOutput;
 
-    public ProxyInputStream(String requestId, ParseHttpResponse response, Logger logger)
-        throws FileNotFoundException {
-      this.requestId = requestId;
-      this.response = response;
-      this.logger = logger;
-      bodyOutput = new ByteArrayOutputStream();
-      needsToBePrinted = isContentTypePrintable(response.getContentType());
+      // We need to make sure we read and write proxyInput/Output in separate thread, otherwise
+      // there will be deadlock.
+      Task.call(new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+          callback.done(proxyInput, null);
+          return null;
+        }
+      }, ParseExecutors.io());
     }
 
     @Override
     public int read() throws IOException {
-      int n = response.getContent().read();
-      if (n == -1) {
-        // We need this flag because it is unsafe to just use -1 to decide whether to print or not.
-        // read() always return -1 after it hits the end of the stream.
-        if (!hasBeenPrinted) {
-          hasBeenPrinted = true;
-          if (needsToBePrinted) {
-            bodyOutput.write(n);
-            bodyOutput.close();
-
-            byte[] bodyBytes = bodyOutput.toByteArray();
-            String responseBodyInfo = formatBytes(bodyBytes, response.getContentType());
-            logResponseInfo(requestId, response, responseBodyInfo);
-          } else {
-            logResponseInfo(requestId, response, IGNORED_BODY_INFO);
-          }
+      try {
+        int n = originalInput.read();
+        if (n == -1) {
+          ParseIOUtils.closeQuietly(proxyOutput);
+        } else {
+          proxyOutput.write(n);
         }
-      } else {
-        if (needsToBePrinted) {
-          bodyOutput.write(n);
-        }
+        return n;
+      } catch (IOException e) {
+        // If we have problems in read from original inputStream or write to the proxyOutputStream,
+        // we simply close the proxy stream and throw the exception.
+        ParseIOUtils.closeQuietly(proxyOutput);
+        throw e;
       }
-      return n;
     }
+  }
 
-    private void logResponseInfo(final String requestId,
-        final ParseHttpResponse response, final String responseBodyInfo) {
-      logger.lock();
-      logger.writeLine(KEY_TYPE, TYPE_RESPONSE);
-      logger.writeLine(KEY_REQUEST_ID, requestId);
-      logger.writeLine(KEY_STATUS_CODE, String.valueOf(response.getStatusCode()));
-      logger.writeLine(KEY_REASON_PHASE, response.getReasonPhrase());
-      logger.writeLine(KEY_HEADERS, response.getAllHeaders().toString());
+  private static boolean isContentTypePrintable(String contentType) {
+    return (contentType != null) && (contentType.contains("json") || contentType.contains("text"));
+  }
 
-      // Body
-      if (responseBodyInfo != null) {
-      logger.writeLine(KEY_BODY, responseBodyInfo);
-      }
-
-      logger.writeLine(LOG_PARAGRAPH_BREAKER);
-      logger.unlock();
-    }
+  private static boolean isGzipEncoding(ParseHttpResponse response) {
+    return GZIP_ENCODING.equals(response.getHeader("Content-Encoding"));
   }
 
   private static String formatBytes(byte[] bytes, String contentType) {
@@ -172,40 +184,93 @@ import java.util.concurrent.locks.ReentrantLock;
     }
   }
 
-  private static boolean isContentTypePrintable(String contentType) {
-    return contentType.contains("json") || contentType.contains("text");
+  private interface InterceptCallback extends ParseCallback2<InputStream, IOException> {
+
+    @Override
+    void done(InputStream proxyInputStream, IOException e);
   }
 
-  // Request Id generator
-  private final AtomicInteger nextRequestId = new AtomicInteger(0);
 
   private Logger logger;
 
-  public Logger getLogger() {
+  /* package for tests */ void setLogger(Logger logger) {
+    if (this.logger == null) {
+      this.logger = logger;
+    } else {
+      throw new IllegalStateException(
+          "Another logger was already registered: " + this.logger);
+    }
+  }
+
+  private Logger getLogger() {
     if (logger == null) {
       logger = new LogcatLogger();
     }
     return logger;
   }
 
+  // Request Id generator
+  private final AtomicInteger nextRequestId = new AtomicInteger(0);
+
   @Override
   public ParseHttpResponse intercept(Chain chain) throws IOException {
     // Intercept request
-    String requestId = String.valueOf(nextRequestId.getAndIncrement());
+    final String requestId = String.valueOf(nextRequestId.getAndIncrement());
     ParseHttpRequest request = chain.getRequest();
 
-    String requestBodyInfo = getRequestBodyInfo(request);
-    logRequestInfo(requestId, request, requestBodyInfo);
+    logRequestInfo(getLogger(), requestId, request);
 
     // Developers need to manually call this
-    ParseHttpResponse response = chain.proceed(request);
+    ParseHttpResponse tempResponse = null;
+    try {
+      tempResponse = chain.proceed(request);
+    } catch (IOException e) {
+      // Log error when we can not get response from server
+      logError(getLogger(), requestId, e.getMessage());
+      throw e;
+    }
 
+    final ParseHttpResponse response = tempResponse;
+    InputStream newResponseBodyStream = response.getContent();
     // For response content, if developers care time of the response(latency, sending and receiving
     // time etc) or need the original networkStream to do something, they have to proxy the
     // response.
+    if (isContentTypePrintable(response.getContentType())) {
+      newResponseBodyStream = new ProxyInputStream(response.getContent(), new InterceptCallback() {
+        @Override
+        public void done(InputStream proxyInput, IOException e) {
+          if (e != null) {
+            return;
+          }
+
+          try {
+            // This inputStream will be blocked until we write to the proxyOutputStream
+            // in ProxyInputStream
+            InputStream decompressedInput = isGzipEncoding(response) ?
+                new GZIPInputStream(proxyInput) : proxyInput;
+            ByteArrayOutputStream decompressedOutput = new ByteArrayOutputStream();
+            ParseIOUtils.copy(decompressedInput, decompressedOutput);
+            byte[] bodyBytes = decompressedOutput.toByteArray();
+            String responseBodyInfo = formatBytes(bodyBytes, response.getContentType());
+            logResponseInfo(getLogger(), requestId, response, responseBodyInfo);
+
+            ParseIOUtils.closeQuietly(decompressedInput);
+            ParseIOUtils.closeQuietly(proxyInput);
+            // No need to close the byteArrayStream
+          } catch (IOException e1) {
+            // Log error when we can not read body stream
+            logError(getLogger(), requestId, e1.getMessage());
+            ParseIOUtils.closeQuietly(proxyInput);
+          }
+        }
+      });
+    } else {
+      logResponseInfo(getLogger(), requestId, response, IGNORED_BODY_INFO);
+    }
+
     //TODO(mengyan) Add builder constructor with state parameter
     return new ParseHttpResponse.Builder()
-        .setContent(new ProxyInputStream(requestId, response, getLogger()))
+        .setContent(newResponseBodyStream)
         .setContentType(response.getContentType())
         .setHeaders(response.getAllHeaders())
         .setReasonPhase(response.getReasonPhrase())
@@ -214,9 +279,8 @@ import java.util.concurrent.locks.ReentrantLock;
         .build();
   }
 
-  private void logRequestInfo(final String requestId,
-      final ParseHttpRequest request, final String requestBodyInfo) throws IOException {
-    Logger logger = getLogger();
+  private void logRequestInfo(
+      Logger logger, String requestId, ParseHttpRequest request) throws IOException {
     logger.lock();
     logger.writeLine(KEY_TYPE, TYPE_REQUEST);
     logger.writeLine(KEY_REQUEST_ID, requestId);
@@ -232,7 +296,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 
     // Body
-    if (requestBodyInfo != null) {
+    if (request.getBody() != null) {
+      String requestBodyInfo;
+      String contentType = request.getBody().getContentType();
+      if (isContentTypePrintable(contentType)) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        request.getBody().writeTo(output);
+        requestBodyInfo =  formatBytes(output.toByteArray(), contentType);
+      } else {
+        requestBodyInfo = IGNORED_BODY_INFO;
+      }
       logger.writeLine(KEY_BODY, requestBodyInfo);
     }
 
@@ -240,19 +313,34 @@ import java.util.concurrent.locks.ReentrantLock;
     logger.unlock();
   }
 
-  private String getRequestBodyInfo(ParseHttpRequest request)
-      throws IOException {
-    if (request.getBody() == null) {
-      return null;
+  // Since we can not read the content of the response directly, we need an additional parameter
+  // to pass the responseBody after we get it asynchronously.
+  private void logResponseInfo(
+      Logger logger, String requestId, ParseHttpResponse response, String responseBodyInfo) {
+    logger.lock();
+    logger.writeLine(KEY_TYPE, TYPE_RESPONSE);
+    logger.writeLine(KEY_REQUEST_ID, requestId);
+    logger.writeLine(KEY_STATUS_CODE, String.valueOf(response.getStatusCode()));
+    logger.writeLine(KEY_REASON_PHASE, response.getReasonPhrase());
+    logger.writeLine(KEY_HEADERS, response.getAllHeaders().toString());
+
+    // Body
+    if (responseBodyInfo != null) {
+      logger.writeLine(KEY_BODY, responseBodyInfo);
     }
 
-    String requestContentType = request.getBody().getContentType();
-    if (isContentTypePrintable(requestContentType)) {
-      ByteArrayOutputStream output = new ByteArrayOutputStream();
-      request.getBody().writeTo(output);
-      return formatBytes(output.toByteArray(), requestContentType);
-    } else {
-      return IGNORED_BODY_INFO;
-    }
+    logger.writeLine(LOG_PARAGRAPH_BREAKER);
+    logger.unlock();
+  }
+
+  // Since we can not read the content of the response directly, we need an additional parameter
+  // to pass the responseBody after we get it asynchronously.
+  private void logError(Logger logger, String requestId, String message) {
+    logger.lock();
+    logger.writeLine(KEY_TYPE, TYPE_ERROR);
+    logger.writeLine(KEY_REQUEST_ID, requestId);
+    logger.writeLine(KEY_ERROR, message);
+    logger.writeLine(LOG_PARAGRAPH_BREAKER);
+    logger.unlock();
   }
 }
