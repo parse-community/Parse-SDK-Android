@@ -24,16 +24,16 @@ import bolts.Task;
   String getAuthType();
 
   /**
-   * Begins the authentication process and invokes onSuccess() or onError() on
-   * the callback upon completion. This call should not block.
+   * Authenticates with the service.
    *
-   * @return A task that will be resolved upon the completion of authentication.
+   * @return A {@code Task} that will be resolved when authentication is complete.
    */
   Task<Map<String, String>> authenticateAsync();
 
   /**
-   * Deauthenticates (logs out) the user associated with this provider. This
-   * call may block.
+   * Deauthenticates (logs out) the user associated with this provider. This call may block.
+   *
+   * @return A {@link Task} that resolves when deauthentication is complete.
    */
   Task<Void> deauthenticateAsync();
 
@@ -44,9 +44,10 @@ import bolts.Task;
    * @param authData
    *          the auth data for the provider. This value may be null when
    *          unlinking an account.
-   * @return true iff the authData was successfully synchronized. A false return
-   *         value indicates that the user should no longer be associated
-   *         because of bad auth data.
+   *
+   * @return A {@link Task} that resolves to {@code true} iff the {@code authData} was successfully
+   *         synchronized or {@code false} if user should no longer be associated because of bad
+   *         {@code authData}.
    */
-  boolean restoreAuthentication(Map<String, String> authData);
+  Task<Boolean> restoreAuthenticationAsync(Map<String, String> authData);
 }

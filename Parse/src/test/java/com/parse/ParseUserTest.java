@@ -567,7 +567,8 @@ public class ParseUserTest {
     // Register a mock authenticationProvider
     ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
     when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthentication(Matchers.<Map<String, String>>any())).thenReturn(true);
+    when(provider.restoreAuthenticationAsync(Matchers.<Map<String, String>>any()))
+        .thenReturn(Task.forResult(true));
     ParseUser.registerAuthenticationProvider(provider);
 
     ParseUser user = new ParseUser();
@@ -596,7 +597,7 @@ public class ParseUserTest {
     verify(partialMockUser, times(1))
         .saveAsync(eq("sessionTokenAgain"), eq(false), Matchers.<Task<Void>>any());
     // Make sure synchronizeAuthData() is called
-    verify(provider, times(1)).restoreAuthentication(authData);
+    verify(provider, times(1)).restoreAuthenticationAsync(authData);
   }
 
   @Test
@@ -1287,7 +1288,8 @@ public class ParseUserTest {
     // Register a mock authenticationProvider
     ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
     when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthentication(Matchers.<Map<String, String>>any())).thenReturn(true);
+    when(provider.restoreAuthenticationAsync(Matchers.<Map<String, String>>any()))
+        .thenReturn(Task.forResult(true));
     ParseUser.registerAuthenticationProvider(provider);
 
     // Set user initial state
@@ -1300,10 +1302,10 @@ public class ParseUserTest {
     ParseUser user = ParseObject.from(userState);
     user.setIsCurrentUser(true);
 
-    user.synchronizeAuthData(authType);
+    ParseTaskUtils.wait(user.synchronizeAuthDataAsync(authType));
 
     // Make sure we restore authentication
-    verify(provider, times(1)).restoreAuthentication(authData);
+    verify(provider, times(1)).restoreAuthenticationAsync(authData);
   }
 
   @Test
@@ -1316,7 +1318,8 @@ public class ParseUserTest {
     // Register a mock authenticationProvider
     ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
     when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthentication(Matchers.<Map<String, String>>any())).thenReturn(true);
+    when(provider.restoreAuthenticationAsync(Matchers.<Map<String, String>>any()))
+        .thenReturn(Task.forResult(true));
     ParseUser.registerAuthenticationProvider(provider);
 
     // Set user initial state
@@ -1329,10 +1332,10 @@ public class ParseUserTest {
     ParseUser user = ParseObject.from(userState);
     user.setIsCurrentUser(true);
 
-    user.synchronizeAllAuthData();
+    ParseTaskUtils.wait(user.synchronizeAllAuthDataAsync());
 
     // Make sure we restore authentication
-    verify(provider, times(1)).restoreAuthentication(facebookAuthData);
+    verify(provider, times(1)).restoreAuthenticationAsync(facebookAuthData);
   }
 
   //endregion

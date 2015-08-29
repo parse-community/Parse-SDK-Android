@@ -14,7 +14,7 @@ import java.util.Map;
 import bolts.Continuation;
 import bolts.Task;
 
-/*** package */ class ParseAuthenticationManager {
+/** package */ class ParseAuthenticationManager {
 
   private final Object lock = new Object();
   private final Map<String, ParseAuthenticationProvider> authenticationProviders = new HashMap<>();
@@ -44,24 +44,27 @@ import bolts.Task;
     }
 
     // Synchronize the current user with the auth provider.
-    controller.getAsync(false).onSuccess(new Continuation<ParseUser, Void>() {
+    controller.getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<Void>>() {
       @Override
-      public Void then(Task<ParseUser> task) throws Exception {
+      public Task<Void> then(Task<ParseUser> task) throws Exception {
         ParseUser user = task.getResult();
         if (user != null) {
-          user.synchronizeAuthData(authType);
+          return user.synchronizeAuthDataAsync(authType);
         }
         return null;
       }
     });
   }
 
-  public boolean restoreAuthentication(String authType, Map<String, String> authData) {
+  public Task<Boolean> restoreAuthenticationAsync(String authType, Map<String, String> authData) {
     ParseAuthenticationProvider provider;
     synchronized (lock) {
       provider = authenticationProviders.get(authType);
     }
-    return provider == null || provider.restoreAuthentication(authData);
+    if (provider == null) {
+      return Task.forResult(true);
+    }
+    return provider.restoreAuthenticationAsync(authData);
   }
 
   public Task<Void> deauthenticateAsync(String authType) {

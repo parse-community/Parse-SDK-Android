@@ -55,18 +55,24 @@ import bolts.Task;
             if (oldCurrentUser != null && oldCurrentUser != user) {
               // We don't need to revoke the token since we're not explicitly calling logOut
               // We don't need to remove persisted files since we're overwriting them
-              return oldCurrentUser.logOutAsync(false);
+              return oldCurrentUser.logOutAsync(false).continueWith(new Continuation<Void, Void>() {
+                @Override
+                public Void then(Task<Void> task) throws Exception {
+                  return null; // ignore errors
+                }
+              });
             }
             return task;
           }
-        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
           @Override
           public Task<Void> then(Task<Void> task) throws Exception {
-            synchronized (user.mutex) {
-              user.setIsCurrentUser(true);
-              user.synchronizeAllAuthData();
-            }
-
+            user.setIsCurrentUser(true);
+            return user.synchronizeAllAuthDataAsync();
+          }
+        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
+          @Override
+          public Task<Void> then(Task<Void> task) throws Exception {
             return store.setAsync(user).continueWith(new Continuation<Void, Void>() {
               @Override
               public Void then(Task<Void> task) throws Exception {
