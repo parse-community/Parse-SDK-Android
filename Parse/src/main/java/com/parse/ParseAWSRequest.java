@@ -11,7 +11,6 @@ package com.parse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.Callable;
 
 import bolts.Task;
 

@@ -140,7 +140,7 @@ public class ParseURLConnectionHttpClientTest {
 
     // Verify status code
     assertEquals(statusCode, parseResponse.getStatusCode());
-    // Verify reason phase
+    // Verify reason phrase
     assertEquals(reasonPhrase, parseResponse.getReasonPhrase());
     // Verify content length
     assertEquals(contentLength, parseResponse.getTotalSize());
@@ -164,7 +164,7 @@ public class ParseURLConnectionHttpClientTest {
 
     // Verify status code
     assertEquals(statusCode, parseResponse.getStatusCode());
-    // Verify reason phase
+    // Verify reason phrase
     assertEquals(reasonPhrase, parseResponse.getReasonPhrase());
     // Verify content length
     assertEquals(contentLength, parseResponse.getTotalSize());

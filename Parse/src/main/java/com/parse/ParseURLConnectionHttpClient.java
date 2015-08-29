@@ -132,7 +132,7 @@ import javax.net.ssl.HttpsURLConnection;
         .setStatusCode(statusCode)
         .setContent(content)
         .setTotalSize(totalSize)
-        .setReasonPhase(reasonPhrase)
+        .setReasonPhrase(reasonPhrase)
         .setHeaders(headers)
         .setContentType(contentType)
         .build();
