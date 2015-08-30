@@ -13,14 +13,30 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * The base interface of a http body.It can be implemented by different http library such as
+ * The base interface of a http body. It can be implemented by different http libraries such as
  * Apache http, Android URLConnection, Square OKHttp and so on.
  */
 /** package */ abstract class ParseHttpBody {
   protected final String contentType;
   protected final long contentLength;
 
+  /**
+   * Returns the content of this body.
+   *
+   * @return The content of this body.
+   * @throws IOException
+   *           Throws an exception if the content of this body is inaccessible.
+   */
   public abstract InputStream getContent() throws IOException;
+
+  /**
+   * Writes the content of this request to {@code out}.
+   *
+   * @param out
+   *          The outputStream the content of this body needs to be written to.
+   * @throws IOException
+   *           Throws an exception if the content of this body can not be written to {@code out}.
+   */
   public abstract void writeTo(OutputStream out) throws IOException;
 
   public ParseHttpBody(String contentType, long contentLength) {
@@ -28,10 +44,21 @@ import java.io.OutputStream;
     this.contentLength = contentLength;
   }
 
+  /**
+   * Returns the number of bytes which will be written to {@code out} when {@link #writeTo} is
+   * called, or -1 if that count is unknown.
+   *
+   * @return The Content-Length of this body.
+   */
   public long getContentLength() {
     return contentLength;
   }
 
+  /**
+   * Returns the Content-Type of this body.
+   *
+   * @return The Content-Type of this body.
+   */
   public String getContentType() {
     return contentType;
   }
