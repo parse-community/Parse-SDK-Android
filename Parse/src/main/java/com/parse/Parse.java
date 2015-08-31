@@ -608,7 +608,14 @@ public class Parse {
     interceptors = null;
   }
 
-  // TODO(mengyan) Make public after we release the interceptor feature
+
+  /**
+   * Add a {@code ParseNetworkInterceptor}. You must invoke
+   * {@code Parse.addParseNetworkInterceptor} before {@code Parse.initialize}. You can add multiple
+   * {@code ParseNetworkInterceptor}.
+   * @param interceptor
+   *          The {@code ParseNetworkInterceptor} should be added.
+   */
   /* package */ static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
@@ -620,7 +627,12 @@ public class Parse {
     interceptors.add(interceptor);
   }
 
-  // TODO(mengyan) Make public after we release the interceptor feature
+  /**
+   * Remove a given {@code ParseNetworkInterceptor}. You must invoke
+   * {@code Parse.removeParseNetworkInterceptor} before {@code Parse.initialize}.
+   * @param interceptor
+   *          The {@code ParseNetworkInterceptor} should be removed.
+   */
   /* package */ static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
