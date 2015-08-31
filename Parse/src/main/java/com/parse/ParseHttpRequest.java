@@ -12,8 +12,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The http request we send to parse server. Instances of this class are not immutable. The
+ * request body may be consumed only once. The other fields are immutable.
+ */
 /** package */ class ParseHttpRequest {
 
+  /**
+   * The {@link ParseHttpRequest} method type.
+   */
   public enum Method {
     GET, POST, PUT, DELETE;
 
@@ -61,43 +68,14 @@ import java.util.Map;
     }
   }
 
-  private final String url;
-  private final ParseHttpRequest.Method method;
-  private final Map<String, String> headers;
-  private final ParseHttpBody body;
-
-  protected ParseHttpRequest(Builder builder) {
-    this.url = builder.url;
-    this.method = builder.method;
-    this.headers = Collections.unmodifiableMap(new HashMap<>(builder.headers));
-    this.body = builder.body;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public ParseHttpRequest.Method getMethod() {
-    return method;
-  }
-
-  public Map<String, String> getAllHeaders() {
-    return headers;
-  }
-
-  public String getHeader(String name) {
-    return headers.get(name);
-  }
-
-  public ParseHttpBody getBody() {
-    return body;
-  }
-
+  /**
+   * Builder of {@link ParseHttpRequest}.
+   */
   public static class Builder {
-    protected String url;
-    protected ParseHttpRequest.Method method;
-    protected Map<String, String> headers;
-    protected ParseHttpBody body;
+    private String url;
+    private Method method;
+    private Map<String, String> headers;
+    private ParseHttpBody body;
 
     public Builder() {
       this.headers = new HashMap<>();
@@ -130,13 +108,54 @@ import java.util.Map;
       return this;
     }
 
+    public Builder addHeaders(Map<String, String> headers) {
+      this.headers.putAll(headers);
+      return this;
+    }
+
     public Builder setHeaders(Map<String, String> headers) {
-      this.headers = headers;
+      this.headers = new HashMap<>(headers);
       return this;
     }
 
     public ParseHttpRequest build() {
       return new ParseHttpRequest(this);
     }
+  }
+
+  private final String url;
+  private final Method method;
+  private final Map<String, String> headers;
+  private final ParseHttpBody body;
+
+  private ParseHttpRequest(Builder builder) {
+    this.url = builder.url;
+    this.method = builder.method;
+    this.headers = Collections.unmodifiableMap(new HashMap<>(builder.headers));
+    this.body = builder.body;
+  }
+
+  public Builder newBuilder() {
+    return new Builder(this);
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public Method getMethod() {
+    return method;
+  }
+
+  public Map<String, String> getAllHeaders() {
+    return headers;
+  }
+
+  public String getHeader(String name) {
+    return headers.get(name);
+  }
+
+  public ParseHttpBody getBody() {
+    return body;
   }
 }

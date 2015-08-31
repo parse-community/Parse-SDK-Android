@@ -14,11 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The base class of a http response we receive from parse server. It can be implemented by
- * different http library such as Apache http, Android URLConnection, Square OKHttp and so on.
+ * The http response we receive from parse server. Instances of this class are not immutable. The
+ * response body may be consumed only once. The other fields are immutable.
  */
 /** package */ class ParseHttpResponse {
 
+  /**
+   * Base builder for {@link ParseHttpResponse}.
+   */
   /* package */ static abstract class Init<T extends Init<T>> {
     private int statusCode;
     private InputStream content;
@@ -30,6 +33,7 @@ import java.util.Map;
     /* package */ abstract T self();
 
     public Init() {
+      this.totalSize = -1;
       this.headers = new HashMap<>();
     }
 
@@ -64,7 +68,7 @@ import java.util.Map;
     }
 
     public T addHeader(String key, String value) {
-      this.headers.put(key, value);
+      headers.put(key, value);
       return self();
     }
 
@@ -74,6 +78,9 @@ import java.util.Map;
     }
   }
 
+  /**
+   * Builder of {@link ParseHttpResponse}.
+   */
   public static class Builder extends Init<Builder> {
 
     @Override
@@ -81,11 +88,18 @@ import java.util.Map;
       return this;
     }
 
-    /* package */ Builder() {
+    public Builder() {
       super();
     }
 
-    /* package */ Builder(ParseHttpResponse response) {
+    /**
+     * Makes a new {@link ParseHttpResponse} {@code Builder} based on the input
+     * {@link ParseHttpResponse}.
+     *
+     * @param response
+     *          The {@link ParseHttpResponse} where the {@code Builder}'s values come from.
+     */
+    public Builder(ParseHttpResponse response) {
       super();
       this.setStatusCode(response.getStatusCode());
       this.setContent(response.getContent());
@@ -100,12 +114,12 @@ import java.util.Map;
     }
   }
 
-  /* package */ final int statusCode;
-  /* package */ final InputStream content;
-  /* package */ final long totalSize;
-  /* package */ final String reasonPhrase;
-  /* package */ final Map<String, String> headers;
-  /* package */ final String contentType;
+  private final int statusCode;
+  private final InputStream content;
+  private final long totalSize;
+  private final String reasonPhrase;
+  private final Map<String, String> headers;
+  private final String contentType;
 
   /* package */ ParseHttpResponse(Init<?> builder) {
     this.statusCode = builder.statusCode;
@@ -116,6 +130,14 @@ import java.util.Map;
     this.contentType = builder.contentType;
   }
 
+  /**
+   * Generates a new {@link com.parse.ParseHttpResponse.Builder} based on an
+   * {@link ParseHttpResponse}, the {@link com.parse.ParseHttpResponse.Builder}'s values are come
+   * from the {@link ParseHttpResponse}.
+   *
+   * @return A new {@link com.parse.ParseHttpResponse.Builder} whose values are come from the
+   * {@link ParseHttpResponse}.
+   */
   public Builder newBuilder() {
     return new Builder(this);
   }
@@ -124,10 +146,22 @@ import java.util.Map;
     return statusCode;
   }
 
+  /**
+   * Returns the content of the {@link ParseHttpResponse}'s body. The {@link InputStream} can only
+   * be read once and can't be reset.
+   *
+   * @return The {@link InputStream} of the {@link ParseHttpResponse}'s body.
+   */
   public InputStream getContent() {
     return content;
   }
 
+  /**
+   * Returns the size of the {@link ParseHttpResponse}'s body. -1 if the size of the
+   * {@link ParseHttpResponse}'s body is unknown.
+   *
+   * @return The size of the {@link ParseHttpResponse}'s body.
+   */
   public long getTotalSize() {
     return totalSize;
   }
@@ -141,7 +175,7 @@ import java.util.Map;
   }
 
   public String getHeader(String name) {
-    return headers == null ? null : headers.get(name);
+    return headers.get(name);
   }
 
   public Map<String, String> getAllHeaders() {
