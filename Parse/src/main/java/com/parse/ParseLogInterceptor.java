@@ -27,7 +27,10 @@ import java.util.zip.GZIPInputStream;
 
 import bolts.Task;
 
-// TODO(mengyan): Add java doc and make it public before we launch it
+/**
+ * {@code ParseLogInterceptor} is used to log the request and response information to the given
+ * logger.
+ */
 /** package */ class ParseLogInterceptor implements ParseNetworkInterceptor {
 
   private final static String TAG = "ParseLogNetworkInterceptor";
@@ -51,12 +54,15 @@ import bolts.Task;
 
   private static final String GZIP_ENCODING = "gzip";
 
-  /* package for tests */ static abstract class Logger {
+  /**
+   * The {@code Logger} to log the request and response information.
+   */
+  public static abstract class Logger {
     public static String NEW_LINE = "\n";
 
-    // The reason we need a lock here is because since multiple network threads may write to the
-    // Logcat concurrently, the message of different threads may intertwined. We need this lock to
-    // keep the message printed by different threads are separated.
+    // The reason we need a lock here is since multiple network threads may write to the
+    // logger concurrently, the message of different threads may intertwined. We need this
+    // lock to keep the messages printed by different threads separated
     private ReentrantLock lock;
 
     public Logger() {
@@ -87,12 +93,17 @@ import bolts.Task;
     }
   }
 
+  /**
+   * Android logcat implementation of {@code Logger}.
+   */
   private static class LogcatLogger extends Logger {
 
     private static int MAX_MESSAGE_LENGTH = 4000;
 
     @Override
     public void write(String str) {
+      // Logcat can only print the limited number of characters in one line, so when we have a long
+      // message, we need to split them to multiple lines
       int start = 0;
       while (start < str.length()) {
         int end = Math.min(start + MAX_MESSAGE_LENGTH, str.length());
@@ -103,13 +114,16 @@ import bolts.Task;
 
     @Override
     public void writeLine(String str) {
-      // Log.i() actually write in a new line every time, so we need to rewrite it.
+      // Logcat actually writes in a new line every time, so we need to rewrite it
       write(str);
     }
   }
 
+  /**
+   * A helper stream to proxy the original inputStream to other inputStream. When the original
+   * stream is read, another proxied stream can also be read for the same content.
+   */
   private static class ProxyInputStream extends InputStream {
-    // Helper stream to proxy the original input stream to other input stream
     private final InputStream originalInput;
     private final PipedInputStream proxyInput;
     private final PipedOutputStream proxyOutput;
@@ -130,8 +144,8 @@ import bolts.Task;
       proxyInput = tempProxyInput;
       proxyOutput = tempProxyOutput;
 
-      // We need to make sure we read and write proxyInput/Output in separate thread, otherwise
-      // there will be deadlock.
+      // We need to make sure we read and write proxyInput/Output in separate threads, otherwise
+      // there will be a deadlock
       Task.call(new Callable<Void>() {
         @Override
         public Void call() throws Exception {
@@ -146,6 +160,7 @@ import bolts.Task;
       try {
         int n = originalInput.read();
         if (n == -1) {
+          // Hit the end of the stream.
           ParseIOUtils.closeQuietly(proxyOutput);
         } else {
           proxyOutput.write(n);
@@ -153,7 +168,7 @@ import bolts.Task;
         return n;
       } catch (IOException e) {
         // If we have problems in read from original inputStream or write to the proxyOutputStream,
-        // we simply close the proxy stream and throw the exception.
+        // we simply close the proxy stream and throw the exception
         ParseIOUtils.closeQuietly(proxyOutput);
         throw e;
       }
@@ -169,8 +184,7 @@ import bolts.Task;
   }
 
   private static String formatBytes(byte[] bytes, String contentType) {
-    // We handle json separately since it is the most common body and json class provide method
-    // to format it.
+    // We handle json separately since it is the most common body
     if (contentType.contains("json")) {
       try {
         return new JSONObject(new String(bytes)).toString(4);
@@ -193,7 +207,12 @@ import bolts.Task;
 
   private Logger logger;
 
-  /* package for tests */ void setLogger(Logger logger) {
+  /**
+   * Set the logger the interceptor uses. The default one is Android logcat logger.
+   * @param logger
+   *          The logger the interceptor uses.
+   */
+  public void setLogger(Logger logger) {
     if (this.logger == null) {
       this.logger = logger;
     } else {
@@ -221,7 +240,7 @@ import bolts.Task;
     logRequestInfo(getLogger(), requestId, request);
 
     // Developers need to manually call this
-    ParseHttpResponse tempResponse = null;
+    ParseHttpResponse tempResponse;
     try {
       tempResponse = chain.proceed(request);
     } catch (IOException e) {
@@ -234,17 +253,17 @@ import bolts.Task;
     InputStream newResponseBodyStream = response.getContent();
     // For response content, if developers care time of the response(latency, sending and receiving
     // time etc) or need the original networkStream to do something, they have to proxy the
-    // response.
+    // response
     if (isContentTypePrintable(response.getContentType())) {
       newResponseBodyStream = new ProxyInputStream(response.getContent(), new InterceptCallback() {
         @Override
         public void done(InputStream proxyInput, IOException e) {
-          if (e != null) {
-            return;
-          }
-
           try {
-            // This inputStream will be blocked until we write to the proxyOutputStream
+            if (e != null) {
+              return;
+            }
+
+            // This inputStream will be blocked until we write to the ProxyOutputStream
             // in ProxyInputStream
             InputStream decompressedInput = isGzipEncoding(response) ?
                 new GZIPInputStream(proxyInput) : proxyInput;
@@ -256,10 +275,10 @@ import bolts.Task;
 
             ParseIOUtils.closeQuietly(decompressedInput);
             ParseIOUtils.closeQuietly(proxyInput);
-            // No need to close the byteArrayStream
           } catch (IOException e1) {
-            // Log error when we can not read body stream
+            // Log error when we can't read body stream
             logError(getLogger(), requestId, e1.getMessage());
+          } finally {
             ParseIOUtils.closeQuietly(proxyInput);
           }
         }
@@ -268,7 +287,6 @@ import bolts.Task;
       logResponseInfo(getLogger(), requestId, response, IGNORED_BODY_INFO);
     }
 
-    //TODO(mengyan) Add builder constructor with state parameter
     return response.newBuilder()
         .setContent(newResponseBodyStream)
         .build();
@@ -288,7 +306,6 @@ import bolts.Task;
       headers.put(KEY_CONTENT_TYPE, request.getBody().getContentType());
     }
     logger.writeLine(KEY_HEADERS, headers.toString());
-
 
     // Body
     if (request.getBody() != null) {
@@ -328,8 +345,6 @@ import bolts.Task;
     logger.unlock();
   }
 
-  // Since we can not read the content of the response directly, we need an additional parameter
-  // to pass the responseBody after we get it asynchronously.
   private void logError(Logger logger, String requestId, String message) {
     logger.lock();
     logger.writeLine(KEY_TYPE, TYPE_ERROR);
