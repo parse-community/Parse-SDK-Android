@@ -20,7 +20,7 @@ import bolts.Task;
  */
 /** package */ class ParseAWSRequest extends ParseRequest<byte[]> {
 
-  public ParseAWSRequest(Method method, String url) {
+  public ParseAWSRequest(ParseHttpRequest.Method method, String url) {
     super(method, url);
   }
 
@@ -31,12 +31,12 @@ import bolts.Task;
     if (statusCode >= 200 && statusCode < 300 || statusCode == 304) {
       // OK
     } else {
-      String action = method == Method.GET ? "Download from" : "Upload to";
+      String action = method == ParseHttpRequest.Method.GET ? "Download from" : "Upload to";
       return Task.forError(new ParseException(ParseException.CONNECTION_FAILED, String.format(
         "%s S3 failed. %s", action, response.getReasonPhrase())));
     }
 
-    if (method != Method.GET) {
+    if (method != ParseHttpRequest.Method.GET) {
       return null;
     }
 

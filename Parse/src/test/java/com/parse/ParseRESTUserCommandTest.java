@@ -42,7 +42,7 @@ public class ParseRESTUserCommandTest {
     ParseRESTUserCommand command = ParseRESTUserCommand.getCurrentUserCommand("sessionToken");
 
     assertEquals("users/me", command.httpPath);
-    assertEquals(ParseRequest.Method.GET, command.method);
+    assertEquals(ParseHttpRequest.Method.GET, command.method);
     assertNull(command.jsonParameters);
     assertEquals("sessionToken", command.getSessionToken());
     // TODO(mengyan): Find a way to verify revocableSession
@@ -54,7 +54,7 @@ public class ParseRESTUserCommandTest {
         "userName", "password", true);
 
     assertEquals("login", command.httpPath);
-    assertEquals(ParseRequest.Method.GET, command.method);
+    assertEquals(ParseHttpRequest.Method.GET, command.method);
     assertEquals("userName", command.jsonParameters.getString("username"));
     assertEquals("password", command.jsonParameters.getString("password"));
     assertNull(command.getSessionToken());
@@ -66,7 +66,7 @@ public class ParseRESTUserCommandTest {
     ParseRESTUserCommand command = ParseRESTUserCommand.resetPasswordResetCommand("test@parse.com");
 
     assertEquals("requestPasswordReset", command.httpPath);
-    assertEquals(ParseRequest.Method.POST, command.method);
+    assertEquals(ParseHttpRequest.Method.POST, command.method);
     assertEquals("test@parse.com", command.jsonParameters.getString("email"));
     assertNull(command.getSessionToken());
     // TODO(mengyan): Find a way to verify revocableSession
@@ -80,7 +80,7 @@ public class ParseRESTUserCommandTest {
         ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
 
     assertEquals("classes/_User", command.httpPath);
-    assertEquals(ParseRequest.Method.POST, command.method);
+    assertEquals(ParseHttpRequest.Method.POST, command.method);
     assertEquals("value", command.jsonParameters.getString("key"));
     assertEquals("sessionToken", command.getSessionToken());
     // TODO(mengyan): Find a way to verify revocableSession
@@ -94,7 +94,7 @@ public class ParseRESTUserCommandTest {
         ParseRESTUserCommand.serviceLogInUserCommand(parameters, "sessionToken", true);
 
     assertEquals("users", command.httpPath);
-    assertEquals(ParseRequest.Method.POST, command.method);
+    assertEquals(ParseHttpRequest.Method.POST, command.method);
     assertEquals("value", command.jsonParameters.getString("key"));
     assertEquals("sessionToken", command.getSessionToken());
     // TODO(mengyan): Find a way to verify revocableSession
@@ -108,7 +108,7 @@ public class ParseRESTUserCommandTest {
         ParseRESTUserCommand.serviceLogInUserCommand("facebook", facebookAuthData, true);
 
     assertEquals("users", command.httpPath);
-    assertEquals(ParseRequest.Method.POST, command.method);
+    assertEquals(ParseHttpRequest.Method.POST, command.method);
     assertNull(command.getSessionToken());
     JSONObject authenticationData = new JSONObject();
     authenticationData.put("facebook", PointerEncoder.get().encode(facebookAuthData));

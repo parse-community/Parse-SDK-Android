@@ -58,35 +58,35 @@ public class ParseOkHttpClientTest {
 
     // Get
     ParseHttpRequest parseRequest = builder
-        .setMethod(ParseRequest.Method.GET)
+        .setMethod(ParseHttpRequest.Method.GET)
         .setBody(null)
         .build();
     Request okHttpRequest = parseClient.getRequest(parseRequest);
-    assertEquals(ParseRequest.Method.GET.toString(), okHttpRequest.method());
+    assertEquals(ParseHttpRequest.Method.GET.toString(), okHttpRequest.method());
 
     // Post
     parseRequest = builder
-        .setMethod(ParseRequest.Method.POST)
+        .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody("test", "application/json"))
         .build();
     okHttpRequest = parseClient.getRequest(parseRequest);
-    assertEquals(ParseRequest.Method.POST.toString(), okHttpRequest.method());
+    assertEquals(ParseHttpRequest.Method.POST.toString(), okHttpRequest.method());
 
     // Delete
     parseRequest = builder
-        .setMethod(ParseRequest.Method.DELETE)
+        .setMethod(ParseHttpRequest.Method.DELETE)
         .setBody(null)
         .build();
     okHttpRequest = parseClient.getRequest(parseRequest);
-    assertEquals(ParseRequest.Method.DELETE.toString(), okHttpRequest.method());
+    assertEquals(ParseHttpRequest.Method.DELETE.toString(), okHttpRequest.method());
 
     // Put
     parseRequest = builder
-        .setMethod(ParseRequest.Method.PUT)
+        .setMethod(ParseHttpRequest.Method.PUT)
         .setBody(new ParseByteArrayHttpBody("test", "application/json"))
         .build();
     okHttpRequest = parseClient.getRequest(parseRequest);
-    assertEquals(ParseRequest.Method.PUT.toString(), okHttpRequest.method());
+    assertEquals(ParseHttpRequest.Method.PUT.toString(), okHttpRequest.method());
   }
 
   @Test
@@ -102,7 +102,7 @@ public class ParseOkHttpClientTest {
     String contentType = "application/json";
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(url)
-        .setMethod(ParseRequest.Method.POST)
+        .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody(content, contentType))
         .setHeaders(headers)
         .build();
@@ -111,7 +111,7 @@ public class ParseOkHttpClientTest {
     Request okHttpRequest = parseClient.getRequest(parseRequest);
 
     // Verify method
-    assertEquals(ParseRequest.Method.POST.toString(), okHttpRequest.method());
+    assertEquals(ParseHttpRequest.Method.POST.toString(), okHttpRequest.method());
     // Verify URL
     assertEquals(url, okHttpRequest.urlString());
     // Verify Headers
@@ -136,7 +136,7 @@ public class ParseOkHttpClientTest {
     String content = "test";
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(url)
-        .setMethod(ParseRequest.Method.POST)
+        .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody(content, null))
         .build();
 
@@ -252,7 +252,7 @@ public class ParseOkHttpClientTest {
     String requestUrl = server.getUrl("/").toString();
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(requestUrl)
-        .setMethod(ParseRequest.Method.GET)
+        .setMethod(ParseHttpRequest.Method.GET)
         .build();
 
     // Execute request
@@ -357,7 +357,7 @@ public class ParseOkHttpClientTest {
     json.put("key", "value");
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(server.getUrl("/").toString())
-        .setMethod(ParseRequest.Method.POST)
+        .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody(json.toString().getBytes(), "application/json"))
         .setHeaders(headers)
         .build();
@@ -368,7 +368,7 @@ public class ParseOkHttpClientTest {
   // sure you also change the condition in this method otherwise tests will fail
   private void verifyClientRequest(ParseHttpRequest parseRequest) throws IOException {
     assertEquals(server.getUrl("/").toString(), parseRequest.getUrl());
-    assertEquals(ParseRequest.Method.POST, parseRequest.getMethod());
+    assertEquals(ParseHttpRequest.Method.POST, parseRequest.getMethod());
     assertEquals("requestValue", parseRequest.getHeader("requestKey"));
     assertEquals("application/json", parseRequest.getBody().getContentType());
     JSONObject json = new JSONObject();
@@ -388,7 +388,7 @@ public class ParseOkHttpClientTest {
         new ParseHttpRequest.Builder()
             .addHeader("requestKeyAgain", "requestValueAgain")
             .setUrl(server.getUrl("/test").toString())
-            .setMethod(ParseRequest.Method.GET)
+            .setMethod(ParseHttpRequest.Method.GET)
             .build();
     return requestAgain;
   }
@@ -397,7 +397,7 @@ public class ParseOkHttpClientTest {
   // sure you also change the condition in this method otherwise tests will fail
   private void verifyInterceptorRequest(RecordedRequest recordedRequest) throws IOException {
     assertEquals("/test", recordedRequest.getPath());
-    assertEquals(ParseRequest.Method.GET.toString(), recordedRequest.getMethod());
+    assertEquals(ParseHttpRequest.Method.GET.toString(), recordedRequest.getMethod());
     assertEquals("requestValueAgain", recordedRequest.getHeader("requestKeyAgain"));
   }
 

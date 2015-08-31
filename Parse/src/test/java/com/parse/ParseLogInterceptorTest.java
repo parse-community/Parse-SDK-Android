@@ -58,7 +58,7 @@ public class ParseLogInterceptorTest {
       @Override
       public ParseHttpRequest getRequest() {
         // We do not need request for this test so we simply return an empty request
-        return new ParseHttpRequest.Builder().setMethod(ParseRequest.Method.GET).build();
+        return new ParseHttpRequest.Builder().setMethod(ParseHttpRequest.Method.GET).build();
       }
 
       @Override
@@ -108,7 +108,7 @@ public class ParseLogInterceptorTest {
       @Override
       public ParseHttpRequest getRequest() {
         // We do not need request for this test so we simply return an empty request
-        return new ParseHttpRequest.Builder().setMethod(ParseRequest.Method.GET).build();
+        return new ParseHttpRequest.Builder().setMethod(ParseHttpRequest.Method.GET).build();
       }
 
       @Override
@@ -158,7 +158,7 @@ public class ParseLogInterceptorTest {
       @Override
       public ParseHttpRequest getRequest() {
         // We do not need request for this test so we simply return an empty request
-        return new ParseHttpRequest.Builder().setMethod(ParseRequest.Method.GET).build();
+        return new ParseHttpRequest.Builder().setMethod(ParseHttpRequest.Method.GET).build();
       }
 
       @Override

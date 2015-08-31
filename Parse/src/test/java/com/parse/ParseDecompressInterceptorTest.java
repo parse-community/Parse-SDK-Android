@@ -41,7 +41,7 @@ public class ParseDecompressInterceptorTest {
         // Generate test request
         return new ParseHttpRequest.Builder()
             .setUrl("www.parse.com")
-            .setMethod(ParseRequest.Method.GET)
+            .setMethod(ParseHttpRequest.Method.GET)
             .build();
       }
 
@@ -79,7 +79,7 @@ public class ParseDecompressInterceptorTest {
         // Generate test request
         return new ParseHttpRequest.Builder()
             .setUrl("www.parse.com")
-            .setMethod(ParseRequest.Method.GET)
+            .setMethod(ParseHttpRequest.Method.GET)
             .build();
       }
 

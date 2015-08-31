@@ -60,7 +60,7 @@ public class ParseRequestTest {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenThrow(new IOException());
 
-    TestParseRequest request = new TestParseRequest(ParseRequest.Method.GET, "http://parse.com");
+    TestParseRequest request = new TestParseRequest(ParseHttpRequest.Method.GET, "http://parse.com");
     Task<String> task = request.executeAsync(mockHttpClient);
     task.waitForCompletion();
 
@@ -78,7 +78,7 @@ public class ParseRequestTest {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
-    ParseAWSRequest request = new ParseAWSRequest(ParseRequest.Method.GET, "localhost");
+    ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, "localhost");
     TestProgressCallback downloadProgressCallback = new TestProgressCallback();
     Task<byte[]> task = request.executeAsync(mockHttpClient, null, downloadProgressCallback);
 
@@ -118,7 +118,7 @@ public class ParseRequestTest {
 
   private static class TestParseRequest extends ParseRequest<String> {
 
-    public TestParseRequest(Method method, String url) {
+    public TestParseRequest(ParseHttpRequest.Method method, String url) {
       super(method, url);
     }
 

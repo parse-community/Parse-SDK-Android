@@ -85,7 +85,7 @@ public class ParseRESTQueryCommandTest {
     ParseRESTQueryCommand command = ParseRESTQueryCommand.findCommand(state, "sessionToken");
 
     assertEquals("classes/TestObject", command.httpPath);
-    assertEquals(ParseRequest.Method.GET, command.method);
+    assertEquals(ParseHttpRequest.Method.GET, command.method);
     assertEquals("sessionToken", command.getSessionToken());
     Map<String, String> parameters = ParseRESTQueryCommand.encode(state, false);
     JSONObject jsonParameters = (JSONObject) NoObjectsEncoder.get().encode(parameters);
@@ -101,7 +101,7 @@ public class ParseRESTQueryCommandTest {
     ParseRESTQueryCommand command = ParseRESTQueryCommand.countCommand(state, "sessionToken");
 
     assertEquals("classes/TestObject", command.httpPath);
-    assertEquals(ParseRequest.Method.GET, command.method);
+    assertEquals(ParseHttpRequest.Method.GET, command.method);
     assertEquals("sessionToken", command.getSessionToken());
     Map<String, String> parameters = ParseRESTQueryCommand.encode(state, true);
     JSONObject jsonParameters = (JSONObject) NoObjectsEncoder.get().encode(parameters);

@@ -173,7 +173,7 @@ import java.util.Map;
     }
 
     HttpUriRequest apacheRequest;
-    ParseRequest.Method method = parseRequest.getMethod();
+    ParseHttpRequest.Method method = parseRequest.getMethod();
     String url = parseRequest.getUrl();
     switch (method) {
       case GET:

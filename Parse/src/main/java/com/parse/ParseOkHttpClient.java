@@ -108,7 +108,7 @@ import okio.Okio;
   @Override
   /* package */ Request getRequest(ParseHttpRequest parseRequest) throws IOException {
     Request.Builder okHttpRequestBuilder = new Request.Builder();
-    ParseRequest.Method method = parseRequest.getMethod();
+    ParseHttpRequest.Method method = parseRequest.getMethod();
     // Set method
     switch (method) {
       case GET:
@@ -161,16 +161,16 @@ import okio.Okio;
     // Set method
     switch (okHttpRequest.method()) {
        case OKHTTP_GET:
-           parseRequestBuilder.setMethod(ParseRequest.Method.GET);
+           parseRequestBuilder.setMethod(ParseHttpRequest.Method.GET);
            break;
        case OKHTTP_DELETE:
-           parseRequestBuilder.setMethod(ParseRequest.Method.DELETE);
+           parseRequestBuilder.setMethod(ParseHttpRequest.Method.DELETE);
            break;
        case OKHTTP_POST:
-           parseRequestBuilder.setMethod(ParseRequest.Method.POST);
+           parseRequestBuilder.setMethod(ParseHttpRequest.Method.POST);
            break;
        case OKHTTP_PUT:
-           parseRequestBuilder.setMethod(ParseRequest.Method.PUT);
+           parseRequestBuilder.setMethod(ParseHttpRequest.Method.PUT);
            break;
        default:
            // This should never happen

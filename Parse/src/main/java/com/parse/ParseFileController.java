@@ -143,7 +143,7 @@ import bolts.Task;
         }
 
         // network
-        final ParseAWSRequest request = new ParseAWSRequest(ParseRequest.Method.GET, state.url());
+        final ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url());
 
         // TODO(grantland): Stream response directly to file t5042019
         return request.executeAsync(

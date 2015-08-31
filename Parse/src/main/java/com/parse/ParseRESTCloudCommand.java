@@ -12,7 +12,10 @@ import java.util.Map;
 
 /** package */ class ParseRESTCloudCommand extends ParseRESTCommand {
 
-  private ParseRESTCloudCommand(String httpPath, Method httpMethod, Map<String, ?> parameters,
+  private ParseRESTCloudCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      Map<String, ?> parameters,
       String sessionToken) {
     super(httpPath, httpMethod, parameters, sessionToken);
   }
@@ -20,6 +23,7 @@ import java.util.Map;
   public static ParseRESTCloudCommand callFunctionCommand(String functionName,
       Map<String, ?> parameters, String sessionToken) {
     final String httpPath = String.format("functions/%s", functionName);
-    return new ParseRESTCloudCommand(httpPath, Method.POST, parameters, sessionToken);
+    return new ParseRESTCloudCommand(
+        httpPath, ParseHttpRequest.Method.POST, parameters, sessionToken);
   }
 }
