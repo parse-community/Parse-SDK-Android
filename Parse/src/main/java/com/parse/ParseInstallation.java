@@ -11,6 +11,7 @@ package com.parse;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.text.TextUtils;
 
 import java.util.Arrays;
@@ -40,12 +41,13 @@ public class ParseInstallation extends ParseObject {
   private static final String KEY_TIME_ZONE = "timeZone";
   private static final String KEY_LOCALE = "localeIdentifier";
   private static final String KEY_APP_VERSION = "appVersion";
+  private static final String KEY_OS_VERSION = "osVersion";
   /* package */ static final String KEY_CHANNELS = "channels";
 
   private static final List<String> READ_ONLY_FIELDS = Collections.unmodifiableList(
       Arrays.asList(KEY_DEVICE_TYPE, KEY_INSTALLATION_ID, KEY_DEVICE_TOKEN, KEY_PUSH_TYPE,
           KEY_TIME_ZONE, KEY_LOCALE, KEY_APP_VERSION, KEY_APP_NAME, KEY_PARSE_VERSION,
-          KEY_APP_IDENTIFIER));
+          KEY_APP_IDENTIFIER, KEY_OS_VERSION));
 
   // TODO(mengyan): Inject into ParseInstallationInstanceController
   /* package */ static ParseCurrentInstallationController getCurrentInstallationController() {
@@ -183,6 +185,7 @@ public class ParseInstallation extends ParseObject {
         PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
         String appVersion = pkgInfo.versionName;
         String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
+        Integer osVersion = Build.VERSION.SDK_INT;
 
         if (packageName != null && !packageName.equals(get(KEY_APP_IDENTIFIER))) {
           performPut(KEY_APP_IDENTIFIER, packageName);
@@ -192,6 +195,9 @@ public class ParseInstallation extends ParseObject {
         }
         if (appVersion != null && !appVersion.equals(get(KEY_APP_VERSION))) {
           performPut(KEY_APP_VERSION, appVersion);
+        }
+        if (osVersion > 0 && !osVersion.equals(get(KEY_OS_VERSION))) {
+          performPut(KEY_OS_VERSION, osVersion);
         }
       } catch (PackageManager.NameNotFoundException e) {
         PLog.w(TAG, "Cannot load package info; will not be saved to installation");
