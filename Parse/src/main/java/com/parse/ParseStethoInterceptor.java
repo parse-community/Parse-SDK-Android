@@ -14,6 +14,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Nullable;
 
+/**
+ * {@code ParseStethoInterceptor} is used to log the request and response through Stetho to chrome
+ * browser debugger.
+ */
 /** package */ class ParseStethoInterceptor implements ParseNetworkInterceptor {
 
   private static final String CONTENT_LENGTH_HEADER = "Content-Length";
@@ -26,7 +30,7 @@ import javax.annotation.Nullable;
     private final ParseHttpRequest request;
     private byte[] body;
     private boolean hasGeneratedBody;
-    // Since stetho use index to get header, we use a list to store them
+    // Since Stetho use index to get header, we use a list to store them
     private List<String> headers;
 
     public ParseInterceptorHttpRequest(String requestId, ParseHttpRequest request) {
@@ -35,7 +39,7 @@ import javax.annotation.Nullable;
 
       // Add content-length and content-type header to the interceptor. These headers are added when
       // a real httpclient send the request. Since we still want users to see these headers, we
-      // manually add them to Interceptor request if they are not in the header list.
+      // manually add them to Interceptor request if they are not in the header list
       headers = new ArrayList<>();
       for (Map.Entry<String, String> headerEntry : request.getAllHeaders().entrySet()) {
         headers.add(headerEntry.getKey());
@@ -168,19 +172,19 @@ import javax.annotation.Nullable;
 
     @Override
     public boolean connectionReused() {
-      // Follow stetho URLConnectionInspectorResponse
+      // Follow Stetho URLConnectionInspectorResponse
       return false;
     }
 
     @Override
     public int connectionId() {
-      // Follow stetho URLConnectionInspectorResponse
+      // Follow Stetho URLConnectionInspectorResponse
       return requestId.hashCode();
     }
 
     @Override
     public boolean fromDiskCache() {
-      // Follow stetho URLConnectionInspectorResponse
+      // Follow Stetho URLConnectionInspectorResponse
       return false;
     }
 
@@ -219,7 +223,7 @@ import javax.annotation.Nullable;
     String requestId = String.valueOf(nextRequestId.getAndIncrement());
     ParseHttpRequest request = chain.getRequest();
 
-    // If stetho debugger is available (chrome debugger is open), intercept the request.
+    // If Stetho debugger is available (chrome debugger is open), intercept the request
     if (stethoEventReporter.isEnabled()) {
       ParseInterceptorHttpRequest inspectorRequest =
           new ParseInterceptorHttpRequest(requestId, chain.getRequest());
@@ -231,7 +235,7 @@ import javax.annotation.Nullable;
     try {
       response = chain.proceed(request);
     } catch (IOException e) {
-      // If stetho debugger is available (chrome debugger is open), intercept the exception.
+      // If Stetho debugger is available (chrome debugger is open), intercept the exception
       if (stethoEventReporter.isEnabled()) {
         stethoEventReporter.httpExchangeFailed(requestId, e.toString());
       }
@@ -239,13 +243,13 @@ import javax.annotation.Nullable;
     }
 
     if (stethoEventReporter.isEnabled()) {
-      // If stetho debugger is available (chrome debugger is open), intercept the response body.
+      // If Stetho debugger is available (chrome debugger is open), intercept the response body
       if (request.getBody() != null) {
-        stethoEventReporter.dataSent(requestId, request.getBody().getContentLength(),
-            request.getBody().getContentLength());
+        stethoEventReporter.dataSent(requestId, (int)(request.getBody().getContentLength()),
+            (int)(request.getBody().getContentLength()));
       }
 
-      // If stetho debugger is available (chrome debugger is open), intercept the response header
+      // If Stetho debugger is available (chrome debugger is open), intercept the response headers
       stethoEventReporter.responseHeadersReceived(
           new ParseInspectorHttpResponse(requestId, request, response));
 
@@ -254,7 +258,7 @@ import javax.annotation.Nullable;
         responseStream = response.getContent();
       }
 
-      // Create the stetho proxy inputStream, when Parse read this stream, it will proxy the
+      // Create the Stetho proxy inputStream, when Parse read this stream, it will proxy the
       // response body to Stetho reporter.
       responseStream = stethoEventReporter.interpretResponseStream(
           requestId,
@@ -264,12 +268,7 @@ import javax.annotation.Nullable;
           new DefaultResponseHandler(stethoEventReporter, requestId)
       );
       if (responseStream != null) {
-        response = new ParseHttpResponse.Builder()
-            .setTotalSize(response.getTotalSize())
-            .setContentType(response.getContentType())
-            .setHeaders(response.getAllHeaders())
-            .setReasonPhase(response.getReasonPhrase())
-            .setStatusCode(response.getStatusCode())
+        response = response.newBuilder()
             .setContent(responseStream)
             .build();
       }
