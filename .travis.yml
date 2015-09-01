@@ -14,7 +14,7 @@ android:
     - extra-android-m2repository
 
 script:
-  - ./gradlew clean testDebug --info
+  - ./gradlew clean testDebugUnitTest --info
 
 after_success:
   - ./gradlew jacocoTestReport coveralls

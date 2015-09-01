@@ -173,7 +173,7 @@ jacoco {
     toolVersion "0.7.1.201405082137"
 }
 
-task jacocoTestReport(type:JacocoReport, dependsOn: "testDebug") {
+task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
 
@@ -191,7 +191,7 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebug") {
             "${buildDir}/generated/source/buildConfig/debug",
             "${buildDir}/generated/source/r/debug"
     ])
-    executionData = files("${buildDir}/jacoco/testDebug.exec")
+    executionData = files("${buildDir}/jacoco/testDebugUnitTest.exec")
 
     reports {
         xml.enabled = true
