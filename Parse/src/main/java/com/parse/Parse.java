@@ -46,8 +46,8 @@ public class Parse {
 
   /**
    * Enable pinning in your application. This must be called before your application can use
-   * pinning. You must invoke {@code Parse.enableLocalDatastore} before
-   * {@code Parse.initialize}:
+   * pinning. You must invoke {@code enableLocalDatastore(Context)} before
+   * {@link #initialize(Context)} :
    * <p/>
    * <pre>
    * public class MyApplication extends Application {
@@ -610,11 +610,11 @@ public class Parse {
 
 
   /**
-   * Add a {@code ParseNetworkInterceptor}. You must invoke
-   * {@code Parse.addParseNetworkInterceptor} before {@code Parse.initialize}. You can add multiple
-   * {@code ParseNetworkInterceptor}.
+   * Add a {@link ParseNetworkInterceptor}. You must invoke
+   * {@code addParseNetworkInterceptor(ParseNetworkInterceptor)} before
+   * {@link #initialize(Context)}. You can add multiple {@link ParseNetworkInterceptor}.
    * @param interceptor
-   *          The {@code ParseNetworkInterceptor} should be added.
+   *          {@link ParseNetworkInterceptor} to be added.
    */
   /* package */ static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
@@ -628,10 +628,11 @@ public class Parse {
   }
 
   /**
-   * Remove a given {@code ParseNetworkInterceptor}. You must invoke
-   * {@code Parse.removeParseNetworkInterceptor} before {@code Parse.initialize}.
+   * Remove a given {@link ParseNetworkInterceptor}. You must invoke
+   * {@code removeParseNetworkInterceptor(ParseNetworkInterceptor)}  before
+   * {@link #initialize(Context)} .
    * @param interceptor
-   *          The {@code ParseNetworkInterceptor} should be removed.
+   *          {@link ParseNetworkInterceptor} to be removed.
    */
   /* package */ static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
