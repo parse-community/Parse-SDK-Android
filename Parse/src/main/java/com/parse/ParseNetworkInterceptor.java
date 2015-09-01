@@ -10,11 +10,26 @@ package com.parse;
 
 import java.io.IOException;
 
-// TODO(mengyan): Add java doc and make it public before we launch it
+/**
+ * {@code ParseNetworkInterceptor} is used to observe requests going out and the corresponding responses coming
+ * back in.
+ */
 /** package */ interface ParseNetworkInterceptor {
 
+  /**
+   * @param chain
+   *          The helper chain we used to get the request, proceed the request and receive the
+   *          response.
+   * @return The intercepted response.
+   * @throws IOException
+   */
   ParseHttpResponse intercept(Chain chain) throws IOException;
 
+  /**
+   * {@code Chain} is used to chain the interceptors. It can get the request from the previous
+   * interceptor, proceed the request to the next interceptor and get the response from the next
+   * interceptor. In most of the cases, you don't need to implement this interface.
+   */
   interface Chain {
     ParseHttpRequest getRequest();
     ParseHttpResponse proceed(ParseHttpRequest request) throws IOException;
