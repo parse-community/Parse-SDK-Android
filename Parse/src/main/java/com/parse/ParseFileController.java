@@ -60,7 +60,7 @@ import bolts.Task;
     if (state.url() == null) {
       return null;
     }
-    return new File(cachePath, ParseDigestUtils.md5(state.url()));
+    return new File(cachePath, state.url()+".tmp");
   }
 
   public boolean isDataAvailable(ParseFile.State state) {
@@ -207,7 +207,6 @@ import bolts.Task;
         final ParseAWSRequest request =
             new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
 
-        // TODO(grantland): Stream response directly to file t5042019
         return request.executeAsync(
             awsClient(),
             null,

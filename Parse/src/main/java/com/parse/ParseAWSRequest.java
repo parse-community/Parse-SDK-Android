@@ -22,7 +22,7 @@ import bolts.Task;
 /** package */ class ParseAWSRequest extends ParseRequest<Void> {
 
   // The temp file is used to save the ParseFile content when we fetch it from server
-  private File tempFile;
+  private final File tempFile;
 
   public ParseAWSRequest(ParseHttpRequest.Method method, String url, File tempFile) {
     super(method, url);
