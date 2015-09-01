@@ -46,8 +46,8 @@ public class Parse {
 
   /**
    * Enable pinning in your application. This must be called before your application can use
-   * pinning. You must invoke {@code Parse.enableLocalDatastore} before
-   * {@code Parse.initialize}:
+   * pinning. You must invoke {@code enableLocalDatastore(Context)} before
+   * {@link #initialize(Context)} :
    * <p/>
    * <pre>
    * public class MyApplication extends Application {
@@ -608,7 +608,14 @@ public class Parse {
     interceptors = null;
   }
 
-  // TODO(mengyan) Make public after we release the interceptor feature
+
+  /**
+   * Add a {@link ParseNetworkInterceptor}. You must invoke
+   * {@code addParseNetworkInterceptor(ParseNetworkInterceptor)} before
+   * {@link #initialize(Context)}. You can add multiple {@link ParseNetworkInterceptor}.
+   * @param interceptor
+   *          {@link ParseNetworkInterceptor} to be added.
+   */
   /* package */ static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
@@ -620,7 +627,13 @@ public class Parse {
     interceptors.add(interceptor);
   }
 
-  // TODO(mengyan) Make public after we release the interceptor feature
+  /**
+   * Remove a given {@link ParseNetworkInterceptor}. You must invoke
+   * {@code removeParseNetworkInterceptor(ParseNetworkInterceptor)}  before
+   * {@link #initialize(Context)} .
+   * @param interceptor
+   *          {@link ParseNetworkInterceptor} to be removed.
+   */
   /* package */ static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
