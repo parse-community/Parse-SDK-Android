@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
  * {@code ParseStethoInterceptor} is used to log the request and response through Stetho to chrome
  * browser debugger.
  */
-/** package */ class ParseStethoInterceptor implements ParseNetworkInterceptor {
+public class ParseStethoInterceptor implements ParseNetworkInterceptor {
 
   private static final String CONTENT_LENGTH_HEADER = "Content-Length";
   private static final String CONTENT_TYPE_HEADER = "Content-Type";

@@ -31,7 +31,7 @@ import bolts.Task;
  * {@code ParseLogInterceptor} is used to log the request and response information to the given
  * logger.
  */
-/** package */ class ParseLogInterceptor implements ParseNetworkInterceptor {
+public class ParseLogInterceptor implements ParseNetworkInterceptor {
 
   private final static String TAG = "ParseLogNetworkInterceptor";
   private final static String LOG_PARAGRAPH_BREAKER = "--------------";
