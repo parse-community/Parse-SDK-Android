@@ -60,7 +60,7 @@ import bolts.Task;
     if (state.url() == null) {
       return null;
     }
-    return new File(cachePath, state.url()+".tmp");
+    return new File(cachePath, state.url() + ".tmp");
   }
 
   public boolean isDataAvailable(ParseFile.State state) {
@@ -185,7 +185,7 @@ import bolts.Task;
       public Boolean call() throws Exception {
         return cacheFile.exists();
       }
-    }, Task.BACKGROUND_EXECUTOR).continueWithTask(new Continuation<Boolean, Task<File>>() {
+    }, ParseExecutors.io()).continueWithTask(new Continuation<Boolean, Task<File>>() {
       @Override
       public Task<File> then(Task<Boolean> task) throws Exception {
         boolean result = task.getResult();
@@ -207,6 +207,7 @@ import bolts.Task;
         final ParseAWSRequest request =
             new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
 
+        // We do not need to delete the temp file since we always try to overwrite it
         return request.executeAsync(
             awsClient(),
             null,
@@ -226,7 +227,7 @@ import bolts.Task;
             ParseFileUtils.moveFile(tempFile, cacheFile);
             return Task.forResult(cacheFile);
           }
-        });
+        }, ParseExecutors.io());
       }
     });
   }
