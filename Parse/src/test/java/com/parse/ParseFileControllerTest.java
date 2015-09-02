@@ -97,7 +97,7 @@ public class ParseFileControllerTest {
     ParseFile.State state = new ParseFile.State.Builder()
         .url("http://example.com")
         .build();
-    Task<ParseFile.State> task = controller.saveAsync(state, null, null, null, null);
+    Task<ParseFile.State> task = controller.saveAsync(state, (byte[])null, null, null, null);
     task.waitForCompletion();
 
     verify(restClient, times(0)).execute(any(ParseHttpRequest.class));
@@ -113,7 +113,7 @@ public class ParseFileControllerTest {
 
     ParseFile.State state = new ParseFile.State.Builder().build();
     Task<Void> cancellationToken = Task.cancelled();
-    Task<ParseFile.State> task = controller.saveAsync(state, null, null, null, cancellationToken);
+    Task<ParseFile.State> task = controller.saveAsync(state, (byte[])null, null, null, cancellationToken);
     task.waitForCompletion();
 
     verify(restClient, times(0)).execute(any(ParseHttpRequest.class));
@@ -121,7 +121,7 @@ public class ParseFileControllerTest {
   }
 
   @Test
-  public void testSaveAsyncSuccess() throws Exception {
+  public void testSaveAsyncSuccessWithByteArray() throws Exception {
     JSONObject json = new JSONObject();
     json.put("name", "new_file_name");
     json.put("url", "http://example.com");
@@ -155,7 +155,43 @@ public class ParseFileControllerTest {
   }
 
   @Test
-  public void testSaveAsyncFailure() throws Exception {
+  public void testSaveAsyncSuccessWithFile() throws Exception {
+    JSONObject json = new JSONObject();
+    json.put("name", "new_file_name");
+    json.put("url", "http://example.com");
+    String content = json.toString();
+
+    ParseHttpResponse response = mock(ParseHttpResponse.class);
+    when(response.getStatusCode()).thenReturn(200);
+    when(response.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
+    when(response.getTotalSize()).thenReturn((long) content.length());
+
+    ParseHttpClient restClient = mock(ParseHttpClient.class);
+    when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
+
+    File root = temporaryFolder.getRoot();
+    ParseFileController controller = new ParseFileController(restClient, root);
+
+    File file = new File(root, "test");
+    ParseFileUtils.writeStringToFile(file, "content", "UTF-8");
+    ParseFile.State state = new ParseFile.State.Builder()
+        .name("file_name")
+        .mimeType("mime_type")
+        .build();
+    Task<ParseFile.State> task = controller.saveAsync(state, file, null, null, null);
+    ParseFile.State result = ParseTaskUtils.wait(task);
+
+    verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
+    assertEquals("new_file_name", result.name());
+    assertEquals("http://example.com", result.url());
+    File cachedFile = new File(root, "new_file_name");
+    assertTrue(cachedFile.exists());
+    assertTrue(file.exists());
+    assertEquals("content", ParseFileUtils.readFileToString(cachedFile, "UTF-8"));
+  }
+
+  @Test
+  public void testSaveAsyncFailureWithByteArray() throws Exception {
     // TODO(grantland): Remove once we no longer rely on retry logic.
     ParseRequest.setDefaultInitialRetryDelay(1L);
 
@@ -178,6 +214,34 @@ public class ParseFileControllerTest {
     assertThat(error, instanceOf(ParseException.class));
     assertEquals(ParseException.CONNECTION_FAILED, ((ParseException) error).getCode());
     assertEquals(0, root.listFiles().length);
+  }
+
+  @Test
+  public void testSaveAsyncFailureWithFile() throws Exception {
+    // TODO(grantland): Remove once we no longer rely on retry logic.
+    ParseRequest.setDefaultInitialRetryDelay(1L);
+
+    ParseHttpClient restClient = mock(ParseHttpClient.class);
+    when(restClient.execute(any(ParseHttpRequest.class))).thenThrow(new IOException());
+
+    File root = temporaryFolder.getRoot();
+    ParseFileController controller = new ParseFileController(restClient, root);
+
+    File file = temporaryFolder.newFile("test");
+    ParseFile.State state = new ParseFile.State.Builder()
+        .build();
+    Task<ParseFile.State> task = controller.saveAsync(state, file, null, null, null);
+    task.waitForCompletion();
+
+    // TODO(grantland): Abstract out command runner so we don't have to account for retries.
+    verify(restClient, times(5)).execute(any(ParseHttpRequest.class));
+    assertTrue(task.isFaulted());
+    Exception error = task.getError();
+    assertThat(error, instanceOf(ParseException.class));
+    assertEquals(ParseException.CONNECTION_FAILED, ((ParseException) error).getCode());
+    // Make sure the original file is not deleted and there is no cache file in the folder
+    assertEquals(1, root.listFiles().length);
+    assertTrue(file.exists());
   }
 
   //endregion

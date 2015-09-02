@@ -11,12 +11,16 @@ package com.parse;
 /**
  * REST network command for creating & uploading {@link ParseFile}s.
  */
+
+import java.io.File;
+
 /** package */ class ParseRESTFileCommand extends ParseRESTCommand {
 
   public static class Builder extends Init<Builder> {
 
     private byte[] data = null;
     private String contentType = null;
+    private File file;
 
     public Builder() {
       // We only ever use ParseRESTFileCommand for file uploads, so default to POST.
@@ -37,6 +41,11 @@ package com.parse;
       return this;
     }
 
+    public Builder file(File file) {
+      this.file = file;
+      return this;
+    }
+
     @Override
     /* package */ Builder self() {
       return this;
@@ -49,18 +58,28 @@ package com.parse;
 
   private final byte[] data;
   private final String contentType;
+  private final File file;
 
   public ParseRESTFileCommand(Builder builder) {
     super(builder);
+    if (builder.file != null && builder.data != null) {
+      throw new IllegalArgumentException("File and data can not be set at the same time");
+    }
     this.data = builder.data;
     this.contentType = builder.contentType;
+    this.file = builder.file;
   }
 
   @Override
   protected ParseHttpBody newBody(final ProgressCallback progressCallback) {
+    // TODO(mengyan): Delete ParseByteArrayHttpBody when we change input byte array to staged file
+    // in ParseFileController
     if (progressCallback == null) {
-      return new ParseByteArrayHttpBody(data, contentType);
+      return data != null ?
+          new ParseByteArrayHttpBody(data, contentType) : new ParseFileHttpBody(file, contentType);
     }
-    return new ParseCountingByteArrayHttpBody(data, contentType, progressCallback);
+    return data != null ?
+        new ParseCountingByteArrayHttpBody(data, contentType, progressCallback) :
+        new ParseCountingFileHttpBody(file, contentType, progressCallback);
   }
 }
