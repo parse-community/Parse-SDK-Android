@@ -20,7 +20,7 @@ package com.parse;
 
     public Builder() {
       // We only ever use ParseRESTFileCommand for file uploads, so default to POST.
-      method(Method.POST);
+      method(ParseHttpRequest.Method.POST);
     }
 
     public Builder fileName(String fileName) {

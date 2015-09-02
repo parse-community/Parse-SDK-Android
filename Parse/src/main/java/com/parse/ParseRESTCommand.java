@@ -49,7 +49,7 @@ import bolts.Task;
     private String installationId;
     public String masterKey;
 
-    private Method method = Method.GET;
+    private ParseHttpRequest.Method method = ParseHttpRequest.Method.GET;
     private String httpPath;
     private JSONObject jsonParameters;
 
@@ -73,7 +73,7 @@ import bolts.Task;
       return self();
     }
 
-    public T method(Method method) {
+    public T method(ParseHttpRequest.Method method) {
       this.method = method;
       return self();
     }
@@ -121,7 +121,10 @@ import bolts.Task;
   private String operationSetUUID;
   private String localId;
 
-  public ParseRESTCommand(String httpPath, Method httpMethod, Map<String, ?> parameters,
+  public ParseRESTCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      Map<String, ?> parameters,
       String sessionToken) {
     this(
         httpPath,
@@ -130,12 +133,18 @@ import bolts.Task;
         sessionToken);
   }
 
-  protected ParseRESTCommand(String httpPath, Method httpMethod, JSONObject jsonParameters,
+  protected ParseRESTCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      JSONObject jsonParameters,
       String sessionToken) {
     this(httpPath, httpMethod, jsonParameters, null, sessionToken);
   }
 
-  private ParseRESTCommand(String httpPath, Method httpMethod, JSONObject jsonParameters,
+  private ParseRESTCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      JSONObject jsonParameters,
       String localId, String sessionToken) {
     super(httpMethod, createUrl(httpPath));
 
@@ -159,7 +168,8 @@ import bolts.Task;
 
   public static ParseRESTCommand fromJSONObject(JSONObject jsonObject) {
     String httpPath = jsonObject.optString("httpPath");
-    Method httpMethod = Method.fromString(jsonObject.optString("httpMethod"));
+    ParseHttpRequest.Method httpMethod =
+        ParseHttpRequest.Method.fromString(jsonObject.optString("httpMethod"));
     String sessionToken = jsonObject.optString("sessionToken", null);
     String localId = jsonObject.optString("localId", null);
     JSONObject jsonParameters = jsonObject.optJSONObject("parameters");
@@ -192,17 +202,17 @@ import bolts.Task;
 
   @Override
   protected ParseHttpRequest newRequest(
-      Method method,
+      ParseHttpRequest.Method method,
       String url,
       ProgressCallback uploadProgressCallback) {
     ParseHttpRequest request;
     if (jsonParameters != null &&
-        method != Method.POST &&
-        method != Method.PUT) {
+        method != ParseHttpRequest.Method.POST &&
+        method != ParseHttpRequest.Method.PUT) {
       // The request URI may be too long to include parameters in the URI.
       // To avoid this problem we send the parameters in a POST request json-encoded body
       // and add a http method override parameter in newBody.
-      request = super.newRequest(Method.POST, url, uploadProgressCallback);
+      request = super.newRequest(ParseHttpRequest.Method.POST, url, uploadProgressCallback);
     } else {
       request = super.newRequest(method, url, uploadProgressCallback);
     }
@@ -221,8 +231,8 @@ import bolts.Task;
 
     try {
       JSONObject parameters = jsonParameters;
-      if (method == Method.GET ||
-          method == Method.DELETE) {
+      if (method == ParseHttpRequest.Method.GET ||
+          method == ParseHttpRequest.Method.DELETE) {
         // The request URI may be too long to include parameters in the URI.
         // To avoid this problem we send the parameters in a POST request json-encoded body
         // and add a http method override parameter.
@@ -421,8 +431,8 @@ import bolts.Task;
         httpPath += String.format("/%s", objectId);
         url = createUrl(httpPath);
 
-        if (httpPath.startsWith("classes") && method == Method.POST) {
-          method = Method.PUT;
+        if (httpPath.startsWith("classes") && method == ParseHttpRequest.Method.POST) {
+          method = ParseHttpRequest.Method.PUT;
         }
       }
     }

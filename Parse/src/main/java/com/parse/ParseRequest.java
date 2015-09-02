@@ -61,53 +61,6 @@ import bolts.Task;
       CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
       new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), sThreadFactory);
 
-  public enum Method {
-    GET, POST, PUT, DELETE;
-
-    public static Method fromString(String string) {
-      Method method = null;
-      switch (string) {
-        case "GET":
-          method = GET;
-          break;
-        case "POST":
-          method = POST;
-          break;
-        case "PUT":
-          method = PUT;
-          break;
-        case "DELETE":
-          method = DELETE;
-          break;
-        default:
-          break;
-      }
-      return method;
-    }
-
-    @Override
-    public String toString() {
-      String string = null;
-      switch (this) {
-        case GET:
-          string = "GET";
-          break;
-        case POST:
-          string = "POST";
-          break;
-        case PUT:
-          string = "PUT";
-          break;
-        case DELETE:
-          string = "DELETE";
-          break;
-        default:
-          break;
-      }
-      return string;
-    }
-  }
-
   protected static final int DEFAULT_MAX_RETRIES = 4;
   /* package */ static final long DEFAULT_INITIAL_RETRY_DELAY = 1000L;
 
@@ -137,14 +90,14 @@ import bolts.Task;
 
   private int maxRetries = DEFAULT_MAX_RETRIES;
 
-  /* package */ Method method;
+  /* package */ ParseHttpRequest.Method method;
   /* package */ String url;
 
   public ParseRequest(String url) {
-    this(Method.GET, url);
+    this(ParseHttpRequest.Method.GET, url);
   }
 
-  public ParseRequest(Method method, String url) {
+  public ParseRequest(ParseHttpRequest.Method method, String url) {
     this.method = method;
     this.url = url;
   }
@@ -159,7 +112,7 @@ import bolts.Task;
   }
 
   protected ParseHttpRequest newRequest(
-      Method method,
+      ParseHttpRequest.Method method,
       String url,
       ProgressCallback uploadProgressCallback)  {
     ParseHttpRequest.Builder requestBuilder = new ParseHttpRequest.Builder()

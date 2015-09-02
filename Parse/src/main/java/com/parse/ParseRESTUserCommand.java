@@ -22,15 +22,15 @@ import bolts.Task;
   private static final String HEADER_TRUE = "1";
 
   public static ParseRESTUserCommand getCurrentUserCommand(String sessionToken) {
-    return new ParseRESTUserCommand("users/me", Method.GET, null, sessionToken);
+    return new ParseRESTUserCommand("users/me", ParseHttpRequest.Method.GET, null, sessionToken);
   }
 
   //region Authentication
 
   public static ParseRESTUserCommand signUpUserCommand(JSONObject parameters, String sessionToken,
       boolean revocableSession) {
-    return new ParseRESTUserCommand("classes/_User", Method.POST, parameters, sessionToken,
-        revocableSession);
+    return new ParseRESTUserCommand(
+        "classes/_User", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
   }
 
   public static ParseRESTUserCommand logInUserCommand(String username, String password,
@@ -38,7 +38,8 @@ import bolts.Task;
     Map<String, String> parameters = new HashMap<>();
     parameters.put("username", username);
     parameters.put("password", password);
-    return new ParseRESTUserCommand("login", Method.GET, parameters, null, revocableSession);
+    return new ParseRESTUserCommand(
+        "login", ParseHttpRequest.Method.GET, parameters, null, revocableSession);
   }
 
   public static ParseRESTUserCommand serviceLogInUserCommand(
@@ -61,8 +62,8 @@ import bolts.Task;
 
   public static ParseRESTUserCommand serviceLogInUserCommand(JSONObject parameters,
       String sessionToken, boolean revocableSession) {
-    return new ParseRESTUserCommand("users", Method.POST, parameters, sessionToken,
-        revocableSession);
+    return new ParseRESTUserCommand(
+        "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
   }
 
   //endregion
@@ -70,24 +71,34 @@ import bolts.Task;
   public static ParseRESTUserCommand resetPasswordResetCommand(String email) {
     Map<String, String> parameters = new HashMap<>();
     parameters.put("email", email);
-    return new ParseRESTUserCommand("requestPasswordReset", Method.POST, parameters, null);
+    return new ParseRESTUserCommand(
+        "requestPasswordReset", ParseHttpRequest.Method.POST, parameters, null);
   }
 
   private boolean isRevocableSessionEnabled;
   private int statusCode;
 
-  private ParseRESTUserCommand(String httpPath, Method httpMethod, Map<String, ?> parameters,
+  private ParseRESTUserCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      Map<String, ?> parameters,
       String sessionToken) {
     this(httpPath, httpMethod, parameters, sessionToken, false);
   }
 
-  private ParseRESTUserCommand(String httpPath, Method httpMethod, Map<String, ?> parameters,
+  private ParseRESTUserCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      Map<String, ?> parameters,
       String sessionToken, boolean isRevocableSessionEnabled) {
     super(httpPath, httpMethod, parameters, sessionToken);
     this.isRevocableSessionEnabled = isRevocableSessionEnabled;
   }
 
-  private ParseRESTUserCommand(String httpPath, Method httpMethod, JSONObject parameters,
+  private ParseRESTUserCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      JSONObject parameters,
       String sessionToken, boolean isRevocableSessionEnabled) {
     super(httpPath, httpMethod, parameters, sessionToken);
     this.isRevocableSessionEnabled = isRevocableSessionEnabled;

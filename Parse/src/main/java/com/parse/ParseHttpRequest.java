@@ -10,12 +10,59 @@ package com.parse;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /** package */ class ParseHttpRequest {
+
+  public enum Method {
+    GET, POST, PUT, DELETE;
+
+    public static Method fromString(String string) {
+      Method method;
+      switch (string) {
+        case "GET":
+          method = GET;
+          break;
+        case "POST":
+          method = POST;
+          break;
+        case "PUT":
+          method = PUT;
+          break;
+        case "DELETE":
+          method = DELETE;
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid http method: <" + string + ">");
+      }
+      return method;
+    }
+
+    @Override
+    public String toString() {
+      String string;
+      switch (this) {
+        case GET:
+          string = "GET";
+          break;
+        case POST:
+          string = "POST";
+          break;
+        case PUT:
+          string = "PUT";
+          break;
+        case DELETE:
+          string = "DELETE";
+          break;
+        default:
+          throw new IllegalArgumentException("Invalid http method: <" + this+ ">");
+      }
+      return string;
+    }
+  }
+
   private final String url;
-  private final ParseRequest.Method method;
+  private final ParseHttpRequest.Method method;
   private final Map<String, String> headers;
   private final ParseHttpBody body;
 
@@ -30,7 +77,7 @@ import java.util.Map;
     return url;
   }
 
-  public ParseRequest.Method getMethod() {
+  public ParseHttpRequest.Method getMethod() {
     return method;
   }
 
@@ -48,7 +95,7 @@ import java.util.Map;
 
   public static class Builder {
     protected String url;
-    protected ParseRequest.Method method;
+    protected ParseHttpRequest.Method method;
     protected Map<String, String> headers;
     protected ParseHttpBody body;
 
@@ -68,7 +115,7 @@ import java.util.Map;
       return this;
     }
 
-    public Builder setMethod(ParseRequest.Method method) {
+    public Builder setMethod(ParseHttpRequest.Method method) {
       this.method = method;
       return this;
     }

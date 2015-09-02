@@ -25,7 +25,10 @@ import java.util.Set;
   /* package */ final static String KEY_EXPIRATION_INTERVAL = "expiration_interval";
   /* package */ final static String KEY_DATA = "data";
 
-  public ParseRESTPushCommand(String httpPath, Method httpMethod, Map<String, ?> parameters,
+  public ParseRESTPushCommand(
+      String httpPath,
+      ParseHttpRequest.Method httpMethod,
+      Map<String, ?> parameters,
       String sessionToken) {
     super(httpPath, httpMethod, parameters, sessionToken);
   }
@@ -68,6 +71,6 @@ import java.util.Set;
       parameters.put(KEY_DATA, payload);
     }
 
-    return new ParseRESTPushCommand("push", Method.POST, parameters, sessionToken);
+    return new ParseRESTPushCommand("push", ParseHttpRequest.Method.POST, parameters, sessionToken);
   }
 }

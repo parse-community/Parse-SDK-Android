@@ -24,7 +24,7 @@ public class ParseHttpRequestTest {
   @Test
   public void testParseHttpRequestGetMethod() throws IOException {
     String url = "www.parse.com";
-    ParseRequest.Method method = ParseRequest.Method.POST;
+    ParseHttpRequest.Method method = ParseHttpRequest.Method.POST;
     Map<String, String> headers = new HashMap<>();
     String name = "name";
     String value = "value";
@@ -53,7 +53,7 @@ public class ParseHttpRequestTest {
   @Test
   public void testParseHttpRequestBuilderInitialization() throws IOException {
     String url = "www.parse.com";
-    ParseRequest.Method method = ParseRequest.Method.POST;
+    ParseHttpRequest.Method method = ParseHttpRequest.Method.POST;
     Map<String, String> headers = new HashMap<>();
     String name = "name";
     String value = "value";

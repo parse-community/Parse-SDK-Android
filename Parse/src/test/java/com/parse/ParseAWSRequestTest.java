@@ -44,7 +44,7 @@ public class ParseAWSRequestTest extends TestCase {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
-    ParseAWSRequest request = new ParseAWSRequest(ParseRequest.Method.GET, "http://parse.com");
+    ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, "http://parse.com");
     Task<byte[]> task = request.executeAsync(mockHttpClient);
     task.waitForCompletion();
 

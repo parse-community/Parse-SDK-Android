@@ -114,7 +114,7 @@ public class ParseHttpClientTest {
     String requestContentType = "application/json";
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(requestUrl)
-        .setMethod(ParseRequest.Method.POST)
+        .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody(requestContent, requestContentType))
         .setHeaders(requestHeaders)
         .build();
@@ -125,7 +125,7 @@ public class ParseHttpClientTest {
     RecordedRequest recordedApacheRequest = server.takeRequest();
 
     // Verify request method
-    assertEquals(ParseRequest.Method.POST.toString(), recordedApacheRequest.getMethod());
+    assertEquals(ParseHttpRequest.Method.POST.toString(), recordedApacheRequest.getMethod());
 
     // Verify request headers, since http library automatically adds some headers, we only need to
     // verify all parseRequest headers are in recordedRequest headers.
@@ -184,7 +184,7 @@ public class ParseHttpClientTest {
     String requestUrl = server.getUrl("/").toString();
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(requestUrl)
-        .setMethod(ParseRequest.Method.GET)
+        .setMethod(ParseHttpRequest.Method.GET)
         .build();
 
     // Execute request
@@ -193,7 +193,7 @@ public class ParseHttpClientTest {
     RecordedRequest recordedRequest = server.takeRequest();
 
     // Verify request method
-    assertEquals(ParseRequest.Method.GET.toString(), recordedRequest.getMethod());
+    assertEquals(ParseHttpRequest.Method.GET.toString(), recordedRequest.getMethod());
 
     // Verify request headers
     Headers recordedHeaders = recordedRequest.getHeaders();
