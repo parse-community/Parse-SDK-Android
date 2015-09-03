@@ -12,9 +12,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +36,9 @@ import static org.mockito.Mockito.when;
 public class ParseRequestTest {
 
   private static byte[] data;
+
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @BeforeClass
   public static void setUpClass() {
@@ -78,13 +84,15 @@ public class ParseRequestTest {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
-    ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, "localhost");
+    File tempFile = temporaryFolder.newFile("test");
+    ParseAWSRequest request =
+        new ParseAWSRequest(ParseHttpRequest.Method.GET, "localhost", tempFile);
     TestProgressCallback downloadProgressCallback = new TestProgressCallback();
-    Task<byte[]> task = request.executeAsync(mockHttpClient, null, downloadProgressCallback);
+    Task<Void> task = request.executeAsync(mockHttpClient, null, downloadProgressCallback);
 
     task.waitForCompletion();
     assertFalse("Download failed: " + task.getError(), task.isFaulted());
-    assertEquals(data.length, task.getResult().length);
+    assertEquals(data.length, ParseFileUtils.readFileToByteArray(tempFile).length);
 
     assertProgressCompletedSuccessfully(downloadProgressCallback);
   }

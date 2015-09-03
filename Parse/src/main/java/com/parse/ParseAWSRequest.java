@@ -8,9 +8,10 @@
  */
 package com.parse;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 
 import bolts.Task;
 
@@ -18,14 +19,18 @@ import bolts.Task;
  * Request returns a byte array of the response and provides a callback the progress of the data
  * read from the network.
  */
-/** package */ class ParseAWSRequest extends ParseRequest<byte[]> {
+/** package */ class ParseAWSRequest extends ParseRequest<Void> {
 
-  public ParseAWSRequest(ParseHttpRequest.Method method, String url) {
+  // The temp file is used to save the ParseFile content when we fetch it from server
+  private final File tempFile;
+
+  public ParseAWSRequest(ParseHttpRequest.Method method, String url, File tempFile) {
     super(method, url);
+    this.tempFile = tempFile;
   }
 
   @Override
-  protected Task<byte[]> onResponseAsync(ParseHttpResponse response,
+  protected Task<Void> onResponseAsync(final ParseHttpResponse response,
       final ProgressCallback downloadProgressCallback) {
     int statusCode = response.getStatusCode();
     if (statusCode >= 200 && statusCode < 300 || statusCode == 304) {
@@ -40,29 +45,33 @@ import bolts.Task;
       return null;
     }
 
-    long totalSize = response.getTotalSize();
-    int downloadedSize = 0;
-    InputStream responseStream = null;
-    try {
-      responseStream = response.getContent();
-      ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    return Task.call(new Callable<Void>() {
+      @Override
+      public Void call() throws Exception {
+        long totalSize = response.getTotalSize();
+        long downloadedSize = 0;
+        InputStream responseStream = null;
+        try {
+          responseStream = response.getContent();
+          FileOutputStream tempFileStream = new FileOutputStream(tempFile);
 
-      int nRead;
-      byte[] data = new byte[32 << 10]; // 32KB
+          int nRead;
+          byte[] data = new byte[32 << 10]; // 32KB
 
-      while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
-        buffer.write(data, 0, nRead);
-        downloadedSize += nRead;
-        if (downloadProgressCallback != null && totalSize != -1) {
-          int progressToReport = Math.round((float) downloadedSize / (float) totalSize * 100.0f);
-          downloadProgressCallback.done(progressToReport);
+          while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
+            tempFileStream.write(data, 0, nRead);
+            downloadedSize += nRead;
+            if (downloadProgressCallback != null && totalSize != -1) {
+              int progressToReport =
+                  Math.round((float) downloadedSize / (float) totalSize * 100.0f);
+              downloadProgressCallback.done(progressToReport);
+            }
+          }
+          return null;
+        } finally {
+          ParseIOUtils.closeQuietly(responseStream);
         }
       }
-      return Task.forResult(buffer.toByteArray());
-    } catch (IOException e) {
-      return Task.forError(e);
-    } finally {
-      ParseIOUtils.closeQuietly(responseStream);
-    }
+    }, ParseExecutors.io());
   }
 }

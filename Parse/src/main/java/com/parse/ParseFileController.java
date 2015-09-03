@@ -56,6 +56,13 @@ import bolts.Task;
     return new File(cachePath, state.name());
   }
 
+  /* package for tests */ File getTempFile(ParseFile.State state) {
+    if (state.url() == null) {
+      return null;
+    }
+    return new File(cachePath, state.url() + ".tmp");
+  }
+
   public boolean isDataAvailable(ParseFile.State state) {
     return getCacheFile(state).exists();
   }
@@ -172,46 +179,55 @@ import bolts.Task;
     if (cancellationToken != null && cancellationToken.isCancelled()) {
       return Task.cancelled();
     }
-    final File file = getCacheFile(state);
+    final File cacheFile = getCacheFile(state);
     return Task.call(new Callable<Boolean>() {
       @Override
       public Boolean call() throws Exception {
-        return file.exists();
+        return cacheFile.exists();
       }
-    }, Task.BACKGROUND_EXECUTOR).continueWithTask(new Continuation<Boolean, Task<File>>() {
+    }, ParseExecutors.io()).continueWithTask(new Continuation<Boolean, Task<File>>() {
       @Override
       public Task<File> then(Task<Boolean> task) throws Exception {
         boolean result = task.getResult();
         if (result) {
-          return Task.forResult(file);
+          return Task.forResult(cacheFile);
         }
         if (cancellationToken != null && cancellationToken.isCancelled()) {
           return Task.cancelled();
         }
 
-        // network
-        final ParseAWSRequest request = new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url());
+        // Generate the temp file path for caching ParseFile content based on ParseFile's url
+        // The reason we do not write to the cacheFile directly is because there is no way we can
+        // verify if a cacheFile is complete or not. If download is interrupted in the middle, next
+        // time when we download the ParseFile, since cacheFile has already existed, we will return
+        // this incomplete cacheFile
+        final File tempFile = getTempFile(state);
 
-        // TODO(grantland): Stream response directly to file t5042019
+        // network
+        final ParseAWSRequest request =
+            new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
+
+        // We do not need to delete the temp file since we always try to overwrite it
         return request.executeAsync(
             awsClient(),
             null,
             downloadProgressCallback,
-            cancellationToken).onSuccess(new Continuation<byte[], File>() {
+            cancellationToken).continueWithTask(new Continuation<Void, Task<File>>() {
           @Override
-          public File then(Task<byte[]> task) throws Exception {
+          public Task<File> then(Task<Void> task) throws Exception {
             // If the top-level task was cancelled, don't actually set the data -- just move on.
             if (cancellationToken != null && cancellationToken.isCancelled()) {
               throw new CancellationException();
             }
-
-            byte[] data = task.getResult();
-            if (data != null) {
-              ParseFileUtils.writeByteArrayToFile(file, data);
+            if (task.isFaulted()) {
+              ParseFileUtils.deleteQuietly(tempFile);
+              return task.cast();
             }
-            return file;
+
+            ParseFileUtils.moveFile(tempFile, cacheFile);
+            return Task.forResult(cacheFile);
           }
-        });
+        }, ParseExecutors.io());
       }
     });
   }
