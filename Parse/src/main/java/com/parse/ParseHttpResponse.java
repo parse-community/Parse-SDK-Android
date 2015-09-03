@@ -20,7 +20,7 @@ import java.util.Map;
 /** package */ class ParseHttpResponse {
 
   /**
-   * Base builder for {@link ParseHttpResponse}.
+   * Base builder for {@code ParseHttpResponse}.
    */
   /* package */ static abstract class Init<T extends Init<T>> {
     private int statusCode;
@@ -79,7 +79,7 @@ import java.util.Map;
   }
 
   /**
-   * Builder of {@link ParseHttpResponse}.
+   * Builder of {@code ParseHttpResponse}.
    */
   public static class Builder extends Init<Builder> {
 
@@ -93,11 +93,11 @@ import java.util.Map;
     }
 
     /**
-     * Makes a new {@link ParseHttpResponse} {@code Builder} based on the input
-     * {@link ParseHttpResponse}.
+     * Makes a new {@code ParseHttpResponse} {@code Builder} based on the input
+     * {@code ParseHttpResponse}.
      *
      * @param response
-     *          The {@link ParseHttpResponse} where the {@code Builder}'s values come from.
+     *          The {@code ParseHttpResponse} where the {@code Builder}'s values come from.
      */
     public Builder(ParseHttpResponse response) {
       super();
@@ -132,11 +132,11 @@ import java.util.Map;
 
   /**
    * Generates a new {@link com.parse.ParseHttpResponse.Builder} based on an
-   * {@link ParseHttpResponse}, the {@link com.parse.ParseHttpResponse.Builder}'s values are come
-   * from the {@link ParseHttpResponse}.
+   * {@code ParseHttpResponse}, the {@link com.parse.ParseHttpResponse.Builder}'s values are come
+   * from the {@code ParseHttpResponse}.
    *
    * @return A new {@link com.parse.ParseHttpResponse.Builder} whose values are come from the
-   * {@link ParseHttpResponse}.
+   * {@code ParseHttpResponse}.
    */
   public Builder newBuilder() {
     return new Builder(this);
@@ -147,20 +147,20 @@ import java.util.Map;
   }
 
   /**
-   * Returns the content of the {@link ParseHttpResponse}'s body. The {@link InputStream} can only
+   * Returns the content of the {@code ParseHttpResponse}'s body. The {@link InputStream} can only
    * be read once and can't be reset.
    *
-   * @return The {@link InputStream} of the {@link ParseHttpResponse}'s body.
+   * @return The {@link InputStream} of the {@code ParseHttpResponse}'s body.
    */
   public InputStream getContent() {
     return content;
   }
 
   /**
-   * Returns the size of the {@link ParseHttpResponse}'s body. -1 if the size of the
-   * {@link ParseHttpResponse}'s body is unknown.
+   * Returns the size of the {@code ParseHttpResponse}'s body. -1 if the size of the
+   * {@code ParseHttpResponse}'s body is unknown.
    *
-   * @return The size of the {@link ParseHttpResponse}'s body.
+   * @return The size of the {@code ParseHttpResponse}'s body.
    */
   public long getTotalSize() {
     return totalSize;

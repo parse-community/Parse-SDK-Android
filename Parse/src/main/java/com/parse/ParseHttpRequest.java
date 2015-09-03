@@ -19,7 +19,7 @@ import java.util.Map;
 /** package */ class ParseHttpRequest {
 
   /**
-   * The {@link ParseHttpRequest} method type.
+   * The {@code ParseHttpRequest} method type.
    */
   public enum Method {
     GET, POST, PUT, DELETE;
@@ -69,7 +69,7 @@ import java.util.Map;
   }
 
   /**
-   * Builder of {@link ParseHttpRequest}.
+   * Builder of {@code ParseHttpRequest}.
    */
   public static class Builder {
     private String url;
