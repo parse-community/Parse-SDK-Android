@@ -10,8 +10,8 @@ package com.parse;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.Callable;
 
 import bolts.Task;
 
@@ -30,7 +30,7 @@ import bolts.Task;
   }
 
   @Override
-  protected Task<Void> onResponseAsync(ParseHttpResponse response,
+  protected Task<Void> onResponseAsync(final ParseHttpResponse response,
       final ProgressCallback downloadProgressCallback) {
     int statusCode = response.getStatusCode();
     if (statusCode >= 200 && statusCode < 300 || statusCode == 304) {
@@ -45,29 +45,32 @@ import bolts.Task;
       return null;
     }
 
-    long totalSize = response.getTotalSize();
-    int downloadedSize = 0;
-    InputStream responseStream = null;
-    try {
-      responseStream = response.getContent();
-      FileOutputStream tempFileStream = new FileOutputStream(tempFile);
+    return Task.call(new Callable<Void>() {
+      @Override
+      public Void call() throws Exception {
+        long totalSize = response.getTotalSize();
+        int downloadedSize = 0;
+        InputStream responseStream = null;
+        try {
+          responseStream = response.getContent();
+          FileOutputStream tempFileStream = new FileOutputStream(tempFile);
 
-      int nRead;
-      byte[] data = new byte[32 << 10]; // 32KB
+          int nRead;
+          byte[] data = new byte[32 << 10]; // 32KB
 
-      while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
-        tempFileStream.write(data, 0, nRead);
-        downloadedSize += nRead;
-        if (downloadProgressCallback != null && totalSize != -1) {
-          int progressToReport = Math.round((float) downloadedSize / (float) totalSize * 100.0f);
-          downloadProgressCallback.done(progressToReport);
+          while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
+            tempFileStream.write(data, 0, nRead);
+            downloadedSize += nRead;
+            if (downloadProgressCallback != null && totalSize != -1) {
+              int progressToReport = Math.round((float) downloadedSize / (float) totalSize * 100.0f);
+              downloadProgressCallback.done(progressToReport);
+            }
+          }
+          return null;
+        } finally {
+          ParseIOUtils.closeQuietly(responseStream);
         }
       }
-      return Task.forResult(null);
-    } catch (IOException e) {
-      return Task.forError(e);
-    } finally {
-      ParseIOUtils.closeQuietly(responseStream);
-    }
+    }, ParseExecutors.io());
   }
 }
