@@ -49,7 +49,7 @@ import bolts.Task;
       @Override
       public Void call() throws Exception {
         long totalSize = response.getTotalSize();
-        int downloadedSize = 0;
+        long downloadedSize = 0;
         InputStream responseStream = null;
         try {
           responseStream = response.getContent();
@@ -62,7 +62,8 @@ import bolts.Task;
             tempFileStream.write(data, 0, nRead);
             downloadedSize += nRead;
             if (downloadProgressCallback != null && totalSize != -1) {
-              int progressToReport = Math.round((float) downloadedSize / (float) totalSize * 100.0f);
+              int progressToReport =
+                  Math.round((float) downloadedSize / (float) totalSize * 100.0f);
               downloadProgressCallback.done(progressToReport);
             }
           }
