@@ -242,8 +242,6 @@ public class ParseUserTest {
     Task<Void> signUpTask = user.signUpAsync(Task.<Void>forResult(null));
     signUpTask.waitForCompletion();
 
-    // Make sure we checkForChangesToMutableContainers
-    verify(currentUser, times(1)).checkForChangesToMutableContainers();
     // Make sure currentUser copy changes from user
     verify(currentUser, times(1)).copyChangesFrom(user);
     // Make sure we update currentUser username and password
@@ -289,8 +287,6 @@ public class ParseUserTest {
     Task<Void> signUpTask = user.signUpAsync(Task.<Void>forResult(null));
     signUpTask.waitForCompletion();
 
-    // Make sure we checkForChangesToMutableContainers
-    verify(partialMockCurrentUser, times(1)).checkForChangesToMutableContainers();
     // Make sure we update currentUser username and password
     verify(partialMockCurrentUser, times(1)).setUsername("userName");
     verify(partialMockCurrentUser, times(1)).setPassword("password");
