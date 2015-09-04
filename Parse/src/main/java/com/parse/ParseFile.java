@@ -231,7 +231,7 @@ public class ParseFile {
    * Whether the file has available data.
    */
   public boolean isDataAvailable() {
-    return data != null || getFileController().isDataAvailable(state) || isPinnedDataAvailable();
+    return data != null || getFileController().isDataAvailable(state);
   }
 
   /**
@@ -243,122 +243,6 @@ public class ParseFile {
   public String getUrl() {
     return state.url();
   }
-
-  //region LDS
-
-  /* package */ static File getFilesDir() {
-    return Parse.getParseFilesDir("files");
-  }
-
-  private String getFilename() {
-    return state.name();
-  }
-
-  /**
-   * On disk cache of the {@code ParseFile}'s data
-   *
-   * @return File if cached, null if not.
-   */
-  /* package for tests */ File getCacheFile() {
-    return getFileController().getCacheFile(state);
-  }
-
-  /* package for tests */ File getFilesFile() {
-    String filename = getFilename();
-    return filename != null ? new File(getFilesDir(), filename) : null;
-  }
-
-  /* package */ boolean isPinned() {
-    File file = getFilesFile();
-    return file != null && file.exists();
-  }
-
-  private boolean isPinnedDataAvailable() {
-    return getFilesFile().exists();
-  }
-
-  /* package */ void pin() throws ParseException {
-    setPinned(true);
-  }
-
-  /* package */ void unpin() throws ParseException {
-    setPinned(false);
-  }
-
-  /* package */ Task<Void> pinInBackground() {
-    return setPinnedInBackground(true);
-  }
-
-  /* package */ Task<Void> unpinInBackground() {
-    return setPinnedInBackground(false);
-  }
-
-  /* package */ void pinInBackground(ParseCallback1<ParseException> callback) {
-    setPinnedInBackground(true, callback);
-  }
-
-  /* package */ void unpinInBackground(ParseCallback1<ParseException> callback) {
-    setPinnedInBackground(false, callback);
-  }
-
-  private void setPinned(boolean pinned) throws ParseException {
-    ParseTaskUtils.wait(setPinnedInBackground(pinned));
-  }
-
-  private void setPinnedInBackground(boolean pinned, ParseCallback1<ParseException> callback) {
-    ParseTaskUtils.callbackOnMainThreadAsync(setPinnedInBackground(pinned), callback);
-  }
-
-  private Task<Void> setPinnedInBackground(final boolean pinned) {
-    return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-      @Override
-      public Task<Void> then(Task<Void> task) throws Exception {
-        return task;
-      }
-    }).continueWith(new Continuation<Void, Void>() {
-      @Override
-      public Void then(Task<Void> task) throws Exception {
-        if (state.url() == null) {
-          throw new IllegalStateException("Unable to pin file before saving");
-        }
-
-        if ((pinned && isPinned()) || (!pinned && !isPinned())) {
-          // Already pinned or unpinned
-          return null;
-        }
-
-        File src, dest;
-        if (pinned) {
-          src = getCacheFile();
-          dest = getFilesFile();
-        } else {
-          src = getFilesFile();
-          dest = getCacheFile();
-        }
-
-        if (dest.exists()) {
-          ParseFileUtils.deleteQuietly(dest);
-        }
-
-        if (pinned && data != null) {
-          ParseFileUtils.writeByteArrayToFile(dest, data);
-          if (src.exists()) {
-            ParseFileUtils.deleteQuietly(src);
-          }
-          return null;
-        }
-
-        if (src == null || !src.exists()) {
-          throw new IllegalStateException("Unable to pin file before retrieving");
-        }
-
-        ParseFileUtils.moveFile(src, dest);
-        return null;
-      }
-    }, Task.BACKGROUND_EXECUTOR);
-  }
-
-  //endregion
 
   /**
    * Saves the file to the Parse cloud synchronously.
