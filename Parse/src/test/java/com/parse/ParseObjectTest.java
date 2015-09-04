@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ParseObjectTest {
 
@@ -72,6 +73,16 @@ public class ParseObjectTest {
   }
 
   //region testGetter
+
+  @Test( expected = IllegalStateException.class )
+  public void testGetUnavailable() {
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.isComplete()).thenReturn(false);
+
+    ParseObject object = ParseObject.from(state);
+    object.get("foo");
+  }
 
   @Test
   public void testGetList() throws Exception {
