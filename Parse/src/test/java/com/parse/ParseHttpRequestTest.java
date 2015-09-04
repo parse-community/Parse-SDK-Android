@@ -10,6 +10,7 @@ package com.parse;
 
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.Map;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class ParseHttpRequestTest {
@@ -77,6 +79,40 @@ public class ParseHttpRequestTest {
     assertEquals(1, requestAgain.getAllHeaders().size());
     assertEquals(value, requestAgain.getHeader(name));
     ParseHttpBody bodyAgain = requestAgain.getBody();
+    assertEquals(contentType, bodyAgain.getContentType());
+    assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(body.getContent()));
+  }
+
+  @Test
+  public void testParseHttpRequestBuildWithParseHttpRequest() throws IOException {
+    String url = "www.parse.com";
+    ParseHttpRequest.Method method = ParseHttpRequest.Method.POST;
+    Map<String, String> headers = new HashMap<>();
+    String name = "name";
+    String value = "value";
+    headers.put(name, value);
+
+    String content = "content";
+    String contentType = "application/json";
+    ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
+
+    ParseHttpRequest request = new ParseHttpRequest.Builder()
+        .setUrl(url)
+        .addHeader(name, value)
+        .setMethod(method)
+        .setBody(body)
+        .build();
+
+    String newURL = "www.api.parse.com";
+    ParseHttpRequest newRequest = new ParseHttpRequest.Builder(request)
+        .setUrl(newURL)
+        .build();
+
+    assertEquals(newURL, newRequest.getUrl());
+    assertEquals(method.toString(), newRequest.getMethod().toString());
+    assertEquals(1, newRequest.getAllHeaders().size());
+    assertEquals(value, newRequest.getHeader(name));
+    ParseHttpBody bodyAgain = newRequest.getBody();
     assertEquals(contentType, bodyAgain.getContentType());
     assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(body.getContent()));
   }
