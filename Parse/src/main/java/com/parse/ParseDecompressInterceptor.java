@@ -33,7 +33,7 @@ import java.util.zip.GZIPInputStream;
       // to -1
       newHeaders.put(CONTENT_LENGTH_HEADER, "-1");
       // TODO(mengyan): Add builder constructor based on an existing ParseHttpResponse
-      response = response.newBuilder()
+      response = new ParseHttpResponse.Builder(response)
           .setTotalSize(-1)
           .setHeaders(newHeaders)
           .setContent(new GZIPInputStream(response.getContent()))

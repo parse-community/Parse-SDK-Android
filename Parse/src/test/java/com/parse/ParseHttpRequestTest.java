@@ -104,7 +104,7 @@ public class ParseHttpRequestTest {
         .build();
 
     String newURL = "www.api.parse.com";
-    ParseHttpRequest newRequest = request.newBuilder()
+    ParseHttpRequest newRequest = new ParseHttpRequest.Builder(request)
         .setUrl(newURL)
         .build();
 

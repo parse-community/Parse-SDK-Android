@@ -130,18 +130,6 @@ import java.util.Map;
     this.contentType = builder.contentType;
   }
 
-  /**
-   * Generates a new {@link com.parse.ParseHttpResponse.Builder} based on an
-   * {@code ParseHttpResponse}, the {@link com.parse.ParseHttpResponse.Builder}'s values are come
-   * from the {@code ParseHttpResponse}.
-   *
-   * @return A new {@link com.parse.ParseHttpResponse.Builder} whose values are come from the
-   * {@code ParseHttpResponse}.
-   */
-  public Builder newBuilder() {
-    return new Builder(this);
-  }
-
   public int getStatusCode() {
     return statusCode;
   }

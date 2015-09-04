@@ -135,10 +135,6 @@ import java.util.Map;
     this.body = builder.body;
   }
 
-  public Builder newBuilder() {
-    return new Builder(this);
-  }
-
   public String getUrl() {
     return url;
   }

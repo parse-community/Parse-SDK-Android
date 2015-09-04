@@ -287,7 +287,7 @@ import bolts.Task;
       logResponseInfo(getLogger(), requestId, response, IGNORED_BODY_INFO);
     }
 
-    return response.newBuilder()
+    return new ParseHttpResponse.Builder(response)
         .setContent(newResponseBodyStream)
         .build();
   }

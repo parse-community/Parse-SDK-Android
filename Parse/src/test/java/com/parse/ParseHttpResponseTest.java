@@ -88,7 +88,7 @@ public class ParseHttpResponseTest {
         .build();
 
     String newReasonPhrase = "Failed";
-    ParseHttpResponse newResponse = response.newBuilder()
+    ParseHttpResponse newResponse = new ParseHttpResponse.Builder(response)
         .setReasonPhrase(newReasonPhrase)
         .build();
     

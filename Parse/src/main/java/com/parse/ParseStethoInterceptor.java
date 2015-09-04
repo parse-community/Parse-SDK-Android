@@ -276,7 +276,7 @@ import javax.annotation.Nullable;
           new DefaultResponseHandler(stethoEventReporter, requestId)
       );
       if (responseStream != null) {
-        response = response.newBuilder()
+        response = new ParseHttpResponse.Builder(response)
             .setContent(responseStream)
             .build();
       }
