@@ -134,10 +134,39 @@ public class ParseFile {
    * successfully synced with the server.
    */
   /* package for tests */ byte[] data;
+  /* package for tests */ File file;
 
   /* package for tests */ final TaskQueue taskQueue = new TaskQueue();
   private Set<Task<?>.TaskCompletionSource> currentTasks = Collections.synchronizedSet(
       new HashSet<Task<?>.TaskCompletionSource>());
+
+  /**
+   * Creates a new file from a file pointer.
+   *
+   * @param file
+   *          The file.
+   */
+  public ParseFile(File file) {
+    this(file, null);
+  }
+
+  /**
+   * Creates a new file from a file pointer, and content type. Content type will be used instead of
+   * auto-detection by file extension.
+   *
+   * @param file
+   *          The file.
+   * @param contentType
+   *          The file's content type.
+   */
+  public ParseFile(File file, String contentType) {
+    this(new State.Builder().name(file.getName()).mimeType(contentType).build());
+    if (file.length() > MAX_FILE_SIZE) {
+      throw new IllegalArgumentException(String.format("ParseFile must be less than %d bytes",
+          MAX_FILE_SIZE));
+    }
+    this.file = file;
+  }
 
   /**
    * Creates a new file from a byte array, file name, and content type. Content type will be used
@@ -273,15 +302,30 @@ public class ParseFile {
           return Task.cancelled();
         }
 
-        return getFileController().saveAsync(
-            state,
-            data,
-            sessionToken,
-            progressCallbackOnMainThread(uploadProgressCallback),
-            cancellationToken).onSuccessTask(new Continuation<State, Task<Void>>() {
+        Task<ParseFile.State> saveTask;
+        if (data != null) {
+          saveTask = getFileController().saveAsync(
+              state,
+              data,
+              sessionToken,
+              progressCallbackOnMainThread(uploadProgressCallback),
+              cancellationToken);
+        } else {
+          saveTask = getFileController().saveAsync(
+              state,
+              file,
+              sessionToken,
+              progressCallbackOnMainThread(uploadProgressCallback),
+              cancellationToken);
+        }
+
+        return saveTask.onSuccessTask(new Continuation<State, Task<Void>>() {
           @Override
           public Task<Void> then(Task<State> task) throws Exception {
             state = task.getResult();
+            // Since we have successfully uploaded the file, we do not need to hold the file pointer
+            // anymore.
+            file = null;
             return task.makeVoid();
           }
         });
