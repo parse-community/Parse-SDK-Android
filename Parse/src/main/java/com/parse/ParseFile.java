@@ -327,6 +327,7 @@ public class ParseFile {
             state = task.getResult();
             // Since we have successfully uploaded the file, we do not need to hold the file pointer
             // anymore.
+            data = null;
             file = null;
             return task.makeVoid();
           }
@@ -424,31 +425,18 @@ public class ParseFile {
    * @return A Task that is resolved when the data has been fetched.
    */
   public Task<byte[]> getDataInBackground(final ProgressCallback progressCallback) {
-    // If data is already available, just return immediately.
-    if (data != null) {
-      // in-memory
-      return Task.forResult(data);
-    }
-
     final Task<Void>.TaskCompletionSource cts = Task.create();
     currentTasks.add(cts);
 
     return taskQueue.enqueue(new Continuation<Void, Task<byte[]>>() {
       @Override
       public Task<byte[]> then(Task<Void> toAwait) throws Exception {
-        // If data is already available, just return immediately.
-        if (data != null) {
-          // in-memory
-          return Task.forResult(data);
-        }
-
         return fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(new Continuation<File, byte[]>() {
           @Override
           public byte[] then(Task<File> task) throws Exception {
             File file = task.getResult();
             try {
-              data =  ParseFileUtils.readFileToByteArray(file);
-              return data;
+              return ParseFileUtils.readFileToByteArray(file);
             } catch (IOException e) {
               // do nothing
             }
@@ -550,7 +538,7 @@ public class ParseFile {
    * @return A Task that is resolved when the data has been fetched.
    */
   public Task<File> getFileInBackground() {
-    return getFileInBackground((ProgressCallback)null);
+    return getFileInBackground((ProgressCallback) null);
   }
 
   /**
