@@ -35,6 +35,9 @@ import java.util.concurrent.atomic.AtomicReference;
   private AtomicReference<ParseCurrentInstallationController> currentInstallationController =
       new AtomicReference<>();
 
+  private AtomicReference<ParseAuthenticationManager> authenticationController =
+      new AtomicReference<>();
+
   private AtomicReference<ParseQueryController> queryController = new AtomicReference<>();
   private AtomicReference<ParseFileController> fileController = new AtomicReference<>();
   private AtomicReference<ParseAnalyticsController> analyticsController = new AtomicReference<>();
@@ -58,6 +61,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
     currentUserController.set(null);
     currentInstallationController.set(null);
+
+    authenticationController.set(null);
 
     queryController.set(null);
     fileController.set(null);
@@ -282,6 +287,23 @@ import java.util.concurrent.atomic.AtomicReference;
       throw new IllegalStateException(
           "Another currentInstallation controller was already registered: " +
               currentInstallationController.get());
+    }
+  }
+
+  public ParseAuthenticationManager getAuthenticationManager() {
+    if (authenticationController.get() == null) {
+      ParseAuthenticationManager controller =
+          new ParseAuthenticationManager(getCurrentUserController());
+      authenticationController.compareAndSet(null, controller);
+    }
+    return authenticationController.get();
+  }
+
+  public void registerAuthenticationManager(ParseAuthenticationManager manager) {
+    if (!authenticationController.compareAndSet(null, manager)) {
+      throw new IllegalStateException(
+          "Another authentication manager was already registered: " +
+              authenticationController.get());
     }
   }
 

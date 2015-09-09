@@ -18,7 +18,7 @@ import bolts.Task;
  * An authentication provider that generates a random UUID that will be used as
  * a key to identify this anonymous user until the user has been claimed.
  */
-/** package */ class AnonymousAuthenticationProvider extends ParseAuthenticationProvider {
+/** package */ class AnonymousAuthenticationProvider implements ParseAuthenticationProvider {
 
   @Override
   public Task<Map<String, String>> authenticateAsync() {
@@ -32,8 +32,9 @@ import bolts.Task;
   }
 
   @Override
-  public void deauthenticate() {
+  public Task<Void> deauthenticateAsync() {
     // do nothing
+    return Task.forResult(null);
   }
 
   @Override
