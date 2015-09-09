@@ -306,7 +306,6 @@ public class ParseObject {
 
   // Cached State
   private final Map<String, Object> estimatedData;
-  private final Map<String, Boolean> dataAvailability;
   private final Map<Object, ParseJSONCacheItem> hashedObjects; // For mutable containers
 
   private String localId;
@@ -385,7 +384,6 @@ public class ParseObject {
     operationSetQueue.add(new ParseOperationSet());
     estimatedData = new HashMap<>();
     hashedObjects = new IdentityHashMap<>();
-    dataAvailability = new HashMap<>();
 
     State.Init<?> builder = newStateBuilder(theClassName);
     // When called from new, assume hasData for the whole object is true.
@@ -754,7 +752,6 @@ public class ParseObject {
       }
 
       rebuildEstimatedData();
-      rebuildDataAvailability();
       checkpointAllMutableContainers();
     }
   }
@@ -843,7 +840,6 @@ public class ParseObject {
     synchronized (mutex) {
       currentOperations().remove(key);
       rebuildEstimatedData();
-      rebuildDataAvailability();
       checkpointAllMutableContainers();
     }
   }
@@ -856,7 +852,6 @@ public class ParseObject {
     synchronized (mutex) {
       currentOperations().clear();
       rebuildEstimatedData();
-      rebuildDataAvailability();
       checkpointAllMutableContainers();
     }
   }
@@ -2960,18 +2955,6 @@ public class ParseObject {
   }
 
   /**
-   * Regenerates the dataAvailability map from the serverData.
-   */
-  private void rebuildDataAvailability() {
-    synchronized (mutex) {
-      dataAvailability.clear();
-      for (String key : state.keySet()) {
-        dataAvailability.put(key, true);
-      }
-    }
-  }
-
-  /**
    * performOperation() is like {@link #put(String, Object)} but instead of just taking a new value,
    * it takes a ParseFieldOperation that modifies the value.
    */
@@ -2990,7 +2973,6 @@ public class ParseObject {
       currentOperations().put(key, newOperation);
 
       checkpointMutableContainer(key, newValue);
-      dataAvailability.put(key, Boolean.TRUE);
     }
   }
 
@@ -3546,8 +3528,7 @@ public class ParseObject {
 
   private boolean isDataAvailable(String key) {
     synchronized (mutex) {
-      return isDataAvailable()
-          || (dataAvailability.containsKey(key) ? dataAvailability.get(key) : false);
+      return isDataAvailable() || estimatedData.containsKey(key);
     }
   }
 
