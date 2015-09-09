@@ -225,6 +225,14 @@ public class ParseStethoInterceptor implements ParseNetworkInterceptor {
   // Request Id generator
   private final AtomicInteger nextRequestId = new AtomicInteger(0);
 
+  /**
+   * Intercept the {@link ParseHttpRequest} and {@link ParseHttpResponse}.
+   * @param chain
+   *          The helper chain we use to get the {@link ParseHttpRequest}, proceed the
+   *          {@link ParseHttpRequest} and receive the {@link ParseHttpResponse}.
+   * @return The intercepted {@link ParseHttpResponse}.
+   * @throws IOException
+   */
   @Override
   public ParseHttpResponse intercept(Chain chain) throws IOException {
     // Intercept request

@@ -58,7 +58,7 @@ public class ParseLogInterceptor implements ParseNetworkInterceptor {
    * The {@code Logger} to log the request and response information.
    */
   public static abstract class Logger {
-    public static String NEW_LINE = "\n";
+    private static String NEW_LINE = System.getProperty("line.separator");
 
     // The reason we need a lock here is since multiple network threads may write to the
     // logger concurrently, the message of different threads may intertwined. We need this
@@ -69,25 +69,58 @@ public class ParseLogInterceptor implements ParseNetworkInterceptor {
       lock = new ReentrantLock();
     }
 
+    /**
+     * Write the given string through {@code Logger}.
+     * @param str
+     *          The string to be written.
+     */
     public abstract void write(String str);
 
+    /**
+     * Lock the {@code Logger}. Since multiple threads may use a same {@code Logger}, we need to
+     * to lock the {@code Logger} to make sure content written by different threads does not
+     * intertwined.
+     */
     public void lock() {
       lock.lock();
     }
 
+    /**
+     * Unlock the {@code Logger}.
+     */
     public void unlock() {
       lock.unlock();
     }
 
+    /**
+     * Write a key-value pair through {@code Logger}. The name and value are separated by :.
+     * @param name
+     *          The key of the key-value pair to be written.
+     * @param value
+     *          The value of the key-value pair to be written.
+     */
     public void write(String name, String value) {
       write(name + " : " + value);
     }
 
+    /**
+     * Write the given string followed by a newline through {@code Logger}.
+     * @param str
+     *          The string to be written.
+     */
     public void writeLine(String str) {
       write(str);
       write(NEW_LINE);
     }
 
+    /**
+     * Write a key-value pair followed by a newline through {@code Logger}. The name and value are
+     * separated by :.
+     * @param name
+     *          The key of the key-value pair to be written.
+     * @param value
+     *           The value of the key-value pair to be written.
+     */
     public void writeLine(String name, String value) {
       writeLine(name + " : " + value);
     }
@@ -100,6 +133,11 @@ public class ParseLogInterceptor implements ParseNetworkInterceptor {
 
     private static int MAX_MESSAGE_LENGTH = 4000;
 
+    /**
+     * Write the given string to Android logcat.
+     * @param str
+     *          The string to be written.
+     */
     @Override
     public void write(String str) {
       // Logcat can only print the limited number of characters in one line, so when we have a long
@@ -112,6 +150,13 @@ public class ParseLogInterceptor implements ParseNetworkInterceptor {
       }
     }
 
+    /**
+     * Write the given string to Android logcat followed by a newline. Since Android {@link Log}
+     * actually adds newline for each write, we need to override this method to avoid adding
+     * additional newlines.
+     * @param str
+     *          The string to be written.
+     */
     @Override
     public void writeLine(String str) {
       // Logcat actually writes in a new line every time, so we need to rewrite it
@@ -231,6 +276,14 @@ public class ParseLogInterceptor implements ParseNetworkInterceptor {
   // Request Id generator
   private final AtomicInteger nextRequestId = new AtomicInteger(0);
 
+  /**
+   * Intercept the {@link ParseHttpRequest} and {@link ParseHttpResponse}.
+   * @param chain
+   *          The helper chain we use to get the {@link ParseHttpRequest}, proceed the
+   *          {@link ParseHttpRequest} and receive the {@link ParseHttpResponse}.
+   * @return The intercept {@link ParseHttpResponse}.
+   * @throws IOException
+   */
   @Override
   public ParseHttpResponse intercept(Chain chain) throws IOException {
     // Intercept request
