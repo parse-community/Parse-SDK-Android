@@ -65,11 +65,11 @@ public final class ParseAnonymousUtils {
    * @return A Task that will be resolved when logging in is completed.
    */
   public static Task<ParseUser> logInInBackground() {
-    final ParseAuthenticationProvider provider = getProvider();
+    final AnonymousAuthenticationProvider provider = getProvider();
     return provider.authenticateAsync().onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
       @Override
       public Task<ParseUser> then(Task<Map<String, String>> task) throws Exception {
-        return ParseUser.logInWithAsync(provider.getAuthType(), task.getResult());
+        return ParseUser.logInWithInBackground(provider.getAuthType(), task.getResult());
       }
     });
   }
