@@ -38,8 +38,8 @@ import bolts.Task;
   }
 
   @Override
-  public boolean restoreAuthentication(Map<String, String> authData) {
-    return true;
+  public Task<Boolean> restoreAuthenticationAsync(Map<String, String> authData) {
+    return Task.forResult(true);
   }
 
   @Override

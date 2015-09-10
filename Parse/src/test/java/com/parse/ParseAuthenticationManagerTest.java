@@ -12,12 +12,14 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Matchers;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import bolts.Task;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -70,20 +72,22 @@ public class ParseAuthenticationManagerTest {
 
     manager.register(provider);
     verify(controller).getAsync(false);
-    verify(user).synchronizeAuthData("test_provider");
+    verify(user).synchronizeAuthDataAsync("test_provider");
   }
 
   //endregion
 
   @Test
-  public void testRestoreAuthentication() {
+  public void testRestoreAuthentication() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
+    when(provider.restoreAuthenticationAsync(Matchers.<Map<String, String>>any()))
+        .thenReturn(Task.forResult(true));
     manager.register(provider);
 
     Map<String, String> authData = new HashMap<>();
-    manager.restoreAuthentication("test_provider", authData);
+    assertTrue(ParseTaskUtils.wait(manager.restoreAuthenticationAsync("test_provider", authData)));
 
-    verify(provider).restoreAuthentication(authData);
+    verify(provider).restoreAuthenticationAsync(authData);
   }
 
   @Test
