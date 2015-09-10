@@ -160,7 +160,7 @@ import bolts.Task;
   }
 
   @Override
-  public Task<Void> logoutAsync() {
+  public Task<Void> logOutAsync() {
     return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> toAwait) throws Exception {
