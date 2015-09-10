@@ -224,6 +224,10 @@ import bolts.Task;
               return task.cast();
             }
 
+            // Since we give the cacheFile pointer to developers, it is not safe to guarantee
+            // cacheFile always does not exist here, so it is better to delete it manually,
+            // otherwise moveFile may throw an exception.
+            ParseFileUtils.deleteQuietly(cacheFile);
             ParseFileUtils.moveFile(tempFile, cacheFile);
             return Task.forResult(cacheFile);
           }
