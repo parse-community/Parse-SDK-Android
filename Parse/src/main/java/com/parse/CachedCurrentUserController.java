@@ -268,10 +268,8 @@ import bolts.Task;
   }
 
   private ParseUser lazyLogIn() {
-    AnonymousAuthenticationProvider provider = ParseAnonymousUtils.getProvider();
-    String authType = provider.getAuthType();
-    Map<String, String> authData = provider.getAuthData();
-    return lazyLogIn(authType, authData);
+    Map<String, String> authData = ParseAnonymousUtils.getAuthData();
+    return lazyLogIn(ParseAnonymousUtils.AUTH_TYPE, authData);
   }
 
   /* package for tests */ ParseUser lazyLogIn(String authType, Map<String, String> authData) {

@@ -31,14 +31,13 @@ public class ParseAuthenticationManagerTest {
 
   private ParseAuthenticationManager manager;
   private ParseCurrentUserController controller;
-  private ParseAuthenticationProvider provider;
+  private ParseAuthenticationCallbacks provider;
 
   @Before
   public void setUp() {
     controller = mock(ParseCurrentUserController.class);
     manager = new ParseAuthenticationManager(controller);
-    provider = mock(ParseAuthenticationProvider.class);
-    when(provider.getAuthType()).thenReturn("test_provider");
+    provider = mock(ParseAuthenticationCallbacks.class);
   }
 
   //region testRegister
@@ -46,21 +45,17 @@ public class ParseAuthenticationManagerTest {
   @Test
   public void testRegisterMultipleShouldThrow() {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    ParseAuthenticationProvider provider2 = mock(ParseAuthenticationProvider.class);
-    when(provider2.getAuthType()).thenReturn("test_provider");
+    ParseAuthenticationCallbacks provider2 = mock(ParseAuthenticationCallbacks.class);
 
-    manager.register(provider);
+    manager.register("test_provider", provider);
 
     thrown.expect(IllegalStateException.class);
-    manager.register(provider2);
+    manager.register("test_provider", provider2);
   }
 
   @Test
   public void testRegisterAnonymous() {
-    ParseAuthenticationProvider anonymous = mock(AnonymousAuthenticationProvider.class);
-    when(anonymous.getAuthType()).thenReturn("anonymous");
-
-    manager.register(anonymous);
+    manager.register("anonymous", mock(ParseAuthenticationCallbacks.class));
     verifyNoMoreInteractions(controller);
   }
 
@@ -69,7 +64,7 @@ public class ParseAuthenticationManagerTest {
     ParseUser user = mock(ParseUser.class);
     when(controller.getAsync(false)).thenReturn(Task.forResult(user));
 
-    manager.register(provider);
+    manager.register("test_provider", provider);
     verify(controller).getAsync(false);
     verify(user).synchronizeAuthDataAsync("test_provider");
   }
@@ -79,24 +74,23 @@ public class ParseAuthenticationManagerTest {
   @Test
   public void testRestoreAuthentication() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    when(provider.restoreAuthenticationInBackground(Matchers.<Map<String, String>>any()))
-        .thenReturn(Task.<Void>forResult(null));
-    manager.register(provider);
+    when(provider.onRestoreAuthentication(Matchers.<Map<String, String>>any()))
+        .thenReturn(true);
+    manager.register("test_provider", provider);
 
     Map<String, String> authData = new HashMap<>();
     ParseTaskUtils.wait(manager.restoreAuthenticationAsync("test_provider", authData));
 
-    verify(provider).restoreAuthenticationInBackground(authData);
+    verify(provider).onRestoreAuthentication(authData);
   }
 
   @Test
   public void testDeauthenticateAsync() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    when(provider.deauthenticateInBackground()).thenReturn(Task.<Void>forResult(null));
-    manager.register(provider);
+    manager.register("test_provider", provider);
 
     ParseTaskUtils.wait(manager.deauthenticateAsync("test_provider"));
 
-    verify(provider).deauthenticateInBackground();
+    verify(provider).onDeauthenticate();
   }
 }

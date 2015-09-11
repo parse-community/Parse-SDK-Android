@@ -1079,30 +1079,31 @@ public class ParseUser extends ParseObject {
   //region Third party authentication
 
   /**
-   * Registers a third party authentication provider.
+   * Registers third party authentication callbacks.
    * <p />
-   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
-   * provider.</strong>
+   * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
+   * library.
    *
-   * @param provider The third party authentication provider to be registered.
+   * @param callbacks The third party authentication callbacks to be registered.
    *
-   * @see ParseAuthenticationProvider
+   * @see ParseAuthenticationCallbacks
    */
-  public static void registerAuthenticationProvider(ParseAuthenticationProvider provider) {
-    getAuthenticationManager().register(provider);
+  public static void registerAuthenticationCallbacks(
+      String authType, ParseAuthenticationCallbacks callbacks) {
+    getAuthenticationManager().register(authType, callbacks);
   }
 
   /**
    * Logs in a user with third party authentication credentials.
    * <p />
-   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
-   * provider.</strong>
+   * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
+   * library.
    *
-   * @param authType The name of the third party authentication provider.
-   * @param authData The user credentials of the third party authentication provider.
+   * @param authType The name of the third party authentication source.
+   * @param authData The user credentials of the third party authentication source.
    * @return A {@code Task} is resolved when logging in completes.
    *
-   * @see ParseAuthenticationProvider
+   * @see ParseAuthenticationCallbacks
    */
   public static Task<ParseUser> logInWithInBackground(
       final String authType, final Map<String, String> authData) {
@@ -1205,15 +1206,15 @@ public class ParseUser extends ParseObject {
   }
 
   /**
-   * Indicates whether this user is linked with a third party authentication provider.
+   * Indicates whether this user is linked with a third party authentication source.
    * <p />
-   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
-   * provider.</strong>
+   * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
+   * library.
    *
-   * @param authType The name of the third party authentication provider.
+   * @param authType The name of the third party authentication source.
    * @return {@code true} if linked, otherwise {@code false}.
    *
-   * @see ParseAuthenticationProvider
+   * @see ParseAuthenticationCallbacks
    */
   public boolean isLinked(String authType) {
     Map<String, Map<String, String>> authData = getAuthData();
@@ -1221,7 +1222,7 @@ public class ParseUser extends ParseObject {
   }
 
   /**
-   * Ensures that all auth providers have auth data (e.g. access tokens, etc.) that matches this
+   * Ensures that all auth sources have auth data (e.g. access tokens, etc.) that matches this
    * user.
    */
   /* package */ Task<Void> synchronizeAllAuthDataAsync() {
@@ -1252,13 +1253,14 @@ public class ParseUser extends ParseObject {
 
   private Task<Void> synchronizeAuthDataAsync(
       ParseAuthenticationManager manager, final String authType, Map<String, String> authData) {
-    return manager.restoreAuthenticationAsync(authType, authData).continueWithTask(new Continuation<Void, Task<Void>>() {
+    return manager.restoreAuthenticationAsync(authType, authData).continueWithTask(new Continuation<Boolean, Task<Void>>() {
       @Override
-      public Task<Void> then(Task<Void> task) throws Exception {
-        if (task.isFaulted()) {
+      public Task<Void> then(Task<Boolean> task) throws Exception {
+        boolean success = !task.isFaulted() && task.getResult();
+        if (!success) {
           return unlinkFromInBackground(authType);
         }
-        return task;
+        return task.makeVoid();
       }
     });
   }
@@ -1303,16 +1305,16 @@ public class ParseUser extends ParseObject {
   }
 
   /**
-   * Links this user to a third party authentication provider.
+   * Links this user to a third party authentication source.
    * <p />
-   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
-   * provider.</strong>
+   * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
+   * library.
    *
-   * @param authType The name of the third party authentication provider.
-   * @param authData The user credentials of the third party authentication provider.
+   * @param authType The name of the third party authentication source.
+   * @param authData The user credentials of the third party authentication source.
    * @return A {@code Task} is resolved when linking completes.
    *
-   * @see ParseAuthenticationProvider
+   * @see ParseAuthenticationCallbacks
    */
   public Task<Void> linkWithInBackground(
       String authType, Map<String, String> authData) {
@@ -1323,15 +1325,15 @@ public class ParseUser extends ParseObject {
   }
 
   /**
-   * Unlinks this user from a third party authentication provider.
+   * Unlinks this user from a third party authentication source.
    * <p />
-   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
-   * provider.</strong>
+   * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
+   * library.
    *
-   * @param authType The name of the third party authentication provider.
+   * @param authType The name of the third party authentication source.
    * @return A {@code Task} is resolved when unlinking completes.
    *
-   * @see ParseAuthenticationProvider
+   * @see ParseAuthenticationCallbacks
    */
   public Task<Void> unlinkFromInBackground(final String authType) {
     synchronized (mutex) {
