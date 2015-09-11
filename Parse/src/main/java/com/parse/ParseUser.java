@@ -1336,23 +1336,18 @@ public class ParseUser extends ParseObject {
    * @see ParseAuthenticationCallbacks
    */
   public Task<Void> unlinkFromInBackground(final String authType) {
+    if (authType == null) {
+      return Task.forResult(null);
+    }
+
     synchronized (mutex) {
-      if (authType == null) {
+      if (!getAuthData().containsKey(authType)) {
         return Task.forResult(null);
       }
-      return Task.<Void> forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
-        @Override
-        public Task<Void> then(Task<Void> task) throws Exception {
-          synchronized (mutex) {
-            if (getAuthData().containsKey(authType)) {
-              putAuthData(authType, null);
-              return saveInBackground();
-            }
-            return Task.forResult(null);
-          }
-        }
-      });
+      putAuthData(authType, null);
     }
+
+    return saveInBackground();
   }
 
   //endregion
