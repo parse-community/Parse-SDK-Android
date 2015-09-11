@@ -295,7 +295,7 @@ public class CachedCurrentUserControllerTest {
     when(currentUser.logOutAsync()).thenReturn(Task.<Void>forResult(null));
     controller.currentUser = currentUser;
 
-    ParseTaskUtils.wait(controller.logoutAsync());
+    ParseTaskUtils.wait(controller.logOutAsync());
 
     // Make sure currentUser.logout() is called
     verify(currentUser, times(1)).logOutAsync();
@@ -316,7 +316,7 @@ public class CachedCurrentUserControllerTest {
     CachedCurrentUserController controller =
         new CachedCurrentUserController(store);
 
-    ParseTaskUtils.wait(controller.logoutAsync());
+    ParseTaskUtils.wait(controller.logOutAsync());
 
     // Make sure controller state is correct
     assertNull(controller.currentUser);

@@ -952,7 +952,7 @@ public class ParseUser extends ParseObject {
    * @return A Task that is resolved when logging out completes.
    */
   public static Task<Void> logOutInBackground() {
-    return getCurrentUserController().logoutAsync();
+    return getCurrentUserController().logOutAsync();
   }
 
   /**

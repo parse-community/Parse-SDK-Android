@@ -14,7 +14,7 @@ import bolts.Task;
     extends ParseObjectCurrentController<ParseUser> {
 
   /**
-   * Get the persisted current ParseUser
+   * Gets the persisted current ParseUser.
    * @param shouldAutoCreateUser
    * @return
    */
@@ -28,14 +28,14 @@ import bolts.Task;
   Task<Void> setIfNeededAsync(ParseUser user);
 
   /**
-   * Get the session token of the persisted current ParseUser
+   * Gets the session token of the persisted current ParseUser.
    * @return
    */
   Task<String> getCurrentSessionTokenAsync();
 
   /**
-   * Logout the current ParseUser
+   * Logs out the current ParseUser.
    * @return
    */
-  Task<Void> logoutAsync();
+  Task<Void> logOutAsync();
 }
