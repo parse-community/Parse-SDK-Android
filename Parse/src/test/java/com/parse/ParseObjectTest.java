@@ -11,21 +11,28 @@ package com.parse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import bolts.Task;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +40,11 @@ public class ParseObjectTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
+
+  @After
+  public void tearDown() {
+    ParseCorePlugins.getInstance().reset();
+  }
 
   @Test
   public void testFromJSONPayload() throws JSONException {
@@ -71,6 +83,151 @@ public class ParseObjectTest {
     ParseObject parseObject = ParseObject.fromJSONPayload(json, ParseDecoder.get());
     assertNull(parseObject);
   }
+
+  //region testRevert
+
+  @Test
+  public void testRevert() throws ParseException {
+    List<Task<Void>> tasks = new ArrayList<>();
+
+    // Mocked to let save work
+    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
+    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
+    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+
+    // Mocked to simulate in-flight save
+    Task<ParseObject.State>.TaskCompletionSource tcs = Task.create();
+    ParseObjectController objectController = mock(ParseObjectController.class);
+    when(objectController.saveAsync(
+        any(ParseObject.State.class),
+        any(ParseOperationSet.class),
+        anyString(),
+        any(ParseDecoder.class)))
+        .thenReturn(tcs.getTask());
+    ParseCorePlugins.getInstance().registerObjectController(objectController);
+
+    // New clean object
+    ParseObject object = new ParseObject("TestObject");
+    object.revert("foo");
+
+    // Reverts changes on new object
+    object.put("foo", "bar");
+    object.put("name", "grantland");
+    object.revert();
+    assertNull(object.get("foo"));
+    assertNull(object.get("name"));
+
+    // Object from server
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.objectId()).thenReturn("test_id");
+    when(state.keySet()).thenReturn(Collections.singleton("foo"));
+    when(state.get("foo")).thenReturn("bar");
+    object = ParseObject.from(state);
+    object.revert();
+    assertFalse(object.isDirty());
+    assertEquals("bar", object.get("foo"));
+
+    // Reverts changes on existing object
+    object.put("foo", "baz");
+    object.put("name", "grantland");
+    object.revert();
+    assertFalse(object.isDirty());
+    assertEquals("bar", object.get("foo"));
+    assertFalse(object.isDataAvailable("name"));
+
+    // Shouldn't revert changes done before last call to `save`
+    object.put("foo", "baz");
+    object.put("name", "nlutsenko");
+    tasks.add(object.saveInBackground());
+    object.revert();
+    assertFalse(object.isDirty());
+    assertEquals("baz", object.get("foo"));
+    assertEquals("nlutsenko", object.get("name"));
+
+    // Should revert changes done after last call to `save`
+    object.put("foo", "qux");
+    object.put("name", "grantland");
+    object.revert();
+    assertFalse(object.isDirty());
+    assertEquals("baz", object.get("foo"));
+    assertEquals("nlutsenko", object.get("name"));
+
+    // Allow save to complete
+    tcs.setResult(state);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
+  }
+
+  @Test
+  public void testRevertKey() throws ParseException {
+    List<Task<Void>> tasks = new ArrayList<>();
+
+    // Mocked to let save work
+    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
+    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
+    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+
+    // Mocked to simulate in-flight save
+    Task<ParseObject.State>.TaskCompletionSource tcs = Task.create();
+    ParseObjectController objectController = mock(ParseObjectController.class);
+    when(objectController.saveAsync(
+        any(ParseObject.State.class),
+        any(ParseOperationSet.class),
+        anyString(),
+        any(ParseDecoder.class)))
+        .thenReturn(tcs.getTask());
+    ParseCorePlugins.getInstance().registerObjectController(objectController);
+
+    // New clean object
+    ParseObject object = new ParseObject("TestObject");
+    object.revert("foo");
+
+    // Reverts changes on new object
+    object.put("foo", "bar");
+    object.put("name", "grantland");
+    object.revert("foo");
+    assertNull(object.get("foo"));
+    assertEquals("grantland", object.get("name"));
+
+    // Object from server
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.objectId()).thenReturn("test_id");
+    when(state.keySet()).thenReturn(Collections.singleton("foo"));
+    when(state.get("foo")).thenReturn("bar");
+    object = ParseObject.from(state);
+    object.revert("foo");
+    assertFalse(object.isDirty());
+    assertEquals("bar", object.get("foo"));
+
+    // Reverts changes on existing object
+    object.put("foo", "baz");
+    object.put("name", "grantland");
+    object.revert("foo");
+    assertEquals("bar", object.get("foo"));
+    assertEquals("grantland", object.get("name"));
+
+    // Shouldn't revert changes done before last call to `save`
+    object.put("foo", "baz");
+    object.put("name", "nlutsenko");
+    tasks.add(object.saveInBackground());
+    object.revert("foo");
+    assertEquals("baz", object.get("foo"));
+    assertEquals("nlutsenko", object.get("name"));
+
+    // Should revert changes done after last call to `save`
+    object.put("foo", "qux");
+    object.put("name", "grantland");
+    object.revert("foo");
+    assertEquals("baz", object.get("foo"));
+    assertEquals("grantland", object.get("name"));
+
+    // Allow save to complete
+    tcs.setResult(state);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
+  }
+
+  //endregion
 
   //region testGetter
 

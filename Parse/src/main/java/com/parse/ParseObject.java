@@ -836,11 +836,19 @@ public class ParseObject {
     }
   }
 
-  /* package */ void revert(String key) {
+  /**
+   * Clears changes to this object's {@code key} made since the last call to {@link #save()} or
+   * {@link #saveInBackground()}.
+   *
+   * @param key The {@code key} to revert changes for.
+   */
+  public void revert(String key) {
     synchronized (mutex) {
-      currentOperations().remove(key);
-      rebuildEstimatedData();
-      checkpointAllMutableContainers();
+      if (isDirty(key)) {
+        currentOperations().remove(key);
+        rebuildEstimatedData();
+        checkpointAllMutableContainers();
+      }
     }
   }
 
@@ -848,11 +856,13 @@ public class ParseObject {
    * Clears any changes to this object made since the last call to {@link #save()} or
    * {@link #saveInBackground()}.
    */
-  /* package for tests */ void revert() {
+  public void revert() {
     synchronized (mutex) {
-      currentOperations().clear();
-      rebuildEstimatedData();
-      checkpointAllMutableContainers();
+      if (isDirty()) {
+        currentOperations().clear();
+        rebuildEstimatedData();
+        checkpointAllMutableContainers();
+      }
     }
   }
 
@@ -1448,10 +1458,10 @@ public class ParseObject {
           operationSetQueue.listIterator(operationSetQueue.indexOf(operationsBeforeSave));
       opIterator.next();
       opIterator.remove();
-      ParseOperationSet nextOperation = opIterator.next();
 
       if (!success) {
         // Merge the data from the failed save into the next save.
+        ParseOperationSet nextOperation = opIterator.next();
         nextOperation.mergeFrom(operationsBeforeSave);
         return task;
       }
@@ -2862,8 +2872,8 @@ public class ParseObject {
           T newObject = resultMap.get(object.getObjectId());
           if (newObject == null) {
             throw new ParseException(
-                    ParseException.OBJECT_NOT_FOUND,
-                    "Object id " + object.getObjectId() + " does not exist");
+                ParseException.OBJECT_NOT_FOUND,
+                "Object id " + object.getObjectId() + " does not exist");
           }
           if (!Parse.isLocalDatastoreEnabled()) {
             // We only need to merge if LDS is disabled, since single instance will do the merging
@@ -3526,7 +3536,7 @@ public class ParseObject {
     }
   }
 
-  private boolean isDataAvailable(String key) {
+  /* package for tests */ boolean isDataAvailable(String key) {
     synchronized (mutex) {
       return isDataAvailable() || estimatedData.containsKey(key);
     }
