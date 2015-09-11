@@ -9,6 +9,10 @@
 
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+import com.parse.http.ParseNetworkInterceptor;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;

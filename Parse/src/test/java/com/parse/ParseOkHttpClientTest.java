@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+import com.parse.http.ParseNetworkInterceptor;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;

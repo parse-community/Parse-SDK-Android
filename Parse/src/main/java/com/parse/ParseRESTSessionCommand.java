@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+
 import org.json.JSONObject;
 
 /** package */ class ParseRESTSessionCommand extends ParseRESTCommand {

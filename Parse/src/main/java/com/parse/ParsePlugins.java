@@ -13,6 +13,10 @@ import android.content.pm.PackageManager;
 import android.net.SSLSessionCache;
 import android.os.Build;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+import com.parse.http.ParseNetworkInterceptor;
+
 import java.io.File;
 import java.io.IOException;
 

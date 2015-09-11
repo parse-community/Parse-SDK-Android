@@ -6,7 +6,7 @@
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
-package com.parse;
+package com.parse.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,8 @@ import java.io.OutputStream;
  * The base interface of a http body. It can be implemented by different http libraries such as
  * Apache http, Android URLConnection, Square OKHttp and so on.
  */
-/** package */ abstract class ParseHttpBody {
+public abstract class ParseHttpBody {
+
   protected final String contentType;
   protected final long contentLength;
 
@@ -39,6 +40,14 @@ import java.io.OutputStream;
    */
   public abstract void writeTo(OutputStream out) throws IOException;
 
+  /**
+   * Creates an {@code ParseHttpBody} with given {@code Content-Type} and {@code Content-Length}.
+   *
+   * @param contentType
+   *          The {@code Content-Type} of the {@code ParseHttpBody}.
+   * @param contentLength
+   *          The {@code Content-Length} of the {@code ParseHttpBody}.
+   */
   public ParseHttpBody(String contentType, long contentLength) {
     this.contentType = contentType;
     this.contentLength = contentLength;
@@ -46,7 +55,7 @@ import java.io.OutputStream;
 
   /**
    * Returns the number of bytes which will be written to {@code out} when {@link #writeTo} is
-   * called, or -1 if that count is unknown.
+   * called, or {@code -1} if that count is unknown.
    *
    * @return The Content-Length of this body.
    */
@@ -55,9 +64,9 @@ import java.io.OutputStream;
   }
 
   /**
-   * Returns the Content-Type of this body.
+   * Returns the {@code Content-Type} of this body.
    *
-   * @return The Content-Type of this body.
+   * @return The {@code Content-Type} of this body.
    */
   public String getContentType() {
     return contentType;

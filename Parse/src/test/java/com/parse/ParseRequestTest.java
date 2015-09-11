@@ -8,6 +8,10 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -76,10 +80,11 @@ public class ParseRequestTest {
   // TODO(grantland): Move to ParseAWSRequestTest or ParseCountingByteArrayHttpBodyTest
   @Test
   public void testDownloadProgress() throws Exception {
-    ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
-    when(mockResponse.getStatusCode()).thenReturn(200);
-    when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(data));
-    when(mockResponse.getTotalSize()).thenReturn((long) data.length);
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) data.length)
+        .setContent(new ByteArrayInputStream(data))
+        .build();
 
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);

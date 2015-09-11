@@ -10,10 +10,9 @@ package com.parse;
 
 import android.net.Uri;
 
-import org.json.JSONObject;
+import com.parse.http.ParseHttpRequest;
 
-import java.net.URI;
-import java.util.Map;
+import org.json.JSONObject;
 
 /** package */ class ParseRESTObjectCommand extends ParseRESTCommand {
 

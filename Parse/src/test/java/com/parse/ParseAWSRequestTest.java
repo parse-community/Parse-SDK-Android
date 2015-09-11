@@ -8,14 +8,12 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import junit.framework.TestCase;
 
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 
 import bolts.Task;
@@ -37,11 +35,12 @@ public class ParseAWSRequestTest extends TestCase {
     ParseRequest.setDefaultInitialRetryDelay(1L);
     InputStream mockInputStream = new ByteArrayInputStream(
         "An Error occurred while saving".getBytes());
-    ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
-    when(mockResponse.getStatusCode()).thenReturn(400);
-    when(mockResponse.getTotalSize()).thenReturn(0L);
-    when(mockResponse.getReasonPhrase()).thenReturn("Bad Request");
-    when(mockResponse.getContent()).thenReturn(mockInputStream);
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(400)
+        .setTotalSize(0L)
+        .setReasonPhrase("Bad Request")
+        .setContent(mockInputStream)
+        .build();
 
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);

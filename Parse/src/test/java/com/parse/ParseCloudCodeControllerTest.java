@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -104,10 +107,11 @@ public class ParseCloudCodeControllerTest {
     json.put("result", "test");
     String content = json.toString();
 
-    ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
-    when(mockResponse.getStatusCode()).thenReturn(200);
-    when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(mockResponse.getTotalSize()).thenReturn((long) content.length());
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) content.length())
+        .setContent(new ByteArrayInputStream(content.getBytes()))
+        .build();
 
     ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
     ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
@@ -125,10 +129,11 @@ public class ParseCloudCodeControllerTest {
     JSONObject json = new JSONObject();
     String content = json.toString();
 
-    ParseHttpResponse mockResponse = mock(ParseHttpResponse.class);
-    when(mockResponse.getStatusCode()).thenReturn(200);
-    when(mockResponse.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(mockResponse.getTotalSize()).thenReturn((long) content.length());
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) content.length())
+        .setContent(new ByteArrayInputStream(content.getBytes()))
+        .build();
 
     ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
     ParseCloudCodeController controller = new ParseCloudCodeController(restClient);

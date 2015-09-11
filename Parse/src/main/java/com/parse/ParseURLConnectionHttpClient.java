@@ -11,6 +11,10 @@ package com.parse;
 import android.net.SSLCertificateSocketFactory;
 import android.net.SSLSessionCache;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
