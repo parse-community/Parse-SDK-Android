@@ -1079,18 +1079,19 @@ public class ParseUser extends ParseObject {
   //region Third party authentication
 
   /**
-   * Registers third party authentication callbacks.
+   * Registers a third party authentication callback.
    * <p />
    * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
    * library.
    *
-   * @param callbacks The third party authentication callbacks to be registered.
+   * @param authType The name of the third party authentication source.
+   * @param callback The third party authentication callback to be registered.
    *
-   * @see ParseAuthenticationCallbacks
+   * @see AuthenticationCallback
    */
-  public static void registerAuthenticationCallbacks(
-      String authType, ParseAuthenticationCallbacks callbacks) {
-    getAuthenticationManager().register(authType, callbacks);
+  public static void registerAuthenticationCallback(
+      String authType, AuthenticationCallback callback) {
+    getAuthenticationManager().register(authType, callback);
   }
 
   /**
@@ -1103,7 +1104,7 @@ public class ParseUser extends ParseObject {
    * @param authData The user credentials of the third party authentication source.
    * @return A {@code Task} is resolved when logging in completes.
    *
-   * @see ParseAuthenticationCallbacks
+   * @see AuthenticationCallback
    */
   public static Task<ParseUser> logInWithInBackground(
       final String authType, final Map<String, String> authData) {
@@ -1214,7 +1215,7 @@ public class ParseUser extends ParseObject {
    * @param authType The name of the third party authentication source.
    * @return {@code true} if linked, otherwise {@code false}.
    *
-   * @see ParseAuthenticationCallbacks
+   * @see AuthenticationCallback
    */
   public boolean isLinked(String authType) {
     Map<String, Map<String, String>> authData = getAuthData();
@@ -1314,7 +1315,7 @@ public class ParseUser extends ParseObject {
    * @param authData The user credentials of the third party authentication source.
    * @return A {@code Task} is resolved when linking completes.
    *
-   * @see ParseAuthenticationCallbacks
+   * @see AuthenticationCallback
    */
   public Task<Void> linkWithInBackground(
       String authType, Map<String, String> authData) {
@@ -1333,7 +1334,7 @@ public class ParseUser extends ParseObject {
    * @param authType The name of the third party authentication source.
    * @return A {@code Task} is resolved when unlinking completes.
    *
-   * @see ParseAuthenticationCallbacks
+   * @see AuthenticationCallback
    */
   public Task<Void> unlinkFromInBackground(final String authType) {
     if (authType == null) {

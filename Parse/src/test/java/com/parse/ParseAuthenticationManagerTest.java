@@ -31,13 +31,13 @@ public class ParseAuthenticationManagerTest {
 
   private ParseAuthenticationManager manager;
   private ParseCurrentUserController controller;
-  private ParseAuthenticationCallbacks provider;
+  private AuthenticationCallback provider;
 
   @Before
   public void setUp() {
     controller = mock(ParseCurrentUserController.class);
     manager = new ParseAuthenticationManager(controller);
-    provider = mock(ParseAuthenticationCallbacks.class);
+    provider = mock(AuthenticationCallback.class);
   }
 
   //region testRegister
@@ -45,7 +45,7 @@ public class ParseAuthenticationManagerTest {
   @Test
   public void testRegisterMultipleShouldThrow() {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    ParseAuthenticationCallbacks provider2 = mock(ParseAuthenticationCallbacks.class);
+    AuthenticationCallback provider2 = mock(AuthenticationCallback.class);
 
     manager.register("test_provider", provider);
 
@@ -55,7 +55,7 @@ public class ParseAuthenticationManagerTest {
 
   @Test
   public void testRegisterAnonymous() {
-    manager.register("anonymous", mock(ParseAuthenticationCallbacks.class));
+    manager.register("anonymous", mock(AuthenticationCallback.class));
     verifyNoMoreInteractions(controller);
   }
 
@@ -74,14 +74,14 @@ public class ParseAuthenticationManagerTest {
   @Test
   public void testRestoreAuthentication() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    when(provider.onRestoreAuthentication(Matchers.<Map<String, String>>any()))
+    when(provider.onRestore(Matchers.<Map<String, String>>any()))
         .thenReturn(true);
     manager.register("test_provider", provider);
 
     Map<String, String> authData = new HashMap<>();
     ParseTaskUtils.wait(manager.restoreAuthenticationAsync("test_provider", authData));
 
-    verify(provider).onRestoreAuthentication(authData);
+    verify(provider).onRestore(authData);
   }
 
   @Test
@@ -91,6 +91,6 @@ public class ParseAuthenticationManagerTest {
 
     ParseTaskUtils.wait(manager.deauthenticateAsync("test_provider"));
 
-    verify(provider).onDeauthenticate();
+    verify(provider).onRestore(null);
   }
 }

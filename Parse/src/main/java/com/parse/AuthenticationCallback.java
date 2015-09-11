@@ -13,12 +13,12 @@ import java.util.Map;
 /**
  * Provides a general interface for delegation of third party authentication callbacks.
  */
-public interface ParseAuthenticationCallbacks {
+public interface AuthenticationCallback {
   /**
    * Called when restoring third party authentication credentials that have been serialized,
    * such as session keys, etc.
    * <p />
-   * <strong>Note:</strong> This will be executed in a background thread.
+   * <strong>Note:</strong> This will be executed on a background thread.
    *
    * @param authData
    *          The auth data for the provider. This value may be {@code null} when
@@ -27,13 +27,5 @@ public interface ParseAuthenticationCallbacks {
    * @return {@code true} iff the {@code authData} was successfully synchronized or {@code false}
    *          if user should no longer be associated because of bad {@code authData}.
    */
-  boolean onRestoreAuthentication(Map<String, String> authData);
-
-  /**
-   * Called when deauthenticating (logging out) the user associated with this third party
-   * authentication source.
-   * <p />
-   * <strong>Note:</strong> This will be executed in a background thread.
-   */
-  void onDeauthenticate();
+  boolean onRestore(Map<String, String> authData);
 }
