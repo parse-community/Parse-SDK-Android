@@ -10,6 +10,10 @@ package com.parse;
 
 import android.os.Build;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;

@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;

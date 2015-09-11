@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Rule;
@@ -127,13 +130,14 @@ public class ParseFileControllerTest {
     json.put("url", "http://example.com");
     String content = json.toString();
 
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(200);
-    when(response.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(response.getTotalSize()).thenReturn((long) content.length());
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) content.length())
+        .setContent(new ByteArrayInputStream(content.getBytes()))
+        .build();
 
     ParseHttpClient restClient = mock(ParseHttpClient.class);
-    when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
+    when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
     File root = temporaryFolder.getRoot();
     ParseFileController controller = new ParseFileController(restClient, root);
@@ -161,13 +165,14 @@ public class ParseFileControllerTest {
     json.put("url", "http://example.com");
     String content = json.toString();
 
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(200);
-    when(response.getContent()).thenReturn(new ByteArrayInputStream(content.getBytes()));
-    when(response.getTotalSize()).thenReturn((long) content.length());
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) content.length())
+        .setContent(new ByteArrayInputStream(content.getBytes()))
+        .build();
 
     ParseHttpClient restClient = mock(ParseHttpClient.class);
-    when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
+    when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
     File root = temporaryFolder.getRoot();
     ParseFileController controller = new ParseFileController(restClient, root);
@@ -290,13 +295,14 @@ public class ParseFileControllerTest {
   @Test
   public void testFetchAsyncSuccess() throws Exception {
     byte[] data = "hello".getBytes();
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(200);
-    when(response.getContent()).thenReturn(new ByteArrayInputStream(data));
-    when(response.getTotalSize()).thenReturn((long) data.length);
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(200)
+        .setTotalSize((long) data.length)
+        .setContent(new ByteArrayInputStream(data))
+        .build();
 
     ParseHttpClient awsClient = mock(ParseHttpClient.class);
-    when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
+    when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
     File root = temporaryFolder.getRoot();
     ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
 

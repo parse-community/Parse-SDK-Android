@@ -14,6 +14,8 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.parse.http.ParseNetworkInterceptor;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;

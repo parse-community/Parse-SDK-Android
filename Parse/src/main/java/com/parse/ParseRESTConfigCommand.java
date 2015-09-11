@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 

@@ -11,6 +11,10 @@ package com.parse;
 import android.net.SSLCertificateSocketFactory;
 import android.net.SSLSessionCache;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+import com.parse.http.ParseNetworkInterceptor;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.Interceptor;

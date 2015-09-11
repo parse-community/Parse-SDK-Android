@@ -10,6 +10,8 @@ package com.parse;
 
 import android.net.Uri;
 
+import com.parse.http.ParseHttpRequest;
+
 import org.json.JSONObject;
 
 import java.util.Date;

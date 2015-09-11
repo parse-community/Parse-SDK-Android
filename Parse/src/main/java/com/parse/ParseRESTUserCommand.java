@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

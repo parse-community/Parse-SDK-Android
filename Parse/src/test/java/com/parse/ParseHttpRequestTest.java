@@ -8,9 +8,11 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

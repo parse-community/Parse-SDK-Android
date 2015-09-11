@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
 import com.squareup.okhttp.Headers;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;

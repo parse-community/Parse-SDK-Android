@@ -12,6 +12,10 @@ import android.net.SSLCertificateSocketFactory;
 import android.net.SSLSessionCache;
 import android.net.http.AndroidHttpClient;
 
+import com.parse.http.ParseHttpBody;
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;

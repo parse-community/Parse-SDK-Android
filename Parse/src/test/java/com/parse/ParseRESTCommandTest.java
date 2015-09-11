@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpRequest;
+import com.parse.http.ParseHttpResponse;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -51,11 +54,12 @@ public class ParseRESTCommandTest {
   }
 
   private static ParseHttpResponse newMockParseHttpResponse(int statusCode, String body) {
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(statusCode);
-    when(response.getContent()).thenReturn(new ByteArrayInputStream(body.getBytes()));
-    when(response.getTotalSize()).thenReturn((long) body.length());
-    return response;
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(statusCode)
+        .setTotalSize((long) body.length())
+        .setContent(new ByteArrayInputStream(body.getBytes()))
+        .build();
+    return mockResponse;
   }
 
   @Rule
@@ -468,13 +472,14 @@ public class ParseRESTCommandTest {
         .when(mockResponseStream)
         .close();
     // Mock response
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(statusCode);
-    when(response.getContent()).thenReturn(mockResponseStream);
-    when(response.getTotalSize()).thenReturn((long) bodyStr.length());
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(statusCode)
+        .setTotalSize((long) bodyStr.length())
+        .setContent(mockResponseStream)
+        .build();
 
     ParseRESTCommand command = new ParseRESTCommand.Builder().build();
-    JSONObject json = ParseTaskUtils.wait(command.onResponseAsync(response, null));
+    JSONObject json = ParseTaskUtils.wait(command.onResponseAsync(mockResponse, null));
 
     verify(mockResponseStream, times(1)).close();
     assertEquals(bodyJson, json, JSONCompareMode.NON_EXTENSIBLE);
@@ -496,14 +501,15 @@ public class ParseRESTCommandTest {
         .when(mockResponseStream)
         .read(any(byte[].class));
     // Mock response
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(statusCode);
-    when(response.getContent()).thenReturn(mockResponseStream);
+    ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        .setStatusCode(statusCode)
+        .setContent(mockResponseStream)
+        .build();
 
     ParseRESTCommand command = new ParseRESTCommand.Builder().build();
     // We can not use ParseTaskUtils here since it will replace the original exception with runtime
     // exception
-    Task<JSONObject> responseTask = command.onResponseAsync(response, null);
+    Task<JSONObject> responseTask = command.onResponseAsync(mockResponse, null);
     responseTask.waitForCompletion();
 
     assertTrue(responseTask.isFaulted());

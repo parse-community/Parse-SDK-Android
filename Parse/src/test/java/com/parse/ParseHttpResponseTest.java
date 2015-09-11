@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.http.ParseHttpResponse;
+
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
