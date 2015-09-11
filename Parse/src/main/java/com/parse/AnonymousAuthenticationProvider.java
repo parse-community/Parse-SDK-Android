@@ -20,7 +20,6 @@ import bolts.Task;
  */
 /** package */ class AnonymousAuthenticationProvider implements ParseAuthenticationProvider {
 
-  @Override
   public Task<Map<String, String>> authenticateAsync() {
     return Task.forResult(getAuthData());
   }
@@ -32,14 +31,14 @@ import bolts.Task;
   }
 
   @Override
-  public Task<Void> deauthenticateAsync() {
+  public Task<Void> deauthenticateInBackground() {
     // do nothing
     return Task.forResult(null);
   }
 
   @Override
-  public Task<Boolean> restoreAuthenticationAsync(Map<String, String> authData) {
-    return Task.forResult(true);
+  public Task<Void> restoreAuthenticationInBackground(Map<String, String> authData) {
+    return Task.forResult(null);
   }
 
   @Override

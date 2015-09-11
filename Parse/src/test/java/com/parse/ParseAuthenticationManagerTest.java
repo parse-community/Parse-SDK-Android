@@ -19,7 +19,6 @@ import java.util.Map;
 
 import bolts.Task;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -80,24 +79,24 @@ public class ParseAuthenticationManagerTest {
   @Test
   public void testRestoreAuthentication() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    when(provider.restoreAuthenticationAsync(Matchers.<Map<String, String>>any()))
-        .thenReturn(Task.forResult(true));
+    when(provider.restoreAuthenticationInBackground(Matchers.<Map<String, String>>any()))
+        .thenReturn(Task.<Void>forResult(null));
     manager.register(provider);
 
     Map<String, String> authData = new HashMap<>();
-    assertTrue(ParseTaskUtils.wait(manager.restoreAuthenticationAsync("test_provider", authData)));
+    ParseTaskUtils.wait(manager.restoreAuthenticationAsync("test_provider", authData));
 
-    verify(provider).restoreAuthenticationAsync(authData);
+    verify(provider).restoreAuthenticationInBackground(authData);
   }
 
   @Test
   public void testDeauthenticateAsync() throws ParseException {
     when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-    when(provider.deauthenticateAsync()).thenReturn(Task.<Void>forResult(null));
+    when(provider.deauthenticateInBackground()).thenReturn(Task.<Void>forResult(null));
     manager.register(provider);
 
     ParseTaskUtils.wait(manager.deauthenticateAsync("test_provider"));
 
-    verify(provider).deauthenticateAsync();
+    verify(provider).deauthenticateInBackground();
   }
 }

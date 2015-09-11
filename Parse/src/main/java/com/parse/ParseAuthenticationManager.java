@@ -56,15 +56,15 @@ import bolts.Task;
     });
   }
 
-  public Task<Boolean> restoreAuthenticationAsync(String authType, Map<String, String> authData) {
+  public Task<Void> restoreAuthenticationAsync(String authType, Map<String, String> authData) {
     ParseAuthenticationProvider provider;
     synchronized (lock) {
       provider = authenticationProviders.get(authType);
     }
     if (provider == null) {
-      return Task.forResult(true);
+      return Task.forResult(null);
     }
-    return provider.restoreAuthenticationAsync(authData);
+    return provider.restoreAuthenticationInBackground(authData);
   }
 
   public Task<Void> deauthenticateAsync(String authType) {
@@ -73,7 +73,7 @@ import bolts.Task;
       provider = authenticationProviders.get(authType);
     }
     if (provider != null) {
-      return provider.deauthenticateAsync();
+      return provider.deauthenticateInBackground();
     }
     return Task.forResult(null);
   }

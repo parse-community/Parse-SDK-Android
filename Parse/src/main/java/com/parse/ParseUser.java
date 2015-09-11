@@ -1078,80 +1078,33 @@ public class ParseUser extends ParseObject {
 
   //region Third party authentication
 
-  /* package */ boolean isLinked(String authType) {
-    Map<String, Map<String, String>> authData = getAuthData();
-    return authData.containsKey(authType) && authData.get(authType) != null;
-  }
-
   /**
-   * Ensures that all auth providers have auth data (e.g. access tokens, etc.) that matches this
-   * user.
+   * Registers a third party authentication provider.
+   * <p />
+   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
+   * provider.</strong>
+   *
+   * @param provider The third party authentication provider to be registered.
+   *
+   * @see ParseAuthenticationProvider
    */
-  /* package */ Task<Void> synchronizeAllAuthDataAsync() {
-    Map<String, Map<String, String>> authData;
-    synchronized (mutex) {
-      if (!isCurrentUser()) {
-        return Task.forResult(null);
-      }
-      authData = getAuthData();
-    }
-    List<Task<Void>> tasks = new ArrayList<>(authData.size());
-    for (String authType : authData.keySet()) {
-      tasks.add(synchronizeAuthDataAsync(authType));
-    }
-    return Task.whenAll(tasks);
-  }
-
-  /* package */ Task<Void> synchronizeAuthDataAsync(String authType) {
-    Map<String, String> authData;
-    synchronized (mutex) {
-      if (!isCurrentUser()) {
-        return Task.forResult(null);
-      }
-      authData = getAuthData(authType);
-    }
-    return synchronizeAuthDataAsync(getAuthenticationManager(), authType, authData);
-  }
-
-  private Task<Void> synchronizeAuthDataAsync(
-      ParseAuthenticationManager manager, final String authType, Map<String, String> authData) {
-    return manager.restoreAuthenticationAsync(authType, authData).onSuccessTask(new Continuation<Boolean, Task<Void>>() {
-      @Override
-      public Task<Void> then(Task<Boolean> task) throws Exception {
-        boolean success = task.getResult();
-        if (!success) {
-          return unlinkFromAsync(authType);
-        }
-        return task.makeVoid();
-      }
-    });
-  }
-
-  /* package */ Task<Void> unlinkFromAsync(final String authType) {
-    synchronized (mutex) {
-      if (authType == null) {
-        return Task.forResult(null);
-      }
-      return Task.<Void> forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
-        @Override
-        public Task<Void> then(Task<Void> task) throws Exception {
-          synchronized (mutex) {
-            if (getAuthData().containsKey(authType)) {
-              putAuthData(authType, null);
-              return saveInBackground();
-            }
-            return Task.forResult(null);
-          }
-        }
-      });
-    }
-  }
-
-  /* package */ static void registerAuthenticationProvider(ParseAuthenticationProvider provider) {
+  public static void registerAuthenticationProvider(ParseAuthenticationProvider provider) {
     getAuthenticationManager().register(provider);
   }
 
-  /* package */ static Task<ParseUser> logInWithAsync(
+  /**
+   * Logs in a user with third party authentication credentials.
+   * <p />
+   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
+   * provider.</strong>
+   *
+   * @param authType The name of the third party authentication provider.
+   * @param authData The user credentials of the third party authentication provider.
+   * @return A {@code Task} is resolved when logging in completes.
+   *
+   * @see ParseAuthenticationProvider
+   */
+  public static Task<ParseUser> logInWithInBackground(
       final String authType, final Map<String, String> authData) {
     if (authType == null) {
       throw new IllegalArgumentException("Invalid authType: " + null);
@@ -1223,29 +1176,89 @@ public class ParseUser extends ParseObject {
                 // Try to link the current user with third party user, unless a user is already linked
                 // to that third party user, then we'll just create a new user and link it with the
                 // third party user. New users will not be linked to the previous user's data.
-                return user.linkWithAsync(authType, authData).continueWithTask(new Continuation<Void, Task<ParseUser>>() {
-                  @Override
-                  public Task<ParseUser> then(Task<Void> task) throws Exception {
-                    if (task.isFaulted()) {
-                      Exception error = task.getError();
-                      if (error instanceof ParseException
-                          && ((ParseException) error).getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-                        // An account that's linked to the given authData already exists, so log in
-                        // instead of trying to claim.
-                        return Task.<Void>forResult(null).continueWithTask(logInWithTask);
+                return user.linkWithInBackground(authType, authData)
+                    .continueWithTask(new Continuation<Void, Task<ParseUser>>() {
+                      @Override
+                      public Task<ParseUser> then(Task<Void> task) throws Exception {
+                        if (task.isFaulted()) {
+                          Exception error = task.getError();
+                          if (error instanceof ParseException
+                              && ((ParseException) error).getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
+                            // An account that's linked to the given authData already exists, so log in
+                            // instead of trying to claim.
+                            return Task.<Void>forResult(null).continueWithTask(logInWithTask);
+                          }
+                        }
+                        if (task.isCancelled()) {
+                          return Task.cancelled();
+                        }
+                        return Task.forResult(user);
                       }
-                    }
-                    if (task.isCancelled()) {
-                      return Task.cancelled();
-                    }
-                    return Task.forResult(user);
-                  }
-                });
+                    });
               }
             }
           }
         }
         return Task.<Void>forResult(null).continueWithTask(logInWithTask);
+      }
+    });
+  }
+
+  /**
+   * Indicates whether this user is linked with a third party authentication provider.
+   * <p />
+   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
+   * provider.</strong>
+   *
+   * @param authType The name of the third party authentication provider.
+   * @return {@code true} if linked, otherwise {@code false}.
+   *
+   * @see ParseAuthenticationProvider
+   */
+  public boolean isLinked(String authType) {
+    Map<String, Map<String, String>> authData = getAuthData();
+    return authData.containsKey(authType) && authData.get(authType) != null;
+  }
+
+  /**
+   * Ensures that all auth providers have auth data (e.g. access tokens, etc.) that matches this
+   * user.
+   */
+  /* package */ Task<Void> synchronizeAllAuthDataAsync() {
+    Map<String, Map<String, String>> authData;
+    synchronized (mutex) {
+      if (!isCurrentUser()) {
+        return Task.forResult(null);
+      }
+      authData = getAuthData();
+    }
+    List<Task<Void>> tasks = new ArrayList<>(authData.size());
+    for (String authType : authData.keySet()) {
+      tasks.add(synchronizeAuthDataAsync(authType));
+    }
+    return Task.whenAll(tasks);
+  }
+
+  /* package */ Task<Void> synchronizeAuthDataAsync(String authType) {
+    Map<String, String> authData;
+    synchronized (mutex) {
+      if (!isCurrentUser()) {
+        return Task.forResult(null);
+      }
+      authData = getAuthData(authType);
+    }
+    return synchronizeAuthDataAsync(getAuthenticationManager(), authType, authData);
+  }
+
+  private Task<Void> synchronizeAuthDataAsync(
+      ParseAuthenticationManager manager, final String authType, Map<String, String> authData) {
+    return manager.restoreAuthenticationAsync(authType, authData).continueWithTask(new Continuation<Void, Task<Void>>() {
+      @Override
+      public Task<Void> then(Task<Void> task) throws Exception {
+        if (task.isFaulted()) {
+          return unlinkFromInBackground(authType);
+        }
+        return task;
       }
     });
   }
@@ -1289,12 +1302,55 @@ public class ParseUser extends ParseObject {
     });
   }
 
-  /* package */ Task<Void> linkWithAsync(
+  /**
+   * Links this user to a third party authentication provider.
+   * <p />
+   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
+   * provider.</strong>
+   *
+   * @param authType The name of the third party authentication provider.
+   * @param authData The user credentials of the third party authentication provider.
+   * @return A {@code Task} is resolved when linking completes.
+   *
+   * @see ParseAuthenticationProvider
+   */
+  public Task<Void> linkWithInBackground(
       String authType, Map<String, String> authData) {
     if (authType == null) {
       throw new IllegalArgumentException("Invalid authType: " + null);
     }
     return linkWithAsync(authType, authData, getSessionToken());
+  }
+
+  /**
+   * Unlinks this user from a third party authentication provider.
+   * <p />
+   * <strong>Note: This shouldn't be called directly unless developing a third party authentication
+   * provider.</strong>
+   *
+   * @param authType The name of the third party authentication provider.
+   * @return A {@code Task} is resolved when unlinking completes.
+   *
+   * @see ParseAuthenticationProvider
+   */
+  public Task<Void> unlinkFromInBackground(final String authType) {
+    synchronized (mutex) {
+      if (authType == null) {
+        return Task.forResult(null);
+      }
+      return Task.<Void> forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
+        @Override
+        public Task<Void> then(Task<Void> task) throws Exception {
+          synchronized (mutex) {
+            if (getAuthData().containsKey(authType)) {
+              putAuthData(authType, null);
+              return saveInBackground();
+            }
+            return Task.forResult(null);
+          }
+        }
+      });
+    }
   }
 
   //endregion

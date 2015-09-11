@@ -13,41 +13,34 @@ import java.util.Map;
 import bolts.Task;
 
 /**
- * Provides a general interface for delegation of the authentication process.
+ * Provides a general interface for delegation of third party authentication.
  */
-/** package */ interface ParseAuthenticationProvider {
+public interface ParseAuthenticationProvider {
 
   /**
-   * Provides a unique name for the type of authentication the provider does.
-   * For example, the FacebookAuthenticationProvider would return "facebook".
+   * @return A unique name for the type of authentication the provider does.
+   * <p />
+   * For example, the {@code FacebookAuthenticationProvider} would return {@code "facebook"}.
    */
   String getAuthType();
 
   /**
-   * Authenticates with the service.
+   * Deauthenticates (logs out) the user associated with this provider.
    *
-   * @return A {@code Task} that will be resolved when authentication is complete.
+   * @return A {@link Task} that resolves when deauthentication completes.
    */
-  Task<Map<String, String>> authenticateAsync();
+  Task<Void> deauthenticateInBackground();
 
   /**
-   * Deauthenticates (logs out) the user associated with this provider. This call may block.
-   *
-   * @return A {@link Task} that resolves when deauthentication is complete.
-   */
-  Task<Void> deauthenticateAsync();
-
-  /**
-   * Restores authentication that has been serialized, such as session keys,
-   * etc.
+   * Restores authentication that has been serialized, such as session keys, etc.
    * 
    * @param authData
-   *          the auth data for the provider. This value may be null when
+   *          The auth data for the provider. This value may be {@code null} when
    *          unlinking an account.
    *
    * @return A {@link Task} that resolves to {@code true} iff the {@code authData} was successfully
    *         synchronized or {@code false} if user should no longer be associated because of bad
    *         {@code authData}.
    */
-  Task<Boolean> restoreAuthenticationAsync(Map<String, String> authData);
+  Task<Void> restoreAuthenticationInBackground(Map<String, String> authData);
 }
