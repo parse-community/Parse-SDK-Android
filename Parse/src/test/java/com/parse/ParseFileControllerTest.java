@@ -303,32 +303,6 @@ public class ParseFileControllerTest {
 
     ParseHttpClient awsClient = mock(ParseHttpClient.class);
     when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
-    File root = temporaryFolder.getRoot();
-    ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
-
-    ParseFile.State state = new ParseFile.State.Builder()
-        .name("file_name")
-        .url("url")
-        .build();
-    Task<File> task = controller.fetchAsync(state, null, null, null);
-    File result = ParseTaskUtils.wait(task);
-
-    verify(awsClient, times(1)).execute(any(ParseHttpRequest.class));
-    assertTrue(result.exists());
-    assertEquals("hello", ParseFileUtils.readFileToString(result, "UTF-8"));
-    assertFalse(controller.getTempFile(state).exists());
-  }
-
-  @Test
-  public void testFetchAsyncSuccessWithCacheDirNotExist() throws Exception {
-    byte[] data = "hello".getBytes();
-    ParseHttpResponse response = mock(ParseHttpResponse.class);
-    when(response.getStatusCode()).thenReturn(200);
-    when(response.getContent()).thenReturn(new ByteArrayInputStream(data));
-    when(response.getTotalSize()).thenReturn((long) data.length);
-
-    ParseHttpClient awsClient = mock(ParseHttpClient.class);
-    when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(response);
     // Make sure cache dir does not exist
     File root = new File(temporaryFolder.getRoot(), "cache");
     assertFalse(root.exists());
