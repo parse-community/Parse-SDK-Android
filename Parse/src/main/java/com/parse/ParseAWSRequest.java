@@ -56,7 +56,7 @@ import bolts.Task;
         InputStream responseStream = null;
         try {
           responseStream = response.getContent();
-          FileOutputStream tempFileStream = new FileOutputStream(tempFile);
+          FileOutputStream tempFileStream = ParseFileUtils.openOutputStream(tempFile);
 
           int nRead;
           byte[] data = new byte[32 << 10]; // 32KB

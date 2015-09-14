@@ -303,7 +303,9 @@ public class ParseFileControllerTest {
 
     ParseHttpClient awsClient = mock(ParseHttpClient.class);
     when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
-    File root = temporaryFolder.getRoot();
+    // Make sure cache dir does not exist
+    File root = new File(temporaryFolder.getRoot(), "cache");
+    assertFalse(root.exists());
     ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
 
     ParseFile.State state = new ParseFile.State.Builder()
