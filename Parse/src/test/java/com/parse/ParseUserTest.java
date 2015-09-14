@@ -568,12 +568,11 @@ public class ParseUserTest {
         .thenReturn(Task.<String>forResult(null));
     when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.<ParseUser>forResult(null));
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-    // Register a mock authenticationProvider
-    ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
-    when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthenticationInBackground(Matchers.<Map<String, String>>any()))
-        .thenReturn(Task.<Void>forResult(null));
-    ParseUser.registerAuthenticationProvider(provider);
+    // Register mock callbacks
+    AuthenticationCallback callbacks = mock(AuthenticationCallback.class);
+    when(callbacks.onRestore(Matchers.<Map<String, String>>any()))
+        .thenReturn(true);
+    ParseUser.registerAuthenticationCallback("facebook", callbacks);
 
     ParseUser user = new ParseUser();
     // To make synchronizeAuthData work
@@ -591,7 +590,7 @@ public class ParseUserTest {
     Map<String, String> authData = new HashMap<>();
     authData.put("token", "test");
 
-    ParseTaskUtils.wait(partialMockUser.linkWithInBackground(provider.getAuthType(), authData));
+    ParseTaskUtils.wait(partialMockUser.linkWithInBackground("facebook", authData));
 
     // Make sure we stripAnonymity
     assertNull(partialMockUser.getAuthData().get(ParseAnonymousUtils.AUTH_TYPE));
@@ -601,7 +600,7 @@ public class ParseUserTest {
     verify(partialMockUser, times(1))
         .saveAsync(eq("sessionTokenAgain"), eq(false), Matchers.<Task<Void>>any());
     // Make sure synchronizeAuthData() is called
-    verify(provider, times(1)).restoreAuthenticationInBackground(authData);
+    verify(callbacks, times(1)).onRestore(authData);
   }
 
   @Test
@@ -1289,12 +1288,11 @@ public class ParseUserTest {
     ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
     when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-    // Register a mock authenticationProvider
-    ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
-    when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthenticationInBackground(Matchers.<Map<String, String>>any()))
-        .thenReturn(Task.<Void>forResult(null));
-    ParseUser.registerAuthenticationProvider(provider);
+    // Register mock callbacks
+    AuthenticationCallback callbacks = mock(AuthenticationCallback.class);
+    when(callbacks.onRestore(Matchers.<Map<String, String>>any()))
+        .thenReturn(true);
+    ParseUser.registerAuthenticationCallback("facebook", callbacks);
 
     // Set user initial state
     String authType = "facebook";
@@ -1309,7 +1307,7 @@ public class ParseUserTest {
     ParseTaskUtils.wait(user.synchronizeAuthDataAsync(authType));
 
     // Make sure we restore authentication
-    verify(provider, times(1)).restoreAuthenticationInBackground(authData);
+    verify(callbacks, times(1)).onRestore(authData);
   }
 
   @Test
@@ -1319,12 +1317,11 @@ public class ParseUserTest {
     ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
     when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-    // Register a mock authenticationProvider
-    ParseAuthenticationProvider provider = mock(ParseAuthenticationProvider.class);
-    when(provider.getAuthType()).thenReturn("facebook");
-    when(provider.restoreAuthenticationInBackground(Matchers.<Map<String, String>>any()))
-        .thenReturn(Task.<Void>forResult(null));
-    ParseUser.registerAuthenticationProvider(provider);
+    // Register mock callbacks
+    AuthenticationCallback callbacks = mock(AuthenticationCallback.class);
+    when(callbacks.onRestore(Matchers.<Map<String, String>>any()))
+        .thenReturn(true);
+    ParseUser.registerAuthenticationCallback("facebook", callbacks);
 
     // Set user initial state
     String facebookAuthType = "facebook";
@@ -1339,7 +1336,7 @@ public class ParseUserTest {
     ParseTaskUtils.wait(user.synchronizeAllAuthDataAsync());
 
     // Make sure we restore authentication
-    verify(provider, times(1)).restoreAuthenticationInBackground(facebookAuthData);
+    verify(callbacks, times(1)).onRestore(facebookAuthData);
   }
 
   //endregion

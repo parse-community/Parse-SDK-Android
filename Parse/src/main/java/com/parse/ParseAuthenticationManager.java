@@ -10,6 +10,7 @@ package com.parse;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -17,33 +18,32 @@ import bolts.Task;
 /** package */ class ParseAuthenticationManager {
 
   private final Object lock = new Object();
-  private final Map<String, ParseAuthenticationProvider> authenticationProviders = new HashMap<>();
+  private final Map<String, AuthenticationCallback> callbacks = new HashMap<>();
   private final ParseCurrentUserController controller;
 
   public ParseAuthenticationManager(ParseCurrentUserController controller) {
     this.controller = controller;
   }
 
-  public void register(ParseAuthenticationProvider provider) {
-    final String authType = provider.getAuthType();
+  public void register(final String authType, AuthenticationCallback callback) {
     if (authType == null) {
       throw new IllegalArgumentException("Invalid authType: " + null);
     }
 
     synchronized (lock) {
-      if (authenticationProviders.containsKey(authType)) {
-        throw new IllegalStateException("Another " + authType + " provider was already registered: "
-            + authenticationProviders.get(authType));
+      if (this.callbacks.containsKey(authType)) {
+        throw new IllegalStateException("Callback already registered for <" + authType + ">: "
+            + this.callbacks.get(authType));
       }
-      authenticationProviders.put(provider.getAuthType(), provider);
+      this.callbacks.put(authType, callback);
     }
 
-    if (provider instanceof AnonymousAuthenticationProvider) {
+    if (ParseAnonymousUtils.AUTH_TYPE.equals(authType)) {
       // There's nothing to synchronize
       return;
     }
 
-    // Synchronize the current user with the auth provider.
+    // Synchronize the current user with the auth callback.
     controller.getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<Void>>() {
       @Override
       public Task<Void> then(Task<ParseUser> task) throws Exception {
@@ -56,24 +56,35 @@ import bolts.Task;
     });
   }
 
-  public Task<Void> restoreAuthenticationAsync(String authType, Map<String, String> authData) {
-    ParseAuthenticationProvider provider;
+  public Task<Boolean> restoreAuthenticationAsync(String authType, final Map<String, String> authData) {
+    final AuthenticationCallback callback;
     synchronized (lock) {
-      provider = authenticationProviders.get(authType);
+      callback = this.callbacks.get(authType);
     }
-    if (provider == null) {
-      return Task.forResult(null);
+    if (callback == null) {
+      return Task.forResult(true);
     }
-    return provider.restoreAuthenticationInBackground(authData);
+    return Task.call(new Callable<Boolean>() {
+      @Override
+      public Boolean call() throws Exception {
+        return callback.onRestore(authData);
+      }
+    }, ParseExecutors.io());
   }
 
   public Task<Void> deauthenticateAsync(String authType) {
-    ParseAuthenticationProvider provider;
+    final AuthenticationCallback callback;
     synchronized (lock) {
-      provider = authenticationProviders.get(authType);
+      callback = this.callbacks.get(authType);
     }
-    if (provider != null) {
-      return provider.deauthenticateInBackground();
+    if (callback != null) {
+      return Task.call(new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+          callback.onRestore(null);
+          return null;
+        }
+      }, ParseExecutors.io());
     }
     return Task.forResult(null);
   }

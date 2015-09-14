@@ -8,7 +8,9 @@
  */
 package com.parse;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -35,17 +37,7 @@ import bolts.Task;
  * </ul>
  */
 public final class ParseAnonymousUtils {
-  private static AnonymousAuthenticationProvider provider;
-
   /* package */ static final String AUTH_TYPE = "anonymous";
-
-  /* package */ static AnonymousAuthenticationProvider getProvider() {
-    if (provider == null) {
-      provider = new AnonymousAuthenticationProvider();
-      ParseUser.registerAuthenticationProvider(provider);
-    }
-    return provider;
-  }
 
   /**
    * Whether the user is logged in anonymously.
@@ -65,13 +57,7 @@ public final class ParseAnonymousUtils {
    * @return A Task that will be resolved when logging in is completed.
    */
   public static Task<ParseUser> logInInBackground() {
-    final AnonymousAuthenticationProvider provider = getProvider();
-    return provider.authenticateAsync().onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
-      @Override
-      public Task<ParseUser> then(Task<Map<String, String>> task) throws Exception {
-        return ParseUser.logInWithInBackground(provider.getAuthType(), task.getResult());
-      }
-    });
+    return ParseUser.logInWithInBackground(AUTH_TYPE, getAuthData());
   }
 
   /**
@@ -82,6 +68,12 @@ public final class ParseAnonymousUtils {
    */
   public static void logIn(LogInCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(logInInBackground(), callback);
+  }
+
+  /* package */ static Map<String, String> getAuthData() {
+    Map<String, String> authData = new HashMap<>();
+    authData.put("id", UUID.randomUUID().toString());
+    return authData;
   }
 
   private ParseAnonymousUtils() {
