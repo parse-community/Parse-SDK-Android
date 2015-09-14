@@ -18,8 +18,8 @@ import java.io.OutputStream;
  */
 public abstract class ParseHttpBody {
 
-  protected final String contentType;
-  protected final long contentLength;
+  private final String contentType;
+  private final long contentLength;
 
   /**
    * Returns the content of this body.
