@@ -615,10 +615,11 @@ public class Parse {
    * Add a {@link ParseNetworkInterceptor}. You must invoke
    * {@code addParseNetworkInterceptor(ParseNetworkInterceptor)} before
    * {@link #initialize(Context)}. You can add multiple {@link ParseNetworkInterceptor}.
+   * 
    * @param interceptor
    *          {@link ParseNetworkInterceptor} to be added.
    */
-  /* package */ static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
+  public static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
           + " must be invoked before `Parse#initialize(Context)`");
@@ -632,11 +633,12 @@ public class Parse {
   /**
    * Remove a given {@link ParseNetworkInterceptor}. You must invoke
    * {@code removeParseNetworkInterceptor(ParseNetworkInterceptor)}  before
-   * {@link #initialize(Context)} .
+   * {@link #initialize(Context)}.
+   *
    * @param interceptor
    *          {@link ParseNetworkInterceptor} to be removed.
    */
-  /* package */ static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
+  public static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
           + " must be invoked before `Parse#initialize(Context)`");
