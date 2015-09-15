@@ -99,7 +99,7 @@ public final class ParseHttpRequest {
     }
 
     /**
-     * Creates a new {@Builder} based on the given {@code ParseHttpRequest}.
+     * Creates a new {@code Builder} based on the given {@code ParseHttpRequest}.
      *
      * @param request
      *          The {@code ParseHttpRequest} where the {@code Builder}'s values come from.
