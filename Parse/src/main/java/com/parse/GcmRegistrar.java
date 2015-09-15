@@ -96,8 +96,9 @@ import bolts.Task;
       final ParseInstallation installation = ParseInstallation.getCurrentInstallation();
       // Check whether we need to send registration request, if installation does not
       // have device token or local device token is stale, we need to send request.
-      Task<Boolean> checkTask = installation.getDeviceToken() == null ? Task.forResult(true) :
-          isLocalDeviceTokenStaleAsync();
+      Task<Boolean> checkTask = installation.getDeviceToken() == null
+          ? Task.forResult(true)
+          : isLocalDeviceTokenStaleAsync();
       return checkTask.onSuccessTask(new Continuation<Boolean, Task<Void>>() {
         @Override
         public Task<Void> then(Task<Boolean> task) throws Exception {

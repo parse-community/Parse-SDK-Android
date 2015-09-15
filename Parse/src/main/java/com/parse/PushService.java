@@ -66,23 +66,15 @@ import java.util.List;
  * <pre>
  * &lt;uses-permission android:name="android.permission.INTERNET" /&gt;
  * &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
- * &lt;uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /&gt;
  * &lt;uses-permission android:name="android.permission.VIBRATE" /&gt;
  * &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
  * </pre>
  * <p/>
- * Also, make sure that {@link ParseBroadcastReceiver}, {@link PushService}, and
- * {@link ParsePushBroadcastReceiver} are declared as children of the
- * <code>&lt;application&gt;</code> element:
+ * Also, make sure that {@link PushService} and {@link ParsePushBroadcastReceiver} are declared as
+ * children of the <code>&lt;application&gt;</code> element:
  * <p/>
  * <pre>
  * &lt;service android:name="com.parse.PushService" /&gt;
- * &lt;receiver android:name="com.parse.ParseBroadcastReceiver"&gt;
- *   &lt;intent-filter&gt;
- *     &lt;action android:name="android.intent.action.BOOT_COMPLETED" /&gt;
- *     &lt;action android:name="android.intent.action.USER_PRESENT" /&gt;
- *   &lt;/intent-filter&gt;
- * &lt;/receiver&gt;
  * &lt;receiver android:name="com.parse.ParsePushBroadcastReceiver" android:exported=false&gt;
  *  &lt;intent-filter&gt;
  *     &lt;action android:name="com.parse.push.intent.RECEIVE" /&gt;
