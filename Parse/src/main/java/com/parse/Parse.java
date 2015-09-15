@@ -615,6 +615,7 @@ public class Parse {
    * Add a {@link ParseNetworkInterceptor}. You must invoke
    * {@code addParseNetworkInterceptor(ParseNetworkInterceptor)} before
    * {@link #initialize(Context)}. You can add multiple {@link ParseNetworkInterceptor}.
+   * 
    * @param interceptor
    *          {@link ParseNetworkInterceptor} to be added.
    */
@@ -632,7 +633,8 @@ public class Parse {
   /**
    * Remove a given {@link ParseNetworkInterceptor}. You must invoke
    * {@code removeParseNetworkInterceptor(ParseNetworkInterceptor)}  before
-   * {@link #initialize(Context)} .
+   * {@link #initialize(Context)}.
+   *
    * @param interceptor
    *          {@link ParseNetworkInterceptor} to be removed.
    */
