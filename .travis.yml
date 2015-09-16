@@ -13,11 +13,15 @@ android:
     - extra-android-support
     - extra-android-m2repository
 
+before_install:
+    - pip install --user codecov
+
 script:
-  - ./gradlew clean testDebugUnitTest --info
+  - ./gradlew clean testDebugUnitTest jacocoTestReport --info
 
 after_success:
-  - ./gradlew jacocoTestReport coveralls
+  - ./gradlew coveralls
+  - codecov
   - ./scripts/publish_snapshot.sh
 
 cache:
