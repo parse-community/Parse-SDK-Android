@@ -22,6 +22,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -217,50 +218,48 @@ import java.util.List;
             && hasRequiredPpnsDeclarations
             && (!hasAnyGcmSpecificDeclaration || !isGooglePlayServicesAvailable)) {
           pushType = PushType.PPNS;
+
+          if (isGooglePlayServicesAvailable) {
+            Log.w(TAG, "Using PPNS for push even though Google Play Services is available." +
+                " Please " + getGcmManifestMessage());
+          }
         } else {
           pushType = PushType.NONE;
 
-          // Emit warnings if the client doesn't get push due to misconfiguration of the manifest.
-          if (hasAnyGcmSpecificDeclaration && !hasRequiredGcmDeclarations) {
+          if (hasAnyGcmSpecificDeclaration) {
+            if (!hasPushBroadcastReceiver) {
+            /* Throw an error if someone migrated from an old SDK and hasn't yet started using
+             * ParsePushBroadcastReceiver. */
+              PLog.e(TAG, "Push is currently disabled. This is probably because you migrated " +
+                  "from an older version of Parse. This version of Parse requires your app to " +
+                  "have a BroadcastReceiver that handles " +
+                  ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
+                  ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
+                  ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
+                  "these lines to your AndroidManifest.xml:\n\n" +
+                  " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
+                  "   android:exported=false>\n" +
+                  "  <intent-filter>\n" +
+                  "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
+                  "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
+                  "     <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
+                  "   </intent-filter>\n" +
+                  " </receiver>");
+            }
+            if (!isGooglePlayServicesAvailable) {
+              PLog.e(TAG, "Cannot use GCM for push on this device because Google Play " +
+                  "Services is not available. Install Google Play Services from the Play Store.");
+            }
+            // Emit warnings if the client doesn't get push due to misconfiguration of the manifest.
+            if (!hasRequiredGcmDeclarations) {
             /*
              * If we detect that the app has some GCM-specific declarations, but not all required
              * declarations for GCM, then most likely the client means to use GCM but misconfigured
              * their manifest. Log an error in this case.
              */
-            PLog.e(TAG, "Cannot use GCM for push because the app manifest is missing some " +
-                "required declarations. Please " + getGcmManifestMessage());
-          } else if (!hasPushBroadcastReceiver &&
-              (hasRequiredGcmDeclarations || hasRequiredPpnsDeclarations)) {
-            /* Throw an error if someone migrated from an old SDK and hasn't yet started using
-             * ParsePushBroadcastReceiver. */
-            PLog.e(TAG, "Push is currently disabled. This is probably because you migrated from " +
-                "an older version of Parse. This version of Parse requires your app to have a " +
-                "BroadcastReceiver that handles " + ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE +
-                ", " + ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
-                ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
-                "these lines to your AndroidManifest.xml:\n\n" +
-                " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
-                "   android:exported=false>\n" +
-                "  <intent-filter>\n" +
-                "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
-                "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
-                "     <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
-                "   </intent-filter>\n" +
-                " </receiver>");
-          } else if (hasPushBroadcastReceiver
-              && hasRequiredGcmDeclarations
-              && !isGooglePlayServicesAvailable) {
-            PLog.e(TAG, "Cannot use GCM for push on this device because Google Play " +
-                "Services is not installed. Install Google Play Service from the Play Store, " +
-                "or enable PPNS as a fallback push service." +
-                "\nTo enable PPNS as a fallback push service on devices without Google Play " +
-                "Service support, please include PPNS.jar in your application and " +
-                getPpnsManifestMessage());
-          } else if (hasPushBroadcastReceiver
-              && hasRequiredPpnsDeclarations
-              && !isPPNSAvailable) {
-            PLog.e(TAG, "Cannot use PPNS for push on this device because PPNS is not available. " +
-                "Include PPNS.jar in your application to use PPNS.");
+              PLog.e(TAG, "Cannot use GCM for push because the app manifest is missing some " +
+                  "required declarations. Please " + getGcmManifestMessage());
+            }
           }
         }
 
