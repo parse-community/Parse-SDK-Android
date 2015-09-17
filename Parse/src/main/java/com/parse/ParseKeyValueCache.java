@@ -64,6 +64,9 @@ import java.util.Date;
   }
 
   private static File getKeyValueCacheDir() {
+    if (directory == null || !directory.exists()) {
+      directory.mkdir();
+    }
     return directory;
   }
 
@@ -71,7 +74,11 @@ import java.util.Date;
    * How many files are in the key-value cache.
    */
   /* package */ static int size() {
-    return getKeyValueCacheDir().listFiles().length;
+    File[] files = getKeyValueCacheDir().listFiles();
+    if (files == null) {
+      return 0;
+    }
+    return files.length;
   }
 
   private static File getKeyValueCacheFile(String key) {
@@ -96,7 +103,7 @@ import java.util.Date;
     }
   }
 
-  /* package */ private static File createKeyValueCacheFile(String key) {
+  private static File createKeyValueCacheFile(String key) {
     String filename = String.valueOf(new Date().getTime()) + '.' + key;
     return new File(getKeyValueCacheDir(), filename);
   }
@@ -127,9 +134,7 @@ import java.util.Date;
       }
       File f = createKeyValueCacheFile(key);
       try {
-        FileOutputStream out = new FileOutputStream(f);
-        out.write(value.getBytes("UTF-8"));
-        out.close();
+        ParseFileUtils.writeByteArrayToFile(f, value.getBytes("UTF-8"));
       } catch (UnsupportedEncodingException e) {
         // do nothing
       } catch (IOException e) {
@@ -138,37 +143,46 @@ import java.util.Date;
 
       // Check if we should kick out old cache entries
       File[] files = getKeyValueCacheDir().listFiles();
+      // We still need this check since dir.mkdir() may fail
+      if (files == null || files.length == 0) {
+        return;
+      }
+
       int numFiles = files.length;
       int numBytes = 0;
       for (File file : files) {
         numBytes += file.length();
       }
-      if (numFiles > maxKeyValueCacheFiles || numBytes > maxKeyValueCacheBytes) {
-        // We need to kick out some cache entries.
-        // Sort oldest-first. We touch on read so mtime is really LRU.
-        // Sometimes (i.e. tests) the time of lastModified isn't granular enough,
-        // so we resort
-        // to sorting by the file name which is always prepended with time in ms
-        Arrays.sort(files, new Comparator<File>() {
-          @Override
-          public int compare(File f1, File f2) {
-            int dateCompare = Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-            if (dateCompare != 0) {
-              return dateCompare;
-            } else {
-              return f1.getName().compareTo(f2.getName());
-            }
-          }
-        });
 
-        for (File file : files) {
-          numFiles--;
-          numBytes -= file.length();
-          file.delete();
+      // If we do not need to clear the cache, simply return
+      if (numFiles <= maxKeyValueCacheFiles && numBytes <= maxKeyValueCacheBytes) {
+        return;
+      }
 
-          if (numFiles <= maxKeyValueCacheFiles && numBytes <= maxKeyValueCacheBytes) {
-            break;
+      // We need to kick out some cache entries.
+      // Sort oldest-first. We touch on read so mtime is really LRU.
+      // Sometimes (i.e. tests) the time of lastModified isn't granular enough,
+      // so we resort
+      // to sorting by the file name which is always prepended with time in ms
+      Arrays.sort(files, new Comparator<File>() {
+        @Override
+        public int compare(File f1, File f2) {
+          int dateCompare = Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+          if (dateCompare != 0) {
+            return dateCompare;
+          } else {
+            return f1.getName().compareTo(f2.getName());
           }
+        }
+      });
+
+      for (File file : files) {
+        numFiles--;
+        numBytes -= file.length();
+        file.delete();
+
+        if (numFiles <= maxKeyValueCacheFiles && numBytes <= maxKeyValueCacheBytes) {
+          break;
         }
       }
     }

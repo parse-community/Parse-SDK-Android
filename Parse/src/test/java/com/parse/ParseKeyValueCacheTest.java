@@ -14,20 +14,29 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 import bolts.Task;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class ParseKeyValueCacheTest {
+
+  private File keyValueCacheDir;
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Before
   public void setUp() throws Exception {
-    ParseKeyValueCache.initialize(temporaryFolder.newFolder("ParseKeyValueCache"));
+    keyValueCacheDir = temporaryFolder.newFolder("ParseKeyValueCache");
+    ParseKeyValueCache.initialize(keyValueCacheDir);
   }
 
   @After
@@ -58,5 +67,32 @@ public class ParseKeyValueCacheTest {
       }, Task.BACKGROUND_EXECUTOR));
     }
     ParseTaskUtils.wait(Task.whenAll(tasks));
+  }
+
+  @Test
+  public void testSaveToKeyValueCacheWithoutCacheDir() throws Exception {
+    // Delete the cache folder(Simulate users clear the app cache)
+    assertTrue(keyValueCacheDir.exists());
+    keyValueCacheDir.delete();
+    assertFalse(keyValueCacheDir.exists());
+
+    // Save a key value pair
+    ParseKeyValueCache.saveToKeyValueCache("key", "value");
+
+    // Verify cache file is correct
+    assertEquals(1, keyValueCacheDir.listFiles().length);
+    assertArrayEquals(
+        "value".getBytes(), ParseFileUtils.readFileToByteArray(keyValueCacheDir.listFiles()[0]));
+  }
+
+  @Test
+  public void testGetSizeWithoutCacheDir() throws Exception {
+    // Delete the cache folder(Simulate users clear the app cache)
+    assertTrue(keyValueCacheDir.exists());
+    keyValueCacheDir.delete();
+    assertFalse(keyValueCacheDir.exists());
+
+    // Verify size is zero
+    assertEquals(0, ParseKeyValueCache.size());
   }
 }
