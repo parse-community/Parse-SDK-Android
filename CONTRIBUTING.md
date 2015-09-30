@@ -34,7 +34,7 @@ We use GitHub issues to track public bugs. We will keep a close eye on this and 
 ### Reporting New Issues
 Not all issues are SDK issues. If you're unsure whether your bug is with the SDK or backend, you can test to see if it reproduces with our [REST API][rest-api] and [Parse API Console][parse-api-console]. If it does, you can report backend bugs [here][bug-reports].
 
-To view the REST API network requests issued by the Parse SDK, please check out our [Network Debugging Tool][network-debugging-tool].  With this tool, you can either log network requests to Android logcat, or log them to Chrome Debugger via Stetho.
+To view the REST API network requests issued by the Parse SDK and responses from the Parse backend, please check out our [Network Debugging Tool][network-debugging-tool].  With this tool, you can either log network requests/responses to Android logcat, or log them to Chrome Debugger via Stetho.
 
 Details are key. The more information you provide us the easier it'll be for us to debug and the faster you'll receive a fix. Some examples of useful tidbits:
 
