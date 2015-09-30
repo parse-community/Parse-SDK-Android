@@ -34,6 +34,8 @@ We use GitHub issues to track public bugs. We will keep a close eye on this and 
 ### Reporting New Issues
 Not all issues are SDK issues. If you're unsure whether your bug is with the SDK or backend, you can test to see if it reproduces with our [REST API][rest-api] and [Parse API Console][parse-api-console]. If it does, you can report backend bugs [here][bug-reports].
 
+To view the REST API network requests issued by the Parse SDK and responses from the Parse backend, please check out our [Network Debugging Tool][network-debugging-tool].  With this tool, you can either log network requests/responses to Android logcat, or log them to Chrome Debugger via Stetho.
+
 Details are key. The more information you provide us the easier it'll be for us to debug and the faster you'll receive a fix. Some examples of useful tidbits:
 
 * A description. What did you expect to happen and what actually happened? Why do you think that was wrong?
@@ -58,6 +60,7 @@ By contributing to Parse Android SDK, you agree that your contributions will be 
  [stack-overflow]: http://stackoverflow.com/tags/parse.com
  [bug-reports]: https://www.parse.com/help#report
  [rest-api]: https://www.parse.com/docs/rest/guide
+ [network-debugging-tool]: https://github.com/ParsePlatform/ParseInterceptors-Android/wiki
  [parse-api-console]: http://blog.parse.com/announcements/introducing-the-parse-api-console/
  [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
  [tests-dir]: /Parse/src/test/java/com/parse
