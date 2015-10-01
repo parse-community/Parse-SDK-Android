@@ -191,6 +191,10 @@ import bolts.Task;
     setMaxRetries(DEFAULT_MAX_RETRIES);
   }
 
+  /* package */ void enableRetryingToCommandWithCallback() {
+        setMaxRetries(DEFAULT_MIN_RETRIES);
+      }
+
   private static String createUrl(String httpPath) {
     // We send all parameters for GET/HEAD/DELETE requests in a post body,
     // so no need to worry about query parameters here.
