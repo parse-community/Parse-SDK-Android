@@ -41,6 +41,7 @@ import bolts.Task;
     JSONObject objectJSON = coder.encode(state, operations, PointerEncoder.get());
     ParseRESTCommand command = ParseRESTUserCommand.signUpUserCommand(
         objectJSON, sessionToken, revocableSession);
+      command.enableRetryingToCommandWithCallback();
 
     return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
       @Override
@@ -61,6 +62,7 @@ import bolts.Task;
       String username, String password) {
     ParseRESTCommand command = ParseRESTUserCommand.logInUserCommand(
         username, password, revocableSession);
+      command.enableRetryingToCommandWithCallback();
     return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
       @Override
       public ParseUser.State then(Task<JSONObject> task) throws Exception {
@@ -79,6 +81,7 @@ import bolts.Task;
     JSONObject objectJSON = coder.encode(state, operations, PointerEncoder.get());
     final ParseRESTUserCommand command = ParseRESTUserCommand.serviceLogInUserCommand(
         objectJSON, state.sessionToken(), revocableSession);
+      command.enableRetryingToCommandWithCallback();
 
     return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
       @Override
