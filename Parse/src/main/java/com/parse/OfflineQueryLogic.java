@@ -459,7 +459,7 @@ import bolts.Task;
 
   /**
    * Returns true iff the given value matches the given operator and constraint.
-   * 
+   *
    * @throws UnsupportedOperationException
    *           if the operator is not one this function can handle.
    */
@@ -955,8 +955,11 @@ import bolts.Task;
   /**
    * Makes sure that the object specified by path, relative to container, is fetched.
    */
-  private Task<Void> fetchIncludeAsync(
-      final Object container, final String path, final ParseSQLiteDatabase db)
+  private static Task<Void> fetchIncludeAsync(
+      final OfflineStore store,
+      final Object container,
+      final String path,
+      final ParseSQLiteDatabase db)
       throws ParseException {
     // If there's no object to include, that's fine.
     if (container == null) {
@@ -972,7 +975,7 @@ import bolts.Task;
         task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
           @Override
           public Task<Void> then(Task<Void> task) throws Exception {
-            return fetchIncludeAsync(item, path, db);
+            return fetchIncludeAsync(store, item, path, db);
           }
         });
       }
@@ -986,7 +989,7 @@ import bolts.Task;
         task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
           @Override
           public Task<Void> then(Task<Void> task) throws Exception {
-            return fetchIncludeAsync(array.get(index), path, db);
+            return fetchIncludeAsync(store, array.get(index), path, db);
           }
         });
       }
@@ -1020,7 +1023,7 @@ import bolts.Task;
       public Task<Object> then(Task<Void> task) throws Exception {
         if (container instanceof ParseObject) {
           // Make sure this object is fetched before descending into it.
-          return fetchIncludeAsync(container, null, db).onSuccess(new Continuation<Void, Object>() {
+          return fetchIncludeAsync(store, container, null, db).onSuccess(new Continuation<Void, Object>() {
             @Override
             public Object then(Task<Void> task) throws Exception {
               return ((ParseObject) container).get(key);
@@ -1041,7 +1044,7 @@ import bolts.Task;
     }).onSuccessTask(new Continuation<Object, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Object> task) throws Exception {
-        return fetchIncludeAsync(task.getResult(), rest, db);
+        return fetchIncludeAsync(store, task.getResult(), rest, db);
       }
     });
   }
@@ -1049,9 +1052,11 @@ import bolts.Task;
   /**
    * Makes sure all of the objects included by the given query get fetched.
    */
-  /* package */ <T extends ParseObject> Task<Void> fetchIncludesAsync(
+  /* package */ static <T extends ParseObject> Task<Void> fetchIncludesAsync(
+      final OfflineStore store,
       final T object,
-      ParseQuery.State<T> state, final ParseSQLiteDatabase db) {
+      ParseQuery.State<T> state,
+      final ParseSQLiteDatabase db) {
     Set<String> includes = state.includes();
     // We do the fetches in series because it makes it easier to fail on the first error.
     Task<Void> task = Task.forResult(null);
@@ -1059,7 +1064,7 @@ import bolts.Task;
       task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
         @Override
         public Task<Void> then(Task<Void> task) throws Exception {
-          return fetchIncludeAsync(object, include, db);
+          return fetchIncludeAsync(store, object, include, db);
         }
       });
     }

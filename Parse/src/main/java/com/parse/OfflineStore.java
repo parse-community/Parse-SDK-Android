@@ -455,7 +455,7 @@ import bolts.Task;
           fetchedIncludesTask = fetchedIncludesTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
             public Task<Void> then(Task<Void> task) throws Exception {
-              return queryLogic.fetchIncludesAsync(object, query, db);
+              return OfflineQueryLogic.fetchIncludesAsync(OfflineStore.this, object, query, db);
             }
           });
         }
