@@ -586,7 +586,7 @@ public class ParseObject {
    * @param isComplete
    *          {@code true} if this is all of the data on the server for the object.
    */
-  /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
+  public static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
       boolean isComplete) {
     return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get());
   }
