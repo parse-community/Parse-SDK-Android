@@ -6,7 +6,7 @@
 
 
 A library that gives you access to the powerful Parse cloud platform from your Android app. 
-For more information Parse and its features, see [the website][parse.com] and [getting started][guide].
+For more information about Parse and its features, see [the website][parse.com] and [getting started][guide].
 
 ## Download
 Download [the latest JAR][latest] or define in Gradle:
