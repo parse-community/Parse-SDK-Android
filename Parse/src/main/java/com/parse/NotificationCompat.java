@@ -68,11 +68,14 @@ import android.widget.RemoteViews;
 
   @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
   static class NotificationCompatPostJellyBean implements NotificationCompatImpl {
-    private Notification.Builder postJellyBeanBuilder;
     @Override
     public Notification build(Builder b) {
-      postJellyBeanBuilder = new Notification.Builder(b.mContext);
-      postJellyBeanBuilder.setContentTitle(b.mContentTitle)
+      return createBuilder(b).build();
+    }
+
+    protected Notification.Builder createBuilder(Builder b) {
+      Notification.Builder builder = new Notification.Builder(b.mContext);
+      builder.setContentTitle(b.mContentTitle)
           .setContentText(b.mContentText)
           .setTicker(b.mNotification.tickerText)
           .setSmallIcon(b.mNotification.icon, b.mNotification.iconLevel)
@@ -84,7 +87,7 @@ import android.widget.RemoteViews;
       if (b.mStyle != null) {
         if (b.mStyle instanceof Builder.BigTextStyle) {
           Builder.BigTextStyle staticStyle = (Builder.BigTextStyle) b.mStyle;
-          Notification.BigTextStyle style = new Notification.BigTextStyle(postJellyBeanBuilder)
+          Notification.BigTextStyle style = new Notification.BigTextStyle(builder)
               .setBigContentTitle(staticStyle.mBigContentTitle)
               .bigText(staticStyle.mBigText);
           if (staticStyle.mSummaryTextSet) {
@@ -92,12 +95,24 @@ import android.widget.RemoteViews;
           }
         }
       }
-      return postJellyBeanBuilder.build();
+      return builder;
+    }
+  }
+
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  static class NotificationCompatPostLollipop extends NotificationCompatPostJellyBean {
+    @Override
+    public Notification build(Builder b) {
+      Notification.Builder builder = createBuilder(b);
+      builder.setColor(b.mColor);
+      return builder.build();
     }
   }
 
   static {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      IMPL = new NotificationCompatPostLollipop();
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
       IMPL = new NotificationCompatPostJellyBean();
     } else {
       IMPL = new NotificationCompatImplBase();
@@ -119,6 +134,7 @@ import android.widget.RemoteViews;
     CharSequence mContentText;
     PendingIntent mContentIntent;
     Bitmap mLargeIcon;
+    int mColor;
     int mPriority;
     Style mStyle;
 
@@ -232,6 +248,14 @@ import android.widget.RemoteViews;
      */
     public Builder setLargeIcon(Bitmap icon) {
       mLargeIcon = icon;
+      return this;
+    }
+
+    /**
+     * Sets the color behind the notification icon on Lollipop and above.
+     */
+    public Builder setColor(int rgb) {
+      mColor = rgb;
       return this;
     }
 

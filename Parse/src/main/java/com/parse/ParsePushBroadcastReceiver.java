@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -93,6 +94,9 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
 
   /** The name of the meta-data field used to override the icon used in Notifications. */
   public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
+
+  /** The name of the meta-data field used to override the color used in Notifications. */
+  public static final String PROPERTY_PUSH_COLOR = "com.parse.push.notification_color";
 
   protected static final int SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT = 38;
 
@@ -279,6 +283,31 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   }
 
   /**
+   * Retrieves the color to be used in a {@link Notification}. The default implementation uses
+   * the color specified by {@code com.parse.push.notification_color} {@code meta-data} in your
+   * {@code AndroidManifest.xml} with the system fallback color.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param intent
+   *      An {@code Intent} containing the channel and data of the current push notification.
+   * @return
+   *      The color for the {@link Notification}
+   */
+  @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+  protected int getColor(Context context, Intent intent) {
+    Bundle metaData = ManifestInfo.getApplicationMetadata(context);
+    int color = 0;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+      color = Notification.COLOR_DEFAULT;
+    }
+    if (metaData != null) {
+      color = metaData.getInt(PROPERTY_PUSH_COLOR);
+    }
+    return color != 0 ? context.getResources().getColor(color) : color;
+  }
+
+  /**
    * Retrieves the large icon to be used in a {@link Notification}. This {@code Bitmap} should be
    * used to provide special context for a particular {@link Notification}, such as the avatar of
    * user who generated the {@link Notification}. The default implementation returns {@code null},
@@ -365,6 +394,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         .setTicker(tickerText)
         .setSmallIcon(this.getSmallIconId(context, intent))
         .setLargeIcon(this.getLargeIcon(context, intent))
+        .setColor(this.getColor(context, intent))
         .setContentIntent(pContentIntent)
         .setDeleteIntent(pDeleteIntent)
         .setAutoCancel(true)
