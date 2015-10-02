@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
 
 group = 'com.parse'
-version = '1.13.0'
+version = "1.0"
 
 buildscript {
     repositories {
@@ -17,14 +17,14 @@ buildscript {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 9
+        targetSdkVersion 22
         versionCode 1
-        versionName project.version
+        versionName "1.0"
     }
 
     lintOptions {
