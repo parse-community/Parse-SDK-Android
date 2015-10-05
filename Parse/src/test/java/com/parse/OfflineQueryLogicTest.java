@@ -828,7 +828,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
     ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
@@ -839,7 +838,7 @@ public class OfflineQueryLogicTest {
     ParseObject unfetchedObject = new ParseObject("TestObject");
     object.put("foo", unfetchedObject);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, db));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, db));
     verify(store).fetchLocallyAsync(object, db);
     verify(store).fetchLocallyAsync(unfetchedObject, db);
     verifyNoMoreInteractions(store);
@@ -851,7 +850,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
     ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
@@ -864,7 +862,7 @@ public class OfflineQueryLogicTest {
     objects.add(unfetchedObject);
     when(object.get("foo")).thenReturn(objects);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, db));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, db));
     verify(store).fetchLocallyAsync(object, db);
     verify(store).fetchLocallyAsync(unfetchedObject, db);
     verifyNoMoreInteractions(store);
@@ -876,7 +874,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
     ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
@@ -889,7 +886,7 @@ public class OfflineQueryLogicTest {
     objects.put(unfetchedObject);
     when(object.get("foo")).thenReturn(objects);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, db));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, db));
     verify(store).fetchLocallyAsync(object, db);
     verify(store).fetchLocallyAsync(unfetchedObject, db);
     verifyNoMoreInteractions(store);
@@ -901,7 +898,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
     ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
@@ -914,7 +910,7 @@ public class OfflineQueryLogicTest {
     objects.put("bar", unfetchedObject);
     when(object.get("foo")).thenReturn(objects);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, db));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, db));
     verify(store).fetchLocallyAsync(object, db);
     verify(store).fetchLocallyAsync(unfetchedObject, db);
     verifyNoMoreInteractions(store);
@@ -926,7 +922,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
     ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
@@ -939,7 +934,7 @@ public class OfflineQueryLogicTest {
     objects.put("bar", unfetchedObject);
     when(object.get("foo")).thenReturn(objects);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, db));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, db));
     verify(store).fetchLocallyAsync(object, db);
     verify(store).fetchLocallyAsync(unfetchedObject, db);
     verifyNoMoreInteractions(store);
@@ -951,8 +946,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
-
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
         .include("foo")
         .build();
@@ -960,7 +953,7 @@ public class OfflineQueryLogicTest {
     ParseObject object = new ParseObject("TestObject");
     object.put("foo", JSONObject.NULL);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, null));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, null));
     // only itself
     verify(store, times(1))
         .fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class));
@@ -972,8 +965,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
-
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
         .include("foo")
         .build();
@@ -982,7 +973,7 @@ public class OfflineQueryLogicTest {
     object.put("foo", 1);
 
     thrown.expect(ParseException.class);
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, null));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, null));
     // only itself
     verify(store, times(1))
         .fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class));
@@ -994,15 +985,13 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
-
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
         .include("foo")
         .build();
 
     ParseObject object = new ParseObject("TestObject");
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, null));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, null));
     // only itself
     verify(store, times(1))
         .fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class));
@@ -1014,8 +1003,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
-
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
         .include("foo.bar")
         .build();
@@ -1023,7 +1010,7 @@ public class OfflineQueryLogicTest {
     ParseObject object = new ParseObject("TestObject");
     object.put("foo", JSONObject.NULL);
 
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, null));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, null));
     // only itself
     verify(store, times(1))
         .fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class));
@@ -1035,8 +1022,6 @@ public class OfflineQueryLogicTest {
     when(store.fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class)))
         .thenReturn(Task.<ParseObject>forResult(null));
 
-    OfflineQueryLogic logic = new OfflineQueryLogic(store);
-
     ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
         .include("foo.bar")
         .build();
@@ -1045,7 +1030,7 @@ public class OfflineQueryLogicTest {
     object.put("foo", 1);
 
     thrown.expect(IllegalStateException.class);
-    ParseTaskUtils.wait(logic.fetchIncludesAsync(object, query, null));
+    ParseTaskUtils.wait(OfflineQueryLogic.fetchIncludesAsync(store, object, query, null));
     // only itself
     verify(store, times(1))
         .fetchLocallyAsync(any(ParseObject.class), any(ParseSQLiteDatabase.class));
