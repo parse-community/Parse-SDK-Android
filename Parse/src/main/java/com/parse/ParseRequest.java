@@ -70,21 +70,6 @@ import bolts.Task;
 
   private static long defaultInitialRetryDelay = DEFAULT_INITIAL_RETRY_DELAY;
 
-  // TODO(grantland): Remove once we're able to inject a http client into all of our controllers
-  // and we don't need this for mocking anymore.
-  private static ParseHttpClient defaultClient = null;
-  @Deprecated
-  public static void setDefaultClient(ParseHttpClient client) {
-    defaultClient = client;
-  }
-  @Deprecated
-  public static ParseHttpClient getDefaultClient() {
-    if (defaultClient == null) {
-      throw new IllegalStateException("Can't send Parse HTTPS request before Parse.initialize()");
-    }
-    return defaultClient;
-  }
-
   public static void setDefaultInitialRetryDelay(long delay) {
     defaultInitialRetryDelay = delay;
   }
@@ -166,23 +151,6 @@ import bolts.Task;
 
   protected abstract Task<Response> onResponseAsync(ParseHttpResponse response,
       ProgressCallback downloadProgressCallback);
-
-  @Deprecated
-  public Task<Response> executeAsync() {
-    return executeAsync(getDefaultClient());
-  }
-
-  @Deprecated
-  public Task<Response> executeAsync(
-      ProgressCallback uploadProgressCallback,
-      ProgressCallback downloadProgressCallback,
-      Task<Void> cancellationToken) {
-    return executeAsync(
-        getDefaultClient(),
-        uploadProgressCallback,
-        downloadProgressCallback,
-        cancellationToken);
-  }
 
   /*
    * Starts retrying the block.

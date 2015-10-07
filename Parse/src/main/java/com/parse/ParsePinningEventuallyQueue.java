@@ -69,6 +69,7 @@ import bolts.Task;
    */
   private Task<Void>.TaskCompletionSource connectionTaskCompletionSource = Task.create();
   private final Object connectionLock = new Object();
+  private final ParseHttpClient httpClient;
 
   private ConnectivityNotifier notifier;
   private ConnectivityNotifier.ConnectivityListener listener = new ConnectivityNotifier.ConnectivityListener() {
@@ -84,8 +85,10 @@ import bolts.Task;
     }
   };
 
-  public ParsePinningEventuallyQueue(Context context) {
+  public ParsePinningEventuallyQueue(Context context, ParseHttpClient client) {
     setConnected(ConnectivityNotifier.isConnected(context));
+
+    httpClient = client;
 
     notifier = ConnectivityNotifier.getNotifier(context);
     notifier.addListener(listener);
@@ -492,7 +495,7 @@ import bolts.Task;
 
         Task<JSONObject> executeTask;
         if (type == EventuallyPin.TYPE_SAVE) {
-          executeTask = object.saveAsync(operationSet, sessionToken);
+          executeTask = object.saveAsync(httpClient, operationSet, sessionToken);
         } else if (type == EventuallyPin.TYPE_DELETE) {
           executeTask = object.deleteAsync(sessionToken).cast();
         } else { // else if (type == EventuallyPin.TYPE_COMMAND) {
@@ -501,7 +504,7 @@ import bolts.Task;
             executeTask = Task.forResult(null);
             notifyTestHelper(TestHelper.COMMAND_OLD_FORMAT_DISCARDED);
           } else {
-            executeTask = command.executeAsync();
+            executeTask = command.executeAsync(httpClient);
           }
         }
 
