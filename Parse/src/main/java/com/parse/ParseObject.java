@@ -1660,11 +1660,13 @@ public class ParseObject {
 
   // Currently only used by ParsePinningEventuallyQueue for saveEventually due to the limitation in
   // ParseCommandCache that it can only return JSONObject result.
-  /* package */ Task<JSONObject> saveAsync(final ParseOperationSet operationSet, String sessionToken)
-      throws ParseException {
+  /* package */ Task<JSONObject> saveAsync(
+      final ParseOperationSet operationSet,
+      String sessionToken,
+      ParseHttpClient client) throws ParseException {
     final ParseRESTCommand command =
         currentSaveEventuallyCommand(operationSet, PointerEncoder.get(), sessionToken);
-    return command.executeAsync();
+    return command.executeAsync(client);
   }
 
   /**

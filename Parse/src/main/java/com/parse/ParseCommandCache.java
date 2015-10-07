@@ -121,8 +121,10 @@ import bolts.Task;
     }
   };
 
-  public ParseCommandCache(Context context) {
+  public ParseCommandCache(Context context, ParseHttpClient client) {
     setConnected(false);
+    setHttpClient(client);
+
     shouldStop = false;
     running = false;
 
@@ -526,7 +528,7 @@ import bolts.Task;
             }
             notifyTestHelper(TestHelper.COMMAND_OLD_FORMAT_DISCARDED);
           } else {
-            commandTask = command.executeAsync().continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
+            commandTask = command.executeAsync(getHttpClient()).continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
               @Override
               public Task<JSONObject> then(Task<JSONObject> task) throws Exception {
                 String localId = command.getLocalId();
