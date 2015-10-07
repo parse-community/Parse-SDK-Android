@@ -249,6 +249,10 @@ import bolts.Task;
     }
   }
 
+  public Task<JSONObject> executeAsync() {
+    return executeAsync(ParsePlugins.get().restClient());
+  }
+
   @Override
   public Task<JSONObject> executeAsync(
       final ParseHttpClient client,
