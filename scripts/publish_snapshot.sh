@@ -14,7 +14,7 @@ elif [ "$TRAVIS_BRANCH" != "$BRANCH" ]; then
   echo "Skipping publishing SNAPSHOT: wrong branch. Expected '$BRANCH' but was '$TRAVIS_BRANCH'"
 else
   echo "Publishing SNAPSHOT..."
-  ./gradlew uploadArchives  
+  ./gradlew uploadArchives
   echo "SNAPSHOT published!"
 fi
 

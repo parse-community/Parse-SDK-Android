@@ -129,7 +129,7 @@ uploadArchives {
             scm {
                 connection 'scm:git@github.com:ParsePlatform/Parse-SDK-Android.git'
                 developerConnection 'scm:git@github.com:ParsePlatform/Parse-SDK-Android.git'
-                url 'https://github.com/ParsePlatform/Parse-SDK-Androidd'
+                url 'https://github.com/ParsePlatform/Parse-SDK-Android'
             }
 
             licenses {
