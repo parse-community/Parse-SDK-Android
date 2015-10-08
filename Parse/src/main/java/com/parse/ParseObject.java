@@ -52,7 +52,7 @@ import bolts.Task;
 public class ParseObject {
   /* package */ static String server = "https://api.parse.com";
   private static final String AUTO_CLASS_NAME = "_Automatic";
-  /* package */ static final String VERSION_NAME = "1.10.3";
+  /* package */ static final String VERSION_NAME = "1.10.4-SNAPSHOT";
 
   /*
   REST JSON Keys
