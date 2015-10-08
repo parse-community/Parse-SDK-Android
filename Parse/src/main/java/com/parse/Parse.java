@@ -413,15 +413,16 @@ public class Parse {
           || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
           || (!isLocalDatastoreEnabled && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
         checkContext();
+        ParseHttpClient httpClient = ParsePlugins.get().restClient();
         eventuallyQueue = isLocalDatastoreEnabled
-          ? new ParsePinningEventuallyQueue(context, ParsePlugins.get().restClient())
-          : new ParseCommandCache(context, ParsePlugins.get().restClient());
+          ? new ParsePinningEventuallyQueue(context, httpClient)
+          : new ParseCommandCache(context, httpClient);
 
         // We still need to clear out the old command cache even if we're using Pinning in case
         // anything is left over when the user upgraded. Checking number of pending and then
         // initializing should be enough.
         if (isLocalDatastoreEnabled && ParseCommandCache.getPendingCount() > 0) {
-          new ParseCommandCache(context, ParsePlugins.get().restClient());
+          new ParseCommandCache(context, httpClient);
         }
       }
       return eventuallyQueue;

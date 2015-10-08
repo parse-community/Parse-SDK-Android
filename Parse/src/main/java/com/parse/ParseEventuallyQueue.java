@@ -30,16 +30,6 @@ import bolts.Task;
    */
   private TestHelper testHelper;
 
-  private ParseHttpClient httpClient;
-
-  protected void setHttpClient(ParseHttpClient client) {
-    httpClient = client;
-  }
-
-  protected ParseHttpClient getHttpClient() {
-    return httpClient;
-  }
-
   public abstract void onDestroy();
 
   public void setConnected(boolean connected) {
