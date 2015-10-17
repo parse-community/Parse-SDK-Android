@@ -2784,6 +2784,14 @@ public class ParseObject {
     }
   }
 
+  public void clearOperationSetQueue() {
+    synchronized (mutex) {
+      operationSetQueue.clear();
+      operationSetQueue.add(new ParseOperationSet());
+    }
+    rebuildEstimatedData();
+  }
+
   /**
    * Updates the estimated values in the map based on the given set of ParseFieldOperations.
    */
