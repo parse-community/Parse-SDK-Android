@@ -70,13 +70,10 @@ import bolts.Task;
 
   @Override
   public Task<ParseInstallation> getAsync() {
-    final ParseInstallation cachedCurrent;
     synchronized (mutex) {
-      cachedCurrent = currentInstallation;
-    }
-
-    if (cachedCurrent != null) {
-      return Task.forResult(cachedCurrent);
+      if (currentInstallation != null) {
+        return Task.forResult(currentInstallation);
+      }
     }
 
     return taskQueue.enqueue(new Continuation<Void, Task<ParseInstallation>>() {
@@ -85,26 +82,32 @@ import bolts.Task;
         return toAwait.continueWithTask(new Continuation<Void, Task<ParseInstallation>>() {
           @Override
           public Task<ParseInstallation> then(Task<Void> task) throws Exception {
-            return store.getAsync();
-          }
-        }).continueWith(new Continuation<ParseInstallation, ParseInstallation>() {
-          @Override
-          public ParseInstallation then(Task<ParseInstallation> task) throws Exception {
-            ParseInstallation current = task.getResult();
-            if (current == null) {
-              current = ParseObject.create(ParseInstallation.class);
-              current.updateDeviceInfo(installationId);
-            } else {
-              installationId.set(current.getInstallationId());
-              PLog.v(TAG, "Successfully deserialized Installation object");
+            synchronized (mutex) {
+              if (currentInstallation != null) {
+                return Task.forResult(currentInstallation);
+              }
             }
 
-            synchronized (mutex) {
-              currentInstallation = current;
-            }
-            return current;
+            return store.getAsync().continueWith(new Continuation<ParseInstallation, ParseInstallation>() {
+              @Override
+              public ParseInstallation then(Task<ParseInstallation> task) throws Exception {
+                ParseInstallation current = task.getResult();
+                if (current == null) {
+                  current = ParseObject.create(ParseInstallation.class);
+                  current.updateDeviceInfo(installationId);
+                } else {
+                  installationId.set(current.getInstallationId());
+                  PLog.v(TAG, "Successfully deserialized Installation object");
+                }
+
+                synchronized (mutex) {
+                  currentInstallation = current;
+                }
+                return current;
+              }
+            }, ParseExecutors.io());
           }
-        }, ParseExecutors.io());
+        });
       }
     });
   }
