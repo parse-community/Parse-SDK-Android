@@ -105,17 +105,13 @@ import bolts.Task;
           if (!task.getResult()) {
             return Task.forResult(null);
           }
-          Task<Void> saveTask;
           if (installation.getPushType() != PushType.GCM) {
             installation.setPushType(PushType.GCM);
-            saveTask = installation.saveInBackground();
-          } else {
-            saveTask = Task.forResult(null);
           }
           // We do not need to wait sendRegistrationRequestAsync, since this task will finish
           // after we get the response from GCM, if we wait for this task, it will block our test.
           sendRegistrationRequestAsync();
-          return saveTask;
+          return Task.forResult(null);
         }
       });
     }
