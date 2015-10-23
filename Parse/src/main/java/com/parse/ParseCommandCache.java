@@ -90,6 +90,8 @@ import bolts.Task;
 
   private Logger log; // Why is there a custom logger? To prevent Mockito deadlock!
 
+  private final ParseHttpClient httpClient;
+
   ConnectivityNotifier notifier;
   ConnectivityNotifier.ConnectivityListener listener = new ConnectivityNotifier.ConnectivityListener() {
     @Override
@@ -121,12 +123,14 @@ import bolts.Task;
     }
   };
 
-  public ParseCommandCache(Context context) {
+  public ParseCommandCache(Context context, ParseHttpClient client) {
     setConnected(false);
+
     shouldStop = false;
     running = false;
 
     runningLock = new Object();
+    httpClient = client;
 
     log = Logger.getLogger(TAG);
 
@@ -526,7 +530,7 @@ import bolts.Task;
             }
             notifyTestHelper(TestHelper.COMMAND_OLD_FORMAT_DISCARDED);
           } else {
-            commandTask = command.executeAsync().continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
+            commandTask = command.executeAsync(httpClient).continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
               @Override
               public Task<JSONObject> then(Task<JSONObject> task) throws Exception {
                 String localId = command.getLocalId();

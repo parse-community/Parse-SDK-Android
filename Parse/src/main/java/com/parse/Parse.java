@@ -193,7 +193,6 @@ public class Parse {
 
     ParseHttpClient.setKeepAlive(true);
     ParseHttpClient.setMaxConnections(20);
-    ParseRequest.setDefaultClient(ParsePlugins.get().restClient());
     // If we have interceptors in list, we have to initialize all http clients and add interceptors
     if (interceptors != null) {
       initializeParseHttpClientsWithParseNetworkInterceptors();
@@ -414,15 +413,16 @@ public class Parse {
           || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
           || (!isLocalDatastoreEnabled && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
         checkContext();
+        ParseHttpClient httpClient = ParsePlugins.get().restClient();
         eventuallyQueue = isLocalDatastoreEnabled
-          ? new ParsePinningEventuallyQueue(context)
-          : new ParseCommandCache(context);
+          ? new ParsePinningEventuallyQueue(context, httpClient)
+          : new ParseCommandCache(context, httpClient);
 
         // We still need to clear out the old command cache even if we're using Pinning in case
         // anything is left over when the user upgraded. Checking number of pending and then
         // initializing should be enough.
         if (isLocalDatastoreEnabled && ParseCommandCache.getPendingCount() > 0) {
-          new ParseCommandCache(context);
+          new ParseCommandCache(context, httpClient);
         }
       }
       return eventuallyQueue;
