@@ -144,6 +144,35 @@ public class CachedCurrentInstallationControllerTest {
     assertEquals("android", currentInstallation.get(KEY_DEVICE_TYPE));
   }
 
+  @Test
+  public void testGetAsyncWithNoInstallationRaceCondition() throws ParseException {
+    // Mock installationId
+    InstallationId installationId = mock(InstallationId.class);
+    when(installationId.get()).thenReturn("testInstallationId");
+    //noinspection unchecked
+    ParseObjectStore<ParseInstallation> store = mock(ParseObjectStore.class);
+    Task<ParseInstallation>.TaskCompletionSource tcs = Task.create();
+    when(store.getAsync()).thenReturn(tcs.getTask());
+
+    // Create test controller
+    CachedCurrentInstallationController controller =
+        new CachedCurrentInstallationController(store, installationId);
+
+    Task<ParseInstallation> taskA = controller.getAsync();
+    Task<ParseInstallation> taskB = controller.getAsync();
+
+    tcs.setResult(null);
+    ParseInstallation installationA = ParseTaskUtils.wait(taskA);
+    ParseInstallation installationB = ParseTaskUtils.wait(taskB);
+
+    verify(store, times(1)).getAsync();
+    assertSame(controller.currentInstallation, installationA);
+    assertSame(controller.currentInstallation, installationB);
+    // Make sure device info is updated
+    assertEquals("testInstallationId", installationA.getInstallationId());
+    assertEquals("android", installationA.get(KEY_DEVICE_TYPE));
+  }
+
   //endregion
 
   //region testExistsAsync
