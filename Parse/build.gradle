@@ -70,31 +70,31 @@ android.libraryVariants.all { variant ->
         exclude '**/BuildConfig.class'
     }
 
-    def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
-        description "Generates Javadoc for $variant.name."
-        source = variant.javaCompile.source
-        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
-
-        options.docletpath = [rootProject.file("./gradle/ExcludeDoclet.jar")]
-        options.doclet = "me.grantland.doclet.ExcludeDoclet"
-
-        options.linksOffline("http://d.android.com/reference", "${android.sdkDirectory}/docs/reference")
-        options.links("http://boltsframework.github.io/docs/android/")
-
-        exclude '**/BuildConfig.java'
-        exclude '**/R.java'
-        exclude '**/internal/**'
-    }
-
-    def javadocJar = task("javadocJar${variant.name.capitalize()}", type: Jar, dependsOn: "javadoc${variant.name.capitalize()}") {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-    }
+//    Disabled doc from source files
+//    def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
+//        description "Generates Javadoc for $variant.name."
+//        source = variant.javaCompile.source
+//        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+//        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+//
+//        options.docletpath = [rootProject.file("./gradle/ExcludeDoclet.jar")]
+//        options.doclet = "me.grantland.doclet.ExcludeDoclet"
+//
+//        options.linksOffline("http://d.android.com/reference", "${android.sdkDirectory}/docs/reference")
+//        options.links("http://boltsframework.github.io/docs/android/")
+//
+//        exclude '**/BuildConfig.java'
+//        exclude '**/R.java'
+//        exclude '**/internal/**'
+//    }
+//    def javadocJar = task("javadocJar${variant.name.capitalize()}", type: Jar, dependsOn: "javadoc${variant.name.capitalize()}") {
+//        classifier = 'javadoc'
+//        from javadoc.destinationDir
+//    }
 
     if (name.equals(BuilderConstants.RELEASE)) {
         artifacts.add('archives', jar);
-        artifacts.add('archives', javadocJar);
+//        artifacts.add('archives', javadocJar);
     }
 }
 
