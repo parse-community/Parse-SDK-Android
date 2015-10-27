@@ -473,7 +473,6 @@ import java.util.List;
       "android.permission.INTERNET",
       "android.permission.ACCESS_NETWORK_STATE",
       "android.permission.WAKE_LOCK",
-      "android.permission.GET_ACCOUNTS",
       "com.google.android.c2dm.permission.RECEIVE",
       context.getPackageName() + ".permission.C2D_MESSAGE"
     };
@@ -549,27 +548,27 @@ import java.util.List;
     return "make sure that these permissions are declared as children " +
         "of the root <manifest> element:\n" + 
         "\n" + 
-        "<uses-permission android:name=\"android.permission.INTERNET\" />\n" + 
-        "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n" + 
-        "<uses-permission android:name=\"android.permission.VIBRATE\" />\n" + 
-        "<uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n" + 
-        "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\" />\n" + 
-        "<uses-permission android:name=\"com.google.android.c2dm.permission.RECEIVE\" />\n" + 
+        "<uses-permission android:name=\"android.permission.INTERNET\" />\n" +
+        "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n" +
+        "<uses-permission android:name=\"android.permission.VIBRATE\" />\n" +
+        "<uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n" +
+        "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\" />\n" +
+        "<uses-permission android:name=\"com.google.android.c2dm.permission.RECEIVE\" />\n" +
         "<permission android:name=\"" + gcmPackagePermission + "\" " +
-        "android:protectionLevel=\"signature\" />\n" + 
-        "<uses-permission android:name=\"" + gcmPackagePermission + "\" />\n" + 
-        "\n" + 
+        "android:protectionLevel=\"signature\" />\n" +
+        "<uses-permission android:name=\"" + gcmPackagePermission + "\" />\n" +
+        "\n" +
         "Also, please make sure that these services and broadcast receivers are declared as " +
-        "children of the <application> element:\n" + 
-        "\n" + 
-        "<service android:name=\"com.parse.PushService\" />\n" + 
+        "children of the <application> element:\n" +
+        "\n" +
+        "<service android:name=\"com.parse.PushService\" />\n" +
         "<receiver android:name=\"com.parse.GcmBroadcastReceiver\" " +
-        "android:permission=\"com.google.android.c2dm.permission.SEND\">\n" + 
-        "  <intent-filter>\n" + 
-        "    <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n" + 
-        "    <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n" + 
+        "android:permission=\"com.google.android.c2dm.permission.SEND\">\n" +
+        "  <intent-filter>\n" +
+        "    <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n" +
+        "    <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n" +
         "    <category android:name=\"" + packageName + "\" />\n" +
-        "  </intent-filter>\n" + 
+        "  </intent-filter>\n" +
         "</receiver>\n" +
         "<receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"" +
         " android:exported=false>\n" +
@@ -583,23 +582,23 @@ import java.util.List;
   
   private static String getPpnsManifestMessage() {
     return "make sure that these permissions are declared as children of the root " +
-        "<manifest> element:\n" + 
-        "\n" + 
-        "<uses-permission android:name=\"android.permission.INTERNET\" />\n" + 
-        "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n" + 
-        "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />\n" + 
-        "<uses-permission android:name=\"android.permission.VIBRATE\" />\n" + 
-        "<uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n" + 
-        "\n" + 
+        "<manifest> element:\n" +
+        "\n" +
+        "<uses-permission android:name=\"android.permission.INTERNET\" />\n" +
+        "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n" +
+        "<uses-permission android:name=\"android.permission.RECEIVE_BOOT_COMPLETED\" />\n" +
+        "<uses-permission android:name=\"android.permission.VIBRATE\" />\n" +
+        "<uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n" +
+        "\n" +
         "Also, please make sure that these services and broadcast receivers are declared as " +
-        "children of the <application> element:\n" + 
-        "\n" + 
-        "<service android:name=\"com.parse.PushService\" />\n" + 
-        "<receiver android:name=\"com.parse.ParseBroadcastReceiver\">\n" + 
-        "  <intent-filter>\n" + 
-        "    <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n" + 
-        "    <action android:name=\"android.intent.action.USER_PRESENT\" />\n" + 
-        "  </intent-filter>\n" + 
+        "children of the <application> element:\n" +
+        "\n" +
+        "<service android:name=\"com.parse.PushService\" />\n" +
+        "<receiver android:name=\"com.parse.ParseBroadcastReceiver\">\n" +
+        "  <intent-filter>\n" +
+        "    <action android:name=\"android.intent.action.BOOT_COMPLETED\" />\n" +
+        "    <action android:name=\"android.intent.action.USER_PRESENT\" />\n" +
+        "  </intent-filter>\n" +
         "</receiver>\n" +
         "<receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"" +
         " android:exported=false>\n" +
