@@ -23,5 +23,7 @@
 # Required for Parse
 -keepattributes *Annotation*
 -keepattributes Signature
+-dontwarn android.net.SSLCertificateSocketFactory
+-dontwarn android.app.Notification
 -dontwarn com.squareup.**
 -dontwarn okio.**
