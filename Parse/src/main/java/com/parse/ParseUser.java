@@ -194,15 +194,6 @@ public class ParseUser extends ParseObject {
     }
   }
 
-  @Override
-  boolean isContainerObject(String key, Object object) {
-    if (KEY_AUTH_DATA.equals(key)) {
-      // We're tracking dirtiness of `authData` ourselves.
-      return false;
-    }
-    return super.isContainerObject(key, object);
-  }
-
   /**
    * Whether the ParseUser has been authenticated on this device. This will be true if the ParseUser
    * was obtained via a logIn or signUp method. Only an authenticated ParseUser can be saved (with
@@ -636,9 +627,6 @@ public class ParseUser extends ParseObject {
           return Task.forError(
               new IllegalArgumentException("Attempt to merge currentUser with itself."));
         }
-
-        checkForChangesToMutableContainers();
-        user.checkForChangesToMutableContainers();
 
         boolean isLazy = user.isLazy();
         final String oldUsername = user.getUsername();
