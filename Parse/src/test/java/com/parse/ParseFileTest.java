@@ -58,31 +58,29 @@ public class ParseFileTest {
     String contentType = "content_type";
     File file = temporaryFolder.newFile(name);
 
+    // TODO(mengyan): After we have proper staging strategy, we should verify the staging file's
+    // content is the same with the original file.
+
     ParseFile parseFile = new ParseFile(name, data, contentType);
     assertEquals("name", parseFile.getName());
-    assertEquals("hello", new String(parseFile.getData()));
     assertEquals("content_type", parseFile.getState().mimeType());
     assertTrue(parseFile.isDirty());
 
     parseFile = new ParseFile(data);
     assertEquals("file", parseFile.getName()); // Default
-    assertEquals("hello", new String(parseFile.getData()));
     assertEquals(null, parseFile.getState().mimeType());
     assertTrue(parseFile.isDirty());
 
     parseFile = new ParseFile(name, data);
     assertEquals("name", parseFile.getName());
-    assertEquals("hello", new String(parseFile.getData()));
     assertEquals(null, parseFile.getState().mimeType());
     assertTrue(parseFile.isDirty());
 
     parseFile = new ParseFile(data, contentType);
     assertEquals("file", parseFile.getName()); // Default
-    assertEquals("hello", new String(parseFile.getData()));
     assertEquals("content_type", parseFile.getState().mimeType());
     assertTrue(parseFile.isDirty());
 
-    // TODO(mengyan): Test file pointer in ParseFile when we have proper stage strategy
     parseFile = new ParseFile(file);
     assertEquals(name, parseFile.getName()); // Default
     assertEquals(null, parseFile.getState().mimeType());
@@ -291,6 +289,22 @@ public class ParseFileTest {
     assertEquals(url, stateCaptor.getValue().url());
     // Verify the data we get is correct
     assertArrayEquals(content.getBytes(), data);
+
+    // Make sure we always get the data from network
+    byte[] dataAgain = ParseTaskUtils.wait(parseFile.getDataInBackground());
+
+    // Verify controller get the correct data
+    ArgumentCaptor<ParseFile.State> stateCaptorAgain =
+        ArgumentCaptor.forClass(ParseFile.State.class);
+    verify(controller, times(2)).fetchAsync(
+        stateCaptorAgain.capture(),
+        anyString(),
+        any(ProgressCallback.class),
+        Matchers.<Task<Void>>any()
+    );
+    assertEquals(url, stateCaptorAgain.getValue().url());
+    // Verify the data we get is correct
+    assertArrayEquals(content.getBytes(), dataAgain);
   }
 
   @Test
@@ -325,6 +339,22 @@ public class ParseFileTest {
     assertEquals(url, stateCaptor.getValue().url());
     // Verify the data we get is correct
     assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(dataStream));
+
+    // Make sure we always get the data from network
+    InputStream dataStreamAgain = ParseTaskUtils.wait(parseFile.getDataStreamInBackground());
+
+    // Verify controller get the correct data
+    ArgumentCaptor<ParseFile.State> stateCaptorAgain =
+        ArgumentCaptor.forClass(ParseFile.State.class);
+    verify(controller, times(2)).fetchAsync(
+        stateCaptorAgain.capture(),
+        anyString(),
+        any(ProgressCallback.class),
+        Matchers.<Task<Void>>any()
+    );
+    assertEquals(url, stateCaptorAgain.getValue().url());
+    // Verify the data we get is correct
+    assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(dataStreamAgain));
   }
 
   @Test
@@ -359,6 +389,22 @@ public class ParseFileTest {
     assertEquals(url, stateCaptor.getValue().url());
     // Verify the data we get is correct
     assertArrayEquals(content.getBytes(), ParseFileUtils.readFileToByteArray(fetchedFile));
+
+    // Make sure we always get the data from network
+    File fetchedFileAgain = ParseTaskUtils.wait(parseFile.getFileInBackground());
+
+    // Verify controller get the correct data
+    ArgumentCaptor<ParseFile.State> stateCaptorAgain =
+        ArgumentCaptor.forClass(ParseFile.State.class);
+    verify(controller, times(2)).fetchAsync(
+        stateCaptorAgain.capture(),
+        anyString(),
+        any(ProgressCallback.class),
+        Matchers.<Task<Void>>any()
+    );
+    assertEquals(url, stateCaptorAgain.getValue().url());
+    // Verify the data we get is correct
+    assertArrayEquals(content.getBytes(), ParseFileUtils.readFileToByteArray(fetchedFileAgain));
   }
 
   //endregion
