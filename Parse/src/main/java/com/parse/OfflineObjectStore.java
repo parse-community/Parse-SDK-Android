@@ -16,6 +16,10 @@ import bolts.Task;
 
 /** package */ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
+  private static ParseObjectSubclassingController getSubclassingController() {
+    return ParseCorePlugins.getInstance().getSubclassingController();
+  }
+
   private static <T extends ParseObject> Task<T> migrate(
       final ParseObjectStore<T> from, final ParseObjectStore<T> to) {
     return from.getAsync().onSuccessTask(new Continuation<T, Task<T>>() {
@@ -44,7 +48,7 @@ import bolts.Task;
   private final ParseObjectStore<T> legacy;
 
   public OfflineObjectStore(Class<T> clazz, String pinName, ParseObjectStore<T> legacy) {
-    this(ParseObject.getClassName(clazz), pinName, legacy);
+    this(getSubclassingController().getClassName(clazz), pinName, legacy);
   }
 
   public OfflineObjectStore(String className, String pinName, ParseObjectStore<T> legacy) {

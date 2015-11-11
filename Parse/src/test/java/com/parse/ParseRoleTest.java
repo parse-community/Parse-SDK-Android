@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.ParseCorePlugins;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -155,7 +157,7 @@ public class ParseRoleTest {
   public void testGetQuery() {
     ParseQuery query = ParseRole.getQuery();
 
-    assertEquals(ParseObject.getClassName(ParseRole.class), query.getBuilder().getClassName());
+    assertEquals(ParseCorePlugins.getInstance().getSubclassingController().getClassName(ParseRole.class), query.getBuilder().getClassName());
   }
 
   //endregion

@@ -49,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
   private AtomicReference<ParseDefaultACLController> defaultACLController = new AtomicReference<>();
 
   private AtomicReference<LocalIdManager> localIdManager = new AtomicReference<>();
+  private AtomicReference<ParseObjectSubclassingController> subclassingController = new AtomicReference<>();
 
   private ParseCorePlugins() {
     // do nothing
@@ -334,6 +335,21 @@ import java.util.concurrent.atomic.AtomicReference;
     if (!localIdManager.compareAndSet(null, manager)) {
       throw new IllegalStateException(
           "Another localId manager was already registered: " + localIdManager.get());
+    }
+  }
+
+  public ParseObjectSubclassingController getSubclassingController() {
+    if (subclassingController.get() == null) {
+      ParseObjectSubclassingController controller = new ParseObjectSubclassingController();
+      subclassingController.compareAndSet(null, controller);
+    }
+    return subclassingController.get();
+  }
+
+  public void registerSubclassingController(ParseObjectSubclassingController controller) {
+    if (!subclassingController.compareAndSet(null, controller)) {
+      throw new IllegalStateException(
+          "Another subclassing controller was already registered: " + subclassingController.get());
     }
   }
 }
