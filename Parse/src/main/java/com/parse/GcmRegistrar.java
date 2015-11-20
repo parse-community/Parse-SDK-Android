@@ -182,6 +182,8 @@ import bolts.Task;
     String registrationId = intent.getStringExtra(REGISTRATION_ID_EXTRA);
 
     if (registrationId != null && registrationId.length() > 0) {
+      PLog.v(TAG, "Received deviceToken <" + registrationId + "> from GCM.");
+
       ParseInstallation installation = ParseInstallation.getCurrentInstallation();
       // Compare the new deviceToken with the old deviceToken, we only update the
       // deviceToken if the new one is different from the old one. This does not follow google
