@@ -136,9 +136,15 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
    *      An {@code Intent} containing the channel and data of the current push notification.
    */
   protected void onPushReceive(Context context, Intent intent) {
+    String pushDataStr = intent.getStringExtra(KEY_PUSH_DATA);
+    if (pushDataStr == null) {
+      PLog.e(TAG, "Can not get push data from intent.");
+      return;
+    }
+
     JSONObject pushData = null;
     try {
-      pushData = new JSONObject(intent.getStringExtra(KEY_PUSH_DATA));
+      pushData = new JSONObject(pushDataStr);
     } catch (JSONException e) {
       PLog.e(TAG, "Unexpected JSONException when receiving push data: ", e);
     }
