@@ -417,6 +417,10 @@ public class ParseFile {
     return ParseTaskUtils.wait(getDataInBackground());
   }
 
+  public byte[] getLocalData() {
+    return data;
+  }
+
   /**
    * Asynchronously gets the data from cache if available or fetches its content from the network.
    * A {@code ProgressCallback} will be called periodically with progress updates.
