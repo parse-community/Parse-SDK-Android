@@ -141,6 +141,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
       PLog.e(TAG, "Can not get push data from intent.");
       return;
     }
+    PLog.v(TAG, "Received push data: " + pushDataStr);
 
     JSONObject pushData = null;
     try {
