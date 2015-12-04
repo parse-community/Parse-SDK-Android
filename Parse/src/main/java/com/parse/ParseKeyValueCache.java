@@ -64,7 +64,7 @@ import java.util.Date;
   }
 
   private static File getKeyValueCacheDir() {
-    if (directory == null || !directory.exists()) {
+    if (directory != null && !directory.exists()) {
       directory.mkdir();
     }
     return directory;
