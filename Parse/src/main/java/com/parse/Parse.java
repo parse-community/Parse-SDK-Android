@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +37,160 @@ import bolts.Task;
  * library.
  */
 public class Parse {
+  /**
+   * Represents an opaque configuration for the {@code Parse} SDK configuration.
+   */
+  public static final class Configuration {
+    /**
+     * Allows for simple constructing of a {@code Configuration} object.
+     */
+    public static final class Builder {
+      private Context context;
+      private String applicationId;
+      private String clientKey;
+      private boolean localDataStoreEnabled;
+      private List<ParseNetworkInterceptor> interceptors;
+
+      /**
+       * Initialize a bulider with a given context.
+       *
+       * This context will then be passed through to the rest of the Parse SDK for use during
+       * initialization.
+       *
+       * <p/>
+       * You may define {@code com.parse.APPLICATION_ID} and {@code com.parse.CLIENT_KEY}
+       * {@code meta-data} in your {@code AndroidManifest.xml}:
+       * <pre>
+       * &lt;manifest ...&gt;
+       *
+       * ...
+       *
+       *   &lt;application ...&gt;
+       *     &lt;meta-data
+       *       android:name="com.parse.APPLICATION_ID"
+       *       android:value="@string/parse_app_id" /&gt;
+       *     &lt;meta-data
+       *       android:name="com.parse.CLIENT_KEY"
+       *       android:value="@string/parse_client_key" /&gt;
+       *
+       *       ...
+       *
+       *   &lt;/application&gt;
+       * &lt;/manifest&gt;
+       * </pre>
+       * <p/>
+       *
+       * This will cause the values for {@code applicationId} and {@code clientKey} to be set to
+       * those defined in your manifest.
+       *
+       * @param context The active {@link Context} for your application. Cannot be null.
+       */
+      public Builder(Context context) {
+        this.context = context;
+
+        // Yes, our public API states we cannot be null. But for unit tests, it's easier just to
+        // support null here.
+        if (context != null) {
+          Context applicationContext = context.getApplicationContext();
+          Bundle metaData = ManifestInfo.getApplicationMetadata(applicationContext);
+          if (metaData != null) {
+            applicationId = metaData.getString(PARSE_APPLICATION_ID);
+            clientKey = metaData.getString(PARSE_CLIENT_KEY);
+          }
+        }
+      }
+
+      /**
+       * Set the application id to be used by Parse.
+       *
+       * This method is only required if you intend to use a different {@code applicationId} than
+       * is defined by {@code com.parse.APPLICATION_ID} in your {@code AndroidManifest.xml}.
+       *
+       * @param applicationId The application id to set.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder applicationId(String applicationId) {
+        this.applicationId = applicationId;
+        return this;
+      }
+
+      /**
+       * Set the client key to be used by Parse.
+       *
+       * This method is only required if you intend to use a different {@code clientKey} than
+       * is defined by {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
+       *
+       * @param clientKey The client key to set.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder clientKey(String clientKey) {
+        this.clientKey = clientKey;
+        return this;
+      }
+
+      /**
+       * Add a {@link ParseNetworkInterceptor}.
+       *
+       * @param interceptor The interceptor to add.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder addNetworkInterceptor(ParseNetworkInterceptor interceptor) {
+        if (interceptors == null) {
+          interceptors = new ArrayList<>();
+        }
+        interceptors.add(interceptor);
+        return this;
+      }
+
+      /**
+       * Enable pinning in your application. This must be called before your application can use
+       * pinning.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder enableLocalDataStore() {
+        localDataStoreEnabled = true;
+        return this;
+      }
+
+      private Builder setNetworkInterceptors(Collection<ParseNetworkInterceptor> interceptors) {
+        if (interceptors != null) {
+          this.interceptors.clear();
+          this.interceptors.addAll(interceptors);
+        }
+        return this;
+      }
+
+      private Builder setLocalDatastoreEnabled(boolean enabled) {
+        localDataStoreEnabled = enabled;
+        return this;
+      }
+
+      /**
+       * Construct this builder into a concrete {@code Configuration} instance.
+       * @return A constructed {@code Configuration} object.
+       */
+      public Configuration build() {
+        return new Configuration(this);
+      }
+    }
+
+    /* package for tests */ final Context context;
+    /* package for tests */ final String applicationId;
+    /* package for tests */ final String clientKey;
+    /* package for tests */ final boolean localDataStoreEnabled;
+    /* package for tests */ final List<ParseNetworkInterceptor> interceptors;
+
+    private Configuration(Builder builder) {
+      this.context = builder.context;
+      this.applicationId = builder.applicationId;
+      this.clientKey = builder.clientKey;
+      this.localDataStoreEnabled = builder.localDataStoreEnabled;
+      this.interceptors = builder.interceptors != null ?
+        Collections.unmodifiableList(new ArrayList<>(builder.interceptors)) :
+        null;
+    }
+  }
+
   private static final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
   private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
 
@@ -133,32 +289,24 @@ public class Parse {
    *          The active {@link Context} for your application.
    */
   public static void initialize(Context context) {
-    Context applicationContext = context.getApplicationContext();
-    String applicationId;
-    String clientKey;
-    Bundle metaData = ManifestInfo.getApplicationMetadata(applicationContext);
-    if (metaData != null) {
-      applicationId = metaData.getString(PARSE_APPLICATION_ID);
-      clientKey = metaData.getString(PARSE_CLIENT_KEY);
-
-      if (applicationId == null) {
-        throw new RuntimeException("ApplicationId not defined. " +
-                "You must provide ApplicationId in AndroidManifest.xml.\n" +
-                "<meta-data\n" +
-                "    android:name=\"com.parse.APPLICATION_ID\"\n" +
-                "    android:value=\"<Your Application Id>\" />");
-      }
-      if (clientKey == null) {
-        throw new RuntimeException("ClientKey not defined. " +
-                "You must provide ClientKey in AndroidManifest.xml.\n" +
-                "<meta-data\n" +
-                "    android:name=\"com.parse.CLIENT_KEY\"\n" +
-                "    android:value=\"<Your Client Key>\" />");
-      }
-    } else {
-      throw new RuntimeException("Can't get Application Metadata");
+    Configuration.Builder builder = new Configuration.Builder(context);
+    if (builder.applicationId == null) {
+      throw new RuntimeException("ApplicationId not defined. " +
+        "You must provide ApplicationId in AndroidManifest.xml.\n" +
+        "<meta-data\n" +
+        "    android:name=\"com.parse.APPLICATION_ID\"\n" +
+        "    android:value=\"<Your Application Id>\" />");
+    } if (builder.clientKey == null) {
+      throw new RuntimeException("ClientKey not defined. " +
+        "You must provide ClientKey in AndroidManifest.xml.\n" +
+        "<meta-data\n" +
+        "    android:name=\"com.parse.CLIENT_KEY\"\n" +
+        "    android:value=\"<Your Client Key>\" />");
     }
-    initialize(context, applicationId, clientKey);
+    initialize(builder.setNetworkInterceptors(interceptors)
+        .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
+        .build()
+    );
   }
 
   /**
@@ -188,22 +336,36 @@ public class Parse {
    *          The client key provided in the Parse dashboard.
    */
   public static void initialize(Context context, String applicationId, String clientKey) {
-    ParsePlugins.Android.initialize(context, applicationId, clientKey);
-    Context applicationContext = context.getApplicationContext();
+    initialize(new Configuration.Builder(context)
+        .applicationId(applicationId)
+        .clientKey(clientKey)
+        .setNetworkInterceptors(interceptors)
+        .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
+        .build()
+    );
+  }
+
+  public static void initialize(Configuration configuration) {
+    // NOTE (richardross): We will need this here, as ParsePlugins uses the return value of
+    // isLocalDataStoreEnabled() to perform additional behavior.
+    isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
+
+    ParsePlugins.Android.initialize(configuration.context, configuration.applicationId, configuration.clientKey);
+    Context applicationContext = configuration.context.getApplicationContext();
 
     ParseHttpClient.setKeepAlive(true);
     ParseHttpClient.setMaxConnections(20);
     // If we have interceptors in list, we have to initialize all http clients and add interceptors
-    if (interceptors != null) {
-      initializeParseHttpClientsWithParseNetworkInterceptors();
+    if (configuration.interceptors != null) {
+      initializeParseHttpClientsWithParseNetworkInterceptors(configuration.interceptors);
     }
 
     ParseObject.registerParseSubclasses();
 
-    if (isLocalDatastoreEnabled()) {
-      offlineStore = new OfflineStore(context);
+    if (configuration.localDataStoreEnabled) {
+      offlineStore = new OfflineStore(configuration.context);
     } else {
-      ParseKeyValueCache.initialize(context);
+      ParseKeyValueCache.initialize(configuration.context);
     }
 
     // Make sure the data on disk for Parse is for the current
@@ -583,7 +745,7 @@ public class Parse {
   private static List<ParseNetworkInterceptor> interceptors;
 
   // Initialize all necessary http clients and add interceptors to these http clients
-  private static void initializeParseHttpClientsWithParseNetworkInterceptors() {
+  private static void initializeParseHttpClientsWithParseNetworkInterceptors(List<ParseNetworkInterceptor> interceptors) {
     // This means developers have not called addInterceptor method so we should do nothing.
     if (interceptors == null) {
       return;
@@ -605,9 +767,6 @@ public class Parse {
         parseHttpClient.addExternalInterceptor(interceptor);
       }
     }
-
-    // Remove interceptors reference since we do not need it anymore
-    interceptors = null;
   }
 
 
