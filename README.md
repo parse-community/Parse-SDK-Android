@@ -43,6 +43,12 @@ Results can be found in `Parse/build/reports/`
 ## How Do I Contribute?
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
 
+## Other Parse Projects
+
+ - [ParseUI for Android][parseui-link]
+ - [ParseFacebookUtils for Android][parsefacebookutils-link]
+ - [ParseTwitterUtils for Android][parsetwitterutils-link]
+
 ## License
     Copyright (c) 2015-present, Parse, LLC.
     All rights reserved.
@@ -64,5 +70,10 @@ We want to make contributing to this project as easy and transparent as possible
  [coverage-status-link]: https://coveralls.io/github/ParsePlatform/Parse-SDK-Android?branch=master
  [maven-svg]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android/badge.svg?style=flat
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
+ 
+ [parseui-link]: https://github.com/ParsePlatform/ParseUI-Android
+ [parsefacebookutils-link]: https://github.com/ParsePlatform/ParseFacebookUtils-Android
+ [parsetwitterutils-link]: https://github.com/ParsePlatform/ParseTwitterUtils-Android
+ 
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE
