@@ -388,6 +388,9 @@ import java.util.List;
     try {
       PackageInfo pi = context.getPackageManager().getPackageInfo(
           packageName, PackageManager.GET_PERMISSIONS);
+      if (pi.requestedPermissions == null) {
+        return false;
+      }
       return Arrays.asList(pi.requestedPermissions).containsAll(Arrays.asList(permissions));
     } catch (NameNotFoundException e) {
       PLog.e(TAG, "Couldn't find info about own package", e);
