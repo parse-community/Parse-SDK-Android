@@ -152,9 +152,14 @@ public class Parse {
         return this;
       }
 
-      private Builder setNetworkInterceptors(Collection<ParseNetworkInterceptor> interceptors) {
-        if (interceptors != null) {
+      /* package for tests */ Builder setNetworkInterceptors(Collection<ParseNetworkInterceptor> interceptors) {
+        if (this.interceptors == null) {
+          this.interceptors = new ArrayList<>();
+        } else {
           this.interceptors.clear();
+        }
+
+        if (interceptors != null) {
           this.interceptors.addAll(interceptors);
         }
         return this;

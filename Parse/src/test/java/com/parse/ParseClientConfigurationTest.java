@@ -12,6 +12,10 @@ import com.parse.http.ParseNetworkInterceptor;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -56,5 +60,61 @@ public class ParseClientConfigurationTest {
     } catch (UnsupportedOperationException ex) {
       // Expected
     }
+  }
+
+  @Test
+  public void testSetNetworkInterceptors() {
+    final ParseNetworkInterceptor interceptorA = mock(ParseNetworkInterceptor.class);
+    final ParseNetworkInterceptor interceptorB = mock(ParseNetworkInterceptor.class);
+
+    Collection<ParseNetworkInterceptor> collectionA = new ArrayList<ParseNetworkInterceptor>() {{
+      add(interceptorA);
+      add(interceptorB);
+    }};
+
+    Collection<ParseNetworkInterceptor> collectionB = new ArrayList<ParseNetworkInterceptor>() {{
+      add(interceptorB);
+      add(interceptorA);
+    }};
+
+    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+
+    builder.setNetworkInterceptors(collectionA);
+    Parse.Configuration configurationA = builder.build();
+
+    builder.setNetworkInterceptors(collectionB);
+    Parse.Configuration configurationB = builder.build();
+
+    assertTrue(collectionsEqual(configurationA.interceptors, collectionA));
+    assertTrue(collectionsEqual(configurationB.interceptors, collectionB));
+  }
+
+  private static <T> boolean collectionsEqual(Collection<T> a, Collection<T> b) {
+    if (a.size() != b.size()) {
+      return false;
+    }
+
+    Iterator<T> iteratorA = a.iterator();
+    Iterator<T> iteratorB = b.iterator();
+    for (; iteratorA.hasNext() && iteratorB.hasNext();) {
+      T objectA = iteratorA.next();
+      T objectB = iteratorB.next();
+
+      if (objectA == null || objectB == null) {
+        if (objectA != objectB) {
+          return false;
+        }
+        continue;
+      }
+
+      if (!objectA.equals(objectB)) {
+        return false;
+      }
+    }
+
+    if (iteratorA.hasNext() || iteratorB.hasNext()) {
+      return false;
+    }
+    return true;
   }
 }
