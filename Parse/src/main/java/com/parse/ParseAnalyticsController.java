@@ -10,6 +10,8 @@ package com.parse;
 
 import org.json.JSONObject;
 
+import java.util.Map;
+
 import bolts.Task;
 
 /** package */ class ParseAnalyticsController {
@@ -21,8 +23,8 @@ import bolts.Task;
   }
 
   public Task<Void> trackEventInBackground(final String name,
-    JSONObject jsonDimensions, String sessionToken) {
-    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackEventCommand(name, jsonDimensions,
+    Map<String, String> dimensions, String sessionToken) {
+    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackEventCommand(name, dimensions,
         sessionToken);
 
     Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);

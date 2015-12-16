@@ -9,7 +9,6 @@
 package com.parse;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collections;
@@ -104,13 +103,18 @@ public class ParseConfig {
     });
   }
 
-  /* package */ ParseConfig(JSONObject object, ParseDecoder decoder) {
-    Map<String, Object> decodedObject = (Map<String, Object>) decoder.decode(object);
+  @SuppressWarnings("unchecked")
+  /* package */ static ParseConfig decode(JSONObject json, ParseDecoder decoder) {
+    Map<String, Object> decodedObject = (Map<String, Object>) decoder.decode(json);
     Map<String, Object> decodedParams = (Map<String, Object>) decodedObject.get("params");
     if (decodedParams == null) {
       throw new RuntimeException("Object did not contain the 'params' key.");
     }
-    this.params = Collections.unmodifiableMap(decodedParams);
+    return new ParseConfig(decodedParams);
+  }
+
+  /* package */ ParseConfig(Map<String, Object> params) {
+    this.params = Collections.unmodifiableMap(params);
   }
 
   /* package */ ParseConfig() {

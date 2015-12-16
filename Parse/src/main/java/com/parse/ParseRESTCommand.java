@@ -137,7 +137,7 @@ import bolts.Task;
         sessionToken);
   }
 
-  protected ParseRESTCommand(
+  public ParseRESTCommand(
       String httpPath,
       ParseHttpRequest.Method httpMethod,
       JSONObject jsonParameters,

@@ -12,10 +12,10 @@ import android.net.Uri;
 
 import com.parse.http.ParseHttpRequest;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 /** package */ class ParseRESTAnalyticsCommand extends ParseRESTCommand {
@@ -26,43 +26,46 @@ import java.util.Map;
   // Tracks the AppOpened event
   /* package for test */ static final String EVENT_APP_OPENED = "AppOpened";
 
+  private static final String PATH = "events/%s";
+
+  private static final String KEY_AT = "at";
+  private static final String KEY_PUSH_HASH = "push_hash";
+  private static final String KEY_DIMENSIONS = "dimensions";
+
+  public static ParseRESTAnalyticsCommand trackAppOpenedCommand(
+      String pushHash, String sessionToken) {
+    return trackEventCommand(EVENT_APP_OPENED, pushHash, null, sessionToken);
+  }
+
+  public static ParseRESTAnalyticsCommand trackEventCommand(
+      String eventName, Map<String, String> dimensions, String sessionToken) {
+    return trackEventCommand(eventName, null, dimensions, sessionToken);
+  }
+
+  /* package */ static ParseRESTAnalyticsCommand trackEventCommand(
+      String eventName, String pushHash, Map<String, String> dimensions, String sessionToken) {
+    String httpPath = String.format(PATH, Uri.encode(eventName));
+    JSONObject parameters = new JSONObject();
+    try {
+      parameters.put(KEY_AT, NoObjectsEncoder.get().encode(new Date()));
+      if (pushHash != null) {
+        parameters.put(KEY_PUSH_HASH, pushHash);
+      }
+      if (dimensions != null) {
+        parameters.put(KEY_DIMENSIONS, NoObjectsEncoder.get().encode(dimensions));
+      }
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
+    }
+    return new ParseRESTAnalyticsCommand(
+        httpPath, ParseHttpRequest.Method.POST, parameters, sessionToken);
+  }
+
   public ParseRESTAnalyticsCommand(
       String httpPath,
       ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
+      JSONObject parameters,
       String sessionToken) {
     super(httpPath, httpMethod, parameters, sessionToken);
-  }
-
-  public static ParseRESTAnalyticsCommand trackAppOpenedCommand(String pushHash,
-      String sessionToken) {
-    Map<String, String> parameters = null;
-    if (pushHash != null) {
-      parameters = new HashMap<>();
-      parameters.put("push_hash", pushHash);
-    }
-    return trackEventCommand(EVENT_APP_OPENED, parameters, sessionToken);
-  }
-
-  public static ParseRESTAnalyticsCommand trackEventCommand(String eventName, JSONObject dimensions,
-      String sessionToken) {
-    Map<String, Object> parameters = null;
-    if (dimensions != null) {
-      parameters = new HashMap<>();
-      parameters.put("dimensions", dimensions);
-    }
-    return trackEventCommand(eventName, parameters, sessionToken);
-  }
-
-  /* package */ static ParseRESTAnalyticsCommand trackEventCommand(String eventName,
-      Map<String, ?> parameters, String sessionToken) {
-    String httpPath = String.format("events/%s", Uri.encode(eventName));
-    Map<String, Object> commandParameters = new HashMap<>();
-    if (parameters != null) {
-      commandParameters.putAll(parameters);
-    }
-    commandParameters.put("at", NoObjectsEncoder.get().encode(new Date()));
-    return new ParseRESTAnalyticsCommand(
-        httpPath, ParseHttpRequest.Method.POST, commandParameters, sessionToken);
   }
 }

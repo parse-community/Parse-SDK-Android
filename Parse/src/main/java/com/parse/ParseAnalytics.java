@@ -13,6 +13,8 @@ import android.content.Intent;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -192,16 +194,15 @@ public class ParseAnalytics {
     if (name == null || name.trim().length() == 0) {
       throw new IllegalArgumentException("A name for the custom event must be provided.");
     }
-
-    final JSONObject jsonDimensions = dimensions != null
-        ? (JSONObject) NoObjectsEncoder.get().encode(dimensions)
+    final Map<String, String> dimensionsCopy = dimensions != null
+        ? Collections.unmodifiableMap(new HashMap<>(dimensions))
         : null;
 
     return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
       @Override
       public Task<Void> then(Task<String> task) throws Exception {
         String sessionToken = task.getResult();
-        return getAnalyticsController().trackEventInBackground(name, jsonDimensions, sessionToken);
+        return getAnalyticsController().trackEventInBackground(name, dimensionsCopy, sessionToken);
       }
     });
   }

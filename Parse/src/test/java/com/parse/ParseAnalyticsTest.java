@@ -17,7 +17,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
+import org.mockito.Matchers;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -32,9 +32,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -47,26 +46,6 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = 21)
 public class ParseAnalyticsTest {
 
-  private static class DimensionsJsonArgumentMatcher extends ArgumentMatcher<JSONObject> {
-   JSONObject expectedJson;
-
-   public DimensionsJsonArgumentMatcher(Map<String, String> dimensions) {
-     if (dimensions == null) {
-       throw new IllegalArgumentException("dimension map should not be null");
-     }
-     expectedJson = (JSONObject) NoObjectsEncoder.get().encode(dimensions);
-   }
-
-   @Override
-   public boolean matches(Object argument) {
-     return argument == null ? false : expectedJson.toString().equals(argument.toString());
-   }
-  }
-
-  private static JSONObject eqDimensionsJson(Map<String, String> expected) {
-    return argThat(new DimensionsJsonArgumentMatcher(expected));
-  }
-
   ParseAnalyticsController controller;
 
   @Before
@@ -77,7 +56,7 @@ public class ParseAnalyticsTest {
     controller = mock(ParseAnalyticsController.class);
     when(controller.trackEventInBackground(
         anyString(),
-        any(JSONObject.class),
+        anyMapOf(String.class, String.class),
         anyString())).thenReturn(Task.<Void>forResult(null));
     when(controller.trackAppOpenedInBackground(
         anyString(),
@@ -117,16 +96,16 @@ public class ParseAnalyticsTest {
   public void testTrackEventInBackgroundNormalName() throws Exception{
     ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test"));
 
-    verify(controller, times(1)).trackEventInBackground(eq("test"), isNull(JSONObject.class),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
   }
 
   @Test
   public void testTrackEventInBackgroundNullParameters() throws Exception{
     ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
 
-    verify(controller, times(1)).trackEventInBackground(eq("test"), isNull(JSONObject.class),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
   }
 
   @Test
@@ -134,8 +113,8 @@ public class ParseAnalyticsTest {
     Map<String, String> dimensions = new HashMap<>();
     ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-    verify(controller, times(1)).trackEventInBackground(eq("test"), eqDimensionsJson(dimensions),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), eq(dimensions), isNull(String.class));
   }
 
   @Test
@@ -144,8 +123,8 @@ public class ParseAnalyticsTest {
     dimensions.put("key", "value");
     ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-    verify(controller, times(1)).trackEventInBackground(eq("test"), eqDimensionsJson(dimensions),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), eq(dimensions), isNull(String.class));
   }
 
   @Test
@@ -153,8 +132,8 @@ public class ParseAnalyticsTest {
     Map<String, String> dimensions = new HashMap<>();
     ParseAnalytics.trackEventInBackground("test", dimensions, null);
 
-    verify(controller, times(1)).trackEventInBackground(eq("test"), eqDimensionsJson(dimensions),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), eq(dimensions), isNull(String.class));
   }
 
 
@@ -174,8 +153,8 @@ public class ParseAnalyticsTest {
 
     // Make sure the callback is called
     assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-    verify(controller, times(1)).trackEventInBackground(eq("test"), eqDimensionsJson(dimensions),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground(
+        eq("test"), eq(dimensions), isNull(String.class));
 
     final Semaphore doneAgain = new Semaphore(0);
     ParseAnalytics.trackEventInBackground("test", new SaveCallback() {
@@ -188,8 +167,8 @@ public class ParseAnalyticsTest {
 
     // Make sure the callback is called
     assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
-    verify(controller, times(1)).trackEventInBackground(eq("test"), isNull(JSONObject.class),
-        isNull(String.class));
+    verify(controller, times(1)).trackEventInBackground
+        (eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
   }
 
   //endregion

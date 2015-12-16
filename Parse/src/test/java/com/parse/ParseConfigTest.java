@@ -9,7 +9,6 @@
 package com.parse;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -71,25 +70,25 @@ public class ParseConfigTest {
   }
 
   @Test
-  public void testConstructWithValidJsonObject() throws Exception {
+  public void testDecodeWithValidJsonObject() throws Exception {
     final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
     JSONObject json = new JSONObject();
     json.put("params", NoObjectsEncoder.get().encode(params));
 
-    ParseConfig config = new ParseConfig(json, ParseDecoder.get());
+    ParseConfig config = ParseConfig.decode(json, ParseDecoder.get());
     assertEquals(1, config.params.size());
     assertEquals("value", config.params.get("string"));
   }
 
   @Test(expected = RuntimeException.class)
-  public void testConstructWithInvalidJsonObject() throws Exception {
+  public void testDecodeWithInvalidJsonObject() throws Exception {
     final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
     JSONObject json = new JSONObject();
     json.put("error", NoObjectsEncoder.get().encode(params));
 
-    ParseConfig config = new ParseConfig(json, ParseDecoder.get());
+    ParseConfig.decode(json, ParseDecoder.get());
   }
 
   //endregion
@@ -98,10 +97,10 @@ public class ParseConfigTest {
 
   @Test
   public void testGetInBackgroundSuccess() throws Exception {
-    final Map<String, Object> params = new HashMap<String, Object>();
+    final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseConfigController controller = mockParseConfigControllerWithResponse(config);
     ParseCorePlugins.getInstance().registerConfigController(controller);
 
@@ -114,6 +113,7 @@ public class ParseConfigTest {
     assertEquals("value", configAgain.params.get("string"));
   }
 
+  @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
   @Test
   public void testGetInBackgroundFail() throws Exception {
     ParseException exception = new ParseException(ParseException.CONNECTION_FAILED, "error");
@@ -135,7 +135,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseConfigController controller = mockParseConfigControllerWithResponse(config);
     ParseCorePlugins.getInstance().registerConfigController(controller);
 
@@ -180,7 +180,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseConfigController controller = mockParseConfigControllerWithResponse(config);
     ParseCorePlugins.getInstance().registerConfigController(controller);
 
@@ -216,7 +216,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("string", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseConfigController controller = new ParseConfigController(mock(ParseHttpClient.class),
         mockParseCurrentConfigControllerWithResponse(config));
     ParseCorePlugins.getInstance().registerConfigController(controller);
@@ -246,7 +246,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", true);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertTrue(config.getBoolean("key"));
     assertTrue(config.getBoolean("key", false));
   }
@@ -256,7 +256,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", true);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertFalse(config.getBoolean("wrongKey"));
     assertFalse(config.getBoolean("wrongKey", false));
   }
@@ -266,7 +266,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertFalse(config.getBoolean("key"));
     assertFalse(config.getBoolean("key", false));
   }
@@ -280,7 +280,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 998);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getInt("key"), 998);
     assertEquals(998, config.getInt("key", 100));
   }
@@ -290,7 +290,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 998);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getInt("wrongKey"), 0);
     assertEquals(100, config.getInt("wrongKey", 100));
   }
@@ -304,7 +304,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 998.1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getDouble("key"), 998.1, 0.0001);
     assertEquals(998.1, config.getDouble("key", 100.1), 0.0001);
   }
@@ -314,7 +314,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 998.1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getDouble("wrongKey"), 0.0, 0.0001);
     assertEquals(100.1, config.getDouble("wrongKey", 100.1), 0.0001);
   }
@@ -328,7 +328,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", (long)998);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getLong("key"), (long)998);
     assertEquals((long)998, config.getLong("key", (long) 100));
   }
@@ -338,7 +338,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", (long)998);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getLong("wrongKey"), (long)0);
     assertEquals((long)100, config.getLong("wrongKey", (long) 100));
   }
@@ -352,7 +352,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.get("key"), "value");
     assertEquals("value", config.get("key", "haha"));
   }
@@ -362,7 +362,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.get("wrongKey"));
     assertEquals("haha", config.get("wrongKey", "haha"));
   }
@@ -373,7 +373,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.get("key"));
     assertNull(config.get("key", "haha"));
     assertNull(config.get("keyAgain"));
@@ -389,7 +389,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(config.getString("key"), "value");
     assertEquals("value", config.getString("key", "haha"));
   }
@@ -399,7 +399,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", "value");
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getString("wrongKey"));
     assertEquals("haha", config.getString("wrongKey", "haha"));
   }
@@ -409,7 +409,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getString("key"));
     assertEquals("haha", config.getString("key", "haha"));
   }
@@ -420,7 +420,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getString("key"));
     assertNull(config.getString("key", "haha"));
     assertNull(config.getString("keyAgain"));
@@ -440,7 +440,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", date);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(date.getTime(), config.getDate("key").getTime());
     assertEquals(date.getTime(), config.getDate("key", dateAgain).getTime());
   }
@@ -454,7 +454,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", date);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getDate("wrongKey"));
     assertSame(dateAgain, config.getDate("wrongKey", dateAgain));
   }
@@ -466,7 +466,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getDate("key"));
     assertSame(date, config.getDate("key", date));
   }
@@ -479,7 +479,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getDate("key"));
     assertNull(config.getDate("key", date));
     assertNull(config.getDate("keyAgain"));
@@ -503,7 +503,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", list);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertArrayEquals(list.toArray(), config.getList("key").toArray());
     assertArrayEquals(list.toArray(), config.getList("key", listAgain).toArray());
   }
@@ -521,7 +521,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", list);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getList("wrongKey"));
     assertSame(listAgain, config.getList("wrongKey", listAgain));
   }
@@ -535,7 +535,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getList("key"));
     assertSame(list, config.getList("key", list));
   }
@@ -550,7 +550,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getList("key"));
     assertNull(config.getList("key", list));
     assertNull(config.getList("keyAgain"));
@@ -568,7 +568,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", number);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertEquals(number, config.getNumber("key"));
     assertEquals(number, config.getNumber("key", numberAgain));
   }
@@ -580,7 +580,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", number);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getNumber("wrongKey"));
     assertSame(numberAgain, config.getNumber("wrongKey", numberAgain));
   }
@@ -591,7 +591,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", new ArrayList<String>());
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getNumber("key"));
     assertSame(number, config.getNumber("key", number));
   }
@@ -603,7 +603,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getNumber("key"));
     assertNull(config.getNumber("key", number));
     assertNull(config.getNumber("keyAgain"));
@@ -627,7 +627,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", map);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     Map<String, Object> mapConfig = config.getMap("key");
     assertEquals(3, mapConfig.size());
     assertEquals("foo", mapConfig.get("first"));
@@ -649,7 +649,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", map);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getMap("wrongKey"));
     assertSame(mapAgain, config.getMap("wrongKey", mapAgain));
   }
@@ -663,7 +663,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getMap("key"));
     assertSame(map, config.getMap("key", map));
   }
@@ -678,7 +678,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getMap("key"));
     assertNull(config.getMap("key", map));
     assertNull(config.getMap("keyAgain"));
@@ -691,16 +691,16 @@ public class ParseConfigTest {
 
   @Test
   public void testGetJsonObjectKeyExist() throws Exception {
-    final JSONObject json = new JSONObject();
-    json.put("key", "value");
-    final JSONObject jsonAgain = new JSONObject();
-    jsonAgain.put("keyAgain", "valueAgain");
+    final Map<String, String> value = new HashMap<>();
+    value.put("key", "value");
     final Map<String, Object> params = new HashMap<>();
-    params.put("key", json);
+    params.put("key", value);
 
-    ParseConfig config = createSampleParseConfig(params);
+    final JSONObject json = new JSONObject(value);
+
+    ParseConfig config = new ParseConfig(params);
     assertEquals(json, config.getJSONObject("key"), JSONCompareMode.NON_EXTENSIBLE);
-    assertEquals(json, config.getJSONObject("key", jsonAgain),
+    assertEquals(json, config.getJSONObject("key", new JSONObject()),
         JSONCompareMode.NON_EXTENSIBLE);
   }
 
@@ -711,10 +711,10 @@ public class ParseConfigTest {
     final JSONObject jsonAgain = new JSONObject();
     jsonAgain.put("keyAgain", "valueAgain");
     final Map<String, Object> params;
-    params = new HashMap<String, Object>();
+    params = new HashMap<>();
     params.put("key", json);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONObject("wrongKey"));
     //TODO(mengyan) ParseConfig.getJSONObject should return jsonAgain, but due to the error in
     // ParseConfig.getJsonObject, this returns null right now. Revise when we correct the logic
@@ -729,7 +729,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONObject("key"));
     //TODO(mengyan) ParseConfig.getJSONObject should return json, but due to the error in
     // ParseConfig.getJsonObject, this returns null right now. Revise when we correct the logic
@@ -745,7 +745,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONObject("key"));
     assertNull(config.getJSONObject("key", json));
     assertNull(config.getJSONObject("keyAgain"));
@@ -758,22 +758,21 @@ public class ParseConfigTest {
 
   @Test
   public void testGetJsonArrayKeyExist() throws Exception {
-    final JSONObject json = new JSONObject();
-    json.put("key", "value");
-    final JSONObject jsonAgain = new JSONObject();
-    jsonAgain.put("keyAgain", "valueAgain");
-    final JSONArray jsonArray = new JSONArray();
-    jsonArray.put(0, json);
-    jsonArray.put(1, jsonAgain);
-    final JSONArray jsonArrayAgain = new JSONArray();
-    jsonArray.put(0, jsonAgain);
-    jsonArray.put(1, json);
+    final Map<String, String> map = new HashMap<>();
+    map.put("key", "value");
+    final Map<String, String> mapAgain = new HashMap<>();
+    mapAgain.put("keyAgain", "valueAgain");
+    final List<Map<String, String>> value = new ArrayList<>();
+    value.add(map);
+    value.add(mapAgain);
     final Map<String, Object> params = new HashMap<>();
-    params.put("key", jsonArray);
+    params.put("key", value);
 
-    ParseConfig config = createSampleParseConfig(params);
+    JSONArray jsonArray = new JSONArray(value);
+
+    ParseConfig config = new ParseConfig(params);
     assertEquals(jsonArray, config.getJSONArray("key"), JSONCompareMode.NON_EXTENSIBLE);
-    assertEquals(jsonArray, config.getJSONArray("key", jsonArrayAgain),
+    assertEquals(jsonArray, config.getJSONArray("key", new JSONArray()),
         JSONCompareMode.NON_EXTENSIBLE);
   }
 
@@ -792,7 +791,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", jsonArray);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONArray("wrongKey"));
     //TODO(mengyan) ParseConfig.getJSONArray should return default jsonArrayAgain, but due to the
     // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct the
@@ -812,7 +811,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONArray("key"));
     //TODO(mengyan) ParseConfig.getJSONArray should return default jsonArray, but due to the
     // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct the
@@ -832,7 +831,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getJSONArray("key"));
     assertNull(config.getJSONArray("key", jsonArray));
     assertNull(config.getJSONArray("keyAgain"));
@@ -850,7 +849,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", geoPoint);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseGeoPoint geoPointConfig = config.getParseGeoPoint("key");
     assertEquals(geoPoint.getLongitude(), geoPointConfig.getLongitude(), 0.0001);
     assertEquals(geoPoint.getLatitude(), geoPointConfig.getLatitude(), 0.0001);
@@ -864,7 +863,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", geoPoint);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseGeoPoint("wrongKey"));
     assertSame(geoPointAgain, config.getParseGeoPoint("wrongKey", geoPointAgain));
   }
@@ -875,7 +874,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseGeoPoint("key"));
     assertSame(geoPoint, config.getParseGeoPoint("key", geoPoint));
   }
@@ -887,7 +886,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", null);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseGeoPoint("key"));
     assertNull(config.getParseGeoPoint("key", geoPoint));
     assertNull(config.getParseGeoPoint("keyAgain"));
@@ -907,7 +906,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", file);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     ParseFile fileConfig = config.getParseFile("key");
     assertEquals(file.getName(), fileConfig.getName());
     assertEquals(file.getUrl(), fileConfig.getUrl());
@@ -923,7 +922,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", file);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseFile("wrongKey"));
     assertSame(fileAgain, config.getParseFile("wrongKey", fileAgain));
   }
@@ -935,7 +934,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("key", 1);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseFile("key"));
     assertSame(file, config.getParseFile("key", file));
   }
@@ -948,7 +947,7 @@ public class ParseConfigTest {
     params.put("key", JSONObject.NULL);
     params.put("keyAgain", JSONObject.NULL);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     assertNull(config.getParseFile("key"));
     assertNull(config.getParseFile("key", file));
     assertNull(config.getParseFile("keyAgain"));
@@ -969,7 +968,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("list", list);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     String configStr = config.toString();
     assertTrue(configStr.contains("ParseConfig"));
     assertTrue(configStr.contains("list"));
@@ -987,7 +986,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("map", map);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     String configStr = config.toString();
     assertTrue(configStr.contains("ParseConfig"));
     assertTrue(configStr.contains("map"));
@@ -1002,7 +1001,7 @@ public class ParseConfigTest {
     final Map<String, Object> params = new HashMap<>();
     params.put("geoPoint", geoPoint);
 
-    ParseConfig config = createSampleParseConfig(params);
+    ParseConfig config = new ParseConfig(params);
     String configStr = config.toString();
     assertTrue(configStr.contains("ParseGeoPoint"));
     assertTrue(configStr.contains("45.484"));
@@ -1023,13 +1022,6 @@ public class ParseConfigTest {
     when(controller.getAsync(anyString()))
         .thenReturn(Task.<ParseConfig>forError(exception));
     return controller;
-  }
-
-  private ParseConfig createSampleParseConfig(final Map<String, Object> params)
-      throws JSONException {
-    JSONObject json = new JSONObject();
-    json.put("params", NoObjectsEncoder.get().encode(params));
-    return new ParseConfig(json, ParseDecoder.get());
   }
 
   private ParseCurrentConfigController mockParseCurrentConfigControllerWithResponse(

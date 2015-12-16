@@ -14,8 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /** package */ class ParseRESTPushCommand extends ParseRESTCommand {
@@ -30,7 +28,7 @@ import java.util.Set;
   public ParseRESTPushCommand(
       String httpPath,
       ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
+      JSONObject parameters,
       String sessionToken) {
     super(httpPath, httpMethod, parameters, sessionToken);
   }
@@ -38,41 +36,39 @@ import java.util.Set;
   public static ParseRESTPushCommand sendPushCommand(ParseQuery.State<ParseInstallation> query,
   Set<String> targetChannels, String targetDeviceType, Long expirationTime,
       Long expirationInterval, JSONObject payload, String sessionToken) {
-    Map <String, Object> parameters = new HashMap<>();
-
-    if (targetChannels != null) {
-      parameters.put(KEY_CHANNELS, new JSONArray(targetChannels));
-    } else {
-      if (query != null) {
-        ParseQuery.QueryConstraints where = query.constraints();
-        JSONObject whereJSON = (JSONObject) PointerEncoder.get().encode(where);
+    JSONObject parameters = new JSONObject();
+    try {
+      if (targetChannels != null) {
+        parameters.put(KEY_CHANNELS, new JSONArray(targetChannels));
+      } else {
+        JSONObject whereJSON = null;
+        if (query != null) {
+          ParseQuery.QueryConstraints where = query.constraints();
+          whereJSON = (JSONObject) PointerEncoder.get().encode(where);
+        }
+        if (targetDeviceType != null) {
+          whereJSON = new JSONObject();
+          whereJSON.put(KEY_DEVICE_TYPE, targetDeviceType);
+        }
+        if (whereJSON == null) {
+          // If there are no conditions set, then push to everyone by specifying empty query conditions.
+          whereJSON = new JSONObject();
+        }
         parameters.put(KEY_WHERE, whereJSON);
       }
-      if (targetDeviceType != null) {
-        JSONObject deviceTypeCondition = new JSONObject();
-        try {
-          deviceTypeCondition.put(KEY_DEVICE_TYPE, targetDeviceType);
-        } catch (JSONException e) {
-          throw new RuntimeException(e.getMessage());
-        }
-        parameters.put(KEY_WHERE, deviceTypeCondition);
+
+      if (expirationTime != null) {
+        parameters.put(KEY_EXPIRATION_TIME, expirationTime);
+      } else if (expirationInterval != null) {
+        parameters.put(KEY_EXPIRATION_INTERVAL, expirationInterval);
       }
-      if (parameters.size() == 0) {
-        // If there are no conditions set, then push to everyone by specifying empty query conditions.
-        parameters.put(KEY_WHERE, new JSONObject());
+
+      if (payload != null) {
+        parameters.put(KEY_DATA, payload);
       }
+    } catch (JSONException e) {
+      throw new RuntimeException(e);
     }
-
-    if (expirationTime != null) {
-      parameters.put(KEY_EXPIRATION_TIME, expirationTime);
-    } else if (expirationInterval != null) {
-      parameters.put(KEY_EXPIRATION_INTERVAL, expirationInterval);
-    }
-
-    if (payload != null) {
-      parameters.put(KEY_DATA, payload);
-    }
-
     return new ParseRESTPushCommand("push", ParseHttpRequest.Method.POST, parameters, sessionToken);
   }
 }
