@@ -3139,10 +3139,6 @@ public class ParseObject {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONArray}.
    */
-  //TODO (grantland): Do not auto-convert JSONArray and List (v2)
-  // Calling this on an untouched fetched object will mark the object as dirty due to mutable
-  // containers and auto List <-> JSONArray conversion, since arrays are converted to List
-  // by default.
   public JSONArray getJSONArray(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3150,7 +3146,6 @@ public class ParseObject {
 
       if (value instanceof List) {
         value = PointerOrLocalIdEncoder.get().encode(value);
-        put(key, value);
       }
 
       if (!(value instanceof JSONArray)) {
@@ -3168,7 +3163,6 @@ public class ParseObject {
    * @return {@code null} if there is no such key or if the value can't be converted to a
    *          {@link List}.
    */
-  //TODO (grantland): Do not auto-convert JSONArray and List (v2)
   public <T> List<T> getList(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
@@ -3176,7 +3170,6 @@ public class ParseObject {
       if (value instanceof JSONArray) {
         ParseDecoder decoder = ParseDecoder.get();
         value = decoder.convertJSONArrayToList((JSONArray) value);
-        put(key, value);
       }
 
       if (!(value instanceof List)) {
@@ -3196,7 +3189,6 @@ public class ParseObject {
    * @return {@code null} if there is no such key or if the value can't be converted to a
    *          {@link Map}.
    */
-  //TODO (grantland): Do not auto-convert JSONObject and Map (v2)
   public <V> Map<String, V> getMap(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
@@ -3204,7 +3196,6 @@ public class ParseObject {
       if (value instanceof JSONObject) {
         ParseDecoder decoder = ParseDecoder.get();
         value = decoder.convertJSONObjectToMap((JSONObject) value);
-        put(key, value);
       }
 
       if (!(value instanceof Map)) {
@@ -3223,10 +3214,6 @@ public class ParseObject {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONObject}.
    */
-  //TODO (grantland): Do not auto-convert JSONObject and Map (v2)
-  // Calling this on an untouched fetched object will mark the object as dirty due to mutable
-  // containers and auto Map <-> JSONObject conversion, since maps are converted to Map
-  // by default.
   public JSONObject getJSONObject(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3234,7 +3221,6 @@ public class ParseObject {
 
       if (value instanceof Map) {
         value = PointerOrLocalIdEncoder.get().encode(value);
-        put(key, value);
       }
 
       if (!(value instanceof JSONObject)) {
