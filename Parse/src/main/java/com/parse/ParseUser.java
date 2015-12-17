@@ -503,10 +503,17 @@ public class ParseUser extends ParseObject {
 
   @Override
   /* package */ void setState(ParseObject.State newState) {
-    // Avoid clearing sessionToken when updating the current user's State via ParseQuery result
-    if (isCurrentUser() && getSessionToken() != null
-            && newState.get("sessionToken") == null) {
-      newState = newState.newBuilder().put("sessionToken", getSessionToken()).build();
+    if (isCurrentUser()) {
+      State.Builder newStateBuilder = newState.newBuilder();
+      // Avoid clearing sessionToken when updating the current user's State via ParseQuery result
+      if (getSessionToken() != null && newState.get(KEY_SESSION_TOKEN) == null) {
+        newStateBuilder.put(KEY_SESSION_TOKEN, getSessionToken());
+      }
+      // Avoid clearing authData when updating the current user's State via ParseQuery result
+      if (getAuthData() != null && newState.get(KEY_AUTH_DATA) == null) {
+        newStateBuilder.put(KEY_AUTH_DATA, getAuthData());
+      }
+      newState = newStateBuilder.build();
     }
     super.setState(newState);
   }

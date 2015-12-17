@@ -1401,6 +1401,42 @@ public class ParseUserTest {
 
   //endregion
 
+  //region testSetState
+
+  @Test
+  public void testSetCurrentUserStateWithoutAuthData() throws Exception {
+    // Set user initial state
+    String authType = "facebook";
+    Map<String, String> authData = new HashMap<>();
+    authData.put("facebookToken", "facebookTest");
+    ParseUser.State userState = new ParseUser.State.Builder()
+        .objectId("test")
+        .put("oldKey", "oldValue")
+        .put("key", "value")
+        .putAuthData(authType, authData)
+        .build();
+    ParseUser user = ParseObject.from(userState);
+    user.setIsCurrentUser(true);
+    // Build new state
+    ParseUser.State newUserState = new ParseUser.State.Builder()
+        .objectId("testAgain")
+        .put("key", "valueAgain")
+        .build();
+
+    user.setState(newUserState);
+
+    // Make sure we keep the authData
+    assertEquals(1, user.getAuthData().size());
+    assertEquals(authData, user.getAuthData().get(authType));
+    // Make sure old state is deleted
+    assertFalse(user.has("oldKey"));
+    // Make sure new state is set
+    assertEquals("testAgain", user.getObjectId());
+    assertEquals("valueAgain", user.get("key"));
+  }
+
+  //endregion
+
   private static void setLazy(ParseUser user) {
     Map<String, String> anonymousAuthData = new HashMap<>();
     anonymousAuthData.put("anonymousToken", "anonymousTest");
