@@ -16,7 +16,6 @@ import org.json.JSONObject;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,11 +28,19 @@ import java.util.Map;
 /** package */ abstract class ParseEncoder {
 
   /* package */ static boolean isValidType(Object value) {
-    return value instanceof JSONObject || value instanceof JSONArray || value instanceof String
-        || value instanceof Number || value instanceof Boolean || value == JSONObject.NULL
-        || value instanceof ParseObject || value instanceof ParseACL || value instanceof ParseFile
-        || value instanceof ParseGeoPoint || value instanceof Date || value instanceof byte[]
-        || value instanceof List || value instanceof Map || value instanceof ParseRelation;
+    return value instanceof String
+        || value instanceof Number
+        || value instanceof Boolean
+        || value instanceof Date
+        || value instanceof List
+        || value instanceof Map
+        || value instanceof byte[]
+        || value == JSONObject.NULL
+        || value instanceof ParseObject
+        || value instanceof ParseACL
+        || value instanceof ParseFile
+        || value instanceof ParseGeoPoint
+        || value instanceof ParseRelation;
   }
 
   public Object encode(Object object) {
@@ -92,32 +99,12 @@ import java.util.Map;
         return json;
       }
 
-      if (object instanceof JSONObject) {
-        JSONObject map = (JSONObject) object;
-        JSONObject json = new JSONObject();
-        Iterator<?> keys = map.keys();
-        while (keys.hasNext()) {
-          String key = (String) keys.next();
-          json.put(key, encode(map.opt(key)));
-        }
-        return json;
-      }
-
       if (object instanceof Collection) {
         JSONArray array = new JSONArray();
         for (Object item : (Collection<?>) object) {
           array.put(encode(item));
         }
         return array;
-      }
-
-      if (object instanceof JSONArray) {
-        JSONArray array = (JSONArray) object;
-        JSONArray json = new JSONArray();
-        for (int i = 0; i < array.length(); ++i) {
-          json.put(encode(array.opt(i)));
-        }
-        return json;
       }
 
       if (object instanceof ParseRelation) {

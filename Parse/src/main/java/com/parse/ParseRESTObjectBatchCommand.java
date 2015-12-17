@@ -18,9 +18,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -59,7 +57,8 @@ import bolts.Task;
       tasks.add(tcs.getTask());
     }
 
-    List<JSONObject> requests = new ArrayList<>(batchSize);
+    JSONObject parameters = new JSONObject();
+    JSONArray requests = new JSONArray();
     try {
       for (ParseRESTObjectCommand command : commands) {
         JSONObject requestParameters = new JSONObject();
@@ -69,14 +68,13 @@ import bolts.Task;
         if (body != null) {
           requestParameters.put("body", body);
         }
-        requests.add(requestParameters);
+        requests.put(requestParameters);
       }
+      parameters.put("requests", requests);
     } catch (JSONException e) {
       throw new RuntimeException(e);
     }
 
-    Map<String, List<JSONObject>> parameters = new HashMap<>();
-    parameters.put("requests", requests);
     ParseRESTCommand command = new ParseRESTObjectBatchCommand(
         "batch", ParseHttpRequest.Method.POST, parameters, sessionToken);
 
@@ -132,7 +130,7 @@ import bolts.Task;
   private ParseRESTObjectBatchCommand(
       String httpPath,
       ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
+      JSONObject parameters,
       String sessionToken) {
     super(httpPath, httpMethod, parameters, sessionToken);
   }

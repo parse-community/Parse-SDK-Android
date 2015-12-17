@@ -68,7 +68,7 @@ import bolts.Task;
     } catch (IOException | JSONException e) {
       return null;
     }
-    return new ParseConfig(json, ParseDecoder.get());
+    return ParseConfig.decode(json, ParseDecoder.get());
   }
 
   /* package */ void clearCurrentConfigForTesting() {

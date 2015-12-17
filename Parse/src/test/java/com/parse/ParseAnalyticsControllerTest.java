@@ -12,10 +12,11 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import bolts.Task;
 
@@ -56,9 +57,9 @@ public class ParseAnalyticsControllerTest {
 
     // Execute
     ParseAnalyticsController controller = new ParseAnalyticsController(queue);
-    JSONObject json = new JSONObject();
-    json.put("event", "close");
-    ParseTaskUtils.wait(controller.trackEventInBackground("name", json, "sessionToken"));
+    Map<String, String> dimensions = new HashMap<>();
+    dimensions.put("event", "close");
+    ParseTaskUtils.wait(controller.trackEventInBackground("name", dimensions, "sessionToken"));
 
     // Verify eventuallyQueue.enqueueEventuallyAsync
     ArgumentCaptor<ParseRESTCommand> command = ArgumentCaptor.forClass(ParseRESTCommand.class);

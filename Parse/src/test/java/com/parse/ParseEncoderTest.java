@@ -123,17 +123,6 @@ public class ParseEncoderTest {
   }
 
   @Test
-  public void testJSONObject() throws JSONException {
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("key1", "object1");
-    JSONObject mapJSON = (JSONObject) testClassObject.encode(jsonObject);
-    assertNotNull(mapJSON);
-    assertNotSame(jsonObject, mapJSON);
-    assertEquals(1, mapJSON.length());
-    assertEquals("object1", mapJSON.getString("key1"));
-  }
-
-  @Test
   public void testCollection() throws JSONException {
     ArrayList<Integer> list = new ArrayList<>();
     list.add(1);
@@ -143,26 +132,6 @@ public class ParseEncoderTest {
     assertEquals(2, jsonArray.length());
     assertEquals(1, jsonArray.get(0));
     assertEquals(2, jsonArray.get(1));
-  }
-
-  @Test
-  public void testJSONArray() throws JSONException {
-    JSONArray jsonArray = new JSONArray();
-    ParseGeoPoint parseGeoPoint = new ParseGeoPoint(30, -20);
-    jsonArray.put(parseGeoPoint);
-    Date date = ParseDateFormat.getInstance().parse("2011-08-21T18:02:52.249Z");
-    jsonArray.put(date);
-    jsonArray = (JSONArray) testClassObject.encode(jsonArray);
-    assertNotNull(jsonArray);
-    assertEquals(2, jsonArray.length());
-    JSONObject geoPointJSON = (JSONObject) jsonArray.get(0);
-    final double DELTA = 0.00001;
-    assertEquals("GeoPoint", geoPointJSON.getString("__type"));
-    assertEquals(30, geoPointJSON.getDouble("latitude"), DELTA);
-    assertEquals(-20, geoPointJSON.getDouble("longitude"), DELTA);
-    JSONObject dateJSON = (JSONObject) jsonArray.get(1);
-    assertEquals("Date", dateJSON.getString("__type"));
-    assertEquals("2011-08-21T18:02:52.249Z", dateJSON.getString("iso"));
   }
 
   @Test

@@ -2918,6 +2918,14 @@ public class ParseObject {
       throw new IllegalArgumentException("value may not be null.");
     }
 
+    if (value instanceof JSONObject) {
+      ParseDecoder decoder = ParseDecoder.get();
+      value = decoder.convertJSONObjectToMap((JSONObject) value);
+    } else if (value instanceof JSONArray){
+      ParseDecoder decoder = ParseDecoder.get();
+      value = decoder.convertJSONArrayToList((JSONArray) value);
+    }
+
     if (!ParseEncoder.isValidType(value)) {
       throw new IllegalArgumentException("invalid type for value: " + value.getClass().toString());
     }
@@ -3166,12 +3174,6 @@ public class ParseObject {
   public <T> List<T> getList(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
-
-      if (value instanceof JSONArray) {
-        ParseDecoder decoder = ParseDecoder.get();
-        value = decoder.convertJSONArrayToList((JSONArray) value);
-      }
-
       if (!(value instanceof List)) {
         return null;
       }
@@ -3192,12 +3194,6 @@ public class ParseObject {
   public <V> Map<String, V> getMap(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
-
-      if (value instanceof JSONObject) {
-        ParseDecoder decoder = ParseDecoder.get();
-        value = decoder.convertJSONObjectToMap((JSONObject) value);
-      }
-
       if (!(value instanceof Map)) {
         return null;
       }

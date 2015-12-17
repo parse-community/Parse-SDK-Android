@@ -35,7 +35,7 @@ import bolts.Task;
       public Task<ParseConfig> then(Task<JSONObject> task) throws Exception {
         JSONObject result = task.getResult();
 
-        final ParseConfig config = new ParseConfig(result, ParseDecoder.get());
+        final ParseConfig config = ParseConfig.decode(result, ParseDecoder.get());
         return currentConfigController.setCurrentConfigAsync(config).continueWith(new Continuation<Void, ParseConfig>() {
           @Override
           public ParseConfig then(Task<Void> task) throws Exception {

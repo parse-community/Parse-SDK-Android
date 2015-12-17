@@ -12,9 +12,6 @@ import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -87,7 +84,7 @@ public class ParseCurrentConfigControllerTest {
     JSONObject sampleConfigJson = new JSONObject() {{
       put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
     }};
-    ParseConfig config = new ParseConfig(sampleConfigJson, ParseDecoder.get());
+    ParseConfig config = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
 
     // Save to disk
     File configFile = new File(temporaryFolder.getRoot(), "config");
@@ -164,7 +161,7 @@ public class ParseCurrentConfigControllerTest {
     JSONObject sampleConfigJson = new JSONObject() {{
       put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
     }};
-    ParseConfig config = new ParseConfig(sampleConfigJson, ParseDecoder.get());
+    ParseConfig config = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
 
     // Save to disk
     File configFile = new File(temporaryFolder.getRoot(), "config");
@@ -272,7 +269,7 @@ public class ParseCurrentConfigControllerTest {
     JSONObject sampleConfigJson = new JSONObject() {{
       put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
     }};
-    ParseConfig diskConfig = new ParseConfig(sampleConfigJson, ParseDecoder.get());
+    ParseConfig diskConfig = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
     currentConfigController.saveToDisk(diskConfig);
 
     // Verify before set, disk config exist and in memory config is null
