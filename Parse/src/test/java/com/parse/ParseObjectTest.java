@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -96,7 +97,7 @@ public class ParseObjectTest {
     ParseCorePlugins.getInstance().registerCurrentUserController(userController);
 
     // Mocked to simulate in-flight save
-    Task<ParseObject.State>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource();
     ParseObjectController objectController = mock(ParseObjectController.class);
     when(objectController.saveAsync(
         any(ParseObject.State.class),
@@ -168,7 +169,7 @@ public class ParseObjectTest {
     ParseCorePlugins.getInstance().registerCurrentUserController(userController);
 
     // Mocked to simulate in-flight save
-    Task<ParseObject.State>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource();
     ParseObjectController objectController = mock(ParseObjectController.class);
     when(objectController.saveAsync(
         any(ParseObject.State.class),

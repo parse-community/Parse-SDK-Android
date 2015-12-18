@@ -36,6 +36,7 @@ import java.util.concurrent.locks.Lock;
 import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * The {@code ParseObject} is a local representation of data that can be saved and retrieved from
@@ -559,7 +560,7 @@ public class ParseObject {
   static <T> Task<T> enqueueForAll(final List<? extends ParseObject> objects,
       Continuation<Void, Task<T>> taskStart) {
     // The task that will be complete when all of the child queues indicate they're ready to start.
-    final Task<Void>.TaskCompletionSource readyToStart = Task.create();
+    final TaskCompletionSource<Void> readyToStart = new TaskCompletionSource<>();
 
     // First, we need to lock the mutex for the queue for every object. We have to hold this
     // from at least when taskStart() is called to when obj.taskQueue enqueue is called, so

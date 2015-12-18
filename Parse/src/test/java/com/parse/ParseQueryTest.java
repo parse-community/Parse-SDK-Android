@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
@@ -88,7 +89,7 @@ public class ParseQueryTest {
     TestQueryController controller = new TestQueryController();
     ParseCorePlugins.getInstance().registerQueryController(controller);
 
-    Task<Void>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
@@ -225,7 +226,7 @@ public class ParseQueryTest {
     TestQueryController controller = new TestQueryController();
     ParseCorePlugins.getInstance().registerQueryController(controller);
 
-    Task<Void>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
@@ -269,7 +270,7 @@ public class ParseQueryTest {
     TestQueryController controller = new TestQueryController();
     ParseCorePlugins.getInstance().registerQueryController(controller);
 
-    Task<Void>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");

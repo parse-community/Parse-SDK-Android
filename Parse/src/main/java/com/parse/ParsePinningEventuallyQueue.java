@@ -24,6 +24,7 @@ import java.util.List;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * Manages all *Eventually calls when the local datastore is enabled.
@@ -40,7 +41,7 @@ import bolts.Task;
   /**
    * TCS that is held until a {@link ParseOperationSet} is completed.
    */
-  private HashMap<String, Task<JSONObject>.TaskCompletionSource> pendingOperationSetUUIDTasks =
+  private HashMap<String, TaskCompletionSource<JSONObject>> pendingOperationSetUUIDTasks =
       new HashMap<>();
 
   /**
@@ -67,7 +68,7 @@ import bolts.Task;
    *
    * If an error is set, it means that we are trying to clear out the taskQueues.
    */
-  private Task<Void>.TaskCompletionSource connectionTaskCompletionSource = Task.create();
+  private TaskCompletionSource<Void> connectionTaskCompletionSource = new TaskCompletionSource<>();
   private final Object connectionLock = new Object();
   private final ParseHttpClient httpClient;
 
@@ -129,7 +130,7 @@ import bolts.Task;
   }
 
   public Task<Integer> pendingCountAsync() {
-    final Task<Integer>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<Integer> tcs = new TaskCompletionSource<>();
 
     taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
       @Override
@@ -218,7 +219,7 @@ import bolts.Task;
   public Task<JSONObject> enqueueEventuallyAsync(final ParseRESTCommand command,
       final ParseObject object) {
     Parse.requirePermission(Manifest.permission.ACCESS_NETWORK_STATE);
-    final Task<JSONObject>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<JSONObject> tcs = new TaskCompletionSource<>();
 
     taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
       @Override
@@ -231,7 +232,7 @@ import bolts.Task;
   }
 
   private Task<Void> enqueueEventuallyAsync(final ParseRESTCommand command,
-      final ParseObject object, Task<Void> toAwait, final Task<JSONObject>.TaskCompletionSource tcs) {
+      final ParseObject object, Task<Void> toAwait, final TaskCompletionSource<JSONObject> tcs) {
     return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> toAwait) throws Exception {
@@ -373,7 +374,7 @@ import bolts.Task;
               notifyTestHelper(TestHelper.COMMAND_SUCCESSFUL);
             }
 
-            Task<JSONObject>.TaskCompletionSource tcs =
+            TaskCompletionSource<JSONObject> tcs =
                 pendingOperationSetUUIDTasks.remove(eventuallyPin.getUUID());
             if (tcs != null) {
               if (error != null) {
@@ -397,7 +398,7 @@ import bolts.Task;
   /**
    * Map of eventually operation UUID to TCS that is resolved when the operation is complete.
    */
-  private HashMap<String, Task<JSONObject>.TaskCompletionSource> pendingEventuallyTasks =
+  private HashMap<String, TaskCompletionSource<JSONObject>> pendingEventuallyTasks =
       new HashMap<>();
 
   /**
@@ -429,7 +430,7 @@ import bolts.Task;
     }
 
     final String uuid; // The key we use to join the taskQueues
-    final Task<JSONObject>.TaskCompletionSource tcs;
+    final TaskCompletionSource<JSONObject> tcs;
 
     synchronized (taskQueueSyncLock) {
       if (operationSet != null && eventuallyPin == null) {

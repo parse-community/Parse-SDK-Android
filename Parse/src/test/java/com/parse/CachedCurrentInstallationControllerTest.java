@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -151,7 +152,7 @@ public class CachedCurrentInstallationControllerTest {
     when(installationId.get()).thenReturn("testInstallationId");
     //noinspection unchecked
     ParseObjectStore<ParseInstallation> store = mock(ParseObjectStore.class);
-    Task<ParseInstallation>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<ParseInstallation> tcs = new TaskCompletionSource();
     when(store.getAsync()).thenReturn(tcs.getTask());
 
     // Create test controller

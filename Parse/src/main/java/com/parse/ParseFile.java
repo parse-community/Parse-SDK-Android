@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * {@code ParseFile} is a local representation of a file that is saved to the Parse cloud.
@@ -139,8 +140,8 @@ public class ParseFile {
   /* package for tests */ File file;
 
   /* package for tests */ final TaskQueue taskQueue = new TaskQueue();
-  private Set<Task<?>.TaskCompletionSource> currentTasks = Collections.synchronizedSet(
-      new HashSet<Task<?>.TaskCompletionSource>());
+  private Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
+      new HashSet<TaskCompletionSource<?>>());
 
   /**
    * Creates a new file from a file pointer.
@@ -345,7 +346,7 @@ public class ParseFile {
    * @return A Task that will be resolved when the save completes.
    */
   public Task<Void> saveInBackground(final ProgressCallback uploadProgressCallback) {
-    final Task<Void>.TaskCompletionSource cts = Task.create();
+    final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
     currentTasks.add(cts);
 
     return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
@@ -425,7 +426,7 @@ public class ParseFile {
    * @return A Task that is resolved when the data has been fetched.
    */
   public Task<byte[]> getDataInBackground(final ProgressCallback progressCallback) {
-    final Task<Void>.TaskCompletionSource cts = Task.create();
+    final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
     currentTasks.add(cts);
 
     return taskQueue.enqueue(new Continuation<Void, Task<byte[]>>() {
@@ -511,7 +512,7 @@ public class ParseFile {
    * @return A Task that is resolved when the file pointer of this object has been fetched.
    */
   public Task<File> getFileInBackground(final ProgressCallback progressCallback) {
-    final Task<Void>.TaskCompletionSource cts = Task.create();
+    final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
     currentTasks.add(cts);
 
     return taskQueue.enqueue(new Continuation<Void, Task<File>>() {
@@ -593,7 +594,7 @@ public class ParseFile {
    * @return A Task that is resolved when the data stream of this object has been fetched.
    */
   public Task<InputStream> getDataStreamInBackground(final ProgressCallback progressCallback) {
-    final Task<Void>.TaskCompletionSource cts = Task.create();
+    final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
     currentTasks.add(cts);
 
     return taskQueue.enqueue(new Continuation<Void, Task<InputStream>>() {
@@ -686,8 +687,8 @@ public class ParseFile {
    */
   //TODO (grantland): Deprecate and replace with CancellationToken
   public void cancel() {
-    Set<Task<?>.TaskCompletionSource> tasks = new HashSet<>(currentTasks);
-    for (Task<?>.TaskCompletionSource tcs : tasks) {
+    Set<TaskCompletionSource<?>> tasks = new HashSet<>(currentTasks);
+    for (TaskCompletionSource<?> tcs : tasks) {
       tcs.trySetCancelled();
     }
     currentTasks.removeAll(tasks);

@@ -13,6 +13,7 @@ import java.util.List;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * Helper class to step through a {@link TaskQueue}.
@@ -24,7 +25,7 @@ public class TaskQueueTestHelper {
 
   private final Object lock = new Object();
   private final TaskQueue taskQueue;
-  private final List<Task<Void>.TaskCompletionSource> pendingTasks = new ArrayList<>();
+  private final List<TaskCompletionSource<Void>> pendingTasks = new ArrayList<>();
 
   public TaskQueueTestHelper(TaskQueue taskQueue) {
     this.taskQueue = taskQueue;
@@ -35,7 +36,7 @@ public class TaskQueueTestHelper {
    */
   public void enqueue() {
     synchronized (lock) {
-      final Task<Void>.TaskCompletionSource tcs = Task.create();
+      final TaskCompletionSource<Void> tcs = new TaskCompletionSource();
       taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
         @Override
         public Task<Void> then(Task<Void> task) throws Exception {
@@ -51,7 +52,7 @@ public class TaskQueueTestHelper {
    */
   public void dequeue() {
     synchronized (lock) {
-      Task<Void>.TaskCompletionSource tcs = pendingTasks.remove(0);
+      TaskCompletionSource<Void> tcs = pendingTasks.remove(0);
       tcs.setResult(null);
     }
   }

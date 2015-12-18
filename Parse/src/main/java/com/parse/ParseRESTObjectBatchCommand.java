@@ -22,6 +22,7 @@ import java.util.List;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /** package */ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
   public final static int COMMAND_OBJECT_BATCH_MAX_SIZE = 50;
@@ -50,9 +51,9 @@ import bolts.Task;
       return tasks;
     }
 
-    final List<Task<JSONObject>.TaskCompletionSource> tcss = new ArrayList<>(batchSize);
+    final List<TaskCompletionSource<JSONObject>> tcss = new ArrayList<>(batchSize);
     for (int i = 0; i < batchSize; i++) {
-      Task<JSONObject>.TaskCompletionSource tcs = Task.create();
+      TaskCompletionSource<JSONObject> tcs = new TaskCompletionSource<>();
       tcss.add(tcs);
       tasks.add(tcs.getTask());
     }
@@ -81,7 +82,7 @@ import bolts.Task;
     command.executeAsync(client).continueWith(new Continuation<JSONObject, Void>() {
       @Override
       public Void then(Task<JSONObject> task) throws Exception {
-        Task<JSONObject>.TaskCompletionSource tcs;
+        TaskCompletionSource<JSONObject> tcs;
 
         if (task.isFaulted() || task.isCancelled()) {
           // REST command failed or canceled, fail or cancel all tasks
