@@ -27,6 +27,7 @@ import bolts.Task;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
@@ -64,6 +65,25 @@ public class ParseQueryTest {
     ParseQuery<ParseObject> query = new ParseQuery<>(builder);
     assertEquals("TestObject", query.getClassName());
     assertSame(builder, query.getBuilder());
+  }
+
+  @Test
+  public void testCopy() throws InterruptedException {
+    ParseQuery<ParseObject> query = new ParseQuery<>("TestObject");
+    query.setUser(new ParseUser());
+    query.whereEqualTo("foo", "bar");
+    ParseQuery.State.Builder<ParseObject> builder = query.getBuilder();
+    ParseQuery.State<ParseObject> state = query.getBuilder().build();
+
+    ParseQuery<ParseObject> queryCopy = new ParseQuery<>(query);
+    ParseQuery.State.Builder<ParseObject> builderCopy = queryCopy.getBuilder();
+    ParseQuery.State<ParseObject> stateCopy = queryCopy.getBuilder().build();
+
+    assertNotSame(query, queryCopy);
+    assertSame(query.getUserAsync(state).getResult(), queryCopy.getUserAsync(stateCopy).getResult());
+
+    assertNotSame(builder, builderCopy);
+    assertSame(state.constraints().get("foo"), stateCopy.constraints().get("foo"));
   }
 
   // ParseUser#setUser is for tests only

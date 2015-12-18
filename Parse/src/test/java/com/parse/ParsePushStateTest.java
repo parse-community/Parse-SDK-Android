@@ -8,8 +8,10 @@
  */
 package com.parse;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.mockito.internal.util.collections.Sets;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -20,8 +22,13 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ParsePushStateTest {
 
@@ -55,6 +62,38 @@ public class ParsePushStateTest {
   }
 
   //endregion
+
+  @Test
+  public void testCopy() throws JSONException {
+    ParsePush.State state = mock(ParsePush.State.class);
+    when(state.expirationTime()).thenReturn(1L);
+    when(state.expirationTimeInterval()).thenReturn(2L);
+    Set channelSet = Sets.newSet("one", "two");
+    when(state.channelSet()).thenReturn(channelSet);
+    JSONObject data = new JSONObject();
+    data.put("foo", "bar");
+    when(state.data()).thenReturn(data);
+    when(state.pushToAndroid()).thenReturn(true);
+    when(state.pushToIOS()).thenReturn(false);
+    ParseQuery.State<ParseInstallation> queryState =
+        new ParseQuery.State.Builder<>(ParseInstallation.class).build();
+    when(state.queryState()).thenReturn(queryState);
+
+    ParsePush.State copy = new ParsePush.State.Builder(state).build();
+    assertSame(1L, copy.expirationTime());
+    assertSame(2L, copy.expirationTimeInterval());
+    Set channelSetCopy = copy.channelSet();
+    assertNotSame(channelSet, channelSetCopy);
+    assertTrue(channelSetCopy.size() == 2 && channelSetCopy.contains("one"));
+    JSONObject dataCopy = copy.data();
+    assertNotSame(data, dataCopy);
+    assertEquals("bar", dataCopy.get("foo"));
+    assertTrue(copy.pushToAndroid());
+    assertFalse(copy.pushToIOS());
+    ParseQuery.State<ParseInstallation> queryStateCopy = copy.queryState();
+    assertNotSame(queryState, queryStateCopy);
+    assertEquals("_Installation", queryStateCopy.className());
+  }
 
   //region testExpirationTime
 

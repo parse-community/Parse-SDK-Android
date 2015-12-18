@@ -55,6 +55,31 @@ public class ParsePush {
       private Boolean pushToAndroid;
       private JSONObject data;
 
+      public Builder() {
+        // do nothing
+      }
+
+      public Builder(State state) {
+        this.channelSet = state.channelSet() == null
+            ? null
+            : Collections.unmodifiableSet(new HashSet<>(state.channelSet()));
+        this.query = state.queryState() == null
+            ? null
+            : new ParseQuery<>(new ParseQuery.State.Builder<ParseInstallation>(state.queryState()));
+        this.expirationTime = state.expirationTime();
+        this.expirationTimeInterval = state.expirationTimeInterval();
+        this.pushToIOS = state.pushToIOS();
+        this.pushToAndroid = state.pushToAndroid();
+        // Since in state.build() we check data is not null, we do not need to check it again here.
+        JSONObject copyData = null;
+        try {
+          copyData = new JSONObject(state.data().toString());
+        } catch (JSONException e) {
+          // Swallow this silently since it is impossible to happen
+        }
+        this.data = copyData;
+      }
+
       public Builder expirationTime(Long expirationTime) {
         this.expirationTime = expirationTime;
         expirationTimeInterval = null;
@@ -184,13 +209,25 @@ public class ParsePush {
   /* package for test */ final State.Builder builder;
 
   /**
-   * Creates a new push notification. The default channel is the empty string, also known as the
-   * global broadcast channel, but this value can be overridden using {@link #setChannel(String)},
-   * {@link #setChannels(Collection)} or {@link #setQuery(ParseQuery)}. Before sending the push
-   * notification you must call either {@link #setMessage(String)} or {@link #setData(JSONObject)}.
+   * Creates a new push notification.
+   *
+   * The default channel is the empty string, also known as the global broadcast channel, but this
+   * value can be overridden using {@link #setChannel(String)}, {@link #setChannels(Collection)} or
+   * {@link #setQuery(ParseQuery)}. Before sending the push notification you must call either
+   * {@link #setMessage(String)} or {@link #setData(JSONObject)}.
    */
   public ParsePush() {
     this(new State.Builder());
+  }
+
+  /**
+   * Creates a copy of {@code push}.
+   *
+   * @param push
+   *          The push to copy.
+   */
+  public ParsePush(ParsePush push) {
+    this(new State.Builder(push.builder.build()));
   }
 
   private ParsePush(State.Builder builder) {
