@@ -59,6 +59,16 @@ public class ParseGeoPoint {
   }
 
   /**
+   * Creates a copy of {@code point};
+   *
+   * @param point
+   *          The point to copy.
+   */
+  public ParseGeoPoint(ParseGeoPoint point) {
+    this(point.getLatitude(), point.getLongitude());
+  }
+
+  /**
    * Set latitude. Valid range is (-90.0, 90.0). Extremes should not be used.
    * 
    * @param latitude

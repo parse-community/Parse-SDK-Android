@@ -103,32 +103,41 @@ public class ParseACL {
     return getDefaultACLController().get();
   }
 
+  // State
+  private final Map<String, Permissions> permissionsById = new HashMap<>();
   private boolean shared;
+
   /**
    * A lazy user that hasn't been saved to Parse.
    */
   //TODO (grantland): This should be a list for multiple lazy users with read/write permissions.
   private ParseUser unresolvedUser;
 
-  private Map<String, Permissions> permissionsById;
-
   /**
    * Creates an ACL with no permissions granted.
    */
   public ParseACL() {
-    permissionsById = new HashMap<>();
+    // do nothing
   }
 
-  /* package */ ParseACL copy() {
-    ParseACL copy = new ParseACL();
-    for (String id : permissionsById.keySet()) {
-      copy.permissionsById.put(id, new Permissions(permissionsById.get(id)));
+  /**
+   * Creates a copy of {@code acl}.
+   *
+   * @param acl
+   *          The acl to copy.
+   */
+  public ParseACL(ParseACL acl) {
+    for (String id : acl.permissionsById.keySet()) {
+      permissionsById.put(id, new Permissions(acl.permissionsById.get(id)));
     }
-    copy.unresolvedUser = unresolvedUser;
+    unresolvedUser = acl.unresolvedUser;
     if (unresolvedUser != null) {
-      unresolvedUser.registerSaveListener(new UserResolutionListener(copy));
+      unresolvedUser.registerSaveListener(new UserResolutionListener(this));
     }
-    return copy;
+  }
+
+  /* package for tests */ ParseACL copy() {
+    return new ParseACL(this);
   }
 
   boolean isShared() {

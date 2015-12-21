@@ -910,6 +910,17 @@ public class ParseQuery<T extends ParseObject> {
     this(new State.Builder<T>(theClassName));
   }
 
+  /**
+   * Constructs a copy of {@code query};
+   *
+   * @param query
+   *          The query to copy.
+   */
+  public ParseQuery(ParseQuery<T> query) {
+    this(new State.Builder<>(query.getBuilder()));
+    user = query.user;
+  }
+
   /* package */ ParseQuery(State.Builder<T> builder) {
     this.builder = builder;
   }
@@ -918,6 +929,12 @@ public class ParseQuery<T extends ParseObject> {
     return builder;
   }
 
+  /**
+   * Sets the user to be used for this query.
+   *
+   *
+   * The query will use the user if set, otherwise it will read the current user.
+   */
   /* package for tests */ ParseQuery<T> setUser(ParseUser user) {
     this.user = user;
     return this;

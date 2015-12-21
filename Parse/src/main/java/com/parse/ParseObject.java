@@ -3397,7 +3397,7 @@ public class ParseObject {
         throw new RuntimeException("only ACLs can be stored in the ACL key");
       }
       if (mayCopy && ((ParseACL) acl).isShared()) {
-        ParseACL copy = ((ParseACL) acl).copy();
+        ParseACL copy = new ParseACL((ParseACL) acl);
         estimatedData.put(KEY_ACL, copy);
         return copy;
       }

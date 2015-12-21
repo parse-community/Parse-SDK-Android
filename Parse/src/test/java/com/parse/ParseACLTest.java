@@ -88,7 +88,7 @@ public class ParseACLTest {
     // setReadAccess()
     reset(unresolvedUser);
 
-    ParseACL copiedACL = acl.copy();
+    ParseACL copiedACL = new ParseACL(acl);
 
     assertEquals(1, copiedACL.getPermissionsById().size());
     assertTrue(copiedACL.getPermissionsById().containsKey(UNRESOLVED_KEY));
@@ -111,7 +111,7 @@ public class ParseACLTest {
     // setReadAccess()
     reset(unresolvedUser);
 
-    ParseACL copiedACL = acl.copy();
+    ParseACL copiedACL = new ParseACL(acl);
 
     // Make sure the callback is called
     ArgumentCaptor<GetCallback> callbackCaptor = ArgumentCaptor.forClass(GetCallback.class);
