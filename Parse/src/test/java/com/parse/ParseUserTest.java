@@ -1428,7 +1428,36 @@ public class ParseUserTest {
     // Make sure we keep the authData
     assertEquals(1, user.getAuthData().size());
     assertEquals(authData, user.getAuthData().get(authType));
-    // Make sure old state is deleted
+    // Make sure old state is replaced
+    assertFalse(user.has("oldKey"));
+    // Make sure new state is set
+    assertEquals("testAgain", user.getObjectId());
+    assertEquals("valueAgain", user.get("key"));
+  }
+
+  @Test
+  public void testSetStateDoesNotAddNonExistentAuthData() throws Exception {
+    // Set user initial state
+    ParseUser.State userState = new ParseUser.State.Builder()
+        .objectId("test")
+        .put("oldKey", "oldValue")
+        .put("key", "value")
+        .build();
+    ParseUser user = ParseObject.from(userState);
+    user.setIsCurrentUser(true);
+    // Build new state
+    ParseUser.State newUserState = new ParseUser.State.Builder()
+        .objectId("testAgain")
+        .put("key", "valueAgain")
+        .build();
+
+    user.setState(newUserState);
+
+    // Make sure we do not add authData when it did not exist before
+    assertFalse(user.keySet().contains("authData"));
+    assertEquals(1, user.keySet().size());
+    assertEquals(0, user.getAuthData().size());
+    // Make sure old state is replaced
     assertFalse(user.has("oldKey"));
     // Make sure new state is set
     assertEquals("testAgain", user.getObjectId());
