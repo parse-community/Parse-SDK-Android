@@ -1127,7 +1127,7 @@ public class ParseUser extends ParseObject {
     };
 
     // Handle claiming of user.
-    return getCurrentUserAsync().onSuccessTask(new Continuation<ParseUser, Task<ParseUser>>() {
+    return getCurrentUserController().getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<ParseUser>>() {
       @Override
       public Task<ParseUser> then(Task<ParseUser> task) throws Exception {
         final ParseUser user = task.getResult();
