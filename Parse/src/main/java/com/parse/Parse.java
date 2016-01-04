@@ -22,6 +22,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,6 +50,7 @@ public class Parse {
       private Context context;
       private String applicationId;
       private String clientKey;
+      private String server = "https://api.parse.com/1";
       private boolean localDataStoreEnabled;
       private List<ParseNetworkInterceptor> interceptors;
 
@@ -129,6 +132,20 @@ public class Parse {
       }
 
       /**
+       * Set the server URL to be used by Parse.
+       *
+       * This method is only required if you intend to use a different API server than the one at
+       * api.parse.com.
+       *
+       * @param server The server URL to set.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder server(String server) {
+        this.server = server;
+        return this;
+      }
+
+      /**
        * Add a {@link ParseNetworkInterceptor}.
        *
        * @param interceptor The interceptor to add.
@@ -182,6 +199,7 @@ public class Parse {
     /* package for tests */ final Context context;
     /* package for tests */ final String applicationId;
     /* package for tests */ final String clientKey;
+    /* package for tests */ final String server;
     /* package for tests */ final boolean localDataStoreEnabled;
     /* package for tests */ final List<ParseNetworkInterceptor> interceptors;
 
@@ -189,6 +207,7 @@ public class Parse {
       this.context = builder.context;
       this.applicationId = builder.applicationId;
       this.clientKey = builder.clientKey;
+      this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
       this.interceptors = builder.interceptors != null ?
         Collections.unmodifiableList(new ArrayList<>(builder.interceptors)) :
@@ -356,6 +375,13 @@ public class Parse {
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
     ParsePlugins.Android.initialize(configuration.context, configuration.applicationId, configuration.clientKey);
+
+    try {
+      ParseRESTCommand.server = new URL(configuration.server);
+    } catch (MalformedURLException ex) {
+      throw new RuntimeException(ex);
+    }
+
     Context applicationContext = configuration.context.getApplicationContext();
 
     ParseHttpClient.setKeepAlive(true);

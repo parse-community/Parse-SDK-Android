@@ -18,6 +18,8 @@ import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.ByteArrayInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,13 +31,15 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 public class ParseRESTUserCommandTest {
 
   @Before
-  public void setUp() {
+  public void setUp() throws MalformedURLException {
     ParseObject.registerSubclass(ParseUser.class);
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
   }
 
   @After
   public void tearDown() {
     ParseObject.unregisterSubclass(ParseUser.class);
+    ParseRESTCommand.server = null;
   }
 
   //region testConstruct

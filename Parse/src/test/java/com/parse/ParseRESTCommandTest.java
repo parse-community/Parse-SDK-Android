@@ -26,6 +26,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import bolts.Task;
 
@@ -68,12 +70,14 @@ public class ParseRESTCommandTest {
   @Before
   public void setUp() throws Exception {
     ParseRequest.setDefaultInitialRetryDelay(1L);
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
   }
 
   @After
   public void tearDown() throws Exception {
     ParseRequest.setDefaultInitialRetryDelay(ParseRequest.DEFAULT_INITIAL_RETRY_DELAY);
     ParseCorePlugins.getInstance().reset();
+    ParseRESTCommand.server = null;
   }
 
   @Test

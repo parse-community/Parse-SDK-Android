@@ -19,6 +19,8 @@ import org.json.JSONStringer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -43,6 +45,9 @@ import bolts.Task;
   private static final String HEADER_SESSION_TOKEN = "X-Parse-Session-Token";
   private static final String HEADER_MASTER_KEY = "X-Parse-Master-Key";
   private static final String PARAMETER_METHOD_OVERRIDE = "_method";
+
+  // Set via Parse.initialize(Configuration)
+  /* package */ static URL server = null;
 
   private static LocalIdManager getLocalIdManager() {
     return ParseCorePlugins.getInstance().getLocalIdManager();
@@ -189,7 +194,15 @@ import bolts.Task;
   private static String createUrl(String httpPath) {
     // We send all parameters for GET/HEAD/DELETE requests in a post body,
     // so no need to worry about query parameters here.
-    return String.format("%s/1/%s", ParseObject.server, httpPath);
+    if (httpPath == null) {
+      return server.toString();
+    }
+
+    try {
+      return new URL(server, httpPath).toString();
+    } catch (MalformedURLException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 
   protected void addAdditionalHeaders(ParseHttpRequest.Builder requestBuilder) {

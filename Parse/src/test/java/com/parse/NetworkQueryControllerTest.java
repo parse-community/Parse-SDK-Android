@@ -11,8 +11,12 @@ package com.parse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import bolts.Task;
@@ -22,6 +26,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class NetworkQueryControllerTest {
+
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
+  @After
+  public void tearDown() {
+    ParseRESTCommand.server = null;
+  }
 
   //region testConvertFindResponse
 

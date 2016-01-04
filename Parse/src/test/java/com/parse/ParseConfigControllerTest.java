@@ -12,12 +12,16 @@ import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +45,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ParseConfigControllerTest {
+
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
+  @After
+  public void tearDown() {
+    ParseRESTCommand.server = null;
+  }
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();

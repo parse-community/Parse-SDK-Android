@@ -13,6 +13,7 @@ import com.parse.http.ParseHttpResponse;
 
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -23,6 +24,8 @@ import org.robolectric.annotation.Config;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import bolts.Task;
 
@@ -43,10 +46,16 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = 21)
 public class ParseFileControllerTest {
 
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
   @After
   public void tearDown() {
     // TODO(grantland): Remove once we no longer rely on retry logic.
     ParseRequest.setDefaultInitialRetryDelay(ParseRequest.DEFAULT_INITIAL_RETRY_DELAY);
+    ParseRESTCommand.server = null;
   }
 
   @Rule
