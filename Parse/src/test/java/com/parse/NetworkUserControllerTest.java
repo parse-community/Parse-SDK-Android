@@ -10,11 +10,15 @@ package com.parse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +30,16 @@ import static org.junit.Assert.assertTrue;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 public class NetworkUserControllerTest {
+
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
+  @After
+  public void tearDown() {
+    ParseRESTCommand.server = null;
+  }
 
   //region testSignUpAsync
 

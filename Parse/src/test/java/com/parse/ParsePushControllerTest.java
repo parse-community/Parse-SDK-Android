@@ -14,6 +14,8 @@ import com.parse.http.ParseHttpResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricGradleTestRunner;
@@ -22,6 +24,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +47,16 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 21)
 public class ParsePushControllerTest {
+
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
+  @After
+  public void tearDown() {
+    ParseRESTCommand.server = null;
+  }
 
   //region testBuildRESTSendPushCommand
 

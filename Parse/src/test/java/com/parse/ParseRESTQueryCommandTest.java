@@ -12,9 +12,13 @@ import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -24,6 +28,16 @@ import static org.junit.Assert.assertTrue;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 public class ParseRESTQueryCommandTest {
+
+  @Before
+  public void setUp() throws MalformedURLException {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+  }
+
+  @After
+  public void tearDown() {
+    ParseRESTCommand.server = null;
+  }
 
   //region testEncode
 
