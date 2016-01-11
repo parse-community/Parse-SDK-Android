@@ -155,7 +155,7 @@ public class ParseRoleTest {
 
   @Test
   public void testGetQuery() {
-    ParseQuery query = ParseRole.getQuery();
+    ParseQuery<?> query = ParseRole.getQuery();
 
     assertEquals(ParseCorePlugins.getInstance().getSubclassingController().getClassName(ParseRole.class), query.getBuilder().getClassName());
   }
