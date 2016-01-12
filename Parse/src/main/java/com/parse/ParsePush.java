@@ -37,6 +37,10 @@ public class ParsePush {
     return ParseCorePlugins.getInstance().getPushChannelsController();
   }
 
+  private static ParseObjectSubclassingController getSubclassingController() {
+    return ParseCorePlugins.getInstance().getSubclassingController();
+  }
+
   private static void checkArgument(boolean expression, Object errorMessage) {
     if (!expression) {
       throw new IllegalArgumentException(String.valueOf(errorMessage));
@@ -126,7 +130,8 @@ public class ParsePush {
         checkArgument(pushToIOS == null && pushToAndroid == null, "Cannot set push targets " +
             "(i.e. setPushToAndroid or setPushToIOS) when pushing to a query");
         checkArgument(
-            query.getClassName().equals(ParseObject.getClassName(ParseInstallation.class)),
+            query.getClassName().equals(
+                getSubclassingController().getClassName(ParseInstallation.class)),
             "Can only push to a query for Installations");
         channelSet = null;
         this.query = query;

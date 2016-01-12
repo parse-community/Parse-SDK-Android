@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.IllegalArgumentException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -85,8 +87,8 @@ public class SubclassTest {
   @After
   public void tearDown() throws Exception {
     ParseObject.unregisterParseSubclasses();
-    ParseObject.unregisterSubclass("Person");
-    ParseObject.unregisterSubclass("ClassWithDirtyingConstructor");
+    ParseObject.unregisterSubclass(Person.class);
+    ParseObject.unregisterSubclass(ClassWithDirtyingConstructor.class);
   }
 
   @SuppressWarnings("unused")
@@ -102,7 +104,7 @@ public class SubclassTest {
     try {
       new UnregisteredClass();
     } finally {
-      ParseObject.unregisterSubclass("UnregisteredClass");
+      ParseObject.unregisterSubclass(UnregisteredClass.class);
     }
   }
 
@@ -137,10 +139,18 @@ public class SubclassTest {
       assertEquals(MyUser.class, ParseObject.create("_User").getClass());
       ParseObject.registerSubclass(ParseUser.class);
       assertEquals(MyUser.class, ParseObject.create("_User").getClass());
-      ParseObject.registerSubclass(MyUser2.class);
-      assertEquals(MyUser2.class, ParseObject.create("_User").getClass());
+
+      // This is expected to fail as MyUser2 and MyUser are not directly related.
+      try {
+        ParseObject.registerSubclass(MyUser2.class);
+        fail();
+      } catch (IllegalArgumentException ex) {
+        /* expected */
+      }
+
+      assertEquals(MyUser.class, ParseObject.create("_User").getClass());
     } finally {
-      ParseObject.unregisterSubclass("_User");
+      ParseObject.unregisterSubclass(ParseUser.class);
       ParseCorePlugins.getInstance().reset();
     }
   }

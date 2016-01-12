@@ -12,8 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
@@ -72,17 +69,16 @@ public class ParseObject {
   // and not check after a while
   private static final String KEY_IS_DELETING_EVENTUALLY_OLD = "isDeletingEventually";
 
-  private static final Map<Class<? extends ParseObject>, String> classNames =
-      new ConcurrentHashMap<>();
-  private static final Map<String, Class<? extends ParseObject>> objectTypes =
-      new ConcurrentHashMap<>();
-
   private static ParseObjectController getObjectController() {
     return ParseCorePlugins.getInstance().getObjectController();
   }
 
   private static LocalIdManager getLocalIdManager() {
     return ParseCorePlugins.getInstance().getLocalIdManager();
+  }
+
+  private static ParseObjectSubclassingController getSubclassingController() {
+    return ParseCorePlugins.getInstance().getSubclassingController();
   }
 
   /** package */ static class State {
@@ -360,21 +356,13 @@ public class ParseObject {
           "You must specify a Parse class name when creating a new ParseObject.");
     }
     if (AUTO_CLASS_NAME.equals(theClassName)) {
-      theClassName = getClassName(this.getClass());
+      theClassName = getSubclassingController().getClassName(getClass());
     }
 
     // If this is supposed to be created by a factory but wasn't, throw an exception.
-    if (this.getClass().equals(ParseObject.class) && objectTypes.containsKey(theClassName)
-        && !objectTypes.get(theClassName).isInstance(this)) {
+    if (!getSubclassingController().isSubclassValid(theClassName, getClass())) {
       throw new IllegalArgumentException(
           "You must create this type of ParseObject using ParseObject.create() or the proper subclass.");
-    }
-
-    // If this is an unregistered subclass, throw an exception.
-    if (!this.getClass().equals(ParseObject.class)
-        && !this.getClass().equals(objectTypes.get(theClassName))) {
-      throw new IllegalArgumentException(
-          "You must register this ParseObject subclass before instantiating it.");
     }
 
     operationSetQueue = new LinkedList<>();
@@ -410,17 +398,7 @@ public class ParseObject {
    * @return A new {@code ParseObject} for the given class name.
    */
   public static ParseObject create(String className) {
-    if (objectTypes.containsKey(className)) {
-      try {
-        return objectTypes.get(className).newInstance();
-      } catch (Exception e) {
-        if (e instanceof RuntimeException) {
-          throw (RuntimeException) e;
-        }
-        throw new RuntimeException("Failed to create instance of subclass.", e);
-      }
-    }
-    return new ParseObject(className);
+    return getSubclassingController().newInstance(className);
   }
 
   /**
@@ -434,7 +412,7 @@ public class ParseObject {
    */
   @SuppressWarnings("unchecked")
   public static <T extends ParseObject> T create(Class<T> subclass) {
-    return (T) create(getClassName(subclass));
+    return (T) create(getSubclassingController().getClassName(subclass));
   }
 
   /**
@@ -497,13 +475,7 @@ public class ParseObject {
    */
   @SuppressWarnings({"unused", "unchecked"})
   public static <T extends ParseObject> T createWithoutData(Class<T> subclass, String objectId) {
-    return (T) createWithoutData(getClassName(subclass), objectId);
-  }
-
-  private static boolean isAccessible(Member m) {
-    return Modifier.isPublic(m.getModifiers())
-        || (m.getDeclaringClass().getPackage().getName().equals("com.parse")
-        && !Modifier.isPrivate(m.getModifiers()) && !Modifier.isProtected(m.getModifiers()));
+    return (T) createWithoutData(getSubclassingController().getClassName(subclass), objectId);
   }
 
   /**
@@ -515,41 +487,11 @@ public class ParseObject {
    *          The subclass type to register.
    */
   public static void registerSubclass(Class<? extends ParseObject> subclass) {
-    String className = getClassName(subclass);
-    if (className == null) {
-      throw new IllegalArgumentException("No ParseClassName annotation provided on " + subclass);
-    }
-    if (subclass.getDeclaredConstructors().length > 0) {
-      try {
-        if (!isAccessible(subclass.getDeclaredConstructor())) {
-          throw new IllegalArgumentException("Default constructor for " + subclass
-              + " is not accessible.");
-        }
-      } catch (NoSuchMethodException e) {
-        throw new IllegalArgumentException("No default constructor provided for " + subclass);
-      }
-    }
-    Class<? extends ParseObject> oldValue = objectTypes.get(className);
-    if (oldValue != null && subclass.isAssignableFrom(oldValue)) {
-      // The old class was already more descendant than the new subclass type. No-op.
-      return;
-    }
-    objectTypes.put(className, subclass);
-    if (oldValue != null && !subclass.equals(oldValue)) {
-      if (className.equals(getClassName(ParseUser.class))) {
-        ParseUser.getCurrentUserController().clearFromMemory();
-      } else if (className.equals(getClassName(ParseInstallation.class))) {
-        ParseInstallation.getCurrentInstallationController().clearFromMemory();
-      }
-    }
+    getSubclassingController().registerSubclass(subclass);
   }
 
   /* package for tests */ static void unregisterSubclass(Class<? extends ParseObject> subclass) {
-    unregisterSubclass(getClassName(subclass));
-  }
-
-  /* package for tests */ static void unregisterSubclass(String className) {
-    objectTypes.remove(className);
+    getSubclassingController().unregisterSubclass(subclass);
   }
 
   /**
@@ -3514,26 +3456,6 @@ public class ParseObject {
     synchronized (mutex) {
       saveEvent.unsubscribe(callback);
     }
-  }
-
-  /**
-   * Gets the class name based on the {@link ParseClassName} annotation associated with a class.
-   *
-   * @param clazz
-   *          The class to inspect.
-   * @return The name of the Parse class, if one is provided. Otherwise, {@code null}.
-   */
-  static String getClassName(Class<? extends ParseObject> clazz) {
-    String name = classNames.get(clazz);
-    if (name == null) {
-      ParseClassName info = clazz.getAnnotation(ParseClassName.class);
-      if (info == null) {
-        return null;
-      }
-      name = info.value();
-      classNames.put(clazz, name);
-    }
-    return name;
   }
 
   /**

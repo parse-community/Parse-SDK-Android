@@ -19,6 +19,10 @@ import bolts.Task;
 
 /** package */ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
+  private static ParseObjectSubclassingController getSubclassingController() {
+    return ParseCorePlugins.getInstance().getSubclassingController();
+  }
+
   /**
    * Saves the {@code ParseObject} to the a file on disk as JSON in /2/ format.
    *
@@ -75,7 +79,7 @@ import bolts.Task;
   private final ParseObjectCurrentCoder coder;
 
   public FileObjectStore(Class<T> clazz, File file, ParseObjectCurrentCoder coder) {
-    this(ParseObject.getClassName(clazz), file, coder);
+    this(getSubclassingController().getClassName(clazz), file, coder);
   }
 
   public FileObjectStore(String className, File file, ParseObjectCurrentCoder coder) {

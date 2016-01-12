@@ -92,6 +92,10 @@ public class ParseQuery<T extends ParseObject> {
     return ParseCorePlugins.getInstance().getQueryController();
   }
 
+  private static ParseObjectSubclassingController getSubclassingController() {
+    return ParseCorePlugins.getInstance().getSubclassingController();
+  }
+
   /**
    * Constraints for a {@code ParseQuery}'s where clause. A map of field names to constraints. The
    * values can either be actual values to compare with for equality, or instances of
@@ -361,7 +365,7 @@ public class ParseQuery<T extends ParseObject> {
       }
 
       public Builder(Class<T> subclass) {
-        this(ParseObject.getClassName(subclass));
+        this(getSubclassingController().getClassName(subclass));
       }
 
       public Builder(State state) {
@@ -896,7 +900,7 @@ public class ParseQuery<T extends ParseObject> {
    *          The {@link ParseObject} subclass type to retrieve.
    */
   public ParseQuery(Class<T> subclass) {
-    this(ParseObject.getClassName(subclass));
+    this(getSubclassingController().getClassName(subclass));
   }
 
   /**
