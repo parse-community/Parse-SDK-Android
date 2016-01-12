@@ -681,8 +681,9 @@ public class ParseFile {
   }
 
   /**
-   * Cancels the current network request and callbacks whether it's uploading or fetching data from
-   * the server.
+   * Cancels the operations for this {@code ParseFile} if they are still in the task queue. However,
+   * if a network request has already been started for an operation, the network request will not
+   * be canceled.
    */
   //TODO (grantland): Deprecate and replace with CancellationToken
   public void cancel() {
