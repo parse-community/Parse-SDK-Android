@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * The {@code ParseQuery} class defines a query that is used to fetch {@link ParseObject}s. The most
@@ -890,7 +891,7 @@ public class ParseQuery<T extends ParseObject> {
 
   private final Object lock = new Object();
   private boolean isRunning = false;
-  private Task<Void>.TaskCompletionSource cts;
+  private TaskCompletionSource<Void> cts;
 
   /**
    * Constructs a query for a {@link ParseObject} subclass type. A default query with no further

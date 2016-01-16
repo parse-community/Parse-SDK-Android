@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /** package */ class ParseSQLiteDatabase {
 
@@ -50,7 +51,7 @@ import bolts.Task;
   private SQLiteDatabase db;
   private Task<Void> current = null;
   private final Object currentLock = new Object();
-  private final Task<Void>.TaskCompletionSource tcs = Task.create();
+  private final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
 
   private int openFlags;
 

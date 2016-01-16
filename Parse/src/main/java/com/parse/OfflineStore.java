@@ -31,6 +31,7 @@ import java.util.WeakHashMap;
 import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /** package */ class OfflineStore {
 
@@ -188,7 +189,7 @@ import bolts.Task;
    */
   private Task<String> getOrCreateUUIDAsync(final ParseObject object, ParseSQLiteDatabase db) {
     final String newUUID = UUID.randomUUID().toString();
-    final Task<String>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<String> tcs = new TaskCompletionSource<>();
 
     synchronized (lock) {
       Task<String> uuidTask = objectToUuidMap.get(object);
@@ -484,7 +485,7 @@ import bolts.Task;
   /* package for OfflineQueryLogic */ <T extends ParseObject> Task<T> fetchLocallyAsync(
       final T object,
       final ParseSQLiteDatabase db) {
-    final Task<T>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<T> tcs = new TaskCompletionSource<>();
     Task<String> uuidTask;
 
     synchronized (lock) {

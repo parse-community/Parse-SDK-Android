@@ -13,6 +13,7 @@ import java.util.concurrent.CancellationException;
 import bolts.AggregateException;
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /** package */ class ParseTaskUtils {
 
@@ -96,7 +97,7 @@ import bolts.Task;
     if (callback == null) {
       return task;
     }
-    final Task<T>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<T> tcs = new TaskCompletionSource();
     task.continueWith(new Continuation<T, Void>() {
       @Override
       public Void then(final Task<T> task) throws Exception {

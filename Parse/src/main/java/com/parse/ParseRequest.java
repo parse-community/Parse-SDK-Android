@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * ParseRequest takes an arbitrary HttpUriRequest and retries it a number of times with
@@ -229,7 +230,7 @@ import bolts.Task;
             PLog.i("com.parse.ParseRequest", "Request failed. Waiting " + delay
                 + " milliseconds before attempt #" + (attemptsMade + 1));
 
-            final Task<Response>.TaskCompletionSource retryTask = Task.create();
+            final TaskCompletionSource<Response> retryTask = new TaskCompletionSource<>();
             ParseExecutors.scheduled().schedule(new Runnable() {
               @Override
               public void run() {

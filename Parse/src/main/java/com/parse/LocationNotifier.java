@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 import bolts.Capture;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * LocationNotifier is a wrapper around fetching the current device's location. It looks for the GPS
@@ -58,7 +59,7 @@ import bolts.Task;
    */
   /* package */ static Task<Location> getCurrentLocationAsync(Context context,
       long timeout, Criteria criteria) {
-    final Task<Location>.TaskCompletionSource tcs = Task.create();
+    final TaskCompletionSource<Location> tcs = new TaskCompletionSource<>();
     final Capture<ScheduledFuture<?>> timeoutFuture = new Capture<ScheduledFuture<?>>();
     final LocationManager manager =
         (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);

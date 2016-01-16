@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * A class that manages registering for GCM and updating the registration if it is out of date.
@@ -286,7 +287,7 @@ import bolts.Task;
     final private String senderId;
     final private Random random;
     final private int identifier;
-    final private Task<String>.TaskCompletionSource tcs;
+    final private TaskCompletionSource<String> tcs;
     final private PendingIntent appIntent;
     final private AtomicInteger tries;
     final private PendingIntent retryIntent;
@@ -304,7 +305,7 @@ import bolts.Task;
       this.senderId = senderId;
       this.random = new Random();
       this.identifier = this.random.nextInt();
-      this.tcs = Task.create();
+      this.tcs = new TaskCompletionSource<>();
       this.appIntent = PendingIntent.getBroadcast(this.context, identifier, new Intent(), 0);
       this.tries = new AtomicInteger(0);
 

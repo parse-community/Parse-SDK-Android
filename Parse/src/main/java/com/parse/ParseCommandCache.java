@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * ParseCommandCache manages an on-disk cache of commands to be executed, and a thread with a
@@ -78,7 +79,7 @@ import bolts.Task;
   // Map of filename to TaskCompletionSource, for all commands that are in the queue from this run
   // of the program. This is necessary so that the original objects can be notified after their
   // saves complete.
-  private HashMap<File, Task<JSONObject>.TaskCompletionSource> pendingTasks = new HashMap<>();
+  private HashMap<File, TaskCompletionSource<JSONObject>> pendingTasks = new HashMap<>();
 
   private boolean running; // Is the run loop executing commands from the disk cache running?
 
@@ -289,7 +290,7 @@ import bolts.Task;
   private Task<JSONObject> enqueueEventuallyAsync(ParseRESTCommand command, boolean preferOldest,
       ParseObject object) {
     Parse.requirePermission(Manifest.permission.ACCESS_NETWORK_STATE);
-    Task<JSONObject>.TaskCompletionSource tcs = Task.create();
+    TaskCompletionSource<JSONObject> tcs = new TaskCompletionSource<>();
     byte[] json;
     try {
       // If this object doesn't have an objectId yet, store the localId so we can remap it to the
@@ -508,7 +509,7 @@ import bolts.Task;
 
         // Convert the command from a string.
         final ParseRESTCommand command;
-        final Task<JSONObject>.TaskCompletionSource tcs =
+        final TaskCompletionSource<JSONObject> tcs =
             pendingTasks.containsKey(file) ? pendingTasks.get(file) : null;
 
         try {
