@@ -50,7 +50,7 @@ public class Parse {
       private Context context;
       private String applicationId;
       private String clientKey;
-      private String server = "https://api.parse.com/1";
+      private String server = "https://api.parse.com/1/";
       private boolean localDataStoreEnabled;
       private List<ParseNetworkInterceptor> interceptors;
 
