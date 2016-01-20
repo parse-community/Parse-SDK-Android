@@ -387,7 +387,7 @@ public class Parse {
     ParseHttpClient.setKeepAlive(true);
     ParseHttpClient.setMaxConnections(20);
     // If we have interceptors in list, we have to initialize all http clients and add interceptors
-    if (configuration.interceptors != null) {
+    if (configuration.interceptors != null && configuration.interceptors.size() > 0) {
       initializeParseHttpClientsWithParseNetworkInterceptors(configuration.interceptors);
     }
 
