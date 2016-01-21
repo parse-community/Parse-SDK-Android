@@ -52,6 +52,9 @@ import java.util.Map;
  */
 @SuppressWarnings("deprecation")
 /** package */ class ParseApacheHttpClient extends ParseHttpClient<HttpUriRequest, HttpResponse> {
+
+  private static final String CONTENT_ENCODING_HEADER = "Content-Encoding";
+
   private DefaultHttpClient apacheClient;
 
   public ParseApacheHttpClient(int socketOperationTimeout, SSLSessionCache sslSessionCache) {
@@ -148,6 +151,10 @@ import java.util.Map;
     Map<String, String> headers = new HashMap<>();
     for (Header header : apacheResponse.getAllHeaders()) {
       headers.put(header.getName(), header.getValue());
+    }
+    // If we auto unzip the response stream, we should remove the content-encoding header
+    if (!disableHttpLibraryAutoDecompress()) {
+      headers.remove(CONTENT_ENCODING_HEADER);
     }
 
     // Content type

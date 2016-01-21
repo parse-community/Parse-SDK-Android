@@ -202,6 +202,9 @@ public class ParseHttpClientTest {
 
     assertEquals("gzip", recordedHeaders.get("Accept-Encoding"));
 
+    // Verify we do not have Content-Encoding header
+    assertNull(parseResponse.getHeader("Content-Encoding"));
+
     // Verify response body
     byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
     assertArrayEquals(responseContent.getBytes(), content);
