@@ -80,6 +80,17 @@ public class ParseRESTCommandTest {
     ParseRESTCommand.server = null;
   }
 
+
+  @Test
+  public void testInitializationWithDefaultParseServerURL() throws Exception {
+    ParseRESTCommand.server = new URL("https://api.parse.com/1/");
+    ParseRESTCommand command = new ParseRESTCommand.Builder()
+        .httpPath("events/Appopened")
+        .build();
+
+    assertEquals("https://api.parse.com/1/events/Appopened", command.url);
+  }
+
   @Test
   public void testPermanentFailures() throws Exception {
     JSONObject json = new JSONObject();
