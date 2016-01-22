@@ -146,9 +146,7 @@ import okio.Okio;
     // Set Body
     ParseHttpBody parseBody = parseRequest.getBody();
     ParseOkHttpRequestBody okHttpRequestBody = null;
-    if(parseBody instanceof ParseByteArrayHttpBody) {
-      okHttpRequestBody = new ParseOkHttpRequestBody(parseBody);
-    }
+    okHttpRequestBody = new ParseOkHttpRequestBody(parseBody);
     switch (method) {
       case PUT:
         okHttpRequestBuilder.put(okHttpRequestBody);
