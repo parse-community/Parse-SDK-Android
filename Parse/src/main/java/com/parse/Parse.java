@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -402,13 +403,14 @@ public class Parse {
     // Make sure the data on disk for Parse is for the current
     // application.
     checkCacheApplicationId();
-    new Thread("Parse.initialize Disk Check & Starting Command Cache") {
+    final Context context = configuration.context;
+    Task.callInBackground(new Callable<Void>() {
       @Override
-      public void run() {
-        // Trigger the command cache to flush its contents.
-        getEventuallyQueue();
+      public Void call() throws Exception {
+        getEventuallyQueue(context);
+        return null;
       }
-    }.start();
+    });
 
     ParseFieldOperations.registerDefaultDecoders();
 
@@ -600,6 +602,10 @@ public class Parse {
    */
   /* package */ static ParseEventuallyQueue getEventuallyQueue() {
     Context context = ParsePlugins.Android.get().applicationContext();
+    return getEventuallyQueue(context);
+  }
+
+  private static ParseEventuallyQueue getEventuallyQueue(Context context) {
     synchronized (MUTEX) {
       boolean isLocalDatastoreEnabled = Parse.isLocalDatastoreEnabled();
       if (eventuallyQueue == null
