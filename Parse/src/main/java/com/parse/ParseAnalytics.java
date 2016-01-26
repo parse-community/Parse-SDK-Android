@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
 
@@ -45,15 +44,13 @@ public class ParseAnalytics {
    * @return A Task that is resolved when the event has been tracked by Parse.
    */
   public static Task<Void> trackAppOpenedInBackground(Intent intent) {
-    String pushHashStr = getPushHashFromIntent(intent);
-    final Capture<String> pushHash = new Capture<>();
-    if (pushHashStr != null && pushHashStr.length() > 0) {
+    final String pushId = getPushIdFromIntent(intent);
+    if (pushId != null) {
       synchronized (lruSeenPushes) {
-        if (lruSeenPushes.containsKey(pushHashStr)) {
+        if (lruSeenPushes.containsKey(pushId)) {
           return Task.forResult(null);
         } else {
-          lruSeenPushes.put(pushHashStr, true);
-          pushHash.set(pushHashStr);
+          lruSeenPushes.put(pushId, true);
         }
       }
     }
@@ -61,7 +58,7 @@ public class ParseAnalytics {
       @Override
       public Task<Void> then(Task<String> task) throws Exception {
         String sessionToken = task.getResult();
-        return getAnalyticsController().trackAppOpenedInBackground(pushHash.get(), sessionToken);
+        return getAnalyticsController().trackAppOpenedInBackground(pushId, sessionToken);
       }
     });
   }
@@ -223,7 +220,7 @@ public class ParseAnalytics {
     }
   }
 
-  /* package for test */ static String getPushHashFromIntent(Intent intent) {
+  /* package for test */ static String getPushIdFromIntent(Intent intent) {
     String pushData = null;
     if (intent != null && intent.getExtras() != null) {
       pushData = intent.getExtras().getString(ParsePushBroadcastReceiver.KEY_PUSH_DATA);
@@ -231,13 +228,17 @@ public class ParseAnalytics {
     if (pushData == null) {
       return null;
     }
-    String pushHash = null;
+    String pushId;
     try {
       JSONObject payload = new JSONObject(pushData);
-      pushHash = payload.optString("push_hash");
+      pushId = payload.optString("push_id");
     } catch (JSONException e) {
       PLog.e(TAG, "Failed to parse push data: " + e.getMessage());
+      return null;
     }
-    return pushHash;
+    if (pushId.length() <= 0) {
+      return null;
+    }
+    return pushId;
   }
 }
