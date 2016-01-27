@@ -299,12 +299,14 @@ public class ParseAnalyticsTest {
 
   //endregion
 
-  private Intent makeIntentWithParseData(String pushId) throws JSONException {
+  private Intent makeIntentWithParseData(String id) throws JSONException {
     Intent intent = new Intent();
     Bundle bundle = new Bundle();
-    JSONObject json = new JSONObject();
-    json.put("push_id", pushId);
-    bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, json.toString());
+    JSONObject pushData = new JSONObject();
+    JSONObject parseMetadata = new JSONObject();
+    parseMetadata.put("id", id);
+    pushData.put("parseMetadata", parseMetadata);
+    bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, pushData.toString());
     intent.putExtras(bundle);
     return intent;
   }

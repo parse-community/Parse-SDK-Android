@@ -221,24 +221,33 @@ public class ParseAnalytics {
   }
 
   /* package for test */ static String getPushIdFromIntent(Intent intent) {
-    String pushData = null;
-    if (intent != null && intent.getExtras() != null) {
-      pushData = intent.getExtras().getString(ParsePushBroadcastReceiver.KEY_PUSH_DATA);
-    }
-    if (pushData == null) {
+    if (intent == null || intent.getExtras() == null) {
       return null;
     }
-    String pushId;
+
+    JSONObject pushData;
     try {
-      JSONObject payload = new JSONObject(pushData);
-      pushId = payload.optString("push_id");
+      String string = intent.getExtras().getString(ParsePushBroadcastReceiver.KEY_PUSH_DATA);
+      if (string == null) {
+        return null;
+      }
+
+      pushData = new JSONObject(string);
     } catch (JSONException e) {
       PLog.e(TAG, "Failed to parse push data: " + e.getMessage());
       return null;
     }
-    if (pushId.length() <= 0) {
+
+    JSONObject parseMetadata = pushData.optJSONObject("parseMetadata");
+    if (parseMetadata == null) {
       return null;
     }
-    return pushId;
+
+    String id = parseMetadata.optString("id");
+    if (ParseTextUtils.isEmpty(id)) {
+      return null;
+    }
+
+    return id;
   }
 }
