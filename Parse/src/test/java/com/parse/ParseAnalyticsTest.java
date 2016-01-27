@@ -204,11 +204,7 @@ public class ParseAnalyticsTest {
   public void testTrackAppOpenedInBackgroundDuplicatedIntent() throws Exception {
     Intent intent = makeIntentWithParseData("test");
     ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
-
-    verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
-
     ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
-
     verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
   }
 
