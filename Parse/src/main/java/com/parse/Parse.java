@@ -467,7 +467,7 @@ public class Parse {
   /**
    * @return {@code True} if {@link #initialize} has been called, otherwise {@code false}.
    */
-  /* package */ static boolean isInitialized() {
+  public static boolean isInitialized() {
     return ParsePlugins.get() != null;
   }
 
