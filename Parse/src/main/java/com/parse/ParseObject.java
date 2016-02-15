@@ -588,9 +588,12 @@ public class ParseObject {
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
       boolean isComplete) {
-    return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get());
+    return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get(), true);
   }
 
+  public static <T extends ParseObject> T fromJsonWithoutMerge(JSONObject json, String defaultClassName) {
+    return fromJSON(json, defaultClassName, true, ParseDecoder.get(), false);
+  }
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
    *
@@ -604,7 +607,7 @@ public class ParseObject {
    *          Delegate for knowing how to decode the values in the JSON.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-      boolean isComplete, ParseDecoder decoder) {
+      boolean isComplete, ParseDecoder decoder, boolean mergePending) {
     String className = json.optString(KEY_CLASS_NAME, defaultClassName);
     if (className == null) {
       return null;
@@ -613,7 +616,13 @@ public class ParseObject {
     @SuppressWarnings("unchecked")
     T object = (T) ParseObject.createWithoutData(className, objectId);
     State newState = object.mergeFromServer(object.getState(), json, decoder, isComplete);
-    object.setState(newState);
+
+    if (mergePending) {
+      object.setState(newState);
+    } else {
+      object.changeState(newState);
+    }
+
     return object;
   }
 
@@ -665,11 +674,17 @@ public class ParseObject {
    */
   /* package */ void setState(State newState) {
     synchronized (mutex) {
-      setState(newState, true);
+      setState(newState, true, true);
     }
   }
 
-  private void setState(State newState, boolean notifyIfObjectIdChanges) {
+  /* package */ void changeState(State newState) {
+    synchronized (mutex) {
+      setState(newState, true, false);
+    }
+  }
+
+  private void setState(State newState, boolean notifyIfObjectIdChanges, boolean isRebuildFromQueue) {
     synchronized (mutex) {
       String oldObjectId = state.objectId();
       String newObjectId = newState.objectId();
@@ -680,7 +695,12 @@ public class ParseObject {
         notifyObjectIdChanged(oldObjectId, newObjectId);
       }
 
-      rebuildEstimatedData();
+      if (isRebuildFromQueue) {
+        rebuildEstimatedData();
+      } else {
+        updateEstimatedDataFromState();
+      }
+
     }
   }
 
@@ -760,7 +780,7 @@ public class ParseObject {
       // doesn't make any sense and we should probably remove that code in ParseUser.
       // Otherwise, there shouldn't be any objectId changes here since this method is only otherwise
       // used in fetchAll.
-      setState(copy, false);
+      setState(copy, false, true);
     }
   }
 
@@ -2813,13 +2833,18 @@ public class ParseObject {
    */
   private void rebuildEstimatedData() {
     synchronized (mutex) {
-      estimatedData.clear();
-      for (String key : state.keySet()) {
-        estimatedData.put(key, state.get(key));
-      }
+      updateEstimatedDataFromState();
+
       for (ParseOperationSet operations : operationSetQueue) {
         applyOperations(operations, estimatedData);
       }
+    }
+  }
+
+  private void updateEstimatedDataFromState() {
+    estimatedData.clear();
+    for (String key : state.keySet()) {
+      estimatedData.put(key, state.get(key));
     }
   }
 
