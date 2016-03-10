@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1x'
+        classpath  'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1x'
     }
 }
 
@@ -47,6 +47,7 @@ android {
 }
 
 dependencies {
+    compile 'com.android.tools.build:gradle:2.0.0-beta6'
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     provided 'com.squareup.okhttp:okhttp:2.4.0'
@@ -211,6 +212,6 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
 
 //region Coveralls
 
-coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+//coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
 
 //endregion
