@@ -25,6 +25,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName project.version
+        consumerProguardFiles 'release-proguard.pro'
     }
 
     lintOptions {
