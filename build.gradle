@@ -4,20 +4,21 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.1'
+        classpath 'com.android.tools.build:gradle:2.0.0-beta6'
     }
 }
+
 
 allprojects {
     repositories {
         mavenCentral()
     }
 }
-
 ext {
-    compileSdkVersion = 22
-    buildToolsVersion = "23.0.1"
-
-    minSdkVersion = 9
-    targetSdkVersion = 23
+    setProperty('compileSdkVersion', 'android-N')
+    setProperty('buildToolsVersion', '24.0.0 rc1')
+    setProperty('minSdkVersion', 'N')
+    setProperty('targetSdkVersion', 'N')
 }
+
+

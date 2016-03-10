@@ -33,6 +33,7 @@ import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.SocketFactory;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -76,8 +77,8 @@ import java.util.Map;
     // Register standard protocols.
     SchemeRegistry schemeRegistry = new SchemeRegistry();
     schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-    schemeRegistry.register(new Scheme("https", SSLCertificateSocketFactory.getHttpSocketFactory(
-        socketOperationTimeout, sslSessionCache), 443));
+    schemeRegistry.register(new Scheme("https", (SocketFactory) SSLCertificateSocketFactory.getDefault(
+            socketOperationTimeout, sslSessionCache), 443));
 
     // [1] AndroidHttpClient defaults to 2 connections per route. Not fun. AND you can't set these
     // properties after AndroidHttpClient#newInstance(context)
