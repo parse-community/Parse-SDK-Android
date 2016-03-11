@@ -198,6 +198,7 @@ import java.util.List;
     synchronized (lock) {
       if (pushType == null) {
         boolean isGooglePlayServicesAvailable = isGooglePlayServicesAvailable();
+        boolean isGcmRegisterServiceAvailable = isGcmRegisterServiceAvailable();
         boolean isPPNSAvailable = PPNSUtil.isPPNSAvailable();
         boolean hasAnyGcmSpecificDeclaration = hasAnyGcmSpecificDeclaration();
         ManifestCheckResult gcmSupportLevel = gcmSupportLevel();
@@ -211,12 +212,13 @@ import java.util.List;
 
         if (hasPushBroadcastReceiver
             && isGooglePlayServicesAvailable
+            && isGcmRegisterServiceAvailable
             && hasRequiredGcmDeclarations) {
           pushType = PushType.GCM;
         } else if (hasPushBroadcastReceiver
             && isPPNSAvailable
             && hasRequiredPpnsDeclarations
-            && (!hasAnyGcmSpecificDeclaration || !isGooglePlayServicesAvailable)) {
+            && !(isGcmRegisterServiceAvailable && isGooglePlayServicesAvailable && hasAnyGcmSpecificDeclaration)) {
           pushType = PushType.PPNS;
 
           if (isGooglePlayServicesAvailable) {
@@ -464,6 +466,13 @@ import java.util.List;
 
   private static boolean isGooglePlayServicesAvailable() {
     return Build.VERSION.SDK_INT >= 8 && getPackageInfo("com.google.android.gsf") != null;
+  }
+
+  private static boolean isGcmRegisterServiceAvailable() {
+    Intent intent = new Intent(GcmRegistrar.REGISTER_ACTION);
+    intent.setPackage("com.google.android.gsf");
+    List<ResolveInfo> services = getContext().getPackageManager().queryIntentServices(intent, 0);
+    return services != null && services.size() > 0;
   }
 
   private static ManifestCheckResult gcmSupportLevel() {
