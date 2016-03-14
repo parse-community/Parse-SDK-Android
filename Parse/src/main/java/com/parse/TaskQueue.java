@@ -115,4 +115,8 @@ import bolts.Task;
       lock.unlock();
     }
   }
+
+  void reset() {
+    tail = Task.forResult(null);
+  }
 }

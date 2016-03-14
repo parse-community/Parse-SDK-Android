@@ -845,6 +845,10 @@ public class Parse {
     interceptors.remove(interceptor);
   }
 
+  public static void resetTaskQueue() {
+    ParseSQLiteDatabase.taskQueue.reset();
+  }
+
   /* package */ static String externalVersionName() {
     return "a" + ParseObject.VERSION_NAME;
   }

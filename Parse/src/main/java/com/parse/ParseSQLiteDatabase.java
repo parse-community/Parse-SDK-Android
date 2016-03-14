@@ -36,7 +36,7 @@ import bolts.TaskCompletionSource;
    * transactions to work correctly.
    */
   //TODO (grantland): do we have to serialize sessions of different databases?
-  private static final TaskQueue taskQueue = new TaskQueue();
+  /* package */ static final TaskQueue taskQueue = new TaskQueue();
 
   /* protected */ static Task<ParseSQLiteDatabase> openDatabaseAsync(final SQLiteOpenHelper helper, int flags) {
     final ParseSQLiteDatabase db = new ParseSQLiteDatabase(flags);
