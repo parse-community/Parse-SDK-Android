@@ -20,7 +20,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -197,8 +196,7 @@ import java.util.List;
   public static PushType getPushType() {
     synchronized (lock) {
       if (pushType == null) {
-        boolean isGooglePlayServicesAvailable = isGooglePlayServicesAvailable();
-        boolean isGcmRegisterServiceAvailable = isGcmRegisterServiceAvailable();
+        boolean isGcmRegisterServiceAvailable = GcmRegistrar.isGcmRegisterServiceAvailable();
         boolean isPPNSAvailable = PPNSUtil.isPPNSAvailable();
         boolean hasAnyGcmSpecificDeclaration = hasAnyGcmSpecificDeclaration();
         ManifestCheckResult gcmSupportLevel = gcmSupportLevel();
@@ -211,18 +209,17 @@ import java.util.List;
             (ppnsSupportLevel != ManifestCheckResult.MISSING_REQUIRED_DECLARATIONS);
 
         if (hasPushBroadcastReceiver
-            && isGooglePlayServicesAvailable
             && isGcmRegisterServiceAvailable
             && hasRequiredGcmDeclarations) {
           pushType = PushType.GCM;
         } else if (hasPushBroadcastReceiver
             && isPPNSAvailable
             && hasRequiredPpnsDeclarations
-            && !(isGcmRegisterServiceAvailable && isGooglePlayServicesAvailable && hasAnyGcmSpecificDeclaration)) {
+            && !(isGcmRegisterServiceAvailable && hasAnyGcmSpecificDeclaration)) {
           pushType = PushType.PPNS;
 
-          if (isGooglePlayServicesAvailable) {
-            Log.w(TAG, "Using PPNS for push even though Google Play Services is available." +
+          if (isGcmRegisterServiceAvailable) {
+            Log.w(TAG, "Using PPNS for push even though GCM service is available." +
                 " Please " + getGcmManifestMessage());
           }
         } else {
@@ -248,9 +245,9 @@ import java.util.List;
                   "   </intent-filter>\n" +
                   " </receiver>");
             }
-            if (!isGooglePlayServicesAvailable) {
-              PLog.e(TAG, "Cannot use GCM for push on this device because Google Play " +
-                  "Services is not available. Install Google Play Services from the Play Store.");
+            if (!isGcmRegisterServiceAvailable) {
+              PLog.e(TAG, "Cannot use GCM for push on this device because GCM " +
+                  "Service is not available. Install Google Play Services from the Play Store.");
             }
             // Emit warnings if the client doesn't get push due to misconfiguration of the manifest.
             if (!hasRequiredGcmDeclarations) {
@@ -462,17 +459,6 @@ import java.util.List;
     }
 
     return false;
-  }
-
-  private static boolean isGooglePlayServicesAvailable() {
-    return Build.VERSION.SDK_INT >= 8 && getPackageInfo("com.google.android.gsf") != null;
-  }
-
-  private static boolean isGcmRegisterServiceAvailable() {
-    Intent intent = new Intent(GcmRegistrar.REGISTER_ACTION);
-    intent.setPackage("com.google.android.gsf");
-    List<ResolveInfo> services = getContext().getPackageManager().queryIntentServices(intent, 0);
-    return services != null && services.size() > 0;
   }
 
   private static ManifestCheckResult gcmSupportLevel() {
