@@ -29,9 +29,9 @@ import java.util.List;
 
   private static final String APACHE_HTTPCLIENT_NAME = "org.apache.http";
   private static final String URLCONNECTION_NAME = "net.java.URLConnection";
-  private static final String OKHTTP_NAME = "com.squareup.okhttp";
+  private static final String OKHTTP_NAME = "com.squareup.okhttp3";
 
-  private static final String OKHTTPCLIENT_PATH = "com.squareup.okhttp.OkHttpClient";
+  private static final String OKHTTPCLIENT_PATH = "okhttp3.OkHttpClient";
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
