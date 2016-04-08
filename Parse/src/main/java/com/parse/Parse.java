@@ -142,6 +142,13 @@ public class Parse {
        * @return The same builder, for easy chaining.
        */
       public Builder server(String server) {
+
+        // Add an extra trailing slash so that Parse REST commands include
+        // the path as part of the server URL (i.e. http://api.myhost.com/parse)
+        if (server.endsWith("/") == false) {
+          server = server + "/";
+        }
+
         this.server = server;
         return this;
       }
