@@ -238,7 +238,7 @@ import java.util.List;
                   ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
                   "these lines to your AndroidManifest.xml:\n\n" +
                   " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
-                  "   android:exported=false>\n" +
+                  "   android:exported=\"false\">\n" +
                   "  <intent-filter>\n" +
                   "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
                   "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
@@ -291,9 +291,14 @@ import java.util.List;
    * but push isn't actually enabled because the manifest is misconfigured.
    */
   public static String getNonePushTypeLogMessage() {
-    return "Push is not configured for this app because the app manifest is missing required " +
-        "declarations. Please add the following declarations to your app manifest to use GCM for " +
-        "push: " + getGcmManifestMessage();
+    if (isGooglePlayServicesAvailable()) {
+      return "Push is not configured for this app because the app manifest is missing required " +
+              "declarations. Please add the following declarations to your app manifest to use GCM for " +
+              "push: " + getGcmManifestMessage();
+    } else {
+      return "Push is not available on this device because Google Play Services are not available " +
+              "on this device and PPNS is not enabled in your app manifest.";
+    }
   }
 
   enum ManifestCheckResult {
@@ -500,7 +505,11 @@ import java.util.List;
     }
 
     String[] optionalPermissions = new String[] {
-      "android.permission.VIBRATE"
+      "android.permission.VIBRATE",
+
+      // Technically this is optional, but the app will not get updates to expired push tokens until
+      // it performs another manual check.
+      "com.google.android.gms.iid.InstanceID"
     };
 
     if (!hasGrantedPermissions(context, optionalPermissions)) {
@@ -570,6 +579,7 @@ import java.util.List;
         "  <intent-filter>\n" +
         "    <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n" +
         "    <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n" +
+        "    <action android:nmae=\"com.google.android.gms.iid.InstanceID\" />\n" +
         "    <category android:name=\"" + packageName + "\" />\n" +
         "  </intent-filter>\n" +
         "</receiver>\n" +

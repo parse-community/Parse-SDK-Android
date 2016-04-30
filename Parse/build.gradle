@@ -41,6 +41,7 @@ android {
 
 dependencies {
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
 
     provided 'com.squareup.okhttp:okhttp:2.4.0'
     provided 'com.facebook.stetho:stetho:1.1.1'
