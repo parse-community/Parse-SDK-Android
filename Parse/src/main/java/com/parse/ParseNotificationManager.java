@@ -48,7 +48,7 @@ import android.util.SparseIntArray;
     return notificationCount.get();
   }
   
-  public void showNotification(Context context, int id, Notification notification) {
+  public void showNotification(Context context, Notification notification) {
     if (context != null && notification != null) {
       notificationCount.incrementAndGet();
       
@@ -58,9 +58,7 @@ import android.util.SparseIntArray;
             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         
         // Pick an id that probably won't overlap anything
-        if (id == 0) {
-          id = (int) System.currentTimeMillis();
-        }
+        int id = (int) System.currentTimeMillis();
 
         try {
           nm.notify(id, notification);
