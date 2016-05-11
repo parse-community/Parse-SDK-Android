@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.security.acl.Permission;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -508,6 +509,41 @@ public class ParseACL {
   public void setRoleWriteAccess(ParseRole role, boolean allowed) {
     validateRoleState(role);
     setRoleWriteAccess(role.getName(), allowed);
+  }
+
+  /**
+   * Get whether users belonging to the given role are allowed to write this object. The role must
+   * already be saved on the server and its data must have been fetched in order to use this method.
+   *
+   * @param other
+   *          The other ACL to test equality against
+   * @return {@code true} if the two objects has same acl. {@code false} otherwise.
+   *
+   */
+  @Override
+  public boolean equals(Object other) {
+      if (!(other instanceof ParseACL)) {
+        return false;
+      }
+      Map<String,Permissions> users = this.getPermissionsById();
+      Map<String,Permissions> otherUsers = ((ParseACL) other).getPermissionsById();
+      if (users.size() != otherUsers.size()) {
+          return false;
+      }
+      for (Map.Entry<String, Permissions> u : users.entrySet()) {
+          Permissions otherUserPermission = otherUsers.get(u.getKey());
+          if (otherUserPermission == null) {
+              return false;
+          }
+          Permissions userPermission = u.getValue();
+          if (userPermission.getReadPermission() != otherUserPermission.getReadPermission()) {
+              return false;
+          }
+          if (userPermission.getWritePermission() != otherUserPermission.getWritePermission()) {
+              return false;
+          }
+      }
+      return true;
   }
 
   private static class UserResolutionListener implements GetCallback<ParseObject> {
