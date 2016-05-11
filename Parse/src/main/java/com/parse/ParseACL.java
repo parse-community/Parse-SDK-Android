@@ -511,12 +511,11 @@ public class ParseACL {
   }
 
   /**
-   * Get whether users belonging to the given role are allowed to write this object. The role must
-   * already be saved on the server and its data must have been fetched in order to use this method.
+   * Get whether an other ParseACL object share the same permissions
    *
    * @param other
-   *          The other ACL to test equality against
-   * @return {@code true} if the two objects has same acl. {@code false} otherwise.
+   *          The other object to test equality
+   * @return {@code true} if the two objects has same permissions. {@code false} otherwise.
    *
    */
   @Override
