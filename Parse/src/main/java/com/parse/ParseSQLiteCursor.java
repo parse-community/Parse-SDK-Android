@@ -249,6 +249,12 @@ import bolts.Task;
   }
 
   @Override
+  public void setExtras(Bundle bundle) {
+    cursor.setExtras(bundle);
+  }
+
+
+  @Override
   public Bundle getExtras() {
     return cursor.getExtras();
   }

@@ -57,7 +57,10 @@ import android.widget.RemoteViews;
     @Override
     public Notification build(Builder b) {
       Notification result = (Notification) b.mNotification;
-      result.setLatestEventInfo(b.mContext, b.mContentTitle, b.mContentText, b.mContentIntent);
+      Notification.Builder builder = new Notification.Builder(b.mContext);
+      builder.setContentTitle(b.mContentTitle);
+      builder.setContentText(b.mContentText);
+      builder.setContentIntent(b.mContentIntent);
       // translate high priority requests into legacy flag
       if (b.mPriority > PRIORITY_DEFAULT) {
         result.flags |= FLAG_HIGH_PRIORITY;
@@ -73,20 +76,20 @@ import android.widget.RemoteViews;
     public Notification build(Builder b) {
       postJellyBeanBuilder = new Notification.Builder(b.mContext);
       postJellyBeanBuilder.setContentTitle(b.mContentTitle)
-          .setContentText(b.mContentText)
-          .setTicker(b.mNotification.tickerText)
-          .setSmallIcon(b.mNotification.icon, b.mNotification.iconLevel)
-          .setContentIntent(b.mContentIntent)
-          .setDeleteIntent(b.mNotification.deleteIntent)
-          .setAutoCancel((b.mNotification.flags & Notification.FLAG_AUTO_CANCEL) != 0)
-          .setLargeIcon(b.mLargeIcon)
-          .setDefaults(b.mNotification.defaults);
+              .setContentText(b.mContentText)
+              .setTicker(b.mNotification.tickerText)
+              .setSmallIcon(b.mNotification.icon, b.mNotification.iconLevel)
+              .setContentIntent(b.mContentIntent)
+              .setDeleteIntent(b.mNotification.deleteIntent)
+              .setAutoCancel((b.mNotification.flags & Notification.FLAG_AUTO_CANCEL) != 0)
+              .setLargeIcon(b.mLargeIcon)
+              .setDefaults(b.mNotification.defaults);
       if (b.mStyle != null) {
         if (b.mStyle instanceof Builder.BigTextStyle) {
           Builder.BigTextStyle staticStyle = (Builder.BigTextStyle) b.mStyle;
           Notification.BigTextStyle style = new Notification.BigTextStyle(postJellyBeanBuilder)
-              .setBigContentTitle(staticStyle.mBigContentTitle)
-              .bigText(staticStyle.mBigText);
+                  .setBigContentTitle(staticStyle.mBigContentTitle)
+                  .bigText(staticStyle.mBigText);
           if (staticStyle.mSummaryTextSet) {
             style.setSummaryText(staticStyle.mSummaryText);
           }
