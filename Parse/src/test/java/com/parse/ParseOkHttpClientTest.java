@@ -11,15 +11,6 @@ package com.parse;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 import com.parse.http.ParseNetworkInterceptor;
-import okhttp3.MediaType;
-import okhttp3.Protocol;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +28,15 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import okio.BufferedSource;
 
@@ -355,7 +355,7 @@ public class ParseOkHttpClientTest {
   // Generate a ParseHttpRequest sent to server
   private ParseHttpRequest generateClientRequest() throws Exception {
     Map<String, String> headers = new HashMap<>();
-    headers.put("requestKey", "requestValue");
+    headers.put("requestkey", "requestValue");
     JSONObject json = new JSONObject();
     json.put("key", "value");
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
@@ -372,7 +372,7 @@ public class ParseOkHttpClientTest {
   private void verifyClientRequest(ParseHttpRequest parseRequest) throws IOException {
     assertEquals(server.url("/").toString(), parseRequest.getUrl());
     assertEquals(ParseHttpRequest.Method.POST, parseRequest.getMethod());
-    assertEquals("requestValue", parseRequest.getHeader("requestKey"));
+    assertEquals("requestValue", parseRequest.getHeader("requestkey"));
     assertEquals("application/json", parseRequest.getBody().getContentType());
     JSONObject json = new JSONObject();
     try {
