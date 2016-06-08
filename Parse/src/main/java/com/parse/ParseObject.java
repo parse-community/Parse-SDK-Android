@@ -48,7 +48,7 @@ import bolts.TaskCompletionSource;
  */
 public class ParseObject {
   private static final String AUTO_CLASS_NAME = "_Automatic";
-  /* package */ static final String VERSION_NAME = "1.13.1";
+  /* package */ static final String VERSION_NAME = "1.13.2-SNAPSHOT";
 
   /*
   REST JSON Keys
