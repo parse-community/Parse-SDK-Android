@@ -95,7 +95,6 @@ import java.io.IOException;
             ParseHttpRequest request = chain.getRequest();
             ParseHttpRequest.Builder builder = new ParseHttpRequest.Builder(request)
                 .addHeader(ParseRESTCommand.HEADER_APPLICATION_ID, applicationId)
-                .addHeader(ParseRESTCommand.HEADER_CLIENT_KEY, clientKey)
                 .addHeader(ParseRESTCommand.HEADER_CLIENT_VERSION, Parse.externalVersionName())
                 .addHeader(
                     ParseRESTCommand.HEADER_APP_BUILD_VERSION,
@@ -111,6 +110,10 @@ import java.io.IOException;
               // We can do this synchronously since the caller is already in a Task on the
               // NETWORK_EXECUTOR
               builder.addHeader(ParseRESTCommand.HEADER_INSTALLATION_ID, installationId().get());
+            }
+            // client key can be null with self-hosted Parse Server
+            if (clientKey != null) {
+              builder.addHeader(ParseRESTCommand.HEADER_CLIENT_KEY, clientKey);
             }
             return chain.proceed(builder.build());
           }
