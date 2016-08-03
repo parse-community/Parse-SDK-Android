@@ -15,7 +15,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.SystemClock;
 
@@ -45,8 +44,6 @@ import bolts.TaskCompletionSource;
 
   public static final String REGISTER_ACTION = "com.google.android.c2dm.intent.REGISTER";
 
-  private static final String GSF_PACKAGE_NAME = "com.google.android.gsf";
-
   private static final String FILENAME_DEVICE_TOKEN_LAST_MODIFIED = "deviceTokenLastModified";
   private long localDeviceTokenLastModified;
   private final Object localDeviceTokenLastModifiedMutex = new Object();
@@ -70,14 +67,6 @@ import bolts.TaskCompletionSource;
     }
 
     return senderID.substring(3);
-  }
-
-  public static boolean isGcmRegisterServiceAvailable() {
-    Intent intent = new Intent(REGISTER_ACTION);
-    intent.setPackage(GSF_PACKAGE_NAME);
-    List<ResolveInfo> services = Parse.getApplicationContext().getPackageManager().
-            queryIntentServices(intent, 0);
-    return services != null && services.size() > 0;
   }
 
   private final Object lock = new Object();
@@ -348,7 +337,7 @@ import bolts.TaskCompletionSource;
 
     private void send() {
       Intent intent = new Intent(REGISTER_ACTION);
-      intent.setPackage(GSF_PACKAGE_NAME);
+      intent.setPackage("com.google.android.gsf");
       intent.putExtra("sender", senderId);
       intent.putExtra("app", appIntent);
 
