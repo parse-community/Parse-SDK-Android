@@ -42,9 +42,6 @@ import bolts.TaskCompletionSource;
  */
 public class ParseFile {
 
-  // We limit the size of ParseFile data to be 10mb.
-  /* package */ static final int MAX_FILE_SIZE = 10 * 1048576;
-
   /* package for tests */ static ParseFileController getFileController() {
     return ParseCorePlugins.getInstance().getFileController();
   }
@@ -164,10 +161,6 @@ public class ParseFile {
    */
   public ParseFile(File file, String contentType) {
     this(new State.Builder().name(file.getName()).mimeType(contentType).build());
-    if (file.length() > MAX_FILE_SIZE) {
-      throw new IllegalArgumentException(String.format("ParseFile must be less than %d bytes",
-          MAX_FILE_SIZE));
-    }
     this.file = file;
   }
 
@@ -186,10 +179,6 @@ public class ParseFile {
    */
   public ParseFile(String name, byte[] data, String contentType) {
     this(new State.Builder().name(name).mimeType(contentType).build());
-    if (data.length > MAX_FILE_SIZE) {
-      throw new IllegalArgumentException(String.format("ParseFile must be less than %d bytes",
-          MAX_FILE_SIZE));
-    }
     this.data = data;
   }
 
