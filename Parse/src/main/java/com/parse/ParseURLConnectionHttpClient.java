@@ -37,9 +37,6 @@ import javax.net.ssl.HttpsURLConnection;
 
   public ParseURLConnectionHttpClient(int socketOperationTimeout, SSLSessionCache sslSessionCache) {
     this.socketOperationTimeout = socketOperationTimeout;
-
-    HttpsURLConnection.setDefaultSSLSocketFactory(SSLCertificateSocketFactory.getDefault(
-        socketOperationTimeout, sslSessionCache));
   }
 
   @Override

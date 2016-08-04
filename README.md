@@ -13,7 +13,7 @@ Download [the latest JAR][latest] or define in Gradle:
 
 ```groovy
 dependencies {
-  compile 'com.parse:parse-android:1.13.0'
+  compile 'com.parse:parse-android:1.13.1'
 }
 ```
 

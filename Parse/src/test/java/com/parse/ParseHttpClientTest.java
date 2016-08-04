@@ -10,10 +10,10 @@ package com.parse;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-import com.squareup.okhttp.Headers;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
+import okhttp3.Headers;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -108,7 +108,7 @@ public class ParseHttpClientTest {
     Map<String, String> requestHeaders = new HashMap<>();
     requestHeaders.put("User-Agent", "Parse Android SDK");
 
-    String requestUrl = server.getUrl("/").toString();
+    String requestUrl = server.url("/").toString();
     JSONObject json = new JSONObject();
     json.put("key", "value");
     String requestContent = json.toString();
@@ -183,7 +183,7 @@ public class ParseHttpClientTest {
     server.start();
 
     // We do not need to add Accept-Encoding header manually, httpClient library should do that.
-    String requestUrl = server.getUrl("/").toString();
+    String requestUrl = server.url("/").toString();
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(requestUrl)
         .setMethod(ParseHttpRequest.Method.GET)

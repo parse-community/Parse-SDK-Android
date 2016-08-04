@@ -30,15 +30,29 @@ public class ParseClientConfigurationTest {
     Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
     builder.applicationId("foo");
     builder.clientKey("bar");
-    builder.server("some.server");
     builder.enableLocalDataStore();
     Parse.Configuration configuration = builder.build();
 
     assertNull(configuration.context);
     assertEquals(configuration.applicationId, "foo");
     assertEquals(configuration.clientKey, "bar");
-    assertEquals(configuration.server, "some.server");
     assertEquals(configuration.localDataStoreEnabled, true);
+  }
+
+  @Test
+  public void testBuilderServerURL() {
+    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+    builder.server("http://myserver.com/parse/");
+    Parse.Configuration configuration = builder.build();
+    assertEquals(configuration.server, "http://myserver.com/parse/");
+  }
+
+  @Test
+  public void testBuilderServerMissingSlashURL() {
+    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+    builder.server("http://myserver.com/missingslash");
+    Parse.Configuration configuration = builder.build();
+    assertEquals(configuration.server, "http://myserver.com/missingslash/");
   }
 
   @Test

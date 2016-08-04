@@ -11,15 +11,6 @@ package com.parse;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 import com.parse.http.ParseNetworkInterceptor;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.Protocol;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
-import com.squareup.okhttp.mockwebserver.MockResponse;
-import com.squareup.okhttp.mockwebserver.MockWebServer;
-import com.squareup.okhttp.mockwebserver.RecordedRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +28,15 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import okio.BufferedSource;
 
@@ -116,7 +116,7 @@ public class ParseOkHttpClientTest {
     // Verify method
     assertEquals(ParseHttpRequest.Method.POST.toString(), okHttpRequest.method());
     // Verify URL
-    assertEquals(url, okHttpRequest.urlString());
+    assertEquals(url, okHttpRequest.url().toString());
     // Verify Headers
     assertEquals(1, okHttpRequest.headers(headerName).size());
     assertEquals(headerValue, okHttpRequest.headers(headerName).get(0));
@@ -173,12 +173,12 @@ public class ParseOkHttpClientTest {
           }
 
           @Override
-          public long contentLength() throws IOException {
+          public long contentLength() {
             return contentLength;
           }
 
           @Override
-          public BufferedSource source() throws IOException {
+          public BufferedSource source() {
             Buffer buffer = new Buffer();
             buffer.write(content.getBytes());
             return buffer;
@@ -252,7 +252,7 @@ public class ParseOkHttpClientTest {
     });
 
     // We do not need to add Accept-Encoding header manually, httpClient library should do that.
-    String requestUrl = server.getUrl("/").toString();
+    String requestUrl = server.url("/").toString();
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
         .setUrl(requestUrl)
         .setMethod(ParseHttpRequest.Method.GET)
@@ -355,11 +355,11 @@ public class ParseOkHttpClientTest {
   // Generate a ParseHttpRequest sent to server
   private ParseHttpRequest generateClientRequest() throws Exception {
     Map<String, String> headers = new HashMap<>();
-    headers.put("requestKey", "requestValue");
+    headers.put("requestkey", "requestValue");
     JSONObject json = new JSONObject();
     json.put("key", "value");
     ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-        .setUrl(server.getUrl("/").toString())
+        .setUrl(server.url("/").toString())
         .setMethod(ParseHttpRequest.Method.POST)
         .setBody(new ParseByteArrayHttpBody(json.toString().getBytes(), "application/json"))
         .setHeaders(headers)
@@ -370,9 +370,9 @@ public class ParseOkHttpClientTest {
   // Verify the request from client, if you change the data in generateClientRequest, make
   // sure you also change the condition in this method otherwise tests will fail
   private void verifyClientRequest(ParseHttpRequest parseRequest) throws IOException {
-    assertEquals(server.getUrl("/").toString(), parseRequest.getUrl());
+    assertEquals(server.url("/").toString(), parseRequest.getUrl());
     assertEquals(ParseHttpRequest.Method.POST, parseRequest.getMethod());
-    assertEquals("requestValue", parseRequest.getHeader("requestKey"));
+    assertEquals("requestValue", parseRequest.getHeader("requestkey"));
     assertEquals("application/json", parseRequest.getBody().getContentType());
     JSONObject json = new JSONObject();
     try {
@@ -390,7 +390,7 @@ public class ParseOkHttpClientTest {
     ParseHttpRequest requestAgain =
         new ParseHttpRequest.Builder()
             .addHeader("requestKeyAgain", "requestValueAgain")
-            .setUrl(server.getUrl("/test").toString())
+            .setUrl(server.url("/test").toString())
             .setMethod(ParseHttpRequest.Method.GET)
             .build();
     return requestAgain;

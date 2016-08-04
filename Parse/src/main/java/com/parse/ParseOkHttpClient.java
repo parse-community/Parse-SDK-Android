@@ -8,22 +8,12 @@
  */
 package com.parse;
 
-import android.net.SSLCertificateSocketFactory;
 import android.net.SSLSessionCache;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 import com.parse.http.ParseNetworkInterceptor;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Headers;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +23,15 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import bolts.Capture;
+import okhttp3.Call;
+import okhttp3.Headers;
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
@@ -48,17 +47,16 @@ import okio.Okio;
 
   public ParseOkHttpClient(int socketOperationTimeout, SSLSessionCache sslSessionCache) {
 
-    okHttpClient = new OkHttpClient();
+    OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
-    okHttpClient.setConnectTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
-    okHttpClient.setReadTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
+    builder.connectTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
+    builder.readTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
 
     // Don't handle redirects. We copy the setting from AndroidHttpClient.
     // For detail, check https://quip.com/Px8jAxnaun2r
-    okHttpClient.setFollowRedirects(false);
+    builder.followRedirects(false);
 
-    okHttpClient.setSslSocketFactory(SSLCertificateSocketFactory.getDefault(
-        socketOperationTimeout, sslSessionCache));
+    okHttpClient = builder.build();
   }
 
   @Override
@@ -183,7 +181,7 @@ import okio.Okio;
      }
 
     // Set url
-    parseRequestBuilder.setUrl(okHttpRequest.urlString());
+    parseRequestBuilder.setUrl(okHttpRequest.url().toString());
 
     // Set Header
     for (Map.Entry<String, List<String>> entry : okHttpRequest.headers().toMultimap().entrySet()) {
@@ -206,7 +204,8 @@ import okio.Okio;
    */
   @Override
   /* package */ void addExternalInterceptor(final ParseNetworkInterceptor parseNetworkInterceptor) {
-    okHttpClient.networkInterceptors().add(new Interceptor() {
+    OkHttpClient.Builder builder = okHttpClient.newBuilder();
+    builder.networkInterceptors().add(new Interceptor() {
       @Override
       public Response intercept(final Chain okHttpChain) throws IOException {
         Request okHttpRequest = okHttpChain.request();
@@ -257,12 +256,12 @@ import okio.Okio;
           }
 
           @Override
-          public long contentLength() throws IOException {
+          public long contentLength() {
             return parseResponse.getTotalSize();
           }
 
           @Override
-          public BufferedSource source() throws IOException {
+          public BufferedSource source() {
             // We need to use the proxy stream from interceptor to replace the origin network
             // stream, so when the stream is read by Parse, the network stream is proxyed in the
             // interceptor.
@@ -276,6 +275,8 @@ import okio.Okio;
         return newOkHttpResponseBuilder.build();
       }
     });
+
+    okHttpClient = builder.build();
   }
 
   private static class ParseOkHttpRequestBody extends RequestBody {
