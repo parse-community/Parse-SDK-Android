@@ -2,9 +2,11 @@ import com.android.builder.core.BuilderConstants
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'com.github.dcendents.android-maven'
 
 group = 'com.parse'
-version = '1.13.3-SNAPSHOT'
+group=  'com.github.DrBeak1'
+version = '1.13.2-SNAPSHOT'
 
 buildscript {
     repositories {

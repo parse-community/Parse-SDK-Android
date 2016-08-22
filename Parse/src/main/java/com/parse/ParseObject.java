@@ -3336,7 +3336,7 @@ public class ParseObject {
         return null;
       }
       String className = acl.getClass().getSimpleName();
-      Log.d("CLASS: " + className);
+      PLog.d("ParseObject", "CLASS: " + className);
       if (!(acl instanceof ParseACL)) {
         throw new RuntimeException("only ACLs can be stored in the ACL key");
       }
