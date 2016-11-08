@@ -144,7 +144,7 @@ import okio.Okio;
     // Set Body
     ParseHttpBody parseBody = parseRequest.getBody();
     ParseOkHttpRequestBody okHttpRequestBody = null;
-    if(parseBody instanceof ParseByteArrayHttpBody) {
+    if(parseBody != null) {
       okHttpRequestBody = new ParseOkHttpRequestBody(parseBody);
     }
     switch (method) {
