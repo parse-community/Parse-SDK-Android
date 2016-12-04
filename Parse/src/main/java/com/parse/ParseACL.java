@@ -523,32 +523,31 @@ public class ParseACL {
   @Override
   public boolean equals(Object other) {
       if (!(other instanceof ParseACL)) {
-        Log.d("ACL", "not instance of");
         return false;
       }
       Map<String,Permissions> users = this.getPermissionsById();
       Map<String,Permissions> otherUsers = ((ParseACL) other).getPermissionsById();
       if (users.size() != otherUsers.size()) {
-        Log.d("ACL", "different size");
+        // Different size
         return false;
       }
       for (Map.Entry<String, Permissions> u : users.entrySet()) {
           Permissions otherUserPermission = otherUsers.get(u.getKey());
           if (otherUserPermission == null) {
-            Log.d("ACL", "no permissions");
+            // No permissions
             return false;
           }
           Permissions userPermission = u.getValue();
           if (userPermission.getReadPermission() != otherUserPermission.getReadPermission()) {
-            Log.d("ACL", "no read permissions");
+            // No read permissions
             return false;
           }
           if (userPermission.getWritePermission() != otherUserPermission.getWritePermission()) {
-            Log.d("ACL", "no write permissions");
+            // No write permissions
             return false;
           }
       }
-    Log.d("ACL", "equals !!!");
+    // equals ACL
     return true;
   }
 
