@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
 
 group = 'com.parse'
-version = '1.13.1-SNAPSHOT'
+version = '1.13.2-SNAPSHOT'
 
 buildscript {
     repositories {
@@ -42,13 +42,13 @@ android {
 dependencies {
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
 
-    provided 'com.squareup.okhttp:okhttp:2.4.0'
-    provided 'com.facebook.stetho:stetho:1.1.1'
+    provided 'com.squareup.okhttp3:okhttp:3.3.1'
+    provided 'com.facebook.stetho:stetho:1.3.0'
 
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.skyscreamer:jsonassert:1.2.3'
     testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.squareup.okhttp:mockwebserver:2.4.0'
+    testCompile 'com.squareup.okhttp3:mockwebserver:3.3.1'
 }
 
 android.libraryVariants.all { variant ->

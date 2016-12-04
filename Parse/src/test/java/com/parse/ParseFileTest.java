@@ -91,12 +91,6 @@ public class ParseFileTest {
     assertEquals("content_type", parseFile.getState().mimeType());
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testSavingTooLargeFileThrowsException() throws Exception {
-    byte[] data = new byte[10 * 1048576 + 1];
-    new ParseFile(data);
-  }
-
   @Test
   public void testGetters() {
     ParseFile file = new ParseFile(new ParseFile.State.Builder().url("http://example.com").build());
