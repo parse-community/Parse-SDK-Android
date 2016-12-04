@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -521,27 +523,33 @@ public class ParseACL {
   @Override
   public boolean equals(Object other) {
       if (!(other instanceof ParseACL)) {
+        Log.d("ACL", "not instance of");
         return false;
       }
       Map<String,Permissions> users = this.getPermissionsById();
       Map<String,Permissions> otherUsers = ((ParseACL) other).getPermissionsById();
       if (users.size() != otherUsers.size()) {
-          return false;
+        Log.d("ACL", "different size");
+        return false;
       }
       for (Map.Entry<String, Permissions> u : users.entrySet()) {
           Permissions otherUserPermission = otherUsers.get(u.getKey());
           if (otherUserPermission == null) {
-              return false;
+            Log.d("ACL", "no permissions");
+            return false;
           }
           Permissions userPermission = u.getValue();
           if (userPermission.getReadPermission() != otherUserPermission.getReadPermission()) {
-              return false;
+            Log.d("ACL", "no read permissions");
+            return false;
           }
           if (userPermission.getWritePermission() != otherUserPermission.getWritePermission()) {
-              return false;
+            Log.d("ACL", "no write permissions");
+            return false;
           }
       }
-      return true;
+    Log.d("ACL", "equals !!!");
+    return true;
   }
 
   private static class UserResolutionListener implements GetCallback<ParseObject> {
