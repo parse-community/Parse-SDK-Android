@@ -44,19 +44,9 @@ public class ParseHttpClientTest {
   // SSLCertificateSocketFactory is only mocked under Robolectric classloader.
 
   @Test
-  public void testParseURLConnectionHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        200, "OK", "Success", new ParseURLConnectionHttpClient(10000, null));  }
-
-  @Test
   public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
     doSingleParseHttpClientExecuteWithResponse(
         200, "OK", "Success", new ParseOkHttpClient(10000, null));  }
-
-  @Test
-  public void testParseURLConnectionHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        404, "NOT FOUND", "Error", new ParseURLConnectionHttpClient(10000, null));  }
 
   @Test
   public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
