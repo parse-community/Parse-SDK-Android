@@ -8,13 +8,18 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.InputStream;
@@ -36,6 +41,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+// For android.os.Parcel
+@RunWith(RobolectricGradleTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 21)
 public class ParseFileTest {
 
   @Rule
@@ -89,6 +97,42 @@ public class ParseFileTest {
     parseFile = new ParseFile(file, contentType);
     assertEquals(name, parseFile.getName()); // Default
     assertEquals("content_type", parseFile.getState().mimeType());
+  }
+
+  @Test
+  public void testParcelable() throws Exception {
+    String name = "name";
+    byte[] data = "hello".getBytes();
+    String contentType = "content_type";
+
+    ParseFile parseFile = new ParseFile(name, data, contentType);
+    Parcel parcel = Parcel.obtain();
+    parseFile.writeToParcel(parcel, parseFile.describeContents());
+    parcel.setDataPosition(0);
+
+    ParseFile createdFromParcel = ParseFile.CREATOR.createFromParcel(parcel);
+    assertEquals(name, createdFromParcel.getName());
+    assertEquals(contentType, createdFromParcel.getState().mimeType());
+    assertTrue(createdFromParcel.isDirty());
+
+    parseFile = new ParseFile(data);
+    parcel = Parcel.obtain();
+    parseFile.writeToParcel(parcel, parseFile.describeContents());
+    parcel.setDataPosition(0);
+
+    createdFromParcel = ParseFile.CREATOR.createFromParcel(parcel);
+    assertEquals("file", createdFromParcel.getName()); // Default
+    assertEquals(null, createdFromParcel.getState().mimeType());
+    assertTrue(createdFromParcel.isDirty());
+
+    parseFile = new ParseFile(new ParseFile.State.Builder().url("http://example.com").build());
+    parcel = Parcel.obtain();
+    parseFile.writeToParcel(parcel, parseFile.describeContents());
+    parcel.setDataPosition(0);
+
+    createdFromParcel = ParseFile.CREATOR.createFromParcel(parcel);
+    assertEquals("http://example.com", createdFromParcel.getUrl());
+    assertFalse(createdFromParcel.isDirty());
   }
 
   @Test

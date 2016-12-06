@@ -69,7 +69,8 @@ public class ParseFile implements Parcelable {
     };
   }
 
-  /* package */ static class State implements Parcelable {
+  // For test
+  protected final static class State implements Parcelable {
 
     /* package */ static class Builder {
 
@@ -753,7 +754,7 @@ public class ParseFile implements Parcelable {
   }
 
   protected ParseFile(Parcel in) {
-    this.state = in.readParcelable(State.class.getClassLoader());
+    this.state = in.readParcelable(ParseFile.State.class.getClassLoader());
     this.data = in.createByteArray();
     this.file = (File) in.readSerializable();
   }
