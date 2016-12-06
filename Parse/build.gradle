@@ -8,11 +8,11 @@ version = '1.13.2-SNAPSHOT'
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1x'
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.7.1'
     }
 }
 
@@ -39,16 +39,16 @@ android {
     }
 }
 
+ext.okhttpVersion = '3.5.0'
 dependencies {
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
+    compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    provided 'com.facebook.stetho:stetho:1.4.1'
 
-    provided 'com.squareup.okhttp3:okhttp:3.3.1'
-    provided 'com.facebook.stetho:stetho:1.3.0'
-
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'org.skyscreamer:jsonassert:1.2.3'
+    testCompile 'org.robolectric:robolectric:3.1.4'
+    testCompile 'org.skyscreamer:jsonassert:1.4.0'
     testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'com.squareup.okhttp3:mockwebserver:3.3.1'
+    testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
 
 android.libraryVariants.all { variant ->

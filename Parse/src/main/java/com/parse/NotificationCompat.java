@@ -56,8 +56,11 @@ import android.widget.RemoteViews;
   static class NotificationCompatImplBase implements  NotificationCompatImpl {
     @Override
     public Notification build(Builder b) {
-      Notification result = (Notification) b.mNotification;
-      result.setLatestEventInfo(b.mContext, b.mContentTitle, b.mContentText, b.mContentIntent);
+      Notification result = b.mNotification;
+      NotificationCompat.Builder builder = new NotificationCompat.Builder(b.mContext);
+      builder.setContentTitle(b.mContentTitle);
+      builder.setContentText(b.mContentText);
+      builder.setContentIntent(b.mContentIntent);
       // translate high priority requests into legacy flag
       if (b.mPriority > PRIORITY_DEFAULT) {
         result.flags |= FLAG_HIGH_PRIORITY;

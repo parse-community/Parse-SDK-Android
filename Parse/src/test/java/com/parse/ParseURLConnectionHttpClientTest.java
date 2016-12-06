@@ -14,7 +14,7 @@ import com.parse.http.ParseHttpResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayInputStream;
@@ -29,8 +29,8 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
 
 // For android.net.SSLCertificateSocketFactory
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class ParseURLConnectionHttpClientTest {
 
   @Test

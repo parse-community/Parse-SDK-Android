@@ -257,4 +257,10 @@ import bolts.Task;
   public Bundle respond(Bundle extras) {
     return cursor.respond(extras);
   }
+
+  @TargetApi(Build.VERSION_CODES.M)
+  @Override
+  public void setExtras(Bundle bundle) {
+    cursor.setExtras(bundle);
+  }
 }
