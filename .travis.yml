@@ -10,10 +10,11 @@ jdk:
 
 android:
   components:
+    - tools
+    - platform-tools
     - build-tools-25.0.1
     - android-25
     - doc-25
-    - extra-android-support
     - extra-android-m2repository
 
 before_install:
