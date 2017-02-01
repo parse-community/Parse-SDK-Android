@@ -2815,6 +2815,15 @@ public class ParseObject {
     }
   }
 
+  /* package */ void markAllFieldDirty() {
+    synchronized (mutex) {
+      estimatedData.clear();
+      for (String key : state.keySet()) {
+        performPut(key, state.get(key));
+      }
+    }
+  }
+
   /**
    * performOperation() is like {@link #put(String, Object)} but instead of just taking a new value,
    * it takes a ParseFieldOperation that modifies the value.

@@ -138,6 +138,28 @@ public class ParseInstallation extends ParseObject {
   }
 
   @Override
+  /* package */ Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
+    return super.saveAsync(sessionToken, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
+      @Override
+      public Task<Void> then(Task<Void> task) throws Exception {
+        // Retry the fetch as a save operation because this Installation was deleted on the server.
+        // Do not attempt to resave an object if LDS is enabled, since changing objectId is not allowed.
+        if(!Parse.isLocalDatastoreEnabled()
+                && task.getError() != null
+                && task.getError() instanceof ParseException
+                && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
+          synchronized (mutex) {
+            setObjectId(null);
+            markAllFieldDirty();
+            return ParseInstallation.super.saveAsync(sessionToken, toAwait);
+          }
+        }
+        return task;
+      }
+    });
+  }
+
+  @Override
   /* package */ Task<Void> handleSaveResultAsync(ParseObject.State result,
       ParseOperationSet operationsBeforeSave) {
     Task<Void> task = super.handleSaveResultAsync(result, operationsBeforeSave);
