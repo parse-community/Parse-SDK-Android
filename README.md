@@ -57,8 +57,8 @@ We want to make contributing to this project as easy and transparent as possible
     LICENSE file in the root directory of this source tree. An additional grant 
     of patent rights can be found in the PATENTS file in the same directory.
 
- [parse.com]: https://www.parse.com/products/android
- [guide]: https://www.parse.com/docs/android/guide
+ [parse.com]: https://parseplatform.github.io/
+ [guide]: http://parseplatform.github.io/docs/android/guide/
  [blog]: https://blog.parse.com/
 
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
