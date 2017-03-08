@@ -73,6 +73,7 @@ import bolts.Task;
           return null;
         } finally {
           ParseIOUtils.closeQuietly(responseStream);
+          ParseIOUtils.closeQuietly(tempFileStream);
         }
       }
     }, ParseExecutors.io());
