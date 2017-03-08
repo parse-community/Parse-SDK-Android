@@ -4,7 +4,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
 
 group = 'com.parse'
-version = '1.13.2-SNAPSHOT'
+version = '1.13.2'
 
 buildscript {
     repositories {
