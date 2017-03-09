@@ -54,9 +54,10 @@ import bolts.Task;
         long totalSize = response.getTotalSize();
         long downloadedSize = 0;
         InputStream responseStream = null;
+        FileOutputStream tempFileStream = null;
         try {
           responseStream = response.getContent();
-          FileOutputStream tempFileStream = ParseFileUtils.openOutputStream(tempFile);
+          tempFileStream = ParseFileUtils.openOutputStream(tempFile);
 
           int nRead;
           byte[] data = new byte[32 << 10]; // 32KB
@@ -73,6 +74,7 @@ import bolts.Task;
           return null;
         } finally {
           ParseIOUtils.closeQuietly(responseStream);
+          ParseIOUtils.closeQuietly(tempFileStream);
         }
       }
     }, ParseExecutors.io());
