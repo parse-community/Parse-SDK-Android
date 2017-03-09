@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.net.SSLSessionCache;
-import android.os.Build;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
@@ -27,11 +26,9 @@ import java.util.List;
 /** package */ abstract class ParseHttpClient<LibraryRequest, LibraryResponse> {
   private static final String TAG = "com.parse.ParseHttpClient";
 
-  private static final String APACHE_HTTPCLIENT_NAME = "org.apache.http";
   private static final String URLCONNECTION_NAME = "net.java.URLConnection";
   private static final String OKHTTP_NAME = "com.squareup.okhttp3";
 
-  private static final String OKHTTPCLIENT_PATH = "okhttp3.OkHttpClient";
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
@@ -40,16 +37,8 @@ import java.util.List;
       SSLSessionCache sslSessionCache) {
     String httpClientLibraryName;
     ParseHttpClient httpClient;
-    if (hasOkHttpOnClasspath()) {
-      httpClientLibraryName = OKHTTP_NAME;
-      httpClient =  new ParseOkHttpClient(socketOperationTimeout, sslSessionCache);
-    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-      httpClientLibraryName = URLCONNECTION_NAME;
-      httpClient =  new ParseURLConnectionHttpClient(socketOperationTimeout, sslSessionCache);
-    } else {
-      httpClientLibraryName = APACHE_HTTPCLIENT_NAME;
-      httpClient =  new ParseApacheHttpClient(socketOperationTimeout, sslSessionCache);
-    }
+    httpClientLibraryName = OKHTTP_NAME;
+    httpClient = new ParseOkHttpClient(socketOperationTimeout, sslSessionCache);
     PLog.i(TAG, "Using " + httpClientLibraryName + " library for networking communication.");
     return httpClient;
   }
@@ -63,15 +52,6 @@ import java.util.List;
 
   public static void setKeepAlive(boolean isKeepAlive) {
     System.setProperty(KEEP_ALIVE_PROPERTY_NAME, String.valueOf(isKeepAlive));
-  }
-
-  private static boolean hasOkHttpOnClasspath() {
-    try {
-      Class.forName(OKHTTPCLIENT_PATH);
-      return true;
-    } catch (ClassNotFoundException e) {
-      return false;
-    }
   }
 
   private boolean hasExecuted;

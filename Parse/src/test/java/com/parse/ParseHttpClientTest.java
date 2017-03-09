@@ -10,15 +10,11 @@ package com.parse;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-import okhttp3.Headers;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
 
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.RobolectricGradleTestRunner;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayOutputStream;
@@ -27,6 +23,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+import okhttp3.Headers;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -35,8 +35,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricGradleTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 21)
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class ParseHttpClientTest {
 
   // We can not use ParameterizedRobolectricTestRunner right now since Robolectric use
@@ -44,41 +44,14 @@ public class ParseHttpClientTest {
   // SSLCertificateSocketFactory is only mocked under Robolectric classloader.
 
   @Test
-  public void testParseApacheHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        200, "OK", "Success", new ParseApacheHttpClient(10000, null));
-  }
-
-  @Test
-  public void testParseURLConnectionHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        200, "OK", "Success", new ParseURLConnectionHttpClient(10000, null));  }
-
-  @Test
   public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
     doSingleParseHttpClientExecuteWithResponse(
         200, "OK", "Success", new ParseOkHttpClient(10000, null));  }
 
   @Test
-  public void testParseApacheHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        404, "NOT FOUND", "Error", new ParseApacheHttpClient(10000, null));  }
-
-  @Test
-  public void testParseURLConnectionHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        404, "NOT FOUND", "Error", new ParseURLConnectionHttpClient(10000, null));  }
-
-  @Test
   public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
     doSingleParseHttpClientExecuteWithResponse(
         404, "NOT FOUND", "Error", new ParseOkHttpClient(10000, null));  }
-
-  @Test
-  public void testParseApacheHttpClientExecuteWithGzipResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithGzipResponse(
-        200, "OK", "Success", new ParseApacheHttpClient(10000, null));
-  }
 
   // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
   // not do that since in unit test env, URLConnection does not use OKHttp internally, so there is

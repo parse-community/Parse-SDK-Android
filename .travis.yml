@@ -5,12 +5,16 @@ branches:
 language: android
 sudo: false
 
+jdk:
+  - oraclejdk8
+
 android:
   components:
-    - build-tools-23.0.1
-    - android-22
-    - doc-23
-    - extra-android-support
+    - tools
+    - platform-tools
+    - build-tools-25.0.2
+    - android-25
+    - doc-25
     - extra-android-m2repository
 
 before_install:
