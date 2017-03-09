@@ -58,14 +58,14 @@ import android.util.SparseIntArray;
             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         
         // Pick an id that probably won't overlap anything
-        int notificationId = (int)System.currentTimeMillis();
+        int id = (int) System.currentTimeMillis();
 
         try {
-          nm.notify(notificationId, notification);
+          nm.notify(id, notification);
         } catch (SecurityException e) {
           // Some phones throw an exception for unapproved vibration
           notification.defaults = Notification.DEFAULT_LIGHTS | Notification.DEFAULT_SOUND;
-          nm.notify(notificationId, notification);
+          nm.notify(id, notification);
         }
       }
     }

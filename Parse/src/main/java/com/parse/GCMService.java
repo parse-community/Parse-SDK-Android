@@ -16,6 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,6 +36,15 @@ import java.util.concurrent.Executors;
       "com.google.android.c2dm.intent.REGISTRATION";
   public static final String RECEIVE_PUSH_ACTION =
       "com.google.android.c2dm.intent.RECEIVE";
+  public static final String INSTANCE_ID_ACTION =
+      "com.google.android.gms.iid.InstanceID";
+
+  private static final String REGISTRATION_ID_EXTRA = "registration_id";
+  private static final String GCM_BODY_EXTRA = "gcm.notification.body";
+  private static final String GCM_TITLE_EXTRA = "gcm.notification.title";
+  private static final String GCM_SOUND_EXTRA = "gcm.notification.sound";
+  private static final String GCM_COMPOSE_ID_EXTRA = "google.c.a.c_id";
+  private static final String GCM_COMPOSE_TIMESTAMP_EXTRA = "google.c.a.ts";
 
   private final WeakReference<Service> parent;
   private ExecutorService executor;
@@ -83,6 +95,8 @@ import java.util.concurrent.Executors;
         handleGcmRegistrationIntent(intent);
       } else if (RECEIVE_PUSH_ACTION.equals(action)) {
         handleGcmPushIntent(intent);
+      } else if (INSTANCE_ID_ACTION.equals(action)) {
+        handleInvalidatedInstanceId(intent);
       } else {
         PLog.e(TAG, "PushService got unknown intent in GCM mode: " + intent);
       }
@@ -94,7 +108,13 @@ import java.util.concurrent.Executors;
       // Have to block here since GCMService is basically an IntentService, and the service is
       // may exit before async handling of the registration is complete if we don't wait for it to
       // complete.
-      GcmRegistrar.getInstance().handleRegistrationIntentAsync(intent).waitForCompletion();
+      PLog.d(TAG, "Got registration intent in service");
+      String registrationId = intent.getStringExtra(REGISTRATION_ID_EXTRA);
+      // Multiple IDs come back to the legacy intnet-based API with an |ID|num: prefix; cut it off.
+      if (registrationId.startsWith("|ID|")) {
+        registrationId = registrationId.substring(registrationId.indexOf(':') + 1);
+      }
+      GcmRegistrar.getInstance().setGCMRegistrationId(registrationId).waitForCompletion();
     } catch (InterruptedException e) {
       // do nothing
     }
@@ -116,16 +136,49 @@ import java.util.concurrent.Executors;
       String channel = intent.getStringExtra("channel");
 
       JSONObject data = null;
-      if (dataString != null) {
-        try {
-          data = new JSONObject(dataString);
-        } catch (JSONException e) {
-          PLog.e(TAG, "Ignoring push because of JSON exception while processing: " + dataString, e);
-          return;
+      try {
+        if (dataString != null) {
+            data = new JSONObject(dataString);
+        } else if (pushId == null && timestamp == null && dataString == null && channel == null) {
+          // The Parse SDK is older than GCM, so it has some non-standard payload fields.
+          // This allows the Parse SDK to handle push providers using the now-standard GCM payloads.
+          pushId = intent.getStringExtra(GCM_COMPOSE_ID_EXTRA);
+          String millisString = intent.getStringExtra(GCM_COMPOSE_TIMESTAMP_EXTRA);
+          if (millisString != null) {
+            Long millis = Long.valueOf(millisString);
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ");
+            timestamp = df.format(new Date(millis));
+          }
+          data = new JSONObject();
+          if (intent.hasExtra(GCM_BODY_EXTRA)) {
+            data.put("alert", intent.getStringExtra(GCM_BODY_EXTRA));
+          }
+          if (intent.hasExtra(GCM_TITLE_EXTRA)) {
+            data.put("title", intent.getStringExtra(GCM_TITLE_EXTRA));
+          }
+          if (intent.hasExtra(GCM_SOUND_EXTRA)) {
+            data.put("sound", intent.getStringExtra(GCM_SOUND_EXTRA));
+          }
+
+          String from = intent.getStringExtra("from");
+          if (from != null && from.startsWith("/topics/")) {
+            channel = from.substring("/topics/".length());
+          }
         }
+      } catch (JSONException e) {
+        PLog.e(TAG, "Ignoring push because of JSON exception while processing: " + dataString, e);
+        return;
       }
 
       PushRouter.getInstance().handlePush(pushId, timestamp, channel, data);
+    }
+  }
+
+  private void handleInvalidatedInstanceId(Intent intent) {
+    try {
+      GcmRegistrar.getInstance().sendRegistrationRequestAsync().waitForCompletion();
+    } catch (InterruptedException e) {
+      // do nothing
     }
   }
 

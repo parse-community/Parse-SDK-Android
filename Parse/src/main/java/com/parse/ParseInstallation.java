@@ -243,6 +243,11 @@ public class ParseInstallation extends ParseObject {
     }
   }
 
+  /* package */ boolean isUsingGCMv4() {
+    String token = getDeviceToken();
+    return token != null && token.indexOf(':') != -1;
+  }
+
   // TODO(mengyan): Move to ParseInstallationInstanceController
   /* package */ void updateDeviceInfo() {
     updateDeviceInfo(ParsePlugins.get().installationId());

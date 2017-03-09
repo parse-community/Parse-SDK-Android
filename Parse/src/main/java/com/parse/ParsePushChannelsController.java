@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,16 +31,19 @@ import bolts.Task;
     return getCurrentInstallationController().getAsync().onSuccessTask(new Continuation<ParseInstallation, Task<Void>>() {
       @Override
       public Task<Void> then(Task<ParseInstallation> task) throws Exception {
-        ParseInstallation installation = task.getResult();
+        final ParseInstallation installation = task.getResult();
+        List<Task<Void>> tasks = new ArrayList<Task<Void>>();
+
         List<String> channels = installation.getList(ParseInstallation.KEY_CHANNELS);
         if (channels == null
             || installation.isDirty(ParseInstallation.KEY_CHANNELS)
             || !channels.contains(channel)) {
           installation.addUnique(ParseInstallation.KEY_CHANNELS, channel);
-          return installation.saveInBackground();
-        } else {
-          return Task.forResult(null);
+          tasks.add(installation.saveInBackground());
+          tasks.add(GcmRegistrar.getInstance().subscribeToGCMTopics(Arrays.asList(channel)));
         }
+
+        return Task.whenAll(tasks);
       }
     });
   }
@@ -51,15 +56,18 @@ import bolts.Task;
     return getCurrentInstallationController().getAsync().onSuccessTask(new Continuation<ParseInstallation, Task<Void>>() {
       @Override
       public Task<Void> then(Task<ParseInstallation> task) throws Exception {
-        ParseInstallation installation = task.getResult();
+        final ParseInstallation installation = task.getResult();
+        List<Task<Void>> tasks = new ArrayList<Task<Void>>();
+
         List<String> channels = installation.getList(ParseInstallation.KEY_CHANNELS);
         if (channels != null && channels.contains(channel)) {
           installation.removeAll(
               ParseInstallation.KEY_CHANNELS, Collections.singletonList(channel));
-          return installation.saveInBackground();
-        } else {
-          return Task.forResult(null);
+          tasks.add(installation.saveInBackground());
+          tasks.add(GcmRegistrar.getInstance().unsubscribeFromGCMTopic(channel));
         }
+
+        return Task.whenAll(tasks);
       }
     });
   }
