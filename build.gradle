@@ -4,7 +4,11 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+<<<<<<< HEAD
+        classpath 'com.android.tools.build:gradle:2.2.2'
+=======
         classpath 'com.android.tools.build:gradle:2.1.0'
+>>>>>>> ParsePlatform/master
     }
 }
 
@@ -15,9 +19,9 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 22
-    buildToolsVersion = "23.0.1"
+    compileSdkVersion = 25
+    buildToolsVersion = "25.0.1"
 
     minSdkVersion = 9
-    targetSdkVersion = 23
+    targetSdkVersion = 25
 }

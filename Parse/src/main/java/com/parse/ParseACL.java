@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -508,6 +510,46 @@ public class ParseACL {
   public void setRoleWriteAccess(ParseRole role, boolean allowed) {
     validateRoleState(role);
     setRoleWriteAccess(role.getName(), allowed);
+  }
+
+  /**
+   * Get whether an other ParseACL object share the same permissions
+   *
+   * @param other
+   *          The other object to test equality
+   * @return {@code true} if the two objects has same permissions. {@code false} otherwise.
+   *
+   */
+  @Override
+  public boolean equals(Object other) {
+      if (!(other instanceof ParseACL)) {
+        Log.d("ACL", "not instance of");
+        return false;
+      }
+      Map<String,Permissions> users = this.getPermissionsById();
+      Map<String,Permissions> otherUsers = ((ParseACL) other).getPermissionsById();
+      if (users.size() != otherUsers.size()) {
+        Log.d("ACL", "different size");
+        return false;
+      }
+      for (Map.Entry<String, Permissions> u : users.entrySet()) {
+          Permissions otherUserPermission = otherUsers.get(u.getKey());
+          if (otherUserPermission == null) {
+            Log.d("ACL", "no permissions");
+            return false;
+          }
+          Permissions userPermission = u.getValue();
+          if (userPermission.getReadPermission() != otherUserPermission.getReadPermission()) {
+            Log.d("ACL", "no read permissions");
+            return false;
+          }
+          if (userPermission.getWritePermission() != otherUserPermission.getWritePermission()) {
+            Log.d("ACL", "no write permissions");
+            return false;
+          }
+      }
+    Log.d("ACL", "equals !!!");
+    return true;
   }
 
   private static class UserResolutionListener implements GetCallback<ParseObject> {
