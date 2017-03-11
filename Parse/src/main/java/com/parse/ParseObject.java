@@ -198,6 +198,7 @@ public class ParseObject {
         for (String key : other.keySet()) {
           put(key, other.get(key));
         }
+        safeKeys(other.safeKeys());
         return self();
       }
 
@@ -297,7 +298,7 @@ public class ParseObject {
     public String toString() {
       return String.format(Locale.US, "%s@%s[" +
               "className=%s, objectId=%s, createdAt=%d, updatedAt=%d, isComplete=%s, " +
-              "serverData=%s]",
+              "serverData=%s, safeKeys=%s]",
           getClass().getName(),
           Integer.toHexString(hashCode()),
           className,
@@ -305,7 +306,8 @@ public class ParseObject {
           createdAt,
           updatedAt,
           isComplete,
-          serverData);
+          serverData,
+          safeKeys);
     }
   }
 

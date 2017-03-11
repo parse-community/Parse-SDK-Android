@@ -10,6 +10,7 @@ package com.parse;
 
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +31,7 @@ public class ParseObjectStateTest {
     assertEquals(-1, state.updatedAt());
     assertFalse(state.isComplete());
     assertTrue(state.keySet().isEmpty());
+    assertTrue(state.safeKeys().isEmpty());
   }
 
   @Test
@@ -62,6 +64,7 @@ public class ParseObjectStateTest {
         .isComplete(true)
         .put("foo", "bar")
         .put("baz", "qux")
+        .safeKeys(Arrays.asList("safe", "keys"))
         .build();
     ParseObject.State copy = new ParseObject.State.Builder(state).build();
     assertEquals(state.className(), copy.className());
@@ -72,6 +75,9 @@ public class ParseObjectStateTest {
     assertEquals(state.keySet().size(), copy.keySet().size());
     assertEquals(state.get("foo"), copy.get("foo"));
     assertEquals(state.get("baz"), copy.get("baz"));
+    assertEquals(state.safeKeys().size(), copy.safeKeys().size());
+    assertTrue(state.safeKeys().containsAll(copy.safeKeys()));
+    assertTrue(copy.safeKeys().containsAll(state.safeKeys()));
   }
 
   @Test
@@ -121,5 +127,6 @@ public class ParseObjectStateTest {
     assertTrue(string.contains("updatedAt"));
     assertTrue(string.contains("isComplete"));
     assertTrue(string.contains("serverData"));
+    assertTrue(string.contains("safeKeys"));
   }
 }
