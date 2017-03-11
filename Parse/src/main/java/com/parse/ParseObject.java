@@ -98,6 +98,7 @@ public class ParseObject {
       private long createdAt = -1;
       private long updatedAt = -1;
       private boolean isComplete;
+      private Set<String> safeKeys = new HashSet<>();
       /* package */ Map<String, Object> serverData = new HashMap<>();
 
       public Init(String className) {
@@ -112,6 +113,7 @@ public class ParseObject {
         for (String key : state.keySet()) {
           serverData.put(key, state.get(key));
         }
+        safeKeys = state.safeKeys();
         isComplete = state.isComplete();
       }
 
@@ -156,6 +158,14 @@ public class ParseObject {
 
       public T remove(String key) {
         serverData.remove(key);
+        return self();
+      }
+
+      public T safeKeys(Collection<String> keys) {
+        if (safeKeys == null) safeKeys = new HashSet<>();
+        for (String key : keys) {
+          safeKeys.add(key);
+        }
         return self();
       }
 
@@ -231,6 +241,7 @@ public class ParseObject {
     private final long createdAt;
     private final long updatedAt;
     private final Map<String, Object> serverData;
+    private final Set<String> safeKeys;
     private final boolean isComplete;
 
     /* package */ State(Init<?> builder) {
@@ -242,6 +253,7 @@ public class ParseObject {
           : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
+      safeKeys = builder.safeKeys;
     }
 
     @SuppressWarnings("unchecked")
@@ -275,6 +287,10 @@ public class ParseObject {
 
     public Set<String> keySet() {
       return serverData.keySet();
+    }
+
+    public Set<String> safeKeys() {
+      return safeKeys;
     }
 
     @Override
@@ -919,6 +935,17 @@ public class ParseObject {
         if (key.equals(KEY_ACL)) {
           ParseACL acl = ParseACL.createACLFromJSONObject(json.getJSONObject(key), decoder);
           builder.put(KEY_ACL, acl);
+          continue;
+        }
+        if (key.equals("__safeKeys")) {
+          JSONArray safeKeys = json.getJSONArray(key);
+          if (safeKeys.length() > 0) {
+            Collection<String> set = new HashSet<>();
+            for (int i = 0; i < safeKeys.length(); i++) {
+              set.add(safeKeys.getString(i));
+            }
+            builder.safeKeys(set);
+          }
           continue;
         }
 
@@ -3027,6 +3054,7 @@ public class ParseObject {
     }
   }
 
+
   /**
    * Access a {@link String} value.
    *
@@ -3366,9 +3394,16 @@ public class ParseObject {
     }
   }
 
-  /* package for tests */ boolean isDataAvailable(String key) {
+  /**
+   * Gets whether the {@code ParseObject} specified key has been fetched.
+   * This means the property can be accessed safely.
+   *
+   * @return {@code true} if the {@code ParseObject} key is new or has been fetched or refreshed. {@code false}
+   *         otherwise.
+   */
+  public boolean isDataAvailable(String key) {
     synchronized (mutex) {
-      return isDataAvailable() || estimatedData.containsKey(key);
+      return isDataAvailable() || estimatedData.containsKey(key) || state.safeKeys().contains(key);
     }
   }
 
