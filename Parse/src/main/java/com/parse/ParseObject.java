@@ -64,7 +64,7 @@ public class ParseObject {
   */
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
-  /* package */ static final String KEY_SAFEKEYS = "__safeKeys";
+  /* package */ static final String KEY_SELECTED_KEYS = "__selectedKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
   // compat, but I think we can be safe to assume any deleteEventuallys from long ago are obsolete
@@ -154,6 +154,7 @@ public class ParseObject {
 
       public T put(String key, Object value) {
         serverData.put(key, value);
+        safeKeys.remove(key);
         return self();
       }
 
@@ -165,7 +166,7 @@ public class ParseObject {
       public T safeKeys(Collection<String> keys) {
         if (safeKeys == null) safeKeys = new HashSet<>();
         for (String key : keys) {
-          safeKeys.add(key);
+          if (!serverData.containsKey(key)) safeKeys.add(key);
         }
         return self();
       }
@@ -598,22 +599,20 @@ public class ParseObject {
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   *
    * @param json
    *          The object's data.
    * @param defaultClassName
    *          The className of the object, if none is in the JSON.
    * @param isComplete
-   *          {@code true} if this is all of the data on the server for the object.
+ *          {@code true} if this is all of the data on the server for the object.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-      boolean isComplete) {
+                                                          boolean isComplete) {
     return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get());
   }
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   *
    * @param json
    *          The object's data.
    * @param defaultClassName
@@ -621,10 +620,9 @@ public class ParseObject {
    * @param isComplete
    *          {@code true} if this is all of the data on the server for the object.
    * @param decoder
-   *          Delegate for knowing how to decode the values in the JSON.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-      boolean isComplete, ParseDecoder decoder) {
+                                                          boolean isComplete, ParseDecoder decoder) {
     String className = json.optString(KEY_CLASS_NAME, defaultClassName);
     if (className == null) {
       return null;
@@ -896,9 +894,9 @@ public class ParseObject {
     }
   }
 
+
   /**
    * Merges from JSON in REST format.
-   *
    * Updates this object with data from the server.
    *
    * @see #toJSONObjectForSaving(State, ParseOperationSet, ParseEncoder)
@@ -941,12 +939,14 @@ public class ParseObject {
           builder.put(KEY_ACL, acl);
           continue;
         }
-        if (key.equals(KEY_SAFEKEYS)) {
+        if (key.equals(KEY_SELECTED_KEYS)) {
           JSONArray safeKeys = json.getJSONArray(key);
           if (safeKeys.length() > 0) {
             Collection<String> set = new HashSet<>();
             for (int i = 0; i < safeKeys.length(); i++) {
-              set.add(safeKeys.getString(i));
+              // Don't add nested keys.
+              String safeKey = safeKeys.getString(i);
+              if (!safeKey.contains(".")) set.add(safeKey);
             }
             builder.safeKeys(set);
           }
@@ -954,6 +954,18 @@ public class ParseObject {
         }
 
         Object value = json.get(key);
+        if (value instanceof JSONObject && json.has(KEY_SELECTED_KEYS)) {
+          // This might be a ParseObject. Pass selected keys to understand if it is complete.
+          JSONArray selectedKeys = json.getJSONArray(KEY_SELECTED_KEYS);
+          JSONArray nestedKeys = new JSONArray();
+          for (int i = 0; i < selectedKeys.length(); i++) {
+            String nestedKey = selectedKeys.getString(i);
+            if (nestedKey.startsWith(key+".")) nestedKeys.put(nestedKey.substring(key.length()+1));
+          }
+          if (nestedKeys.length() > 0) {
+            ((JSONObject) value).put(KEY_SELECTED_KEYS, nestedKeys);
+          }
+        }
         Object decodedObject = decoder.decode(value);
         builder.put(key, decodedObject);
       }
@@ -1021,7 +1033,7 @@ public class ParseObject {
         json.put(KEY_COMPLETE, state.isComplete());
         json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
         JSONArray safekeys = new JSONArray(state.safeKeys());
-        json.put(KEY_SAFEKEYS, safekeys);
+        json.put(KEY_SELECTED_KEYS, safekeys);
 
         // Operation Set Queue
         JSONArray operations = new JSONArray();
@@ -2896,7 +2908,7 @@ public class ParseObject {
     if (value instanceof JSONObject) {
       ParseDecoder decoder = ParseDecoder.get();
       value = decoder.convertJSONObjectToMap((JSONObject) value);
-    } else if (value instanceof JSONArray){
+    } else if (value instanceof JSONArray) {
       ParseDecoder decoder = ParseDecoder.get();
       value = decoder.convertJSONArrayToList((JSONArray) value);
     }
