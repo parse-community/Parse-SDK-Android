@@ -620,6 +620,7 @@ public class ParseObject {
    * @param isComplete
    *          {@code true} if this is all of the data on the server for the object.
    * @param decoder
+   *          Delegate for knowing how to decode the values in the JSON.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
                                                           boolean isComplete, ParseDecoder decoder) {
@@ -946,7 +947,7 @@ public class ParseObject {
             for (int i = 0; i < safeKeys.length(); i++) {
               // Don't add nested keys.
               String safeKey = safeKeys.getString(i);
-              if (safeKey.contains(".")) safeKey = safeKey.split(".")[0];
+              if (safeKey.contains(".")) safeKey = safeKey.split("\\.")[0];
               set.add(safeKey);
             }
             builder.safeKeys(set);
@@ -961,7 +962,7 @@ public class ParseObject {
           JSONArray nestedKeys = new JSONArray();
           for (int i = 0; i < selectedKeys.length(); i++) {
             String nestedKey = selectedKeys.getString(i);
-            if (nestedKey.startsWith(key+".")) nestedKeys.put(nestedKey.substring(key.length()+1));
+            if (nestedKey.startsWith(key + ".")) nestedKeys.put(nestedKey.substring(key.length() + 1));
           }
           if (nestedKeys.length() > 0) {
             ((JSONObject) value).put(KEY_SELECTED_KEYS, nestedKeys);

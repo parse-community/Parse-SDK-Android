@@ -240,6 +240,34 @@ public class ParseDecoderTest {
   }
 
   @Test
+  public void testCompletenessOfIncludedParseObject() throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("__type", "Object");
+    json.put("className", "GameScore");
+    json.put("createdAt", "2015-06-22T21:23:41.733Z");
+    json.put("objectId", "TT1ZskATqS");
+    json.put("updatedAt", "2015-06-22T22:06:18.104Z");
+
+    JSONObject child = new JSONObject();
+    child.put("__type", "Object");
+    child.put("className", "GameScore");
+    child.put("createdAt", "2015-06-22T21:23:41.733Z");
+    child.put("objectId", "TT1ZskATqR");
+    child.put("updatedAt", "2015-06-22T22:06:18.104Z");
+    child.put("bar", "child bar");
+
+    JSONArray arr = new JSONArray("[\"foo.bar\"]");
+    json.put("foo", child);
+    json.put("__selectedKeys", arr);
+    ParseObject parentObject = (ParseObject) ParseDecoder.get().decode(json);
+    assertFalse(parentObject.isDataAvailable());
+    assertTrue(parentObject.isDataAvailable("foo"));
+    ParseObject childObject = parentObject.getParseObject("foo");
+    assertFalse(childObject.isDataAvailable());
+    assertTrue(childObject.isDataAvailable("bar"));
+  }
+
+  @Test
   public void testRelation() throws JSONException {
     JSONObject json = new JSONObject();
     json.put("__type", "Relation");
