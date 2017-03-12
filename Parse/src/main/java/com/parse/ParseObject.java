@@ -946,7 +946,8 @@ public class ParseObject {
             for (int i = 0; i < safeKeys.length(); i++) {
               // Don't add nested keys.
               String safeKey = safeKeys.getString(i);
-              if (!safeKey.contains(".")) set.add(safeKey);
+              if (safeKey.contains(".")) safeKey = safeKey.split(".")[0];
+              set.add(safeKey);
             }
             builder.safeKeys(set);
           }
