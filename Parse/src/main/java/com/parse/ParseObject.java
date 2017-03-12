@@ -64,6 +64,7 @@ public class ParseObject {
   */
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
+  /* package */ static final String KEY_SAFEKEYS = "__safeKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
   // compat, but I think we can be safe to assume any deleteEventuallys from long ago are obsolete
@@ -175,6 +176,7 @@ public class ParseObject {
         updatedAt = -1;
         isComplete = false;
         serverData.clear();
+        safeKeys.clear();
         return self();
       }
 
@@ -254,7 +256,7 @@ public class ParseObject {
           : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
-      safeKeys = builder.safeKeys;
+      safeKeys = new HashSet<>(builder.safeKeys);
     }
 
     @SuppressWarnings("unchecked")
@@ -939,7 +941,7 @@ public class ParseObject {
           builder.put(KEY_ACL, acl);
           continue;
         }
-        if (key.equals("__safeKeys")) {
+        if (key.equals(KEY_SAFEKEYS)) {
           JSONArray safeKeys = json.getJSONArray(key);
           if (safeKeys.length() > 0) {
             Collection<String> set = new HashSet<>();
@@ -1018,6 +1020,8 @@ public class ParseObject {
         // using the REST api and want to send data to Parse.
         json.put(KEY_COMPLETE, state.isComplete());
         json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
+        JSONArray safekeys = new JSONArray(state.safeKeys());
+        json.put(KEY_SAFEKEYS, safekeys);
 
         // Operation Set Queue
         JSONArray operations = new JSONArray();

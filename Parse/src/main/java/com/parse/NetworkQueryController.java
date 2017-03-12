@@ -137,7 +137,7 @@ import bolts.Task;
       JSONArray safeKeys = new JSONArray(state.selectedKeys());
       for (int i = 0; i < results.length(); ++i) {
         JSONObject data = results.getJSONObject(i);
-        data.put("__safeKeys", safeKeys);
+        data.put(ParseObject.KEY_SAFEKEYS, safeKeys);
         T object = ParseObject.fromJSON(data, resultClassName, state.selectedKeys() == null);
         answer.add(object);
 
