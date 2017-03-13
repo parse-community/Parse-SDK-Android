@@ -146,7 +146,7 @@ public class ParseInstallationTest {
 
     installation.saveAsync(sessionToken, toAwait);
 
-    verify(controller, times(1)).getAsync();
+    verify(controller).getAsync();
     verify(objController, times(2)).saveAsync(
         any(ParseObject.State.class),
         any(ParseOperationSet.class),
