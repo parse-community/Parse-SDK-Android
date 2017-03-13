@@ -122,7 +122,7 @@ import org.json.JSONObject;
     }
 
     if (typeString.equals("Object")) {
-      return ParseObject.fromJSON(jsonObject, null, !jsonObject.has(ParseObject.KEY_SELECTED_KEYS), this);
+      return ParseObject.fromJSON(jsonObject, null, this);
     }
 
     if (typeString.equals("Relation")) {

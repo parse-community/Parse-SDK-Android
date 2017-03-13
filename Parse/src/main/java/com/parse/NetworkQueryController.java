@@ -134,12 +134,9 @@ import bolts.Task;
       if (resultClassName == null) {
         resultClassName = state.className();
       }
-      boolean isSubset = state.selectedKeys() != null;
-      JSONArray selectedKeys = isSubset ? new JSONArray(state.selectedKeys()) : null;
       for (int i = 0; i < results.length(); ++i) {
         JSONObject data = results.getJSONObject(i);
-        if (isSubset) data.put(ParseObject.KEY_SELECTED_KEYS, selectedKeys);
-        T object = ParseObject.fromJSON(data, resultClassName, !isSubset);
+        T object = ParseObject.fromJSON(data, resultClassName, ParseDecoder.get(), state.selectedKeys());
         answer.add(object);
 
         /*

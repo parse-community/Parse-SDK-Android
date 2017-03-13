@@ -64,7 +64,7 @@ public class ParseObject {
   */
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
-  /* package */ static final String KEY_SELECTED_KEYS = "__selectedKeys";
+  private static final String KEY_SELECTED_KEYS = "__selectedKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
   // compat, but I think we can be safe to assume any deleteEventuallys from long ago are obsolete
@@ -603,32 +603,45 @@ public class ParseObject {
    *          The object's data.
    * @param defaultClassName
    *          The className of the object, if none is in the JSON.
-   * @param isComplete
- *          {@code true} if this is all of the data on the server for the object.
+   * @param decoder
+   *          Delegate for knowing how to decode the values in the JSON.
+   * @param selectedKeys
+   *          Set of keys selected when quering for this object. If none, the object is assumed to
+   *          be complete, i.e. this is all the data for the object on the server.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-                                                          boolean isComplete) {
-    return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get());
+                                                          ParseDecoder decoder,
+                                                          Set<String> selectedKeys) {
+    boolean complete = selectedKeys == null || selectedKeys.isEmpty();
+    if (!complete) {
+      JSONArray keys = new JSONArray(selectedKeys);
+      try {
+        json.put(KEY_SELECTED_KEYS, keys);
+      } catch (JSONException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return fromJSON(json, defaultClassName, decoder);
   }
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
    * @param json
-   *          The object's data.
+   *          The object's data. It is assumed to be complete, unless the JSON has the
+   *          {@link #KEY_SELECTED_KEYS} key.
    * @param defaultClassName
    *          The className of the object, if none is in the JSON.
-   * @param isComplete
-   *          {@code true} if this is all of the data on the server for the object.
    * @param decoder
    *          Delegate for knowing how to decode the values in the JSON.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-                                                          boolean isComplete, ParseDecoder decoder) {
+                                                          ParseDecoder decoder) {
     String className = json.optString(KEY_CLASS_NAME, defaultClassName);
     if (className == null) {
       return null;
     }
     String objectId = json.optString(KEY_OBJECT_ID, null);
+    boolean isComplete = !json.has(KEY_SELECTED_KEYS);
     @SuppressWarnings("unchecked")
     T object = (T) ParseObject.createWithoutData(className, objectId);
     State newState = object.mergeFromServer(object.getState(), json, decoder, isComplete);
@@ -641,7 +654,7 @@ public class ParseObject {
    *
    * Method is used by parse server webhooks implementation to create a
    * new {@code ParseObject} from the incoming json payload. The method is different from
-   * {@link #fromJSON(JSONObject, String, boolean)} ()} in that it calls
+   * {@link #fromJSON(JSONObject, String, ParseDecoder, Set)} ()} in that it calls
    * {@link #build(JSONObject, ParseDecoder)} which populates operation queue
    * rather then the server data from the incoming JSON, as at external server the incoming
    * JSON may not represent the actual server data. Also it handles
