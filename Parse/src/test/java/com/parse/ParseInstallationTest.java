@@ -29,9 +29,11 @@ import java.util.TimeZone;
 import bolts.Task;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -106,6 +108,50 @@ public class ParseInstallationTest {
         assertTrue(e.getMessage().contains("Cannot modify"));
       }
     }
+  }
+
+  @Test
+  public void testSaveAsync() throws Exception {
+    String sessionToken = "sessionToken";
+    Task<Void> toAwait = Task.forResult(null);
+
+    ParseCurrentInstallationController controller =
+        mock(ParseCurrentInstallationController.class);
+    ParseInstallation currentInstallation = new ParseInstallation();
+    when(controller.getAsync())
+        .thenReturn(Task.forResult(currentInstallation));
+    ParseCorePlugins.getInstance()
+        .registerCurrentInstallationController(controller);
+    ParseObject.State state = new ParseObject.State.Builder("_Installation")
+        .put("deviceToken", "deviceToken")
+        .build();
+    ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+    assertNotNull(installation);
+    installation.setState(state);
+
+    ParseObjectController objController = mock(ParseObjectController.class);
+    // mock return task when Installation was deleted on the server
+    Task<ParseObject.State> taskError = Task.forError(new ParseException(ParseException.OBJECT_NOT_FOUND, ""));
+    // mock return task when Installation was re-saved to the server
+    Task<ParseObject.State> task = Task.forResult(null);
+    when(objController.saveAsync(
+        any(ParseObject.State.class),
+        any(ParseOperationSet.class),
+        eq(sessionToken),
+        any(ParseDecoder.class)))
+        .thenReturn(taskError)
+        .thenReturn(task);
+    ParseCorePlugins.getInstance()
+        .registerObjectController(objController);
+
+    installation.saveAsync(sessionToken, toAwait);
+
+    verify(controller).getAsync();
+    verify(objController, times(2)).saveAsync(
+        any(ParseObject.State.class),
+        any(ParseOperationSet.class),
+        eq(sessionToken),
+        any(ParseDecoder.class));
   }
 
   @Test
