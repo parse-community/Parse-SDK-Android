@@ -64,6 +64,9 @@ public class ParseObject {
   */
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
+  // Array of keys selected when querying for the object. Helps decoding nested {@code ParseObject}s
+  // correctly, and helps constructing the {@code State.availableKeys()} set.
+  private static final String KEY_SELECTED_KEYS = "__selectedKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
   // compat, but I think we can be safe to assume any deleteEventuallys from long ago are obsolete
@@ -98,6 +101,7 @@ public class ParseObject {
       private long createdAt = -1;
       private long updatedAt = -1;
       private boolean isComplete;
+      private Set<String> availableKeys = new HashSet<>();
       /* package */ Map<String, Object> serverData = new HashMap<>();
 
       public Init(String className) {
@@ -109,8 +113,10 @@ public class ParseObject {
         objectId = state.objectId();
         createdAt = state.createdAt();
         updatedAt = state.updatedAt();
+        availableKeys = state.availableKeys();
         for (String key : state.keySet()) {
           serverData.put(key, state.get(key));
+          availableKeys.add(key);
         }
         isComplete = state.isComplete();
       }
@@ -151,11 +157,19 @@ public class ParseObject {
 
       public T put(String key, Object value) {
         serverData.put(key, value);
+        availableKeys.add(key);
         return self();
       }
 
       public T remove(String key) {
         serverData.remove(key);
+        return self();
+      }
+
+      public T availableKeys(Collection<String> keys) {
+        for (String key : keys) {
+          availableKeys.add(key);
+        }
         return self();
       }
 
@@ -165,6 +179,7 @@ public class ParseObject {
         updatedAt = -1;
         isComplete = false;
         serverData.clear();
+        availableKeys.clear();
         return self();
       }
 
@@ -188,6 +203,7 @@ public class ParseObject {
         for (String key : other.keySet()) {
           put(key, other.get(key));
         }
+        availableKeys(other.availableKeys());
         return self();
       }
 
@@ -231,6 +247,7 @@ public class ParseObject {
     private final long createdAt;
     private final long updatedAt;
     private final Map<String, Object> serverData;
+    private final Set<String> availableKeys;
     private final boolean isComplete;
 
     /* package */ State(Init<?> builder) {
@@ -242,6 +259,7 @@ public class ParseObject {
           : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
+      availableKeys = new HashSet<>(builder.availableKeys);
     }
 
     @SuppressWarnings("unchecked")
@@ -277,11 +295,20 @@ public class ParseObject {
       return serverData.keySet();
     }
 
+    // Available keys for this object. With respect to keySet(), this includes also keys that are
+    // undefined in the server, but that should be accessed without throwing.
+    // These extra keys come e.g. from ParseQuery.selectKeys(). Selected keys must be available to
+    // get() methods even if undefined, for consistency with complete objects.
+    // For a complete object, this set is equal to keySet().
+    public Set<String> availableKeys() {
+      return availableKeys;
+    }
+
     @Override
     public String toString() {
       return String.format(Locale.US, "%s@%s[" +
               "className=%s, objectId=%s, createdAt=%d, updatedAt=%d, isComplete=%s, " +
-              "serverData=%s]",
+              "serverData=%s, availableKeys=%s]",
           getClass().getName(),
           Integer.toHexString(hashCode()),
           className,
@@ -289,7 +316,8 @@ public class ParseObject {
           createdAt,
           updatedAt,
           isComplete,
-          serverData);
+          serverData,
+          availableKeys);
     }
   }
 
@@ -578,38 +606,48 @@ public class ParseObject {
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   *
    * @param json
    *          The object's data.
    * @param defaultClassName
    *          The className of the object, if none is in the JSON.
-   * @param isComplete
-   *          {@code true} if this is all of the data on the server for the object.
+   * @param decoder
+   *          Delegate for knowing how to decode the values in the JSON.
+   * @param selectedKeys
+   *          Set of keys selected when quering for this object. If none, the object is assumed to
+   *          be complete, i.e. this is all the data for the object on the server.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-      boolean isComplete) {
-    return fromJSON(json, defaultClassName, isComplete, ParseDecoder.get());
+                                                          ParseDecoder decoder,
+                                                          Set<String> selectedKeys) {
+    if (selectedKeys != null && !selectedKeys.isEmpty()) {
+      JSONArray keys = new JSONArray(selectedKeys);
+      try {
+        json.put(KEY_SELECTED_KEYS, keys);
+      } catch (JSONException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return fromJSON(json, defaultClassName, decoder);
   }
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   *
    * @param json
-   *          The object's data.
+   *          The object's data. It is assumed to be complete, unless the JSON has the
+   *          {@link #KEY_SELECTED_KEYS} key.
    * @param defaultClassName
    *          The className of the object, if none is in the JSON.
-   * @param isComplete
-   *          {@code true} if this is all of the data on the server for the object.
    * @param decoder
    *          Delegate for knowing how to decode the values in the JSON.
    */
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-      boolean isComplete, ParseDecoder decoder) {
+                                                          ParseDecoder decoder) {
     String className = json.optString(KEY_CLASS_NAME, defaultClassName);
     if (className == null) {
       return null;
     }
     String objectId = json.optString(KEY_OBJECT_ID, null);
+    boolean isComplete = !json.has(KEY_SELECTED_KEYS);
     @SuppressWarnings("unchecked")
     T object = (T) ParseObject.createWithoutData(className, objectId);
     State newState = object.mergeFromServer(object.getState(), json, decoder, isComplete);
@@ -622,7 +660,7 @@ public class ParseObject {
    *
    * Method is used by parse server webhooks implementation to create a
    * new {@code ParseObject} from the incoming json payload. The method is different from
-   * {@link #fromJSON(JSONObject, String, boolean)} ()} in that it calls
+   * {@link #fromJSON(JSONObject, String, ParseDecoder, Set)} ()} in that it calls
    * {@link #build(JSONObject, ParseDecoder)} which populates operation queue
    * rather then the server data from the incoming JSON, as at external server the incoming
    * JSON may not represent the actual server data. Also it handles
@@ -876,9 +914,9 @@ public class ParseObject {
     }
   }
 
+
   /**
    * Merges from JSON in REST format.
-   *
    * Updates this object with data from the server.
    *
    * @see #toJSONObjectForSaving(State, ParseOperationSet, ParseEncoder)
@@ -921,8 +959,34 @@ public class ParseObject {
           builder.put(KEY_ACL, acl);
           continue;
         }
+        if (key.equals(KEY_SELECTED_KEYS)) {
+          JSONArray safeKeys = json.getJSONArray(key);
+          if (safeKeys.length() > 0) {
+            Collection<String> set = new HashSet<>();
+            for (int i = 0; i < safeKeys.length(); i++) {
+              // Don't add nested keys.
+              String safeKey = safeKeys.getString(i);
+              if (safeKey.contains(".")) safeKey = safeKey.split("\\.")[0];
+              set.add(safeKey);
+            }
+            builder.availableKeys(set);
+          }
+          continue;
+        }
 
         Object value = json.get(key);
+        if (value instanceof JSONObject && json.has(KEY_SELECTED_KEYS)) {
+          // This might be a ParseObject. Pass selected keys to understand if it is complete.
+          JSONArray selectedKeys = json.getJSONArray(KEY_SELECTED_KEYS);
+          JSONArray nestedKeys = new JSONArray();
+          for (int i = 0; i < selectedKeys.length(); i++) {
+            String nestedKey = selectedKeys.getString(i);
+            if (nestedKey.startsWith(key + ".")) nestedKeys.put(nestedKey.substring(key.length() + 1));
+          }
+          if (nestedKeys.length() > 0) {
+            ((JSONObject) value).put(KEY_SELECTED_KEYS, nestedKeys);
+          }
+        }
         Object decodedObject = decoder.decode(value);
         builder.put(key, decodedObject);
       }
@@ -989,6 +1053,8 @@ public class ParseObject {
         // using the REST api and want to send data to Parse.
         json.put(KEY_COMPLETE, state.isComplete());
         json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
+        JSONArray availableKeys = new JSONArray(state.availableKeys());
+        json.put(KEY_SELECTED_KEYS, availableKeys);
 
         // Operation Set Queue
         JSONArray operations = new JSONArray();
@@ -2872,7 +2938,7 @@ public class ParseObject {
     if (value instanceof JSONObject) {
       ParseDecoder decoder = ParseDecoder.get();
       value = decoder.convertJSONObjectToMap((JSONObject) value);
-    } else if (value instanceof JSONArray){
+    } else if (value instanceof JSONArray) {
       ParseDecoder decoder = ParseDecoder.get();
       value = decoder.convertJSONArrayToList((JSONArray) value);
     }
@@ -3035,6 +3101,7 @@ public class ParseObject {
       return estimatedData.containsKey(key);
     }
   }
+
 
   /**
    * Access a {@link String} value.
@@ -3375,9 +3442,17 @@ public class ParseObject {
     }
   }
 
-  /* package for tests */ boolean isDataAvailable(String key) {
+  /**
+   * Gets whether the {@code ParseObject} specified key has been fetched.
+   * This means the property can be accessed safely.
+   *
+   * @return {@code true} if the {@code ParseObject} key is new or has been fetched or refreshed. {@code false}
+   *         otherwise.
+   */
+  public boolean isDataAvailable(String key) {
     synchronized (mutex) {
-      return isDataAvailable() || estimatedData.containsKey(key);
+      // Fallback to estimatedData to include dirty changes.
+      return isDataAvailable() || state.availableKeys().contains(key) || estimatedData.containsKey(key);
     }
   }
 

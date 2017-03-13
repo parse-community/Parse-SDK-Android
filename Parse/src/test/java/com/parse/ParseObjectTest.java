@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -237,7 +238,16 @@ public class ParseObjectTest {
     ParseObject.State state = mock(ParseObject.State.class);
     when(state.className()).thenReturn("TestObject");
     when(state.isComplete()).thenReturn(false);
+    ParseObject object = ParseObject.from(state);
+    object.get("foo");
+  }
 
+  @Test
+  public void testGetAvailableIfKeyAvailable() {
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.isComplete()).thenReturn(false);
+    when(state.availableKeys()).thenReturn(new HashSet<>(Arrays.asList("foo")));
     ParseObject object = ParseObject.from(state);
     object.get("foo");
   }

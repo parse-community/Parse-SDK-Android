@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 // For android.util.Base64
 @RunWith(RobolectricTestRunner.class)
@@ -196,6 +197,74 @@ public class ParseDecoderTest {
     json.put("updatedAt", "2015-06-22T22:06:18.104Z");
     ParseObject parseObject = (ParseObject) ParseDecoder.get().decode(json);
     assertNotNull(parseObject);
+  }
+
+  @Test
+  public void testIncludedParseObject() throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("__type", "Object");
+    json.put("className", "GameScore");
+    json.put("createdAt", "2015-06-22T21:23:41.733Z");
+    json.put("objectId", "TT1ZskATqS");
+    json.put("updatedAt", "2015-06-22T22:06:18.104Z");
+
+    JSONObject child = new JSONObject();
+    child.put("__type", "Object");
+    child.put("className", "GameScore");
+    child.put("createdAt", "2015-06-22T21:23:41.733Z");
+    child.put("objectId", "TT1ZskATqR");
+    child.put("updatedAt", "2015-06-22T22:06:18.104Z");
+
+    json.put("child", child);
+    ParseObject parseObject = (ParseObject) ParseDecoder.get().decode(json);
+    assertNotNull(parseObject.getParseObject("child"));
+  }
+
+  @Test
+  public void testCompleteness() throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("__type", "Object");
+    json.put("className", "GameScore");
+    json.put("createdAt", "2015-06-22T21:23:41.733Z");
+    json.put("objectId", "TT1ZskATqS");
+    json.put("updatedAt", "2015-06-22T22:06:18.104Z");
+    json.put("foo", "foo");
+    json.put("bar", "bar");
+    ParseObject parseObject = (ParseObject) ParseDecoder.get().decode(json);
+    assertTrue(parseObject.isDataAvailable());
+
+    JSONArray arr = new JSONArray("[\"foo\"]");
+    json.put("__selectedKeys", arr);
+    parseObject = (ParseObject) ParseDecoder.get().decode(json);
+    assertFalse(parseObject.isDataAvailable());
+  }
+
+  @Test
+  public void testCompletenessOfIncludedParseObject() throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("__type", "Object");
+    json.put("className", "GameScore");
+    json.put("createdAt", "2015-06-22T21:23:41.733Z");
+    json.put("objectId", "TT1ZskATqS");
+    json.put("updatedAt", "2015-06-22T22:06:18.104Z");
+
+    JSONObject child = new JSONObject();
+    child.put("__type", "Object");
+    child.put("className", "GameScore");
+    child.put("createdAt", "2015-06-22T21:23:41.733Z");
+    child.put("objectId", "TT1ZskATqR");
+    child.put("updatedAt", "2015-06-22T22:06:18.104Z");
+    child.put("bar", "child bar");
+
+    JSONArray arr = new JSONArray("[\"foo.bar\"]");
+    json.put("foo", child);
+    json.put("__selectedKeys", arr);
+    ParseObject parentObject = (ParseObject) ParseDecoder.get().decode(json);
+    assertFalse(parentObject.isDataAvailable());
+    assertTrue(parentObject.isDataAvailable("foo"));
+    ParseObject childObject = parentObject.getParseObject("foo");
+    assertFalse(childObject.isDataAvailable());
+    assertTrue(childObject.isDataAvailable("bar"));
   }
 
   @Test

@@ -136,7 +136,7 @@ import bolts.Task;
       }
       for (int i = 0; i < results.length(); ++i) {
         JSONObject data = results.getJSONObject(i);
-        T object = ParseObject.fromJSON(data, resultClassName, state.selectedKeys() == null);
+        T object = ParseObject.fromJSON(data, resultClassName, ParseDecoder.get(), state.selectedKeys());
         answer.add(object);
 
         /*
