@@ -243,11 +243,11 @@ public class ParseObjectTest {
   }
 
   @Test
-  public void testGetAvailableIfKeySafe() {
+  public void testGetAvailableIfKeyAvailable() {
     ParseObject.State state = mock(ParseObject.State.class);
     when(state.className()).thenReturn("TestObject");
     when(state.isComplete()).thenReturn(false);
-    when(state.safeKeys()).thenReturn(new HashSet<>(Arrays.asList("foo")));
+    when(state.availableKeys()).thenReturn(new HashSet<>(Arrays.asList("foo")));
     ParseObject object = ParseObject.from(state);
     object.get("foo");
   }

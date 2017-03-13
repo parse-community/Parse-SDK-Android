@@ -65,7 +65,7 @@ public class ParseObject {
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
   // Array of keys selected when querying for the object. Helps decoding nested {@code ParseObject}s
-  // correctly, and helps constructing the {@code State.safeKeys()} set.
+  // correctly, and helps constructing the {@code State.availableKeys()} set.
   private static final String KEY_SELECTED_KEYS = "__selectedKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
@@ -101,7 +101,7 @@ public class ParseObject {
       private long createdAt = -1;
       private long updatedAt = -1;
       private boolean isComplete;
-      private Set<String> safeKeys = new HashSet<>();
+      private Set<String> availableKeys = new HashSet<>();
       /* package */ Map<String, Object> serverData = new HashMap<>();
 
       public Init(String className) {
@@ -113,10 +113,11 @@ public class ParseObject {
         objectId = state.objectId();
         createdAt = state.createdAt();
         updatedAt = state.updatedAt();
+        availableKeys = state.availableKeys();
         for (String key : state.keySet()) {
           serverData.put(key, state.get(key));
+          availableKeys.add(key);
         }
-        safeKeys = state.safeKeys();
         isComplete = state.isComplete();
       }
 
@@ -156,7 +157,7 @@ public class ParseObject {
 
       public T put(String key, Object value) {
         serverData.put(key, value);
-        safeKeys.remove(key);
+        availableKeys.add(key);
         return self();
       }
 
@@ -165,10 +166,9 @@ public class ParseObject {
         return self();
       }
 
-      public T safeKeys(Collection<String> keys) {
-        if (safeKeys == null) safeKeys = new HashSet<>();
+      public T availableKeys(Collection<String> keys) {
         for (String key : keys) {
-          if (!serverData.containsKey(key)) safeKeys.add(key);
+          availableKeys.add(key);
         }
         return self();
       }
@@ -179,7 +179,7 @@ public class ParseObject {
         updatedAt = -1;
         isComplete = false;
         serverData.clear();
-        safeKeys.clear();
+        availableKeys.clear();
         return self();
       }
 
@@ -203,7 +203,7 @@ public class ParseObject {
         for (String key : other.keySet()) {
           put(key, other.get(key));
         }
-        safeKeys(other.safeKeys());
+        availableKeys(other.availableKeys());
         return self();
       }
 
@@ -247,7 +247,7 @@ public class ParseObject {
     private final long createdAt;
     private final long updatedAt;
     private final Map<String, Object> serverData;
-    private final Set<String> safeKeys;
+    private final Set<String> availableKeys;
     private final boolean isComplete;
 
     /* package */ State(Init<?> builder) {
@@ -259,7 +259,7 @@ public class ParseObject {
           : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
-      safeKeys = new HashSet<>(builder.safeKeys);
+      availableKeys = new HashSet<>(builder.availableKeys);
     }
 
     @SuppressWarnings("unchecked")
@@ -295,19 +295,20 @@ public class ParseObject {
       return serverData.keySet();
     }
 
-    // Extra keys that are undefined for this object, but that can be accessed without throwing.
-    // These come e.g. from ParseQuery.selectKeys(). Selected keys must be available to get()
-    // methods even if undefined, for consistency with complete objects.
-    // For a complete object, this set is empty.
-    public Set<String> safeKeys() {
-      return safeKeys;
+    // Available keys for this object. With respect to keySet(), this includes also keys that are
+    // undefined in the server, but that should be accessed without throwing.
+    // These extra keys come e.g. from ParseQuery.selectKeys(). Selected keys must be available to
+    // get() methods even if undefined, for consistency with complete objects.
+    // For a complete object, this set is equal to keySet().
+    public Set<String> availableKeys() {
+      return availableKeys;
     }
 
     @Override
     public String toString() {
       return String.format(Locale.US, "%s@%s[" +
               "className=%s, objectId=%s, createdAt=%d, updatedAt=%d, isComplete=%s, " +
-              "serverData=%s, safeKeys=%s]",
+              "serverData=%s, availableKeys=%s]",
           getClass().getName(),
           Integer.toHexString(hashCode()),
           className,
@@ -316,7 +317,7 @@ public class ParseObject {
           updatedAt,
           isComplete,
           serverData,
-          safeKeys);
+          availableKeys);
     }
   }
 
@@ -968,7 +969,7 @@ public class ParseObject {
               if (safeKey.contains(".")) safeKey = safeKey.split("\\.")[0];
               set.add(safeKey);
             }
-            builder.safeKeys(set);
+            builder.availableKeys(set);
           }
           continue;
         }
@@ -1052,8 +1053,8 @@ public class ParseObject {
         // using the REST api and want to send data to Parse.
         json.put(KEY_COMPLETE, state.isComplete());
         json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
-        JSONArray safekeys = new JSONArray(state.safeKeys());
-        json.put(KEY_SELECTED_KEYS, safekeys);
+        JSONArray availableKeys = new JSONArray(state.availableKeys());
+        json.put(KEY_SELECTED_KEYS, availableKeys);
 
         // Operation Set Queue
         JSONArray operations = new JSONArray();
@@ -3441,7 +3442,8 @@ public class ParseObject {
    */
   public boolean isDataAvailable(String key) {
     synchronized (mutex) {
-      return isDataAvailable() || estimatedData.containsKey(key) || state.safeKeys().contains(key);
+      // Fallback to estimatedData to include dirty changes.
+      return isDataAvailable() || state.availableKeys().contains(key) || estimatedData.containsKey(key);
     }
   }
 
