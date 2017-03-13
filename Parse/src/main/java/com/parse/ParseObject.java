@@ -64,6 +64,8 @@ public class ParseObject {
   */
   private static final String KEY_COMPLETE = "__complete";
   private static final String KEY_OPERATIONS = "__operations";
+  // Array of keys selected when querying for the object. Helps decoding nested {@code ParseObject}s
+  // correctly, and helps constructing the {@code State.safeKeys()} set.
   private static final String KEY_SELECTED_KEYS = "__selectedKeys";
   /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
@@ -293,6 +295,10 @@ public class ParseObject {
       return serverData.keySet();
     }
 
+    // Extra keys that are undefined for this object, but that can be accessed without throwing.
+    // These come e.g. from ParseQuery.selectKeys(). Selected keys must be available to get()
+    // methods even if undefined, for consistency with complete objects.
+    // For a complete object, this set is empty.
     public Set<String> safeKeys() {
       return safeKeys;
     }
@@ -612,8 +618,7 @@ public class ParseObject {
   /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
                                                           ParseDecoder decoder,
                                                           Set<String> selectedKeys) {
-    boolean complete = selectedKeys == null || selectedKeys.isEmpty();
-    if (!complete) {
+    if (selectedKeys != null && !selectedKeys.isEmpty()) {
       JSONArray keys = new JSONArray(selectedKeys);
       try {
         json.put(KEY_SELECTED_KEYS, keys);
