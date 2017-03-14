@@ -51,7 +51,7 @@ public class Parse {
       private Context context;
       private String applicationId;
       private String clientKey;
-      private String server = "https://api.parse.com/1/";
+      private String server = null;
       private boolean localDataStoreEnabled;
       private List<ParseNetworkInterceptor> interceptors;
 
@@ -98,6 +98,7 @@ public class Parse {
           Context applicationContext = context.getApplicationContext();
           Bundle metaData = ManifestInfo.getApplicationMetadata(applicationContext);
           if (metaData != null) {
+            server(metaData.getString(PARSE_SERVER_URL));
             applicationId = metaData.getString(PARSE_APPLICATION_ID);
             clientKey = metaData.getString(PARSE_CLIENT_KEY);
           }
@@ -145,7 +146,7 @@ public class Parse {
 
         // Add an extra trailing slash so that Parse REST commands include
         // the path as part of the server URL (i.e. http://api.myhost.com/parse)
-        if (server.endsWith("/") == false) {
+        if (server != null && !server.endsWith("/")) {
           server = server + "/";
         }
 
@@ -223,6 +224,7 @@ public class Parse {
     }
   }
 
+  private static final String PARSE_SERVER_URL = "com.parse.SERVER_URL";
   private static final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
   private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
 
@@ -322,18 +324,18 @@ public class Parse {
    */
   public static void initialize(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context);
-    if (builder.applicationId == null) {
+    if (builder.server == null) {
+      throw new RuntimeException("ServerUrl not defined. " +
+          "You must provide ServerUrl in AndroidManifest.xml.\n" +
+          "<meta-data\n" +
+          "    android:name=\"com.parse.SERVER_URL\"\n" +
+          "    android:value=\"<Your Server Url>\" />");
+    } if (builder.applicationId == null) {
       throw new RuntimeException("ApplicationId not defined. " +
         "You must provide ApplicationId in AndroidManifest.xml.\n" +
         "<meta-data\n" +
         "    android:name=\"com.parse.APPLICATION_ID\"\n" +
         "    android:value=\"<Your Application Id>\" />");
-    } if (builder.clientKey == null) {
-      throw new RuntimeException("ClientKey not defined. " +
-        "You must provide ClientKey in AndroidManifest.xml.\n" +
-        "<meta-data\n" +
-        "    android:name=\"com.parse.CLIENT_KEY\"\n" +
-        "    android:value=\"<Your Client Key>\" />");
     }
     initialize(builder.setNetworkInterceptors(interceptors)
         .setLocalDatastoreEnabled(isLocalDatastoreEnabled)

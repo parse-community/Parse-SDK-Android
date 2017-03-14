@@ -20,6 +20,9 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <meta-data
+            android:name="com.parse.SERVER_URL"
+            android:value="@string/parse_server_url" />
+        <meta-data
             android:name="com.parse.APPLICATION_ID"
             android:value="@string/parse_app_id" />
         <meta-data
