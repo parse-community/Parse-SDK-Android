@@ -62,7 +62,7 @@ public class Parse {
        * initialization.
        *
        * <p/>
-       * You may define {@code com.parse.APPLICATION_ID} and {@code com.parse.CLIENT_KEY}
+       * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
        * {@code meta-data} in your {@code AndroidManifest.xml}:
        * <pre>
        * &lt;manifest ...&gt;
@@ -70,6 +70,9 @@ public class Parse {
        * ...
        *
        *   &lt;application ...&gt;
+       *     &lt;meta-data
+       *       android:name="com.parse.SERVER_URL"
+       *       android:value="@string/parse_server_url" /&gt;
        *     &lt;meta-data
        *       android:name="com.parse.APPLICATION_ID"
        *       android:value="@string/parse_app_id" /&gt;
@@ -84,7 +87,7 @@ public class Parse {
        * </pre>
        * <p/>
        *
-       * This will cause the values for {@code applicationId} and {@code clientKey} to be set to
+       * This will cause the values for {@code server}, {@code applicationId} and {@code clientKey} to be set to
        * those defined in your manifest.
        *
        * @param context The active {@link Context} for your application. Cannot be null.
