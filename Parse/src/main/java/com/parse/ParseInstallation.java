@@ -150,7 +150,7 @@ public class ParseInstallation extends ParseObject {
                 && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
           synchronized (mutex) {
             setObjectId(null);
-            markAllFieldDirty();
+            markAllFieldsDirty();
             return ParseInstallation.super.saveAsync(sessionToken, toAwait);
           }
         }

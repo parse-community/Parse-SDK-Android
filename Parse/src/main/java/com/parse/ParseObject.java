@@ -2881,7 +2881,7 @@ public class ParseObject {
     }
   }
 
-  /* package */ void markAllFieldDirty() {
+  /* package */ void markAllFieldsDirty() {
     synchronized (mutex) {
       estimatedData.clear();
       for (String key : state.keySet()) {
