@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -16,7 +15,13 @@ import android.os.Bundle;
 import com.parse.http.ParseNetworkInterceptor;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowPackageManager;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -29,10 +34,12 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, packageName = "com.parse.example")
 public class ParseClientConfigurationTest {
 
-  private final String packageName = "com.parse.example";
   private final String serverUrl = "http://example.com/parse";
   private final String appId = "MyAppId";
   private final String clientKey = "MyClientKey";
@@ -122,67 +129,70 @@ public class ParseClientConfigurationTest {
 
   @Test
   public void testConfigureFromManifest() throws Exception {
-    Context context = mock(Context.class);
-    PackageManager packageManager = mock(PackageManager.class);
-    ApplicationInfo appInfo = mock(ApplicationInfo.class);
-    Bundle metaData = setupMockMetaData(context, packageManager, appInfo);
+    Bundle metaData = setupMockMetaData();
     when(metaData.getString(PARSE_SERVER_URL)).thenReturn(serverUrl);
     when(metaData.getString(PARSE_APPLICATION_ID)).thenReturn(appId);
     when(metaData.getString(PARSE_CLIENT_KEY)).thenReturn(clientKey);
 
-    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(context);
+    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(RuntimeEnvironment.application);
     Parse.Configuration config = builder.build();
     assertEquals(serverUrl + "/", config.server);
     assertEquals(appId, config.applicationId);
     assertEquals(clientKey, config.clientKey);
 
-    verify(context).getApplicationContext();
-    verify(context).getPackageManager();
-    verify(context).getPackageName();
-    verify(packageManager).getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-    verify(metaData).getString(PARSE_SERVER_URL);
-    verify(metaData).getString(PARSE_APPLICATION_ID);
-    verify(metaData).getString(PARSE_CLIENT_KEY);
+    verifyMockMetaData(metaData);
   }
 
   @Test(expected = RuntimeException.class)
   public void testConfigureFromManifestWithoutServer() throws Exception {
-    Context context = mock(Context.class);
-    PackageManager packageManager = mock(PackageManager.class);
-    ApplicationInfo appInfo = mock(ApplicationInfo.class);
-    Bundle metaData = setupMockMetaData(context, packageManager, appInfo);
+    Bundle metaData = setupMockMetaData();
     when(metaData.getString(PARSE_SERVER_URL)).thenReturn(null);
     when(metaData.getString(PARSE_APPLICATION_ID)).thenReturn(appId);
     when(metaData.getString(PARSE_CLIENT_KEY)).thenReturn(clientKey);
 
     // RuntimeException due to serverUrl = null
-    Parse.initialize(context);
+    Parse.initialize(RuntimeEnvironment.application);
   }
 
   @Test(expected = RuntimeException.class)
   public void testConfigureFromManifestWithoutAppId() throws Exception {
-    Context context = mock(Context.class);
-    PackageManager packageManager = mock(PackageManager.class);
-    ApplicationInfo appInfo = mock(ApplicationInfo.class);
-    Bundle metaData = setupMockMetaData(context, packageManager, appInfo);
+    Bundle metaData = setupMockMetaData();
     when(metaData.getString(PARSE_SERVER_URL)).thenReturn(serverUrl);
     when(metaData.getString(PARSE_APPLICATION_ID)).thenReturn(null);
     when(metaData.getString(PARSE_CLIENT_KEY)).thenReturn(clientKey);
 
     // RuntimeException due to applicationId = null
-    Parse.initialize(context);
+    Parse.initialize(RuntimeEnvironment.application);
   }
 
-  private Bundle setupMockMetaData(
-      Context context,
-      PackageManager packageManager,
-      ApplicationInfo appInfo) throws Exception {
+  @Test
+  public void testConfigureFromManifestWithoutClientKey() throws Exception {
+    Bundle metaData = setupMockMetaData();
+    when(metaData.getString(PARSE_SERVER_URL)).thenReturn(serverUrl);
+    when(metaData.getString(PARSE_APPLICATION_ID)).thenReturn(appId);
+    when(metaData.getString(PARSE_CLIENT_KEY)).thenReturn(null);
+
+    Parse.initialize(RuntimeEnvironment.application);
+    assertEquals(new URL(serverUrl + "/"), ParseRESTCommand.server);
+    assertEquals(appId, ParsePlugins.get().applicationId());
+    assertNull(ParsePlugins.get().clientKey());
+
+    verifyMockMetaData(metaData);
+  }
+
+  private void verifyMockMetaData(Bundle metaData) throws Exception {
+    verify(metaData).getString(PARSE_SERVER_URL);
+    verify(metaData).getString(PARSE_APPLICATION_ID);
+    verify(metaData).getString(PARSE_CLIENT_KEY);
+  }
+
+  private Bundle setupMockMetaData() throws Exception {
     Bundle metaData = mock(Bundle.class);
-    when(context.getApplicationContext()).thenReturn(context);
-    when(context.getPackageManager()).thenReturn(packageManager);
-    when(context.getPackageName()).thenReturn(packageName);
-    when(packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)).thenReturn(appInfo);
-    appInfo.metaData = metaData;
+    ShadowPackageManager packageManager = shadowOf(RuntimeEnvironment.application.getPackageManager());
+    ApplicationInfo info = packageManager.getApplicationInfo(
+        RuntimeEnvironment.application.getPackageName(),
+        PackageManager.GET_META_DATA);
+    info.metaData = metaData;
     return metaData;
   }
 
