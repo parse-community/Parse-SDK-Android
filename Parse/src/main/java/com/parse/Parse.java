@@ -51,7 +51,7 @@ public class Parse {
       private Context context;
       private String applicationId;
       private String clientKey;
-      private String server = null;
+      private String server;
       private boolean localDataStoreEnabled;
       private List<ParseNetworkInterceptor> interceptors;
 
