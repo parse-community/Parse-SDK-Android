@@ -210,7 +210,7 @@ extends <a href="http://d.android.com/reference/java/lang/Object.html?is-externa
  initialization.
 
  <p/>
- You may define <code>com.parse.APPLICATION_ID</code> and <code>com.parse.CLIENT_KEY</code>
+ You may define <code>com.parse.SERVER_URL</code>, <code>com.parse.APPLICATION_ID</code> and (optional) <code>com.parse.CLIENT_KEY</code>
  <code>meta-data</code> in your <code>AndroidManifest.xml</code>:
  <pre>
  &lt;manifest ...&gt;
@@ -218,6 +218,9 @@ extends <a href="http://d.android.com/reference/java/lang/Object.html?is-externa
  ...
 
    &lt;application ...&gt;
+     &lt;meta-data
+       android:name="com.parse.SERVER_URL"
+       android:value="@string/parse_server_url" /&gt;
      &lt;meta-data
        android:name="com.parse.APPLICATION_ID"
        android:value="@string/parse_app_id" /&gt;
@@ -232,7 +235,7 @@ extends <a href="http://d.android.com/reference/java/lang/Object.html?is-externa
  </pre>
  <p/>
 
- This will cause the values for <code>applicationId</code> and <code>clientKey</code> to be set to
+ This will cause the values for <code>server</code>, <code>applicationId</code> and <code>clientKey</code> to be set to
  those defined in your manifest.</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>context</code> - The active <a href="http://d.android.com/reference/android/content/Context.html?is-external=true" title="class or interface in android.content"><code>Context</code></a> for your application. Cannot be null.</dd></dl>
 </li>
