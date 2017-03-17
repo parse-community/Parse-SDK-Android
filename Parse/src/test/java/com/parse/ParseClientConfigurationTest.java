@@ -37,7 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(manifest = Config.NONE, packageName = "com.parse.example")
+@Config(constants = BuildConfig.class)
 public class ParseClientConfigurationTest {
 
   private final String serverUrl = "http://example.com/parse";
