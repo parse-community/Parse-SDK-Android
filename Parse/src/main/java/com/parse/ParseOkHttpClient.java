@@ -117,7 +117,7 @@ import okio.Okio;
         okHttpRequestBuilder.get();
         break;
       case DELETE:
-        okHttpRequestBuilder.delete();
+        okHttpRequestBuilder.delete(null);
         break;
       case POST:
       case PUT:
