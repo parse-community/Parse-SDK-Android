@@ -149,9 +149,7 @@ public class ParseInstallation extends ParseObject {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         // Retry the fetch as a save operation because this Installation was deleted on the server.
-        // Do not attempt to resave an object if LDS is enabled, since changing objectId is not allowed.
-        if(!Parse.isLocalDatastoreEnabled()
-                && task.getError() != null
+        if(task.getError() != null
                 && task.getError() instanceof ParseException
                 && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
           synchronized (mutex) {

@@ -122,6 +122,9 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
 
   @Test
   public void testSaveAsync() throws Exception {
+    OfflineStore lds = new OfflineStore(RuntimeEnvironment.application);
+    Parse.setLocalDatastore(lds);
+
     String sessionToken = "sessionToken";
     Task<Void> toAwait = Task.forResult(null);
 
@@ -133,11 +136,13 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     ParseCorePlugins.getInstance()
         .registerCurrentInstallationController(controller);
     ParseObject.State state = new ParseObject.State.Builder("_Installation")
+        .objectId("oldId")
         .put("deviceToken", "deviceToken")
         .build();
     ParseInstallation installation = ParseInstallation.getCurrentInstallation();
     assertNotNull(installation);
     installation.setState(state);
+    installation.put("key", "value");
 
     ParseObjectController objController = mock(ParseObjectController.class);
     // mock return task when Installation was deleted on the server
