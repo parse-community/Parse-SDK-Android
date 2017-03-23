@@ -95,6 +95,11 @@ public class ParseInstallation extends ParseObject {
   }
 
   @Override
+  public void setObjectId(String newObjectId) {
+    throw new RuntimeException("Installation's objectId cannot be changed");
+  }
+
+  @Override
   /* package */ boolean needsDefaultACL() {
     return false;
   }
@@ -149,7 +154,7 @@ public class ParseInstallation extends ParseObject {
                 && task.getError() instanceof ParseException
                 && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
           synchronized (mutex) {
-            setObjectId(null);
+            setState(new State.Builder(getState()).objectId(null).build());
             markAllFieldsDirty();
             return ParseInstallation.super.saveAsync(sessionToken, toAwait);
           }

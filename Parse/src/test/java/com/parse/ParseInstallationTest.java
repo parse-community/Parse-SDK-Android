@@ -319,7 +319,19 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     assertEquals("en", installation.getString(KEY_LOCALE_IDENTIFIER));
   }
 
+  @Test(expected = RuntimeException.class)
+  public void testSetObjectId() throws Exception {
+    ParseCurrentInstallationController controller =
+        mock(ParseCurrentInstallationController.class);
+    ParseInstallation currentInstallation = new ParseInstallation();
+    when(controller.getAsync()).thenReturn(Task.forResult(currentInstallation));
+    ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
 
+    ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+    assertNotNull(installation);
+    verify(controller, times(1)).getAsync();
+    installation.setObjectId(null);
+  }
 
   // TODO(mengyan): Add testFetchAsync, right now we can not test super methods inside
   // testFetchAsync
