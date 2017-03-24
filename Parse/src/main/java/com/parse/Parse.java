@@ -654,11 +654,6 @@ public class Parse {
           + "You must call Parse.initialize(Context)"
           + " before using the Parse library.");
     }
-    if (ParsePlugins.get().clientKey() == null) {
-      throw new RuntimeException("clientKey is null. "
-          + "You must call Parse.initialize(Context)"
-          + " before using the Parse library.");
-    }
   }
 
   static void checkContext() {
