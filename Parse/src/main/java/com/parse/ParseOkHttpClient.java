@@ -117,11 +117,9 @@ import okio.Okio;
         okHttpRequestBuilder.get();
         break;
       case DELETE:
-        okHttpRequestBuilder.delete();
-        break;
       case POST:
       case PUT:
-        // Since we need to set body and method at the same time for POST and PUT, we will do it in
+        // Since we need to set body and method at the same time for DELETE, POST, PUT, we will do it in
         // the following.
         break;
       default:
@@ -154,6 +152,8 @@ import okio.Okio;
       case POST:
         okHttpRequestBuilder.post(okHttpRequestBody);
         break;
+      case DELETE:
+        okHttpRequestBuilder.delete(okHttpRequestBody);
     }
     return okHttpRequestBuilder.build();
   }
