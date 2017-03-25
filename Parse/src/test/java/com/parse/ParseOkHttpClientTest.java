@@ -82,6 +82,7 @@ public class ParseOkHttpClientTest {
         .build();
     okHttpRequest = parseClient.getRequest(parseRequest);
     assertEquals(ParseHttpRequest.Method.DELETE.toString(), okHttpRequest.method());
+    assertEquals(null, okHttpRequest.body());
 
     // Put
     parseRequest = builder
