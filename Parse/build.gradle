@@ -2,10 +2,17 @@ import com.android.builder.core.BuilderConstants
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'com.jfrog.bintray'
 
 group = 'com.parse'
 version = '1.14.2-SNAPSHOT'
 
+ext {
+    projDescription = 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
+    artifact = 'parse-android'
+    projName = 'Parse-Android'
+    gitLink = 'https://github.com/ParsePlatform/Parse-SDK-Android'
+}
 buildscript {
     repositories {
         jcenter()
@@ -121,11 +128,11 @@ uploadArchives {
         }
 
         pom.project {
-            name 'Parse-Android'
-            artifactId = 'parse-android'
+            name projName
+            artifactId = artifact
             packaging 'jar'
-            description 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
-            url 'https://github.com/ParsePlatform/Parse-SDK-Android'
+            description projDescription
+            url gitLink
 
             scm {
                 connection 'scm:git@github.com:ParsePlatform/Parse-SDK-Android.git'
@@ -175,7 +182,7 @@ jacoco {
     toolVersion "0.7.1.201405082137"
 }
 
-task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
+task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
 
@@ -208,3 +215,62 @@ task jacocoTestReport(type:JacocoReport, dependsOn: "testDebugUnitTest") {
 coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
 
 //endregion
+
+// Requires apply plugin: 'com.jfrog.bintray'
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    pkg {
+        repo = 'maven'
+        name = 'Parse-Android'
+        userOrg = 'parse'
+        licenses = ['BSD License']
+        vcsUrl = 'https://github.com/ParsePlatform/Parse-SDK-Android'
+
+        version {
+            name = version
+            desc = projDescription
+            released = new Date()
+            vcsTag = version
+        }
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name 'BSD License'
+            url 'https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE'
+            distribution 'repo'
+        }
+    }
+
+    developers {
+        developer {
+            id 'parse'
+            name 'Parse'
+        }
+    }
+}
+
+// Create the publication with the pom configuration:
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            groupId group
+            artifactId artifact
+            version version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', desc)
+                root.appendNode('name', projName)
+                root.appendNode('url', gitLink)
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+// End of Bintray plugin
