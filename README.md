@@ -17,6 +17,12 @@ dependencies {
 }
 ```
 
+## ProGuard
+If you enable ProGuard, you may need to add the following rule:
+```
+-dontwarn okio.**
+```
+
 Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
 
 ## Usage
