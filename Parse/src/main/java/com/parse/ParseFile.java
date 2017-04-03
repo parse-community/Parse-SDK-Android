@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,7 +43,7 @@ import bolts.TaskCompletionSource;
  * object.save();
  * </pre>
  */
-public class ParseFile {
+public class ParseFile implements Parcelable {
 
   /* package for tests */ static ParseFileController getFileController() {
     return ParseCorePlugins.getInstance().getFileController();
@@ -219,6 +222,22 @@ public class ParseFile {
    */
   public ParseFile(byte[] data, String contentType) {
     this(null, data, contentType);
+  }
+
+  /**
+   * Creates a new file instance from a Parcel {@code source}. This is used when unparceling
+   * a non-dirty ParseFile. Subclasses that need Parcelable behavior should provide their own
+   * {@link android.os.Parcelable.Creator} and override this constructor.
+   *
+   * @param source
+   *          the source Parcel
+   */
+  protected ParseFile(Parcel source) {
+    this(new State.Builder()
+          .url(source.readString())
+          .name(source.readString())
+          .mimeType(source.readByte() == 1 ? source.readString() : null)
+          .build());
   }
 
   /* package for tests */ ParseFile(State state) {
@@ -705,4 +724,35 @@ public class ParseFile {
 
     return json;
   }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    if (isDirty()) {
+      throw new RuntimeException("Unable to parcel an unsaved ParseFile.");
+    }
+    dest.writeString(getUrl()); // Not null
+    dest.writeString(getName()); // Not null
+    String type = state.mimeType(); // Nullable
+    dest.writeByte(type != null ? (byte) 1 : 0);
+    if (type != null) {
+      dest.writeString(type);
+    }
+  }
+
+  public final static Creator<ParseFile> CREATOR = new Creator<ParseFile>() {
+    @Override
+    public ParseFile createFromParcel(Parcel source) {
+      return new ParseFile(source);
+    }
+
+    @Override
+    public ParseFile[] newArray(int size) {
+      return new ParseFile[size];
+    }
+  };
 }
