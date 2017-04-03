@@ -10,6 +10,8 @@ package com.parse;
 
 import android.location.Criteria;
 import android.location.Location;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.Locale;
 
@@ -32,7 +34,7 @@ import bolts.Task;
  * </pre>
  */
 
-public class ParseGeoPoint {
+public class ParseGeoPoint implements Parcelable {
   static double EARTH_MEAN_RADIUS_KM = 6371.0;
   static double EARTH_MEAN_RADIUS_MILE = 3958.8;
 
@@ -268,4 +270,27 @@ public class ParseGeoPoint {
   public String toString() {
     return String.format(Locale.US, "ParseGeoPoint[%.6f,%.6f]", latitude, longitude);
   }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeDouble(latitude);
+    dest.writeDouble(longitude);
+  }
+
+  public final static Creator<ParseGeoPoint> CREATOR = new Creator<ParseGeoPoint>() {
+    @Override
+    public ParseGeoPoint createFromParcel(Parcel source) {
+      return new ParseGeoPoint(source.readDouble(), source.readDouble());
+    }
+
+    @Override
+    public ParseGeoPoint[] newArray(int size) {
+      return new ParseGeoPoint[size];
+    }
+  };
 }
