@@ -123,7 +123,7 @@ uploadArchives {
         pom.project {
             name 'Parse-Android'
             artifactId = 'parse-android'
-            packaging 'jar'
+            packaging 'aar'
             description 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
             url 'https://github.com/ParsePlatform/Parse-SDK-Android'
 
