@@ -70,6 +70,20 @@ public class ParseGeoPoint implements Parcelable {
     this(point.getLatitude(), point.getLongitude());
   }
 
+
+  /**
+   * Creates a new point instance from a Parcel {@code source}. This is used when unparceling a
+   * ParseGeoPoint. Subclasses that need Parcelable behavior should provide their own
+   * {@link android.os.Parcelable.Creator} and override this constructor.
+   *
+   * @param source
+   *          The recovered parcel.
+   */
+  protected ParseGeoPoint(Parcel source) {
+    setLatitude(source.readDouble());
+    setLongitude(source.readDouble());
+  }
+
   /**
    * Set latitude. Valid range is (-90.0, 90.0). Extremes should not be used.
    * 
@@ -285,7 +299,7 @@ public class ParseGeoPoint implements Parcelable {
   public final static Creator<ParseGeoPoint> CREATOR = new Creator<ParseGeoPoint>() {
     @Override
     public ParseGeoPoint createFromParcel(Parcel source) {
-      return new ParseGeoPoint(source.readDouble(), source.readDouble());
+      return new ParseGeoPoint(source);
     }
 
     @Override
