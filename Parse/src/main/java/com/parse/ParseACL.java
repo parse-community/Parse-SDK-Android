@@ -8,12 +8,16 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@code ParseACL} is used to control which users can access or modify a particular object. Each
@@ -22,7 +26,7 @@ import java.util.Map;
  * permissions to "the public" so that, for example, any user could read a particular object but
  * only a particular set of users could write to that object.
  */
-public class ParseACL {
+public class ParseACL implements Parcelable {
   private static final String PUBLIC_KEY = "*";
   private final static String UNRESOLVED_KEY = "*unresolved";
   private static final String KEY_ROLE_PREFIX = "role:";
@@ -61,6 +65,11 @@ public class ParseACL {
       return json;
     }
 
+    /* package */ void toParcel(Parcel parcel) {
+      parcel.writeByte(readPermission ? (byte) 1 : 0);
+      parcel.writeByte(writePermission ? (byte) 1 : 0);
+    }
+
     /* package */ boolean getReadPermission() {
       return readPermission;
     }
@@ -73,6 +82,10 @@ public class ParseACL {
       boolean read = object.optBoolean(READ_PERMISSION, false);
       boolean write = object.optBoolean(WRITE_PERMISSION, false);
       return new Permissions(read, write);
+    }
+
+    /* package */ static Permissions createPermissionsFromParcel(Parcel parcel) {
+        return new Permissions(parcel.readByte() == 1, parcel.readByte() == 1);
     }
   }
 
@@ -535,5 +548,50 @@ public class ParseACL {
 
   /* package for tests */ Map<String, Permissions> getPermissionsById() {
     return permissionsById;
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeByte(shared ? (byte) 1 : 0);
+    dest.writeInt(permissionsById.size());
+    Set<String> keys = permissionsById.keySet();
+    for (String key : keys) {
+      dest.writeString(key);
+      Permissions permissions = permissionsById.get(key);
+      permissions.toParcel(dest);
+    }
+    dest.writeByte(unresolvedUser != null ? (byte) 1 : 0);
+    if (unresolvedUser != null) dest.writeParcelable(unresolvedUser, 0);
+  }
+
+  public final static Creator<ParseACL> CREATOR = new Creator<ParseACL>() {
+    @Override
+    public ParseACL createFromParcel(Parcel source) {
+      return new ParseACL(source);
+    }
+
+    @Override
+    public ParseACL[] newArray(int size) {
+      return new ParseACL[size];
+    }
+  };
+
+  /* package */ ParseACL(Parcel source) {
+    shared = source.readByte() == 1;
+    int size = source.readInt();
+    for (int i = 0; i < size; i++) {
+      String key = source.readString();
+      Permissions permissions = Permissions.createPermissionsFromParcel(source);
+      permissionsById.put(key, permissions);
+    }
+    if (source.readByte() == 1) {
+      unresolvedUser = source.readParcelable(ParseUser.class.getClassLoader());
+      unresolvedUser.registerSaveListener(new UserResolutionListener(this));
+    }
   }
 }

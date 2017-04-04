@@ -8,14 +8,19 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.util.HashMap;
@@ -35,6 +40,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class ParseACLTest {
 
   private final static String UNRESOLVED_KEY = "*unresolved";
@@ -159,6 +166,35 @@ public class ParseACLTest {
     assertEquals(aclJson.getJSONObject("*unresolved").has("write"), false);
     assertEquals(aclJson.length(), 3);
   }
+
+  //endregion
+
+  //region parcelable
+
+  @Test
+  public void testParcelable() throws Exception {
+    ParseACL acl = new ParseACL();
+    acl.setReadAccess("userId", true);
+    ParseUser user = new ParseUser();
+    user.setObjectId("userId2");
+    acl.setReadAccess(user, true);
+    acl.setRoleWriteAccess("role", true);
+    acl.setShared(true);
+
+    Parcel parcel = Parcel.obtain();
+    acl.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    acl = ParseACL.CREATOR.createFromParcel(parcel);
+
+    assertTrue(acl.getReadAccess("userId"));
+    assertTrue(acl.getReadAccess(user));
+    assertTrue(acl.getRoleWriteAccess("role"));
+    assertTrue(acl.isShared());
+    assertFalse(acl.getPublicReadAccess());
+    assertFalse(acl.getPublicWriteAccess());
+  }
+
+  // TODO testParcelableWithUnresolvedUser once we have decent User parceling.
 
   //endregion
 

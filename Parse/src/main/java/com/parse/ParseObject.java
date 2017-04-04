@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,7 +49,7 @@ import bolts.TaskCompletionSource;
  * The basic workflow for accessing existing data is to use a {@link ParseQuery} to specify which
  * existing data to retrieve.
  */
-public class ParseObject {
+public class ParseObject implements Parcelable {
   private static final String AUTO_CLASS_NAME = "_Automatic";
   /* package */ static final String VERSION_NAME = "1.15.2-SNAPSHOT";
 
@@ -4171,6 +4174,19 @@ public class ParseObject {
   public void unpin() throws ParseException {
     ParseTaskUtils.wait(unpinInBackground());
   }
+
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+
+  }
+
+
 }
 
 // [1] Normally we should only construct the command from state when it's our turn in the
