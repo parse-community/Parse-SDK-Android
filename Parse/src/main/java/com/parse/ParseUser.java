@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Bundle;
+import android.os.Parcel;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -124,6 +127,11 @@ public class ParseUser extends ParseObject {
       isNew = builder.isNew;
     }
 
+    /* package */ State(Parcel source, String className) {
+        super(source, className);
+        isNew = source.readByte() == 1;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Builder newBuilder() {
@@ -149,6 +157,12 @@ public class ParseUser extends ParseObject {
 
     public boolean isNew() {
       return isNew;
+    }
+
+    @Override
+    protected void writeToParcel(Parcel dest) {
+      super.writeToParcel(dest);
+      dest.writeByte(isNew ? (byte) 1 : 0);
     }
   }
 
@@ -1451,6 +1465,24 @@ public class ParseUser extends ParseObject {
     synchronized (isAutoUserEnabledMutex) {
       return autoUserEnabled;
     }
+  }
+
+  //endregion
+
+  //region Parcelable
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    synchronized (mutex) {
+      outState.putBoolean("_isCurrentUser", isCurrentUser);
+    }
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedState) {
+    super.onRestoreInstanceState(savedState);
+    setIsCurrentUser(savedState.getBoolean("_isCurrentUser"));
   }
 
   //endregion

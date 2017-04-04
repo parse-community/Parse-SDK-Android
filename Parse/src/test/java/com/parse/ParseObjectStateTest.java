@@ -116,6 +116,8 @@ public class ParseObjectStateTest {
     assertNull(state.get("baz"));
   }
 
+  // TODO test parcelable
+
   @Test
   public void testToString() {
     String string = new ParseObject.State.Builder("TestObject").build().toString();

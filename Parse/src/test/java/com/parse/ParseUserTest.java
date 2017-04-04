@@ -71,6 +71,8 @@ public class ParseUserTest extends ResetPluginsParseTest {
     Parse.disableLocalDatastore();
   }
 
+  // TODO: test parcelable (isNew, isCurrentUser)
+
   @Test
   public void testImmutableKeys() {
     ParseUser user = new ParseUser();

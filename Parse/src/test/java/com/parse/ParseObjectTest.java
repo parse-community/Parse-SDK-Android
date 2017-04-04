@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +17,9 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +43,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class ParseObjectTest {
 
   @Rule
@@ -497,4 +504,57 @@ public class ParseObjectTest {
   }
   
   //endregion
+
+  //region testParcelable
+
+  @Test
+  public void testParcelable() throws Exception {
+    ParseObject object = new ParseObject("Test");
+    object.isDeleted = true;
+    object.put("long", 200L);
+    object.put("double", 30D);
+    object.put("int", 50);
+    object.put("string", "test");
+    object.put("collection", Arrays.asList("test1", "test2"));
+    ParseObject other = new ParseObject("Test");
+    other.setObjectId("otherId");
+    object.put("pointer", other);
+    Map<String, Object> map = new HashMap<>();
+    map.put("key1", "value");
+    map.put("key2", 50);
+    object.put("map", map);
+    object.put("date", new Date(200));
+    byte[] bytes = new byte[2];
+    object.put("bytes", bytes);
+    object.put("null", JSONObject.NULL);
+    ParseACL acl = new ParseACL();
+    acl.setReadAccess("reader", true);
+    object.setACL(acl);
+
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+
+    ParseObject newObject = ParseObject.CREATOR.createFromParcel(parcel);
+    assertEquals(newObject.getClassName(), object.getClassName());
+    assertEquals(newObject.isDeleted, true);
+    assertEquals(newObject.getLong("long"), object.getLong("long"));
+    assertEquals(newObject.getDouble("double"), object.getDouble("double"), 0);
+    assertEquals(newObject.getInt("int"), object.getInt("int"));
+    assertEquals(newObject.getString("string"), object.getString("string"));
+    assertEquals(newObject.getList("collection"), object.getList("collection"));
+    assertEquals(newObject.getParseObject("pointer").getClassName(), other.getClassName());
+    assertEquals(newObject.getParseObject("pointer").getObjectId(), other.getObjectId());
+    assertEquals(newObject.getMap("map"), object.getMap("map"));
+    assertEquals(newObject.getDate("date"), object.getDate("date"));
+    assertEquals(newObject.getBytes("bytes").length, bytes.length);
+    assertEquals(newObject.get("null"), object.get("null"));
+    assertEquals(newObject.getACL().getReadAccess("reader"), acl.getReadAccess("reader"));
+  }
+
+  // TODO test ParseGeoPoint and ParseFile after merge
+  // TODO test subclassing
+
+  //endregion
+
 }

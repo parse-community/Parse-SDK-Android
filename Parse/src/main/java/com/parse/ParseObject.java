@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -95,6 +96,14 @@ public class ParseObject implements Parcelable {
         return new ParseUser.State.Builder();
       }
       return new Builder(className);
+    }
+
+    /* package */ static State createFromParcel(Parcel source) {
+      String className = source.readString();
+      if ("_User".equals(className)) {
+        return new ParseUser.State(source, className);
+      }
+      return new State(source, className);
     }
 
     /** package */ static abstract class Init<T extends Init> {
@@ -265,6 +274,27 @@ public class ParseObject implements Parcelable {
       availableKeys = new HashSet<>(builder.availableKeys);
     }
 
+    /* package */ State(Parcel parcel, String clazz) {
+      ParseParcelableDecoder decoder = ParseParcelableDecoder.get();
+      className = clazz;
+      objectId = parcel.readByte() == 1 ? parcel.readString() : null;
+      createdAt = parcel.readLong();
+      long updated = parcel.readLong();
+      updatedAt = updated > 0 ? updated : createdAt;
+      int size = parcel.readInt();
+      HashMap<String, Object> map = new HashMap<>();
+      for (int i = 0; i < size; i++) {
+        String key = parcel.readString();
+        Object obj = decoder.decode(parcel);
+        map.put(key, obj);
+      }
+      serverData = Collections.unmodifiableMap(map);
+      isComplete = parcel.readByte() == 1;
+      List<String> available = new ArrayList<>();
+      parcel.readStringList(available);
+      availableKeys = new HashSet<>(available);
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends Init<?>> T newBuilder() {
       return (T) new Builder(this);
@@ -305,6 +335,25 @@ public class ParseObject implements Parcelable {
     // For a complete object, this set is equal to keySet().
     public Set<String> availableKeys() {
       return availableKeys;
+    }
+
+    protected void writeToParcel(Parcel dest) {
+      ParseParcelableEncoder encoder = ParseParcelableEncoder.get();
+      dest.writeString(className);
+      dest.writeByte(objectId != null ? (byte) 1 : 0);
+      if (objectId != null) {
+        dest.writeString(objectId);
+      }
+      dest.writeLong(createdAt);
+      dest.writeLong(updatedAt);
+      dest.writeInt(serverData.size());
+      Set<String> keys = serverData.keySet();
+      for (String key : keys) {
+        dest.writeString(key);
+        encoder.encode(serverData.get(key), dest);
+      }
+      dest.writeByte(isComplete ? (byte) 1 : 0);
+      dest.writeStringList(new ArrayList<>(availableKeys));
     }
 
     @Override
@@ -4183,9 +4232,74 @@ public class ParseObject implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
+    // TODO operationSetQueue?
+    // TODO isDeletingEventually?
+    // TODO warn if it has ongoing tasks
 
+    ParseParcelableEncoder encoder = ParseParcelableEncoder.get();
+    synchronized (mutex) {
+      state.writeToParcel(dest);
+      dest.writeByte(localId != null ? (byte) 1 : 0);
+      if (localId != null) dest.writeString(localId);
+      dest.writeByte(isDeleted ? (byte) 1 : 0);
+      dest.writeInt(estimatedData.size());
+      Set<String> keys = estimatedData.keySet();
+      for (String key : keys) {
+        dest.writeString(key);
+        encoder.encode(estimatedData.get(key), dest);
+      }
+      Bundle bundle = new Bundle();
+      onSaveInstanceState(bundle);
+      dest.writeBundle(bundle);
+    }
   }
 
+  public final static Creator<ParseObject> CREATOR = new Creator<ParseObject>() {
+    @Override
+    public ParseObject createFromParcel(Parcel source) {
+      State state = State.createFromParcel(source); // Returns ParseUser.State if needed
+      ParseObject obj = create(state.className); // Returns the correct subclass
+      obj.setState(state); // This calls rebuildEstimatedData
+      if (source.readByte() == 1) obj.localId = source.readString();
+      if (source.readByte() == 1) obj.isDeleted = true;
+      ParseParcelableDecoder decoder = ParseParcelableDecoder.get();
+      int size = source.readInt();
+      obj.estimatedData.clear(); // Clear estimatedData after setState.
+      for (int i = 0; i < size; i++) {
+        String key = source.readString();
+        Object object = decoder.decode(source);
+        obj.estimatedData.put(key, object);
+      }
+      Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
+      obj.onRestoreInstanceState(bundle);
+      return obj;
+    }
+
+    @Override
+    public ParseObject[] newArray(int size) {
+      return new ParseObject[size];
+    }
+  };
+
+  /**
+   * Called when parceling this ParseObject.
+   * Subclasses can put values into the provided {@link Bundle} and receive them later
+   * {@link #onRestoreInstanceState(Bundle)}. Note that internal fields are already parceled by
+   * the framework.
+   *
+   * @param outState Bundle to host extra values
+   */
+  protected void onSaveInstanceState(Bundle outState) {}
+
+  /**
+   * Called when unparceling this ParseObject.
+   * Subclasses can read values from the provided {@link Bundle} that were previously put
+   * during {@link #onSaveInstanceState(Bundle)}. At this point the internal state is already
+   * recovered.
+   *
+   * @param savedState Bundle to read the values from
+   */
+  protected void onRestoreInstanceState(Bundle savedState) {}
 
 }
 
