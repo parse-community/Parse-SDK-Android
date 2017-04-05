@@ -68,16 +68,16 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
  [snap]: https://oss.sonatype.org/content/repositories/snapshots/
 
- [build-status-svg]: https://travis-ci.org/ParsePlatform/Parse-SDK-Android.svg?branch=master
- [build-status-link]: https://travis-ci.org/ParsePlatform/Parse-SDK-Android
- [coverage-status-svg]: https://coveralls.io/repos/ParsePlatform/Parse-SDK-Android/badge.svg?branch=master&service=github
- [coverage-status-link]: https://coveralls.io/github/ParsePlatform/Parse-SDK-Android?branch=master
+ [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master
+ [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-Android
+ [coverage-status-svg]: https://coveralls.io/repos/parse-community/Parse-SDK-Android/badge.svg?branch=master&service=github
+ [coverage-status-link]: https://coveralls.io/github/parse-community/Parse-SDK-Android?branch=master
  [maven-svg]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android/badge.svg?style=flat
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
 
- [parseui-link]: https://github.com/ParsePlatform/ParseUI-Android
- [parsefacebookutils-link]: https://github.com/ParsePlatform/ParseFacebookUtils-Android
- [parsetwitterutils-link]: https://github.com/ParsePlatform/ParseTwitterUtils-Android
+ [parseui-link]: https://github.com/parse-community/ParseUI-Android
+ [parsefacebookutils-link]: https://github.com/parse-community/ParseFacebookUtils-Android
+ [parsetwitterutils-link]: https://github.com/parse-community/ParseTwitterUtils-Android
 
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
- [license-link]: https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE
+ [license-link]: https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE
