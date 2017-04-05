@@ -37,7 +37,7 @@ import java.util.Map;
     switch (type) {
 
       case ParseParcelableEncoder.TYPE_OBJECT:
-        return source.readParcelable(ParseObject.class.getClassLoader());
+        return ParseObject.createFromParcel(source, this);
 
       case ParseParcelableEncoder.TYPE_DATE:
         String iso = source.readString();
@@ -52,7 +52,10 @@ import java.util.Map;
         return ParseFieldOperations.decode(source, this);
 
       case ParseParcelableEncoder.TYPE_ACL:
-        return source.readParcelable(ParseACL.class.getClassLoader());
+        return new ParseACL(source, this);
+
+      case ParseParcelableEncoder.TYPE_RELATION:
+        return new ParseRelation<>(source, this);
 
       case ParseParcelableEncoder.TYPE_MAP:
         int size = source.readInt();

@@ -4234,7 +4234,10 @@ public class ParseObject implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    ParseParcelableEncoder encoder = ParseParcelableEncoder.get();
+      writeToParcel(dest, ParseParcelableEncoder.get());
+  }
+
+  /* package */ void writeToParcel(Parcel dest, ParseParcelableEncoder encoder) {
     synchronized (mutex) {
       state.writeToParcel(dest);
       dest.writeByte(localId != null ? (byte) 1 : 0);
@@ -4269,20 +4272,7 @@ public class ParseObject implements Parcelable {
   public final static Creator<ParseObject> CREATOR = new Creator<ParseObject>() {
     @Override
     public ParseObject createFromParcel(Parcel source) {
-      State state = State.createFromParcel(source); // Returns ParseUser.State if needed
-      ParseObject obj = create(state.className); // Returns the correct subclass
-      obj.setState(state); // This calls rebuildEstimatedData
-      if (source.readByte() == 1) obj.localId = source.readString();
-      if (source.readByte() == 1) obj.isDeleted = true;
-      ParseParcelableDecoder decoder = ParseParcelableDecoder.get();
-      ParseOperationSet set = ParseOperationSet.fromParcel(source, decoder);
-      for (String key : set.keySet()) {
-        ParseFieldOperation op = set.get(key);
-        obj.performOperation(key, op); // Update ops and estimatedData
-      }
-      Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
-      obj.onRestoreInstanceState(bundle);
-      return obj;
+      return ParseObject.createFromParcel(source, ParseParcelableDecoder.get());
     }
 
     @Override
@@ -4290,6 +4280,22 @@ public class ParseObject implements Parcelable {
       return new ParseObject[size];
     }
   };
+
+  /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelableDecoder decoder) {
+    State state = State.createFromParcel(source); // Returns ParseUser.State if needed
+    ParseObject obj = create(state.className); // Returns the correct subclass
+    obj.setState(state); // This calls rebuildEstimatedData
+    if (source.readByte() == 1) obj.localId = source.readString();
+    if (source.readByte() == 1) obj.isDeleted = true;
+    ParseOperationSet set = ParseOperationSet.fromParcel(source, decoder);
+    for (String key : set.keySet()) {
+      ParseFieldOperation op = set.get(key);
+      obj.performOperation(key, op); // Update ops and estimatedData
+    }
+    Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
+    obj.onRestoreInstanceState(bundle);
+    return obj;
+  }
 
   /**
    * Called when parceling this ParseObject.

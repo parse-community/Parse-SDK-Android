@@ -43,16 +43,17 @@ import java.util.Map;
         || value instanceof byte[]
         || value == JSONObject.NULL
         || value instanceof ParseObject
-        || value instanceof ParseACL;
+        || value instanceof ParseACL
         // TODO: waiting merge || value instanceof ParseFile
         // TODO: waiting merge || value instanceof ParseGeoPoint
-        // TODO: not done yet || value instanceof ParseRelation;
+        || value instanceof ParseRelation;
   }
 
   /* package */ final static String TYPE_OBJECT = "ParseObject";
   /* package */ final static String TYPE_DATE = "Date";
   /* package */ final static String TYPE_BYTES = "Bytes";
   /* package */ final static String TYPE_ACL = "Acl";
+  /* package */ final static String TYPE_RELATION = "Relation";
   /* package */ final static String TYPE_MAP = "Map";
   /* package */ final static String TYPE_COLLECTION = "Collection";
   /* package */ final static String TYPE_JSON_NULL = "JsonNull";
@@ -88,7 +89,11 @@ import java.util.Map;
 
       } else if (object instanceof ParseACL) {
         dest.writeString(TYPE_ACL);
-        dest.writeParcelable((ParseACL) object, 0);
+        ((ParseACL) object).writeToParcel(dest, this);
+
+      } else if (object instanceof ParseRelation) {
+        dest.writeString(TYPE_RELATION);
+        ((ParseRelation) object).writeToParcel(dest, this);
 
       } else if (object instanceof Map) {
         dest.writeString(TYPE_MAP);
@@ -134,6 +139,6 @@ import java.util.Map;
   }
 
   protected void encodeParseObject(ParseObject object, Parcel dest) {
-    dest.writeParcelable(object, 0);
+    object.writeToParcel(dest, this);
   }
 }

@@ -43,8 +43,8 @@ public class ParseFileTest {
 
   @Before
   public void setup() {
-      ParseCorePlugins.getInstance().reset();
-      ParseTestUtils.setTestParseUser();
+    ParseCorePlugins.getInstance().reset();
+    ParseTestUtils.setTestParseUser();
   }
 
   @After
