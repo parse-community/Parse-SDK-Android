@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -71,8 +73,6 @@ public class ParseUserTest extends ResetPluginsParseTest {
     Parse.disableLocalDatastore();
   }
 
-  // TODO: test parcelable (isNew, isCurrentUser)
-
   @Test
   public void testImmutableKeys() {
     ParseUser user = new ParseUser();
@@ -96,6 +96,38 @@ public class ParseUserTest extends ResetPluginsParseTest {
       assertTrue(e.getMessage().contains("Cannot modify"));
     }
   }
+
+  // region Parcelable
+
+  @Test
+  public void testOnSaveRestoreState() throws Exception {
+    ParseUser user = new ParseUser();
+    user.setIsCurrentUser(true);
+
+    Parcel parcel = Parcel.obtain();
+    user.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    user = (ParseUser) ParseObject.CREATOR.createFromParcel(parcel);
+    assertTrue(user.isCurrentUser());
+  }
+
+  @Test
+  public void testParcelableState() throws Exception {
+    ParseUser.State state = new ParseUser.State.Builder()
+        .objectId("test")
+        .isNew(true)
+        .build();
+    ParseUser user = ParseObject.from(state);
+    assertTrue(user.isNew());
+
+    Parcel parcel = Parcel.obtain();
+    user.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    user = (ParseUser) ParseObject.CREATOR.createFromParcel(parcel);
+    assertTrue(user.isNew());
+  }
+
+  // endregion
 
   //region SignUpAsync
 

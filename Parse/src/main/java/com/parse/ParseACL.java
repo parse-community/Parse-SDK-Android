@@ -218,7 +218,7 @@ public class ParseACL implements Parcelable {
   }
 
   /* package for tests */ void resolveUser(ParseUser user) {
-    if (user != unresolvedUser) {
+    if (!isUnresolvedUser(user)) {
       return;
     }
     if (permissionsById.containsKey(UNRESOLVED_KEY)) {
@@ -349,11 +349,18 @@ public class ParseACL implements Parcelable {
   private void prepareUnresolvedUser(ParseUser user) {
     // Registers a listener for the user so that when it is saved, the
     // unresolved ACL will be resolved.
-    if (this.unresolvedUser != user) {
+    if (!isUnresolvedUser(user)) {
       permissionsById.remove(UNRESOLVED_KEY);
       unresolvedUser = user;
-      user.registerSaveListener(new UserResolutionListener(this));
+      unresolvedUser.registerSaveListener(new UserResolutionListener(this));
     }
+  }
+
+  private boolean isUnresolvedUser(ParseUser other) {
+    // This might be a different instance, but if they have the same local id, assume it's correct.
+    if (other == null || unresolvedUser == null) return false;
+    return other == unresolvedUser || (other.getObjectId() == null &&
+        other.getOrCreateLocalId().equals(unresolvedUser.getOrCreateLocalId()));
   }
 
   /**
@@ -362,7 +369,7 @@ public class ParseACL implements Parcelable {
    * {@code true} or a role that the user belongs to has read access.
    */
   public boolean getReadAccess(ParseUser user) {
-    if (user == unresolvedUser) {
+    if (isUnresolvedUser(user)) {
       return getReadAccess(UNRESOLVED_KEY);
     }
     if (user.isLazy()) {
@@ -394,7 +401,7 @@ public class ParseACL implements Parcelable {
    * {@code true} or a role that the user belongs to has write access.
    */
   public boolean getWriteAccess(ParseUser user) {
-    if (user == unresolvedUser) {
+    if (isUnresolvedUser(user)) {
       return getWriteAccess(UNRESOLVED_KEY);
     }
     if (user.isLazy()) {
@@ -566,7 +573,11 @@ public class ParseACL implements Parcelable {
       permissions.toParcel(dest);
     }
     dest.writeByte(unresolvedUser != null ? (byte) 1 : 0);
-    if (unresolvedUser != null) dest.writeParcelable(unresolvedUser, 0);
+    if (unresolvedUser != null) {
+      // Ensure it has a local Id so we recognize it after parceling
+      unresolvedUser.getOrCreateLocalId();
+      dest.writeParcelable(unresolvedUser, 0);
+    }
   }
 
   public final static Creator<ParseACL> CREATOR = new Creator<ParseACL>() {

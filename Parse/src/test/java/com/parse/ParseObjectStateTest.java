@@ -8,7 +8,12 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -19,6 +24,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = 23)
 public class ParseObjectStateTest {
 
   @Test
@@ -80,6 +87,39 @@ public class ParseObjectStateTest {
   }
 
   @Test
+  public void testParcelable() {
+    long updatedAt = System.currentTimeMillis();
+    long createdAt = updatedAt + 10;
+
+    ParseObject.State state = new ParseObject.State.Builder("TestObject")
+        .objectId("fake")
+        .createdAt(new Date(createdAt))
+        .updatedAt(new Date(updatedAt))
+        .isComplete(true)
+        .put("foo", "bar")
+        .put("baz", "qux")
+        .availableKeys(Arrays.asList("safe", "keys"))
+        .build();
+
+    Parcel parcel = Parcel.obtain();
+    state.writeToParcel(parcel);
+    parcel.setDataPosition(0);
+    ParseObject.State copy = ParseObject.State.createFromParcel(parcel);
+
+    assertEquals(state.className(), copy.className());
+    assertEquals(state.objectId(), copy.objectId());
+    assertEquals(state.createdAt(), copy.createdAt());
+    assertEquals(state.updatedAt(), copy.updatedAt());
+    assertEquals(state.isComplete(), copy.isComplete());
+    assertEquals(state.keySet().size(), copy.keySet().size());
+    assertEquals(state.get("foo"), copy.get("foo"));
+    assertEquals(state.get("baz"), copy.get("baz"));
+    assertEquals(state.availableKeys().size(), copy.availableKeys().size());
+    assertTrue(state.availableKeys().containsAll(copy.availableKeys()));
+    assertTrue(copy.availableKeys().containsAll(state.availableKeys()));
+  }
+
+  @Test
   public void testAutomaticUpdatedAt() {
     long createdAt = System.currentTimeMillis();
 
@@ -115,8 +155,6 @@ public class ParseObjectStateTest {
     assertNull(state.get("foo"));
     assertNull(state.get("baz"));
   }
-
-  // TODO test parcelable
 
   @Test
   public void testToString() {

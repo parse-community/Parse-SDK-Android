@@ -384,7 +384,7 @@ public class ParseObject implements Parcelable {
   // Cached State
   private final Map<String, Object> estimatedData;
 
-  private String localId;
+  /* package */ String localId;
   private final ParseMulticastDelegate<ParseObject> saveEvent = new ParseMulticastDelegate<>();
 
   /* package */ boolean isDeleted;

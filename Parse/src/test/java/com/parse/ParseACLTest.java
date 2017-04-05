@@ -16,12 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +31,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -194,7 +191,23 @@ public class ParseACLTest {
     assertFalse(acl.getPublicWriteAccess());
   }
 
-  // TODO testParcelableWithUnresolvedUser once we have decent User parceling.
+  @Test
+  public void testParcelableWithUnresolvedUser() throws Exception {
+    ParseFieldOperations.registerDefaultDecoders(); // Needed for unparceling ParseObjects
+    ParseACL acl = new ParseACL();
+    ParseUser unresolved = new ParseUser();
+    setLazy(unresolved);
+    acl.setReadAccess(unresolved, true);
+
+    // unresolved users need a local id when parcelling.
+    // Since we don't have an Android environment, local id creation will fail.
+    unresolved.localId = "local_12hs2";
+    Parcel parcel = Parcel.obtain();
+    acl.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    acl = ParseACL.CREATOR.createFromParcel(parcel);
+    assertTrue(acl.getReadAccess(unresolved));
+  }
 
   //endregion
 
@@ -233,7 +246,11 @@ public class ParseACLTest {
     ParseACL acl = new ParseACL();
     acl.setReadAccess(unresolvedUser, true);
 
-    acl.resolveUser(new ParseUser());
+    ParseUser other = new ParseUser();
+    // local id creation fails if we don't have Android environment
+    unresolvedUser.localId = "someId";
+    other.localId = "someOtherId";
+    acl.resolveUser(other);
 
     // Make sure unresolvedUser is not changed
     assertSame(unresolvedUser, acl.getUnresolvedUser());
