@@ -41,7 +41,7 @@ import java.util.List;
   }
 
   @Override
-  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
     dest.writeString(OP_NAME);
     dest.writeInt(objects.size());
     for (Object object : objects) {

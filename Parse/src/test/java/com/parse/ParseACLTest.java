@@ -199,13 +199,14 @@ public class ParseACLTest {
     setLazy(unresolved);
     acl.setReadAccess(unresolved, true);
 
-    // unresolved users need a local id when parcelling.
+    // unresolved users need a local id when parcelling and unparcelling.
     // Since we don't have an Android environment, local id creation will fail.
-    unresolved.localId = "local_12hs2";
+    unresolved.localId = "localId";
     Parcel parcel = Parcel.obtain();
     acl.writeToParcel(parcel, 0);
     parcel.setDataPosition(0);
-    acl = ParseACL.CREATOR.createFromParcel(parcel);
+    // Do not user ParseObjectParcelDecoder because it requires local ids
+    acl = new ParseACL(parcel, new ParseParcelDecoder());
     assertTrue(acl.getReadAccess(unresolved));
   }
 

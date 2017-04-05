@@ -100,12 +100,12 @@ public class ParseObject implements Parcelable {
       return new Builder(className);
     }
 
-    /* package */ static State createFromParcel(Parcel source) {
+    /* package */ static State createFromParcel(Parcel source, ParseParcelDecoder decoder) {
       String className = source.readString();
       if ("_User".equals(className)) {
-        return new ParseUser.State(source, className);
+        return new ParseUser.State(source, className, decoder);
       }
-      return new State(source, className);
+      return new State(source, className, decoder);
     }
 
     /** package */ static abstract class Init<T extends Init> {
@@ -276,9 +276,8 @@ public class ParseObject implements Parcelable {
       availableKeys = new HashSet<>(builder.availableKeys);
     }
 
-    /* package */ State(Parcel parcel, String clazz) {
-      ParseParcelableDecoder decoder = ParseParcelableDecoder.get();
-      className = clazz;
+    /* package */ State(Parcel parcel, String clazz, ParseParcelDecoder decoder) {
+      className = clazz; // Already read
       objectId = parcel.readByte() == 1 ? parcel.readString() : null;
       createdAt = parcel.readLong();
       long updated = parcel.readLong();
@@ -339,8 +338,7 @@ public class ParseObject implements Parcelable {
       return availableKeys;
     }
 
-    protected void writeToParcel(Parcel dest) {
-      ParseParcelableEncoder encoder = ParseParcelableEncoder.get();
+    protected void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
       dest.writeString(className);
       dest.writeByte(objectId != null ? (byte) 1 : 0);
       if (objectId != null) {
@@ -4234,12 +4232,18 @@ public class ParseObject implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-      writeToParcel(dest, ParseParcelableEncoder.get());
+      writeToParcel(dest, new ParseObjectParcelEncoder(this));
   }
 
-  /* package */ void writeToParcel(Parcel dest, ParseParcelableEncoder encoder) {
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     synchronized (mutex) {
-      state.writeToParcel(dest);
+      // Write className and id regardless of state.
+      dest.writeString(getClassName());
+      String objectId = getObjectId();
+      dest.writeByte(objectId != null ? (byte) 1 : 0);
+      if (objectId != null) dest.writeString(objectId);
+      // Write state and other members
+      state.writeToParcel(dest, encoder);
       dest.writeByte(localId != null ? (byte) 1 : 0);
       if (localId != null) dest.writeString(localId);
       dest.writeByte(isDeleted ? (byte) 1 : 0);
@@ -4272,7 +4276,7 @@ public class ParseObject implements Parcelable {
   public final static Creator<ParseObject> CREATOR = new Creator<ParseObject>() {
     @Override
     public ParseObject createFromParcel(Parcel source) {
-      return ParseObject.createFromParcel(source, ParseParcelableDecoder.get());
+      return ParseObject.createFromParcel(source, new ParseObjectParcelDecoder());
     }
 
     @Override
@@ -4281,9 +4285,18 @@ public class ParseObject implements Parcelable {
     }
   };
 
-  /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelableDecoder decoder) {
-    State state = State.createFromParcel(source); // Returns ParseUser.State if needed
-    ParseObject obj = create(state.className); // Returns the correct subclass
+  /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelDecoder decoder) {
+    ParseObject obj;
+    String className = source.readString();
+    if (source.readByte() == 1) { // We have an objectId.
+      obj = createWithoutData(className, source.readString());
+    } else {
+      obj = create(className);
+    }
+    if (decoder instanceof ParseObjectParcelDecoder) {
+      ((ParseObjectParcelDecoder) decoder).addKnownObject(obj);
+    }
+    State state = State.createFromParcel(source, decoder); // Returns ParseUser.State if needed
     obj.setState(state); // This calls rebuildEstimatedData
     if (source.readByte() == 1) obj.localId = source.readString();
     if (source.readByte() == 1) obj.isDeleted = true;

@@ -21,14 +21,14 @@ import java.util.Map;
  * A {@code ParseParcelableEncoder} can be used to parcel objects such as
  * {@link com.parse.ParseObject} into a {@link android.os.Parcel}.
  *
- * @see com.parse.ParseParcelableDecoder
+ * @see ParseParcelDecoder
  */
-/* package */ class ParseParcelableEncoder {
+/* package */ class ParseParcelEncoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.
-  private static final ParseParcelableEncoder INSTANCE = new ParseParcelableEncoder();
-  public static ParseParcelableEncoder get() {
+  private static final ParseParcelEncoder INSTANCE = new ParseParcelEncoder();
+  public static ParseParcelEncoder get() {
     return INSTANCE;
   }
 
@@ -50,6 +50,7 @@ import java.util.Map;
   }
 
   /* package */ final static String TYPE_OBJECT = "ParseObject";
+  /* package */ final static String TYPE_POINTER = "Pointer";
   /* package */ final static String TYPE_DATE = "Date";
   /* package */ final static String TYPE_BYTES = "Bytes";
   /* package */ final static String TYPE_ACL = "Acl";
@@ -64,7 +65,7 @@ import java.util.Map;
   public void encode(Object object, Parcel dest) {
     try {
       if (object instanceof ParseObject) {
-        dest.writeString(TYPE_OBJECT);
+        // By default, encode as a full ParseObject. Overriden in sublasses.
         encodeParseObject((ParseObject) object, dest);
 
       } else if (object instanceof Date) {
@@ -139,6 +140,13 @@ import java.util.Map;
   }
 
   protected void encodeParseObject(ParseObject object, Parcel dest) {
+    dest.writeString(TYPE_OBJECT);
     object.writeToParcel(dest, this);
+  }
+
+  protected void encodePointer(String className, String objectId, Parcel dest) {
+    dest.writeString(TYPE_POINTER);
+    dest.writeString(className);
+    dest.writeString(objectId);
   }
 }

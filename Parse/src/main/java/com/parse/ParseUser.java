@@ -129,8 +129,8 @@ public class ParseUser extends ParseObject {
       isNew = builder.isNew;
     }
 
-    /* package */ State(Parcel source, String className) {
-        super(source, className);
+    /* package */ State(Parcel source, String className, ParseParcelDecoder decoder) {
+        super(source, className, decoder);
         isNew = source.readByte() == 1;
     }
 
@@ -162,8 +162,8 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-    protected void writeToParcel(Parcel dest) {
-      super.writeToParcel(dest);
+    protected void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+      super.writeToParcel(dest, encoder);
       dest.writeByte(isNew ? (byte) 1 : 0);
     }
   }

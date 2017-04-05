@@ -145,7 +145,7 @@ import java.util.UUID;
   /**
    * Parcels this operation set into a Parcel with the given encoder.
    */
-  /* package */ void toParcel(Parcel dest, ParseParcelableEncoder encoder) {
+  /* package */ void toParcel(Parcel dest, ParseParcelEncoder encoder) {
     dest.writeString(uuid);
     dest.writeByte(isSaveEventually ? (byte) 1 : 0);
     dest.writeInt(size());
@@ -155,7 +155,7 @@ import java.util.UUID;
     }
   }
 
-  /* package */ static ParseOperationSet fromParcel(Parcel source, ParseParcelableDecoder decoder) {
+  /* package */ static ParseOperationSet fromParcel(Parcel source, ParseParcelDecoder decoder) {
     ParseOperationSet set = new ParseOperationSet(source.readString());
     set.setIsSaveEventually(source.readByte() == 1);
     int size = source.readInt();

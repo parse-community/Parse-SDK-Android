@@ -102,9 +102,9 @@ public class ParseObjectStateTest {
         .build();
 
     Parcel parcel = Parcel.obtain();
-    state.writeToParcel(parcel);
+    state.writeToParcel(parcel, ParseParcelEncoder.get());
     parcel.setDataPosition(0);
-    ParseObject.State copy = ParseObject.State.createFromParcel(parcel);
+    ParseObject.State copy = ParseObject.State.createFromParcel(parcel, ParseParcelDecoder.get());
 
     assertEquals(state.className(), copy.className());
     assertEquals(state.objectId(), copy.objectId());

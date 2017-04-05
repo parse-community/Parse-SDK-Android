@@ -36,7 +36,7 @@ import org.json.JSONObject;
   }
 
   @Override
-  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
     dest.writeString(OP_NAME);
   }
 

@@ -564,10 +564,10 @@ public class ParseACL implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    writeToParcel(dest, ParseParcelableEncoder.get());
+    writeToParcel(dest, new ParseObjectParcelEncoder());
   }
 
-  /* package */ void writeToParcel(Parcel dest, ParseParcelableEncoder encoder) {
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     dest.writeByte(shared ? (byte) 1 : 0);
     dest.writeInt(permissionsById.size());
     Set<String> keys = permissionsById.keySet();
@@ -578,8 +578,7 @@ public class ParseACL implements Parcelable {
     }
     dest.writeByte(unresolvedUser != null ? (byte) 1 : 0);
     if (unresolvedUser != null) {
-      // Ensure it has a local Id so we recognize it after parceling
-      unresolvedUser.getOrCreateLocalId();
+      // Encoder will create a local id for unresolvedUser, so we recognize it after unparcel.
       encoder.encode(unresolvedUser, dest);
     }
   }
@@ -587,7 +586,7 @@ public class ParseACL implements Parcelable {
   public final static Creator<ParseACL> CREATOR = new Creator<ParseACL>() {
     @Override
     public ParseACL createFromParcel(Parcel source) {
-      return new ParseACL(source, ParseParcelableDecoder.get());
+      return new ParseACL(source, new ParseObjectParcelDecoder());
     }
 
     @Override
@@ -596,7 +595,7 @@ public class ParseACL implements Parcelable {
     }
   };
 
-  /* package */ ParseACL(Parcel source, ParseParcelableDecoder decoder) {
+  /* package */ ParseACL(Parcel source, ParseParcelDecoder decoder) {
     shared = source.readByte() == 1;
     int size = source.readInt();
     for (int i = 0; i < size; i++) {

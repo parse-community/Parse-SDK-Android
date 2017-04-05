@@ -46,7 +46,7 @@ import org.json.JSONObject;
    * @param parcelableEncoder
    *          A ParseParcelableEncoder.
    */
-  void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder);
+  void encode(Parcel dest, ParseParcelEncoder parcelableEncoder);
 
   /**
    * Returns a field operation that is composed of a previous operation followed by this operation.
@@ -90,7 +90,7 @@ final class ParseFieldOperations {
    */
   private interface ParseFieldOperationFactory {
     ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) throws JSONException;
-    ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder);
+    ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder);
   }
 
   // A map of all known decoders.
@@ -122,7 +122,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         // Decode AddRelation and then RemoveRelation
         ParseFieldOperation add = ParseFieldOperations.decode(source, decoder);
         ParseFieldOperation remove = ParseFieldOperations.decode(source, decoder);
@@ -138,7 +138,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         return ParseDeleteOperation.getInstance();
       }
     });
@@ -151,7 +151,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         return new ParseIncrementOperation((Number) decoder.decode(source));
       }
     });
@@ -164,7 +164,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
@@ -182,7 +182,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
@@ -200,7 +200,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
@@ -220,7 +220,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         int size = source.readInt();
         Set<ParseObject> set = new HashSet<>(size);
         for (int i = 0; i < size; i++) {
@@ -240,7 +240,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         int size = source.readInt();
         Set<ParseObject> set = new HashSet<>(size);
         for (int i = 0; i < size; i++) {
@@ -257,7 +257,7 @@ final class ParseFieldOperations {
       }
 
       @Override
-      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+      public ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
         return new ParseSetOperation(decoder.decode(source));
       }
     });
@@ -289,7 +289,7 @@ final class ParseFieldOperations {
    *
    * @return A ParseFieldOperation.
    */
-  static ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+  static ParseFieldOperation decode(Parcel source, ParseParcelDecoder decoder) {
     String op = source.readString();
     ParseFieldOperationFactory factory = opDecoderMap.get(op);
     if (factory == null) {

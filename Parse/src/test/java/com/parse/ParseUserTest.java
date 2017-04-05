@@ -102,6 +102,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
   @Test
   public void testOnSaveRestoreState() throws Exception {
     ParseUser user = new ParseUser();
+    user.setObjectId("objId");
     user.setIsCurrentUser(true);
 
     Parcel parcel = Parcel.obtain();

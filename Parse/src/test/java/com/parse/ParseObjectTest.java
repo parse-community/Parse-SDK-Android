@@ -510,27 +510,36 @@ public class ParseObjectTest {
   @Test
   public void testParcelable() throws Exception {
     ParseFieldOperations.registerDefaultDecoders();
-    ParseObject object = new ParseObject("Test");
+    ParseObject object = ParseObject.createWithoutData("Test", "objectId");
     object.isDeleted = true;
     object.put("long", 200L);
     object.put("double", 30D);
     object.put("int", 50);
     object.put("string", "test");
+    object.put("date", new Date(200));
+    object.put("null", JSONObject.NULL);
+    // Collection
     object.put("collection", Arrays.asList("test1", "test2"));
-    ParseObject other = new ParseObject("Test");
-    other.setObjectId("otherId");
+    // Pointer
+    ParseObject other = ParseObject.createWithoutData("Test", "otherId");
     object.put("pointer", other);
+    // Map
     Map<String, Object> map = new HashMap<>();
     map.put("key1", "value");
     map.put("key2", 50);
     object.put("map", map);
-    object.put("date", new Date(200));
+    // Bytes
     byte[] bytes = new byte[2];
     object.put("bytes", bytes);
-    object.put("null", JSONObject.NULL);
+    // ACL
     ParseACL acl = new ParseACL();
     acl.setReadAccess("reader", true);
     object.setACL(acl);
+    // Relation
+    ParseObject related = ParseObject.createWithoutData("RelatedClass", "relatedId");
+    ParseRelation<ParseObject> rel = new ParseRelation<>(object, "relation");
+    rel.add(related);
+    object.put("relation", rel);
 
     Parcel parcel = Parcel.obtain();
     object.writeToParcel(parcel, 0);
@@ -538,33 +547,42 @@ public class ParseObjectTest {
 
     ParseObject newObject = ParseObject.CREATOR.createFromParcel(parcel);
     assertEquals(newObject.getClassName(), object.getClassName());
-    assertEquals(newObject.isDeleted, true);
-    assertEquals(newObject.hasChanges(), true);
+    assertEquals(newObject.isDeleted, object.isDeleted);
+    assertEquals(newObject.hasChanges(), object.hasChanges());
     assertEquals(newObject.getLong("long"), object.getLong("long"));
     assertEquals(newObject.getDouble("double"), object.getDouble("double"), 0);
     assertEquals(newObject.getInt("int"), object.getInt("int"));
     assertEquals(newObject.getString("string"), object.getString("string"));
+    assertEquals(newObject.getDate("date"), object.getDate("date"));
+    assertEquals(newObject.get("null"), object.get("null"));
     assertEquals(newObject.getList("collection"), object.getList("collection"));
     assertEquals(newObject.getParseObject("pointer").getClassName(), other.getClassName());
     assertEquals(newObject.getParseObject("pointer").getObjectId(), other.getObjectId());
     assertEquals(newObject.getMap("map"), object.getMap("map"));
-    assertEquals(newObject.getDate("date"), object.getDate("date"));
     assertEquals(newObject.getBytes("bytes").length, bytes.length);
-    assertEquals(newObject.get("null"), object.get("null"));
     assertEquals(newObject.getACL().getReadAccess("reader"), acl.getReadAccess("reader"));
+    ParseRelation newRel = newObject.getRelation("relation");
+    assertEquals(newRel.getKey(), rel.getKey());
+    assertEquals(newRel.getKnownObjects().size(), rel.getKnownObjects().size());
+    newRel.hasKnownObject(related);
   }
 
   @Test
   public void testRecursiveParcel() throws Exception {
+    ParseFieldOperations.registerDefaultDecoders();
     ParseObject object = new ParseObject("Test");
-    object.put("itself", object);
+    object.setObjectId("id");
+    object.put("self", object);
     Parcel parcel = Parcel.obtain();
-    // object.writeToParcel(parcel, 0);
-    // TODO fix this
+    object.writeToParcel(parcel, new ParseObjectParcelEncoder(object));
+    parcel.setDataPosition(0);
+    ParseObject newObject = ParseObject.createFromParcel(parcel, new ParseObjectParcelDecoder());
+    assertEquals(newObject.getObjectId(), "id");
+    assertEquals(newObject.getParseObject("self").getObjectId(), "id");
+    assertEquals(newObject.getParseObject("self").getParseObject("self").getObjectId(), "id");
   }
 
   // TODO test ParseGeoPoint and ParseFile after merge
-  // TODO test subclassing
 
   //endregion
 

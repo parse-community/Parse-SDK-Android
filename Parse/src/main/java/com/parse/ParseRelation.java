@@ -81,7 +81,7 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
   /**
    * Creates a ParseRelation from a Parcel with the given decoder.
    */
-  /* package */ ParseRelation(Parcel source, ParseParcelableDecoder decoder) {
+  /* package */ ParseRelation(Parcel source, ParseParcelDecoder decoder) {
     if (source.readByte() == 1) this.key = source.readString();
     if (source.readByte() == 1) this.targetClass = source.readString();
     if (source.readByte() == 1) this.parentClassName = source.readString();
@@ -250,10 +250,10 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    writeToParcel(dest, ParseParcelableEncoder.get());
+    writeToParcel(dest, new ParseObjectParcelEncoder());
   }
 
-  /* package */ void writeToParcel(Parcel dest, ParseParcelableEncoder encoder) {
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     synchronized (mutex) {
       // Fields are all nullable.
       dest.writeByte(key != null ? (byte) 1 : 0);
@@ -277,7 +277,7 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
   public final static Creator<ParseRelation> CREATOR = new Creator<ParseRelation>() {
     @Override
     public ParseRelation createFromParcel(Parcel source) {
-      return new ParseRelation(source, ParseParcelableDecoder.get());
+      return new ParseRelation(source, new ParseObjectParcelDecoder());
     }
 
     @Override

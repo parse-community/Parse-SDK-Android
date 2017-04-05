@@ -34,7 +34,7 @@ import org.json.JSONObject;
   }
 
   @Override
-  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
     dest.writeString(OP_NAME);
     parcelableEncoder.encode(amount, dest); // Let encoder figure out how to parcel Number
   }
