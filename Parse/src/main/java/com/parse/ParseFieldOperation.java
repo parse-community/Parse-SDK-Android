@@ -8,12 +8,15 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +37,16 @@ import org.json.JSONObject;
    * @return An object to be jsonified.
    */
   Object encode(ParseEncoder objectEncoder) throws JSONException;
+
+  /**
+   * Writes the ParseFieldOperation to the given Parcel using the given encoder.
+   *
+   * @param dest
+   *          The destination Parcel.
+   * @param parcelableEncoder
+   *          A ParseParcelableEncoder.
+   */
+  void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder);
 
   /**
    * Returns a field operation that is composed of a previous operation followed by this operation.
@@ -73,10 +86,11 @@ final class ParseFieldOperations {
   }
 
   /**
-   * A function that creates a ParseFieldOperation from a JSONObject.
+   * A function that creates a ParseFieldOperation from a JSONObject or a Parcel.
    */
   private interface ParseFieldOperationFactory {
     ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) throws JSONException;
+    ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder);
   }
 
   // A map of all known decoders.
@@ -106,12 +120,25 @@ final class ParseFieldOperations {
         }
         return op;
       }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        // Decode AddRelation and then RemoveRelation
+        ParseFieldOperation add = ParseFieldOperations.decode(source, decoder);
+        ParseFieldOperation remove = ParseFieldOperations.decode(source, decoder);
+        return remove.mergeWithPrevious(add);
+      }
     });
 
     registerDecoder("Delete", new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
+        return ParseDeleteOperation.getInstance();
+      }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
         return ParseDeleteOperation.getInstance();
       }
     });
@@ -122,6 +149,11 @@ final class ParseFieldOperations {
           throws JSONException {
         return new ParseIncrementOperation((Number) decoder.decode(object.opt("amount")));
       }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        return new ParseIncrementOperation((Number) decoder.decode(source));
+      }
     });
 
     registerDecoder("Add", new ParseFieldOperationFactory() {
@@ -129,6 +161,16 @@ final class ParseFieldOperations {
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
         return new ParseAddOperation((Collection) decoder.decode(object.opt("objects")));
+      }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        int size = source.readInt();
+        List<Object> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+          list.set(i, decoder.decode(source));
+        }
+        return new ParseAddOperation(list);
       }
     });
 
@@ -138,6 +180,16 @@ final class ParseFieldOperations {
           throws JSONException {
         return new ParseAddUniqueOperation((Collection) decoder.decode(object.opt("objects")));
       }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        int size = source.readInt();
+        List<Object> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+          list.set(i, decoder.decode(source));
+        }
+        return new ParseAddUniqueOperation(list);
+      }
     });
 
     registerDecoder("Remove", new ParseFieldOperationFactory() {
@@ -145,6 +197,16 @@ final class ParseFieldOperations {
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
         return new ParseRemoveOperation((Collection) decoder.decode(object.opt("objects")));
+      }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        int size = source.readInt();
+        List<Object> list = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+          list.set(i, decoder.decode(source));
+        }
+        return new ParseRemoveOperation(list);
       }
     });
 
@@ -156,6 +218,16 @@ final class ParseFieldOperations {
         List<ParseObject> objectsList = (List<ParseObject>) decoder.decode(objectsArray);
         return new ParseRelationOperation<>(new HashSet<>(objectsList), null);
       }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        int size = source.readInt();
+        Set<ParseObject> set = new HashSet<>(size);
+        for (int i = 0; i < size; i++) {
+          set.add((ParseObject) decoder.decode(source));
+        }
+        return new ParseRelationOperation<>(set, null);
+      }
     });
 
     registerDecoder("RemoveRelation", new ParseFieldOperationFactory() {
@@ -166,15 +238,37 @@ final class ParseFieldOperations {
         List<ParseObject> objectsList = (List<ParseObject>) decoder.decode(objectsArray);
         return new ParseRelationOperation<>(null, new HashSet<>(objectsList));
       }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        int size = source.readInt();
+        Set<ParseObject> set = new HashSet<>(size);
+        for (int i = 0; i < size; i++) {
+          set.add((ParseObject) decoder.decode(source));
+        }
+        return new ParseRelationOperation<>(null, set);
+      }
+    });
+
+    registerDecoder("Set", new ParseFieldOperationFactory() {
+      @Override
+      public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) throws JSONException {
+        return null; // Not called.
+      }
+
+      @Override
+      public ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+        return new ParseSetOperation(decoder.decode(source));
+      }
     });
   }
 
   /**
-   * Converts a parsed JSON object into a PFFieldOperation.
+   * Converts a parsed JSON object into a ParseFieldOperation.
    * 
    * @param encoded
    *          A JSONObject containing an __op field.
-   * @return A PFFieldOperation.
+   * @return A ParseFieldOperation.
    */
   static ParseFieldOperation decode(JSONObject encoded, ParseDecoder decoder) throws JSONException {
     String op = encoded.optString("__op");
@@ -183,6 +277,25 @@ final class ParseFieldOperations {
       throw new RuntimeException("Unable to decode operation of type " + op);
     }
     return factory.decode(encoded, decoder);
+  }
+
+  /**
+   * Reads a ParseFieldOperation out of the given Parcel.
+   *
+   * @param source
+   *          The source Parcel.
+   * @param decoder
+   *          The given ParseParcelableDecoder.
+   *
+   * @return A ParseFieldOperation.
+   */
+  static ParseFieldOperation decode(Parcel source, ParseParcelableDecoder decoder) {
+    String op = source.readString();
+    ParseFieldOperationFactory factory = opDecoderMap.get(op);
+    if (factory == null) {
+      throw new RuntimeException("Unable to decode operation of type " + op);
+    }
+    return factory.decode(source, decoder);
   }
 
   /**

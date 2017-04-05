@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,6 +34,11 @@ import org.json.JSONObject;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+    dest.writeString("Delete");
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     return this;
   }

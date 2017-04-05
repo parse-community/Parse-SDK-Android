@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -187,6 +189,30 @@ import org.json.JSONObject;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+    if (relationsToAdd.isEmpty() && relationsToRemove.isEmpty()) {
+      throw new IllegalArgumentException("A ParseRelationOperation was created without any data.");
+    }
+    if (relationsToAdd.size() > 0 && relationsToRemove.size() > 0) {
+      dest.writeString("Batch");
+    }
+    if (relationsToAdd.size() > 0) {
+      dest.writeString("AddRelation");
+      dest.writeInt(relationsToAdd.size());
+      for (ParseObject object : relationsToAdd) {
+        parcelableEncoder.encode(object, dest);
+      }
+    }
+    if (relationsToRemove.size() > 0) {
+      dest.writeString("RemoveRelation");
+      dest.writeInt(relationsToRemove.size());
+      for (ParseObject object : relationsToRemove) {
+        parcelableEncoder.encode(object, dest);
+      }
+    }
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     if (previous == null) {
       return this;

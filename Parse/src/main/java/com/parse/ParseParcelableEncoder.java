@@ -9,10 +9,7 @@
 package com.parse;
 
 import android.os.Parcel;
-import android.util.Base64;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Collection;
@@ -21,13 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@code ParseParcelableEncoder} can be used to parcel objects such as {@link ParseObjects}
- * into a {@link android.os.Parcel}.
+ * A {@code ParseParcelableEncoder} can be used to parcel objects such as
+ * {@link com.parse.ParseObject} into a {@link android.os.Parcel}.
  *
  * @see com.parse.ParseParcelableDecoder
  */
-
-/** package */ class ParseParcelableEncoder {
+/* package */ class ParseParcelableEncoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.
@@ -62,6 +58,7 @@ import java.util.Map;
   /* package */ final static String TYPE_JSON_NULL = "JsonNull";
   /* package */ final static String TYPE_NULL = "Null";
   /* package */ final static String TYPE_NATIVE = "Native";
+  /* package */ final static String TYPE_OP = "Operation";
 
   public void encode(Object object, Parcel dest) {
     try {
@@ -78,6 +75,10 @@ import java.util.Map;
         byte[] bytes = (byte[]) object;
         dest.writeInt(bytes.length);
         dest.writeByteArray(bytes);
+
+      } else if (object instanceof ParseFieldOperation) {
+        dest.writeString(TYPE_OP);
+        ((ParseFieldOperation) object).encode(dest, this);
 
       } else if (object instanceof ParseFile) { // TODO
         throw new IllegalArgumentException("Not supported yet");

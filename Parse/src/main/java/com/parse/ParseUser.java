@@ -41,6 +41,8 @@ public class ParseUser extends ParseObject {
   private static final List<String> READ_ONLY_KEYS = Collections.unmodifiableList(
       Arrays.asList(KEY_SESSION_TOKEN, KEY_AUTH_DATA));
 
+  private static final String PARCEL_KEY_IS_CURRENT_USER = "_isCurrentUser";
+
   /**
    * Constructs a query for {@code ParseUser}.
    *
@@ -1475,14 +1477,14 @@ public class ParseUser extends ParseObject {
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
     synchronized (mutex) {
-      outState.putBoolean("_isCurrentUser", isCurrentUser);
+      outState.putBoolean(PARCEL_KEY_IS_CURRENT_USER, isCurrentUser);
     }
   }
 
   @Override
   protected void onRestoreInstanceState(Bundle savedState) {
     super.onRestoreInstanceState(savedState);
-    setIsCurrentUser(savedState.getBoolean("_isCurrentUser"));
+    setIsCurrentUser(savedState.getBoolean(PARCEL_KEY_IS_CURRENT_USER, false));
   }
 
   //endregion

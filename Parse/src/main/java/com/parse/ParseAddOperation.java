@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +37,15 @@ import org.json.JSONObject;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+    dest.writeString("Add");
+    dest.writeInt(objects.size());
+    for (Object object : objects) {
+      parcelableEncoder.encode(object, dest);
+    }
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     if (previous == null) {
       return this;

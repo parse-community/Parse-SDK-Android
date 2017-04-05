@@ -11,6 +11,7 @@ package com.parse;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,6 +54,7 @@ import bolts.TaskCompletionSource;
 public class ParseObject implements Parcelable {
   private static final String AUTO_CLASS_NAME = "_Automatic";
   /* package */ static final String VERSION_NAME = "1.15.2-SNAPSHOT";
+  private static final String TAG = "ParseObject";
 
   /*
   REST JSON Keys
@@ -4242,12 +4244,26 @@ public class ParseObject implements Parcelable {
       dest.writeByte(localId != null ? (byte) 1 : 0);
       if (localId != null) dest.writeString(localId);
       dest.writeByte(isDeleted ? (byte) 1 : 0);
-      dest.writeInt(estimatedData.size());
-      Set<String> keys = estimatedData.keySet();
-      for (String key : keys) {
-        dest.writeString(key);
-        encoder.encode(estimatedData.get(key), dest);
+      // Squash the operations queue if needed.
+      ParseOperationSet set;
+      if (hasOutstandingOperations()) { // There's more than one set.
+        Log.w(TAG, "About to parcel a ParseObject while a save / saveEventually operation is " +
+              "going on. The unparceled object will act as if these tasks had failed. This " +
+              "means that the subsequent call to save() will update again the same keys. " +
+              "This is dangerous for certain operations, like increment() and decrement(). " +
+              "To avoid inconsistencies, wait for save operations to end before parceling.");
+        ListIterator<ParseOperationSet> iterator = operationSetQueue.listIterator();
+        set = new ParseOperationSet();
+        while (iterator.hasNext()) {
+          ParseOperationSet other = iterator.next();
+          other.mergeFrom(set);
+          set = other;
+        }
+      } else {
+        set = operationSetQueue.getLast();
       }
+      set.setIsSaveEventually(false);
+      set.toParcel(dest, encoder);
       Bundle bundle = new Bundle();
       onSaveInstanceState(bundle);
       dest.writeBundle(bundle);
@@ -4263,12 +4279,10 @@ public class ParseObject implements Parcelable {
       if (source.readByte() == 1) obj.localId = source.readString();
       if (source.readByte() == 1) obj.isDeleted = true;
       ParseParcelableDecoder decoder = ParseParcelableDecoder.get();
-      int size = source.readInt();
-      obj.estimatedData.clear(); // Clear estimatedData after setState.
-      for (int i = 0; i < size; i++) {
-        String key = source.readString();
-        Object object = decoder.decode(source);
-        obj.estimatedData.put(key, object);
+      ParseOperationSet set = ParseOperationSet.fromParcel(source, decoder);
+      for (String key : set.keySet()) {
+        ParseFieldOperation op = set.get(key);
+        obj.performOperation(key, op); // Update ops and estimatedData
       }
       Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
       obj.onRestoreInstanceState(bundle);

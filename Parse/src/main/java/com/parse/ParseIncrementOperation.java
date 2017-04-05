@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,6 +32,12 @@ import org.json.JSONObject;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
+    dest.writeString("Increment");
+    parcelableEncoder.encode(amount, dest); // Let encoder figure out how to parcel Number
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     if (previous == null) {
       return this;

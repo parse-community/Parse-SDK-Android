@@ -13,21 +13,17 @@ import android.os.Parcel;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
- * A {@code ParseParcelableDecoder} can be used to unparcel objects such as {@link ParseObjects}
- * from a {@link android.os.Parcel}.
+ * A {@code ParseParcelableDecoder} can be used to unparcel objects such as
+ * {@link com.parse.ParseObject} from a {@link android.os.Parcel}.
  *
  * @see com.parse.ParseParcelableEncoder
  */
-
-/** package */ class ParseParcelableDecoder {
+/* package */ class ParseParcelableDecoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.
@@ -51,6 +47,9 @@ import java.util.Set;
         byte[] bytes = new byte[source.readInt()];
         source.readByteArray(bytes);
         return bytes;
+
+      case ParseParcelableEncoder.TYPE_OP:
+        return ParseFieldOperations.decode(source, this);
 
       case ParseParcelableEncoder.TYPE_ACL:
         return source.readParcelable(ParseACL.class.getClassLoader());

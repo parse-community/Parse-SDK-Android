@@ -509,6 +509,7 @@ public class ParseObjectTest {
 
   @Test
   public void testParcelable() throws Exception {
+    ParseFieldOperations.registerDefaultDecoders();
     ParseObject object = new ParseObject("Test");
     object.isDeleted = true;
     object.put("long", 200L);
@@ -538,6 +539,7 @@ public class ParseObjectTest {
     ParseObject newObject = ParseObject.CREATOR.createFromParcel(parcel);
     assertEquals(newObject.getClassName(), object.getClassName());
     assertEquals(newObject.isDeleted, true);
+    assertEquals(newObject.hasChanges(), true);
     assertEquals(newObject.getLong("long"), object.getLong("long"));
     assertEquals(newObject.getDouble("double"), object.getDouble("double"), 0);
     assertEquals(newObject.getInt("int"), object.getInt("int"));
@@ -550,6 +552,15 @@ public class ParseObjectTest {
     assertEquals(newObject.getBytes("bytes").length, bytes.length);
     assertEquals(newObject.get("null"), object.get("null"));
     assertEquals(newObject.getACL().getReadAccess("reader"), acl.getReadAccess("reader"));
+  }
+
+  @Test
+  public void testRecursiveParcel() throws Exception {
+    ParseObject object = new ParseObject("Test");
+    object.put("itself", object);
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    // TODO fix this
   }
 
   // TODO test ParseGeoPoint and ParseFile after merge
