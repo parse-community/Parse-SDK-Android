@@ -17,6 +17,8 @@ import org.json.JSONObject;
  * An operation that increases a numeric field's value by a given amount.
  */
 /** package */ class ParseIncrementOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Increment";
+
   private final Number amount;
 
   public ParseIncrementOperation(Number amount) {
@@ -26,14 +28,14 @@ import org.json.JSONObject;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "Increment");
+    output.put("__op", OP_NAME);
     output.put("amount", amount);
     return output;
   }
 
   @Override
   public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
-    dest.writeString("Increment");
+    dest.writeString(OP_NAME);
     parcelableEncoder.encode(amount, dest); // Let encoder figure out how to parcel Number
   }
 

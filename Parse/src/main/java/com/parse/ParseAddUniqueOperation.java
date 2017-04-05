@@ -24,6 +24,8 @@ import java.util.List;
  * An operation that adds a new element to an array field, only if it wasn't already present.
  */
 /** package */ class ParseAddUniqueOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "AddUnique";
+
   protected final LinkedHashSet<Object> objects = new LinkedHashSet<>();
 
   public ParseAddUniqueOperation(Collection<?> col) {
@@ -33,14 +35,14 @@ import java.util.List;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "AddUnique");
+    output.put("__op", OP_NAME);
     output.put("objects", objectEncoder.encode(new ArrayList<>(objects)));
     return output;
   }
 
   @Override
   public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
-    dest.writeString("AddUnique");
+    dest.writeString(OP_NAME);
     dest.writeInt(objects.size());
     for (Object object : objects) {
       parcelableEncoder.encode(object, dest);

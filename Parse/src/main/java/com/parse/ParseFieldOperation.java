@@ -104,11 +104,11 @@ final class ParseFieldOperations {
   }
 
   /**
-   * Registers a list of default decoder functions that convert a JSONObject with an __op field into
-   * a ParseFieldOperation.
+   * Registers a list of default decoder functions that convert a JSONObject with an __op field,
+   * or a Parcel with a op name string, into a ParseFieldOperation.
    */
   static void registerDefaultDecoders() {
-    registerDecoder("Batch", new ParseFieldOperationFactory() {
+    registerDecoder(ParseRelationOperation.OP_NAME_BATCH, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -130,7 +130,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("Delete", new ParseFieldOperationFactory() {
+    registerDecoder(ParseDeleteOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -143,7 +143,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("Increment", new ParseFieldOperationFactory() {
+    registerDecoder(ParseIncrementOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -156,7 +156,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("Add", new ParseFieldOperationFactory() {
+    registerDecoder(ParseAddOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -174,7 +174,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("AddUnique", new ParseFieldOperationFactory() {
+    registerDecoder(ParseAddUniqueOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -192,7 +192,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("Remove", new ParseFieldOperationFactory() {
+    registerDecoder(ParseRemoveOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -210,7 +210,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("AddRelation", new ParseFieldOperationFactory() {
+    registerDecoder(ParseRelationOperation.OP_NAME_ADD, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -230,7 +230,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("RemoveRelation", new ParseFieldOperationFactory() {
+    registerDecoder(ParseRelationOperation.OP_NAME_REMOVE, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
           throws JSONException {
@@ -250,7 +250,7 @@ final class ParseFieldOperations {
       }
     });
 
-    registerDecoder("Set", new ParseFieldOperationFactory() {
+    registerDecoder(ParseSetOperation.OP_NAME, new ParseFieldOperationFactory() {
       @Override
       public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) throws JSONException {
         return null; // Not called.

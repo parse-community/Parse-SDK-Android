@@ -4234,10 +4234,6 @@ public class ParseObject implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-    // TODO operationSetQueue?
-    // TODO isDeletingEventually?
-    // TODO warn if it has ongoing tasks
-
     ParseParcelableEncoder encoder = ParseParcelableEncoder.get();
     synchronized (mutex) {
       state.writeToParcel(dest);

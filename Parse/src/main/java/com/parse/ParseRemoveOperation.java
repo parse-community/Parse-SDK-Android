@@ -24,6 +24,8 @@ import org.json.JSONObject;
  * An operation that removes every instance of an element from an array field.
  */
 /** package */ class ParseRemoveOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Remove";
+
   protected final HashSet<Object> objects = new HashSet<>();
 
   public ParseRemoveOperation(Collection<?> coll) {
@@ -33,14 +35,14 @@ import org.json.JSONObject;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "Remove");
+    output.put("__op", OP_NAME);
     output.put("objects", objectEncoder.encode(new ArrayList<>(objects)));
     return output;
   }
 
   @Override
   public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
-    dest.writeString("Remove");
+    dest.writeString(OP_NAME);
     dest.writeInt(objects.size());
     for (Object object : objects) {
       parcelableEncoder.encode(object, dest);

@@ -22,6 +22,8 @@ import org.json.JSONObject;
  * An operation that adds a new element to an array field.
  */
 /** package */ class ParseAddOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Add";
+
   protected final ArrayList<Object> objects = new ArrayList<>();
 
   public ParseAddOperation(Collection<?> coll) {
@@ -31,14 +33,14 @@ import org.json.JSONObject;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "Add");
+    output.put("__op", OP_NAME);
     output.put("objects", objectEncoder.encode(objects));
     return output;
   }
 
   @Override
   public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
-    dest.writeString("Add");
+    dest.writeString(OP_NAME);
     dest.writeInt(objects.size());
     for (Object object : objects) {
       parcelableEncoder.encode(object, dest);

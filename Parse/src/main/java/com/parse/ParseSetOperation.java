@@ -15,6 +15,8 @@ package com.parse;
 import android.os.Parcel;
 
 /** package */ class ParseSetOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Set";
+
   private final Object value;
 
   public ParseSetOperation(Object newValue) {
@@ -32,7 +34,7 @@ import android.os.Parcel;
 
   @Override
   public void encode(Parcel dest, ParseParcelableEncoder parcelableEncoder) {
-    dest.writeString("Set");
+    dest.writeString(OP_NAME);
     parcelableEncoder.encode(value, dest);
   }
 
