@@ -133,7 +133,7 @@ import java.util.Map;
             + object.getClass().toString());
       }
 
-    } catch (Exception e) {
+    } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException("Could not encode this object into Parcel. "
             + object.getClass().toString());
     }

@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
@@ -580,6 +581,61 @@ public class ParseObjectTest {
     assertEquals(newObject.getObjectId(), "id");
     assertEquals(newObject.getParseObject("self").getObjectId(), "id");
     assertEquals(newObject.getParseObject("self").getParseObject("self").getObjectId(), "id");
+  }
+
+  @Test
+  public void testParcelWhileSaving() throws Exception {
+    ParseFieldOperations.registerDefaultDecoders();
+    ParseObject object, other;
+    List<Task<Void>> tasks = new ArrayList<>();
+
+    // Mocked to let save work
+    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
+    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
+    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+
+    // Mocked to simulate in-flight save
+    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource<>();
+    ParseObjectController objectController = mock(ParseObjectController.class);
+    when(objectController.saveAsync(
+        any(ParseObject.State.class),
+        any(ParseOperationSet.class),
+        anyString(),
+        any(ParseDecoder.class)))
+        .thenReturn(tcs.getTask());
+    ParseCorePlugins.getInstance().registerObjectController(objectController);
+
+    // Create multiple ParseOperationSets
+    object = new ParseObject("TestObject");
+    object.setObjectId("id");
+    object.put("key", "value");
+    object.put("number", 5);
+    tasks.add(object.saveInBackground());
+
+    object.put("key", "newValue");
+    object.increment("number", 6);
+    tasks.add(object.saveInBackground());
+
+    object.increment("number", -1);
+    tasks.add(object.saveInBackground());
+
+    // Ensure Log.w is called...
+    assertTrue(object.hasOutstandingOperations());
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    other = ParseObject.CREATOR.createFromParcel(parcel);
+    assertTrue(other.isDirty("key"));
+    assertTrue(other.isDirty("number"));
+    assertEquals(other.getString("key"), "newValue");
+    assertEquals(other.getNumber("number"), 10);
+    // By design, we assume that old operations failed even if
+    // they are still running on the old instance.
+    assertFalse(other.hasOutstandingOperations());
+
+    // Force finish save operations on the old instance.
+    tcs.setResult(null);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
   }
 
   // TODO test ParseGeoPoint and ParseFile after merge

@@ -12,8 +12,7 @@ import java.util.Set;
  * {@code ParseObject}s have been decoded. When a pointer is found and we have already decoded
  * an instance for the same object id, we use the decoded instance.
  *
- * This is very similar to what {@link KnownParseObjectDecoder} does for JSON, and is meant to be
- * used with {@link ParseObjectParcelEncoder}.
+ * This is very similar to what {@link KnownParseObjectDecoder} does for JSON.
  */
 /* package */ class ParseObjectParcelDecoder extends ParseParcelDecoder {
 
@@ -32,11 +31,13 @@ import java.util.Set;
     if (objects.containsKey(objectId)) {
       return objects.get(objectId);
     }
-    // Should not happen if using in conjunction with ParseObjectParcelEncoder .
-    return ParseObject.createWithoutData(className, objectId);
+    // Should not happen if encoding was done through ParseObjectParcelEncoder.
+    ParseObject object = ParseObject.createWithoutData(className, objectId);
+    objects.put(objectId, object);
+    return object;
   }
 
-  /* package for tests */ String getObjectOrLocalId(ParseObject object) {
+  private String getObjectOrLocalId(ParseObject object) {
     return object.getObjectId() != null ? object.getObjectId() : object.getOrCreateLocalId();
   }
 }
