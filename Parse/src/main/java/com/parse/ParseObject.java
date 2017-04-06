@@ -386,8 +386,10 @@ public class ParseObject implements Parcelable {
   private final ParseMulticastDelegate<ParseObject> saveEvent = new ParseMulticastDelegate<>();
 
   /* package */ boolean isDeleted;
+  /* package */ boolean isDeleting; // Since delete ops are queued, we don't need a counter.
   //TODO (grantland): Derive this off the EventuallyPins as opposed to +/- count.
   /* package */ int isDeletingEventually;
+  private boolean ldsEnabledWhenParceling;
 
   private static final ThreadLocal<String> isCreatingPointerForObjectId =
       new ThreadLocal<String>() {
@@ -2158,6 +2160,7 @@ public class ParseObject implements Parcelable {
     return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
+        isDeleting = true;
         if (state.objectId() == null) {
           return task.cast(); // no reason to call delete since it doesn't exist
         }
@@ -2167,6 +2170,12 @@ public class ParseObject implements Parcelable {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         return handleDeleteResultAsync();
+      }
+    }).continueWith(new Continuation<Void, Void>() {
+      @Override
+      public Void then(Task<Void> task) throws Exception {
+        isDeleting = false;
+        return null;
       }
     });
   }
@@ -4237,7 +4246,26 @@ public class ParseObject implements Parcelable {
 
   /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     synchronized (mutex) {
-      // Write className and id regardless of state.
+      // Developer warnings.
+      ldsEnabledWhenParceling = Parse.isLocalDatastoreEnabled();
+      boolean saving = hasOutstandingOperations();
+      boolean deleting = isDeleting || isDeletingEventually > 0;
+      if (saving) {
+        Log.w(TAG, "About to parcel a ParseObject while a save / saveEventually operation is " +
+            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+            "these tasks end. If not, it will act as if these tasks have failed. This means that " +
+            "the subsequent call to save() will update again the same keys, and this is dangerous " +
+            "for certain operations, like increment(). To avoid inconsistencies, wait for operations " +
+            "to end before parceling.");
+      }
+      if (deleting) {
+        Log.w(TAG, "About to parcel a ParseObject while a delete / deleteEventually operation is " +
+            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+            "these tasks end. If not, it will assume it's not deleted, and might incorrectly " +
+            "return false for isDirty(). To avoid inconsistencies, wait for operations to end " +
+            "before parceling.");
+      }
+      // Write className and id first, regardless of state.
       dest.writeString(getClassName());
       String objectId = getObjectId();
       dest.writeByte(objectId != null ? (byte) 1 : 0);
@@ -4247,26 +4275,23 @@ public class ParseObject implements Parcelable {
       dest.writeByte(localId != null ? (byte) 1 : 0);
       if (localId != null) dest.writeString(localId);
       dest.writeByte(isDeleted ? (byte) 1 : 0);
-      // Squash the operations queue if needed.
+      // Care about dirty changes and ongoing tasks.
       ParseOperationSet set;
-      if (hasOutstandingOperations()) { // There's more than one set.
-        Log.w(TAG, "About to parcel a ParseObject while a save / saveEventually operation is " +
-              "going on. The unparceled object will act as if these tasks had failed. This " +
-              "means that the subsequent call to save() will update again the same keys. " +
-              "This is dangerous for certain operations, like increment() and decrement(). " +
-              "To avoid inconsistencies, wait for save operations to end before parceling.");
-        ListIterator<ParseOperationSet> iterator = operationSetQueue.listIterator();
+      if (hasOutstandingOperations()) {
+        // There's more than one set. Squash the queue, creating copies
+        // to preserve the original queue when LDS is enabled.
         set = new ParseOperationSet();
-        while (iterator.hasNext()) {
-          ParseOperationSet other = iterator.next();
-          other.mergeFrom(set);
-          set = other;
+        for (ParseOperationSet operationSet : operationSetQueue) {
+          ParseOperationSet copy = new ParseOperationSet(operationSet);
+          copy.mergeFrom(set);
+          set = copy;
         }
       } else {
         set = operationSetQueue.getLast();
       }
       set.setIsSaveEventually(false);
       set.toParcel(dest, encoder);
+      // Pass a Bundle to subclasses.
       Bundle bundle = new Bundle();
       onSaveInstanceState(bundle);
       dest.writeBundle(bundle);
@@ -4286,28 +4311,31 @@ public class ParseObject implements Parcelable {
   };
 
   /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelDecoder decoder) {
-    ParseObject obj;
     String className = source.readString();
-    if (source.readByte() == 1) { // We have an objectId.
-      obj = createWithoutData(className, source.readString());
-    } else {
-      obj = create(className);
-    }
+    String objectId = source.readByte() == 1 ? source.readString() : null;
+    // Create empty object (might be the same instance if LDS is enabled)
+    // and pass to decoder before unparceling child objects in State
+    ParseObject object = createWithoutData(className, objectId);
     if (decoder instanceof ParseObjectParcelDecoder) {
-      ((ParseObjectParcelDecoder) decoder).addKnownObject(obj);
+      ((ParseObjectParcelDecoder) decoder).addKnownObject(object);
     }
-    State state = State.createFromParcel(source, decoder); // Returns ParseUser.State if needed
-    obj.setState(state); // This calls rebuildEstimatedData
-    if (source.readByte() == 1) obj.localId = source.readString();
-    if (source.readByte() == 1) obj.isDeleted = true;
+    State state = State.createFromParcel(source, decoder);
+    object.setState(state);
+    if (source.readByte() == 1) object.localId = source.readString();
+    if (source.readByte() == 1) object.isDeleted = true;
+    // If object.ldsEnabledWhenParceling is true, we got this from OfflineStore.
+    // There is no need to restore operations in that case.
+    boolean restoreOperations = !object.ldsEnabledWhenParceling;
     ParseOperationSet set = ParseOperationSet.fromParcel(source, decoder);
-    for (String key : set.keySet()) {
-      ParseFieldOperation op = set.get(key);
-      obj.performOperation(key, op); // Update ops and estimatedData
+    if (restoreOperations) {
+      for (String key : set.keySet()) {
+        ParseFieldOperation op = set.get(key);
+        object.performOperation(key, op); // Update ops and estimatedData
+      }
     }
     Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
-    obj.onRestoreInstanceState(bundle);
-    return obj;
+    object.onRestoreInstanceState(bundle);
+    return object;
   }
 
   /**

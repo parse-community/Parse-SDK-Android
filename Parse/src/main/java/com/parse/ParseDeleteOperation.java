@@ -40,7 +40,7 @@ import org.json.JSONObject;
     dest.writeString(OP_NAME);
   }
 
-    @Override
+  @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     return this;
   }

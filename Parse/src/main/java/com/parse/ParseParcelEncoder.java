@@ -32,21 +32,9 @@ import java.util.Map;
     return INSTANCE;
   }
 
-  // TODO: remove this and user ParseEncoder.isValidType.
-  /* package */ static boolean isValidType(Object value) {
-    return value instanceof String
-        || value instanceof Number
-        || value instanceof Boolean
-        || value instanceof Date
-        || value instanceof List
-        || value instanceof Map
-        || value instanceof byte[]
-        || value == JSONObject.NULL
-        || value instanceof ParseObject
-        || value instanceof ParseACL
-        // TODO: waiting merge || value instanceof ParseFile
-        // TODO: waiting merge || value instanceof ParseGeoPoint
-        || value instanceof ParseRelation;
+  private static boolean isValidType(Object value) {
+    // This encodes to parcel what ParseEncoder does for JSON
+    return ParseEncoder.isValidType(value);
   }
 
   /* package */ final static String TYPE_OBJECT = "ParseObject";
@@ -82,10 +70,10 @@ import java.util.Map;
         dest.writeString(TYPE_OP);
         ((ParseFieldOperation) object).encode(dest, this);
 
-      } else if (object instanceof ParseFile) { // TODO
+      } else if (object instanceof ParseFile) {
         throw new IllegalArgumentException("Not supported yet");
 
-      } else if (object instanceof ParseGeoPoint) { // TODO
+      } else if (object instanceof ParseGeoPoint) {
         throw new IllegalArgumentException("Not supported yet");
 
       } else if (object instanceof ParseACL) {
@@ -114,9 +102,6 @@ import java.util.Map;
           encode(item, dest);
         }
 
-      } else if (object instanceof ParseRelation) {// TODO
-        throw new IllegalArgumentException("Not supported yet.");
-
       } else if (object == JSONObject.NULL) {
         dest.writeString(TYPE_JSON_NULL);
 
@@ -133,7 +118,7 @@ import java.util.Map;
             + object.getClass().toString());
       }
 
-    } catch (IllegalArgumentException e) {
+    } catch (Exception e) {
       throw new IllegalArgumentException("Could not encode this object into Parcel. "
             + object.getClass().toString());
     }
