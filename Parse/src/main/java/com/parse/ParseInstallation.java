@@ -30,6 +30,7 @@ import bolts.Task;
 public class ParseInstallation extends ParseObject {
   private static final String TAG = "com.parse.ParseInstallation";
 
+  private static final String KEY_OBJECT_ID = "objectId";
   private static final String KEY_INSTALLATION_ID = "installationId";
   private static final String KEY_DEVICE_TYPE = "deviceType";
   private static final String KEY_APP_NAME = "appName";
@@ -45,7 +46,7 @@ public class ParseInstallation extends ParseObject {
   private static final List<String> READ_ONLY_FIELDS = Collections.unmodifiableList(
       Arrays.asList(KEY_DEVICE_TYPE, KEY_INSTALLATION_ID, KEY_DEVICE_TOKEN, KEY_PUSH_TYPE,
           KEY_TIME_ZONE, KEY_LOCALE, KEY_APP_VERSION, KEY_APP_NAME, KEY_PARSE_VERSION,
-          KEY_APP_IDENTIFIER));
+          KEY_APP_IDENTIFIER, KEY_OBJECT_ID));
 
   // TODO(mengyan): Inject into ParseInstallationInstanceController
   /* package */ static ParseCurrentInstallationController getCurrentInstallationController() {
