@@ -26,7 +26,6 @@ import java.util.List;
 /** package */ abstract class ParseHttpClient<LibraryRequest, LibraryResponse> {
   private static final String TAG = "com.parse.ParseHttpClient";
 
-  private static final String URLCONNECTION_NAME = "net.java.URLConnection";
   private static final String OKHTTP_NAME = "com.squareup.okhttp3";
 
 

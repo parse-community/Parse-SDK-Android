@@ -34,6 +34,7 @@ import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
+import okhttp3.OkHttpClient;
 
 /**
  * The {@code Parse} class contains static functions that handle global configuration for the Parse
@@ -53,6 +54,7 @@ public class Parse {
       private String clientKey;
       private String server;
       private boolean localDataStoreEnabled;
+      private OkHttpClient.Builder clientBuilder;
       private List<ParseNetworkInterceptor> interceptors;
 
       /**
