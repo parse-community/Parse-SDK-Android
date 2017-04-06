@@ -8,8 +8,6 @@
  */
 package com.parse;
 
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.parse.http.ParseNetworkInterceptor;
@@ -19,7 +17,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowPackageManager;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,7 +31,6 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class)
@@ -188,11 +184,7 @@ public class ParseClientConfigurationTest {
 
   private Bundle setupMockMetaData() throws Exception {
     Bundle metaData = mock(Bundle.class);
-    ShadowPackageManager packageManager = shadowOf(RuntimeEnvironment.application.getPackageManager());
-    ApplicationInfo info = packageManager.getApplicationInfo(
-        RuntimeEnvironment.application.getPackageName(),
-        PackageManager.GET_META_DATA);
-    info.metaData = metaData;
+    RuntimeEnvironment.application.getApplicationInfo().metaData = metaData;
     return metaData;
   }
 

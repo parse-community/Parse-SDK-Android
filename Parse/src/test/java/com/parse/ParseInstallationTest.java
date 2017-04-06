@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
@@ -20,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-import org.robolectric.res.builder.RobolectricPackageManager;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -34,9 +32,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -334,11 +330,8 @@ public class ParseInstallationTest {
             mock(ParseCurrentInstallationController.class);
     when(controller.isCurrent(any(ParseInstallation.class))).thenReturn(true);
     ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
-    // Mock package manager
-    RobolectricPackageManager packageManager =
-            spy(RuntimeEnvironment.getRobolectricPackageManager());
-    doReturn("parseTest").when(packageManager).getApplicationLabel(any(ApplicationInfo.class));
-    RuntimeEnvironment.setRobolectricPackageManager(packageManager);
+    // Mock App Name
+    RuntimeEnvironment.application.getApplicationInfo().name = "parseTest";
     ParsePlugins.Android plugins = mock(ParsePlugins.Android.class);
     // Mock installationId
     InstallationId installationId = mock(InstallationId.class);
