@@ -10,7 +10,6 @@ package com.parse;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.SSLSessionCache;
 import android.os.Build;
 
 import com.parse.http.ParseHttpRequest;
@@ -19,6 +18,9 @@ import com.parse.http.ParseNetworkInterceptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
 
 /** package */ class ParsePlugins {
 
@@ -79,10 +81,7 @@ import java.io.IOException;
   }
 
   /* package */ ParseHttpClient newHttpClient() {
-    int socketOperationTimeout = 10 * 1000; // 10 seconds
-    return ParseHttpClient.createClient(
-        socketOperationTimeout,
-        null);
+    return ParseOkHttpClient.createClient(generateBuilder());
   }
 
   /* package */ ParseHttpClient restClient() {
@@ -151,6 +150,12 @@ import java.io.IOException;
     throw new IllegalStateException("Stub");
   }
 
+  protected OkHttpClient.Builder generateBuilder() {
+    return new OkHttpClient.Builder()
+            .readTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS);
+  }
+
   /* package */ static class Android extends ParsePlugins {
     /* package */ static void initialize(Context context, String applicationId, String clientKey) {
       ParsePlugins.set(new Android(context, applicationId, clientKey));
@@ -173,11 +178,7 @@ import java.io.IOException;
 
     @Override
     public ParseHttpClient newHttpClient() {
-      SSLSessionCache sslSessionCache = new SSLSessionCache(applicationContext);
-      int socketOperationTimeout = 10 * 1000; // 10 seconds
-      return ParseHttpClient.createClient(
-          socketOperationTimeout,
-          sslSessionCache);
+      return ParseOkHttpClient.createClient(generateBuilder());
     }
 
     @Override

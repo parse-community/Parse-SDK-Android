@@ -8,7 +8,7 @@
  */
 package com.parse;
 
-import android.net.SSLSessionCache;
+import android.support.annotation.Nullable;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import bolts.Capture;
 import okhttp3.Call;
@@ -43,14 +42,17 @@ import okio.Okio;
   private final static String OKHTTP_PUT = "PUT";
   private final static String OKHTTP_DELETE = "DELETE";
 
+  public static ParseOkHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
+    return new ParseOkHttpClient(builder);
+  }
+
   private OkHttpClient okHttpClient;
 
-  public ParseOkHttpClient(int socketOperationTimeout, SSLSessionCache sslSessionCache) {
+    ParseOkHttpClient(@Nullable OkHttpClient.Builder builder) {
 
-    OkHttpClient.Builder builder = new OkHttpClient.Builder();
-
-    builder.connectTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
-    builder.readTimeout(socketOperationTimeout, TimeUnit.MILLISECONDS);
+    if (builder == null) {
+      builder = new OkHttpClient.Builder();
+    }
 
     // Don't handle redirects. We copy the setting from AndroidHttpClient.
     // For detail, check https://quip.com/Px8jAxnaun2r

@@ -8,8 +8,6 @@
  */
 package com.parse;
 
-import android.net.SSLSessionCache;
-
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 import com.parse.http.ParseNetworkInterceptor;
@@ -24,23 +22,9 @@ import java.util.List;
  * Android URLConnection, Square OKHttp and so on.
  */
 /** package */ abstract class ParseHttpClient<LibraryRequest, LibraryResponse> {
-  private static final String TAG = "com.parse.ParseHttpClient";
-
-  private static final String OKHTTP_NAME = "com.squareup.okhttp3";
-
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
-
-  public static ParseHttpClient createClient(int socketOperationTimeout,
-      SSLSessionCache sslSessionCache) {
-    String httpClientLibraryName;
-    ParseHttpClient httpClient;
-    httpClientLibraryName = OKHTTP_NAME;
-    httpClient = new ParseOkHttpClient(socketOperationTimeout, sslSessionCache);
-    PLog.i(TAG, "Using " + httpClientLibraryName + " library for networking communication.");
-    return httpClient;
-  }
 
   public static void setMaxConnections(int maxConnections) {
     if (maxConnections <= 0) {
