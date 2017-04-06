@@ -56,7 +56,7 @@ public class ParseOkHttpClientTest {
 
   @Test
   public void testGetOkHttpRequestType() throws IOException {
-    ParseOkHttpClient parseClient = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
     ParseHttpRequest.Builder builder = new ParseHttpRequest.Builder();
     builder.setUrl("http://www.parse.com");
 
@@ -112,7 +112,7 @@ public class ParseOkHttpClientTest {
         .setHeaders(headers)
         .build();
 
-    ParseOkHttpClient parseClient = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
     Request okHttpRequest = parseClient.getRequest(parseRequest);
 
     // Verify method
@@ -145,7 +145,7 @@ public class ParseOkHttpClientTest {
         .setBody(new ParseByteArrayHttpBody(content, null))
         .build();
 
-    ParseOkHttpClient parseClient = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
     Request okHttpRequest = parseClient.getRequest(parseRequest);
 
     // Verify Content-Type
@@ -188,7 +188,7 @@ public class ParseOkHttpClientTest {
         })
         .build();
 
-    ParseOkHttpClient parseClient = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
     ParseHttpResponse parseResponse = parseClient.getResponse(okHttpResponse);
 
     // Verify status code
@@ -233,7 +233,7 @@ public class ParseOkHttpClientTest {
     server.enqueue(mockResponse);
     server.start();
 
-    ParseHttpClient client = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient client = ParseHttpClient.createClient(new OkHttpClient.Builder());
 
     final Semaphore done = new Semaphore(0);
     // Add plain interceptor to disable decompress response stream
@@ -283,7 +283,7 @@ public class ParseOkHttpClientTest {
     server.enqueue(generateServerResponse());
     server.start();
 
-    ParseHttpClient client = ParseOkHttpClient.createClient(new OkHttpClient.Builder());
+    ParseHttpClient client = ParseHttpClient.createClient(new OkHttpClient.Builder());
 
     // Make ParseHttpRequest
     ParseHttpRequest parseRequest = generateClientRequest();

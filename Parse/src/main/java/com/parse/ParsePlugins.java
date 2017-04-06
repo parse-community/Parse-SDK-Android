@@ -81,7 +81,7 @@ import okhttp3.OkHttpClient;
   }
 
   /* package */ ParseHttpClient newHttpClient() {
-    return ParseOkHttpClient.createClient(generateBuilder());
+    return ParseHttpClient.createClient(generateBuilder());
   }
 
   /* package */ ParseHttpClient restClient() {
@@ -178,7 +178,7 @@ import okhttp3.OkHttpClient;
 
     @Override
     public ParseHttpClient newHttpClient() {
-      return ParseOkHttpClient.createClient(generateBuilder());
+      return ParseHttpClient.createClient(generateBuilder());
     }
 
     @Override
