@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 // For android.util.Base64
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseCoderTest {
 
   @Test

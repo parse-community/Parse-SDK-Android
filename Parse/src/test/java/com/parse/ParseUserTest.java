@@ -50,8 +50,8 @@ import static org.mockito.Mockito.when;
 
 // For ParseExecutors.main()
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
-public class ParseUserTest {
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+public class ParseUserTest extends TeardownPluginsParseTest {
 
   @Rule
   public ExpectedException thrown= ExpectedException.none();
@@ -63,11 +63,10 @@ public class ParseUserTest {
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
+    super.tearDown();
     ParseObject.unregisterSubclass(ParseUser.class);
     ParseObject.unregisterSubclass(ParseSession.class);
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
     Parse.disableLocalDatastore();
   }
 

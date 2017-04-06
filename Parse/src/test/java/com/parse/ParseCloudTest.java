@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,17 +39,12 @@ import static org.mockito.Mockito.when;
 
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
-public class ParseCloudTest {
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+public class ParseCloudTest extends TeardownPluginsParseTest {
 
   @Before
   public void setUp() {
     ParseTestUtils.setTestParseUser();
-  }
-
-  @After
-  public void tearDown() {
-    ParseCorePlugins.getInstance().reset();
   }
 
   //region testGetCloudCodeController

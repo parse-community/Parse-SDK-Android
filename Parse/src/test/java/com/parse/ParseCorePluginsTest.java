@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,8 +23,8 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
-public class ParseCorePluginsTest {
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+public class ParseCorePluginsTest extends TeardownPluginsParseTest {
 
   @Before
   public void setUp() {
@@ -33,12 +32,6 @@ public class ParseCorePluginsTest {
             .applicationId("1234")
             .build();
     ParsePlugins.initialize(configuration);
-  }
-
-  @After
-  public void tearDown() {
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
   }
 
   @Test

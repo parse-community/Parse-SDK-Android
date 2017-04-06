@@ -26,7 +26,6 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import bolts.Task;
@@ -47,7 +46,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 // For org.json
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class ParseRESTCommandTest {
 

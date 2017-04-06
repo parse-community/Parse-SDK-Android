@@ -46,7 +46,11 @@ dependencies {
     compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
     provided 'com.facebook.stetho:stetho:1.4.2'
 
-    testCompile 'org.robolectric:robolectric:3.3.2'
+    //Be aware, tests fail on 3.3.2 Wait to update until
+    //java.lang.NoClassDefFoundError: android/content/pm/VersionedPackage
+    //issue is fixed in Robolectric
+    //https://github.com/robolectric/robolectric/issues/2562
+    testCompile 'org.robolectric:robolectric:3.3'
     testCompile 'org.skyscreamer:jsonassert:1.5.0'
     testCompile 'org.mockito:mockito-core:1.10.19'
     testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
