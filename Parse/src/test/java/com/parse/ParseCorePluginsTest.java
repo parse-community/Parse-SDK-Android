@@ -23,14 +23,16 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
-// For org.apache.http
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23)
 public class ParseCorePluginsTest {
 
   @Before
   public void setUp() {
-    ParsePlugins.initialize("1234", "1234");
+    Parse.Configuration configuration = new Parse.Configuration.Builder(null)
+            .applicationId("1234")
+            .build();
+    ParsePlugins.initialize(configuration);
   }
 
   @After

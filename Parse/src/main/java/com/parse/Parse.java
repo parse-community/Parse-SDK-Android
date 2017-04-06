@@ -14,8 +14,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.parse.http.ParseNetworkInterceptor;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -24,9 +22,6 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,14 +50,14 @@ public class Parse {
       private String server;
       private boolean localDataStoreEnabled;
       private OkHttpClient.Builder clientBuilder;
-      private List<ParseNetworkInterceptor> interceptors;
+      private OkHttpClient.Builder awsClientBuilder;
 
       /**
        * Initialize a bulider with a given context.
-       *
+       * <p>
        * This context will then be passed through to the rest of the Parse SDK for use during
        * initialization.
-       *
+       * <p>
        * <p/>
        * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
        * {@code meta-data} in your {@code AndroidManifest.xml}:
@@ -88,7 +83,7 @@ public class Parse {
        * &lt;/manifest&gt;
        * </pre>
        * <p/>
-       *
+       * <p>
        * This will cause the values for {@code server}, {@code applicationId} and {@code clientKey} to be set to
        * those defined in your manifest.
        *
@@ -112,7 +107,7 @@ public class Parse {
 
       /**
        * Set the application id to be used by Parse.
-       *
+       * <p>
        * This method is only required if you intend to use a different {@code applicationId} than
        * is defined by {@code com.parse.APPLICATION_ID} in your {@code AndroidManifest.xml}.
        *
@@ -126,7 +121,7 @@ public class Parse {
 
       /**
        * Set the client key to be used by Parse.
-       *
+       * <p>
        * This method is only required if you intend to use a different {@code clientKey} than
        * is defined by {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
        *
@@ -140,9 +135,6 @@ public class Parse {
 
       /**
        * Set the server URL to be used by Parse.
-       *
-       * This method is only required if you intend to use a different API server than the one at
-       * api.parse.com.
        *
        * @param server The server URL to set.
        * @return The same builder, for easy chaining.
@@ -160,39 +152,13 @@ public class Parse {
       }
 
       /**
-       * Add a {@link ParseNetworkInterceptor}.
-       *
-       * @param interceptor The interceptor to add.
-       * @return The same builder, for easy chaining.
-       */
-      public Builder addNetworkInterceptor(ParseNetworkInterceptor interceptor) {
-        if (interceptors == null) {
-          interceptors = new ArrayList<>();
-        }
-        interceptors.add(interceptor);
-        return this;
-      }
-
-      /**
        * Enable pinning in your application. This must be called before your application can use
        * pinning.
+       *
        * @return The same builder, for easy chaining.
        */
       public Builder enableLocalDataStore() {
         localDataStoreEnabled = true;
-        return this;
-      }
-
-      /* package for tests */ Builder setNetworkInterceptors(Collection<ParseNetworkInterceptor> interceptors) {
-        if (this.interceptors == null) {
-          this.interceptors = new ArrayList<>();
-        } else {
-          this.interceptors.clear();
-        }
-
-        if (interceptors != null) {
-          this.interceptors.addAll(interceptors);
-        }
         return this;
       }
 
@@ -202,7 +168,33 @@ public class Parse {
       }
 
       /**
+       * Set the {@link okhttp3.OkHttpClient.Builder} to use when communicating with the Parse
+       * REST API
+       * <p>
+       *
+       * @param builder The client builder, which will be modified for compatibility
+       * @return The same builder, for easy chaining.
+       */
+      public Builder clientBuilder(OkHttpClient.Builder builder) {
+        clientBuilder = builder;
+        return this;
+      }
+
+      /**
+       * Set the {@link okhttp3.OkHttpClient.Builder} to use when communicating with the AWS
+       * <p>
+       *
+       * @param builder The client builder, which will be modified for compatibility
+       * @return The same builder, for easy chaining.
+       */
+      public Builder awsClientBuilder(OkHttpClient.Builder builder) {
+        awsClientBuilder = builder;
+        return this;
+      }
+
+      /**
        * Construct this builder into a concrete {@code Configuration} instance.
+       *
        * @return A constructed {@code Configuration} object.
        */
       public Configuration build() {
@@ -210,12 +202,14 @@ public class Parse {
       }
     }
 
-    /* package for tests */ final Context context;
-    /* package for tests */ final String applicationId;
-    /* package for tests */ final String clientKey;
-    /* package for tests */ final String server;
-    /* package for tests */ final boolean localDataStoreEnabled;
-    /* package for tests */ final List<ParseNetworkInterceptor> interceptors;
+    final Context context;
+    final String applicationId;
+    final String clientKey;
+    final String server;
+    final boolean localDataStoreEnabled;
+    final OkHttpClient.Builder clientBuilder;
+    final OkHttpClient.Builder awsClientBuilder;
+
 
     private Configuration(Builder builder) {
       this.context = builder.context;
@@ -223,9 +217,8 @@ public class Parse {
       this.clientKey = builder.clientKey;
       this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
-      this.interceptors = builder.interceptors != null ?
-        Collections.unmodifiableList(new ArrayList<>(builder.interceptors)) :
-        null;
+      this.clientBuilder = builder.clientBuilder;
+      this.awsClientBuilder = builder.awsClientBuilder;
     }
   }
 
@@ -234,7 +227,7 @@ public class Parse {
   private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
 
   private static final Object MUTEX = new Object();
-  /* package */ static ParseEventuallyQueue eventuallyQueue = null;
+  static ParseEventuallyQueue eventuallyQueue = null;
 
   //region LDS
 
@@ -255,34 +248,33 @@ public class Parse {
    * }
    * </pre>
    *
-   * @param context
-   *          The active {@link Context} for your application.
+   * @param context The active {@link Context} for your application.
    */
   public static void enableLocalDatastore(Context context) {
     if (isInitialized()) {
       throw new IllegalStateException("`Parse#enableLocalDatastore(Context)` must be invoked " +
-          "before `Parse#initialize(Context)`");
+              "before `Parse#initialize(Context)`");
     }
     isLocalDatastoreEnabled = true;
   }
 
-  /* package for tests */ static void disableLocalDatastore() {
+  static void disableLocalDatastore() {
     setLocalDatastore(null);
     // We need to re-register ParseCurrentInstallationController otherwise it is still offline
     // controller
     ParseCorePlugins.getInstance().reset();
   }
 
-  /* package */ static OfflineStore getLocalDatastore() {
+  static OfflineStore getLocalDatastore() {
     return offlineStore;
   }
 
-  /* package for tests */ static void setLocalDatastore(OfflineStore offlineStore) {
+  static void setLocalDatastore(OfflineStore offlineStore) {
     Parse.isLocalDatastoreEnabled = offlineStore != null;
     Parse.offlineStore = offlineStore;
   }
 
-  /* package */ static boolean isLocalDatastoreEnabled() {
+  static boolean isLocalDatastoreEnabled() {
     return isLocalDatastoreEnabled;
   }
 
@@ -327,27 +319,27 @@ public class Parse {
    * }
    * </pre>
    *
-   * @param context
-   *          The active {@link Context} for your application.
+   * @param context The active {@link Context} for your application.
    */
   public static void initialize(Context context) {
     Configuration.Builder builder = new Configuration.Builder(context);
     if (builder.server == null) {
       throw new RuntimeException("ServerUrl not defined. " +
-          "You must provide ServerUrl in AndroidManifest.xml.\n" +
-          "<meta-data\n" +
-          "    android:name=\"com.parse.SERVER_URL\"\n" +
-          "    android:value=\"<Your Server Url>\" />");
-    } if (builder.applicationId == null) {
-      throw new RuntimeException("ApplicationId not defined. " +
-        "You must provide ApplicationId in AndroidManifest.xml.\n" +
-        "<meta-data\n" +
-        "    android:name=\"com.parse.APPLICATION_ID\"\n" +
-        "    android:value=\"<Your Application Id>\" />");
+              "You must provide ServerUrl in AndroidManifest.xml.\n" +
+              "<meta-data\n" +
+              "    android:name=\"com.parse.SERVER_URL\"\n" +
+              "    android:value=\"<Your Server Url>\" />");
     }
-    initialize(builder.setNetworkInterceptors(interceptors)
-        .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-        .build()
+    if (builder.applicationId == null) {
+      throw new RuntimeException("ApplicationId not defined. " +
+              "You must provide ApplicationId in AndroidManifest.xml.\n" +
+              "<meta-data\n" +
+              "    android:name=\"com.parse.APPLICATION_ID\"\n" +
+              "    android:value=\"<Your Application Id>\" />");
+    }
+    initialize(builder
+            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
+            .build()
     );
   }
 
@@ -369,21 +361,17 @@ public class Parse {
    *   }
    * }
    * </pre>
-   * 
-   * @param context
-   *          The active {@link Context} for your application.
-   * @param applicationId
-   *          The application id provided in the Parse dashboard.
-   * @param clientKey
-   *          The client key provided in the Parse dashboard.
+   *
+   * @param context       The active {@link Context} for your application.
+   * @param applicationId The application id provided in the Parse dashboard.
+   * @param clientKey     The client key provided in the Parse dashboard.
    */
   public static void initialize(Context context, String applicationId, String clientKey) {
     initialize(new Configuration.Builder(context)
-        .applicationId(applicationId)
-        .clientKey(clientKey)
-        .setNetworkInterceptors(interceptors)
-        .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-        .build()
+            .applicationId(applicationId)
+            .clientKey(clientKey)
+            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
+            .build()
     );
   }
 
@@ -392,7 +380,7 @@ public class Parse {
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
-    ParsePlugins.Android.initialize(configuration.context, configuration.applicationId, configuration.clientKey);
+    ParsePlugins.Android.initialize(configuration.context, configuration);
 
     try {
       ParseRESTCommand.server = new URL(configuration.server);
@@ -404,10 +392,6 @@ public class Parse {
 
     ParseHttpClient.setKeepAlive(true);
     ParseHttpClient.setMaxConnections(20);
-    // If we have interceptors in list, we have to initialize all http clients and add interceptors
-    if (configuration.interceptors != null && configuration.interceptors.size() > 0) {
-      initializeParseHttpClientsWithParseNetworkInterceptors(configuration.interceptors);
-    }
 
     ParseObject.registerParseSubclasses();
 
@@ -434,7 +418,7 @@ public class Parse {
     if (!allParsePushIntentReceiversInternal()) {
       throw new SecurityException("To prevent external tampering to your app's notifications, " +
               "all receivers registered to handle the following actions must have " +
-              "their exported attributes set to false: com.parse.push.intent.RECEIVE, "+
+              "their exported attributes set to false: com.parse.push.intent.RECEIVE, " +
               "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
     }
 
@@ -467,7 +451,7 @@ public class Parse {
     }
   }
 
-  /* package */ static void destroy() {
+  static void destroy() {
     ParseEventuallyQueue queue;
     synchronized (MUTEX) {
       queue = eventuallyQueue;
@@ -484,7 +468,7 @@ public class Parse {
   /**
    * @return {@code True} if {@link #initialize} has been called, otherwise {@code false}.
    */
-  /* package */ static boolean isInitialized() {
+  static boolean isInitialized() {
     return ParsePlugins.get() != null;
   }
 
@@ -505,9 +489,9 @@ public class Parse {
    */
   private static boolean allParsePushIntentReceiversInternal() {
     List<ResolveInfo> intentReceivers = ManifestInfo.getIntentReceivers(
-        ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE,
-        ParsePushBroadcastReceiver.ACTION_PUSH_DELETE,
-        ParsePushBroadcastReceiver.ACTION_PUSH_OPEN);
+            ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE,
+            ParsePushBroadcastReceiver.ACTION_PUSH_DELETE,
+            ParsePushBroadcastReceiver.ACTION_PUSH_OPEN);
 
     for (ResolveInfo resolveInfo : intentReceivers) {
       if (resolveInfo.activityInfo.exported) {
@@ -522,15 +506,15 @@ public class Parse {
    * instead.
    */
   @Deprecated
-  /* package */ static File getParseDir() {
+  static File getParseDir() {
     return ParsePlugins.get().getParseDir();
   }
 
-  /* package */ static File getParseCacheDir() {
+  static File getParseCacheDir() {
     return ParsePlugins.get().getCacheDir();
   }
 
-  /* package */ static File getParseCacheDir(String subDir) {
+  static File getParseCacheDir(String subDir) {
     synchronized (MUTEX) {
       File dir = new File(getParseCacheDir(), subDir);
       if (!dir.exists()) {
@@ -540,11 +524,11 @@ public class Parse {
     }
   }
 
-  /* package */ static File getParseFilesDir() {
+  static File getParseFilesDir() {
     return ParsePlugins.get().getFilesDir();
   }
 
-  /* package */ static File getParseFilesDir(String subDir) {
+  static File getParseFilesDir(String subDir) {
     synchronized (MUTEX) {
       File dir = new File(getParseFilesDir(), subDir);
       if (!dir.exists()) {
@@ -617,7 +601,7 @@ public class Parse {
    * ParseCommandCache is instantiated, it will begin running its run loop, which will start by
    * processing any commands already stored in the on-disk queue.
    */
-  /* package */ static ParseEventuallyQueue getEventuallyQueue() {
+  static ParseEventuallyQueue getEventuallyQueue() {
     Context context = ParsePlugins.Android.get().applicationContext();
     return getEventuallyQueue(context);
   }
@@ -626,13 +610,13 @@ public class Parse {
     synchronized (MUTEX) {
       boolean isLocalDatastoreEnabled = Parse.isLocalDatastoreEnabled();
       if (eventuallyQueue == null
-          || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
-          || (!isLocalDatastoreEnabled && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
+              || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
+              || (!isLocalDatastoreEnabled && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
         checkContext();
         ParseHttpClient httpClient = ParsePlugins.get().restClient();
         eventuallyQueue = isLocalDatastoreEnabled
-          ? new ParsePinningEventuallyQueue(context, httpClient)
-          : new ParseCommandCache(context, httpClient);
+                ? new ParsePinningEventuallyQueue(context, httpClient)
+                : new ParseCommandCache(context, httpClient);
 
         // We still need to clear out the old command cache even if we're using Pinning in case
         // anything is left over when the user upgraded. Checking number of pending and then
@@ -648,21 +632,21 @@ public class Parse {
   static void checkContext() {
     if (ParsePlugins.Android.get().applicationContext() == null) {
       throw new RuntimeException("applicationContext is null. "
-          + "You must call Parse.initialize(Context)"
-          + " before using the Parse library.");
+              + "You must call Parse.initialize(Context)"
+              + " before using the Parse library.");
     }
   }
 
   static boolean hasPermission(String permission) {
     return (getApplicationContext().checkCallingOrSelfPermission(permission) ==
-        PackageManager.PERMISSION_GRANTED);
+            PackageManager.PERMISSION_GRANTED);
   }
 
   static void requirePermission(String permission) {
     if (!hasPermission(permission)) {
       throw new IllegalStateException(
-          "To use this functionality, add this to your AndroidManifest.xml:\n"
-              + "<uses-permission android:name=\"" + permission + "\" />");
+              "To use this functionality, add this to your AndroidManifest.xml:\n"
+                      + "<uses-permission android:name=\"" + permission + "\" />");
     }
   }
 
@@ -677,10 +661,10 @@ public class Parse {
    *
    * @param listener the listener to register
    */
-  /* package */ static void registerParseCallbacks(ParseCallbacks listener) {
+  static void registerParseCallbacks(ParseCallbacks listener) {
     if (isInitialized()) {
       throw new IllegalStateException(
-          "You must register callbacks before Parse.initialize(Context)");
+              "You must register callbacks before Parse.initialize(Context)");
     }
 
     synchronized (MUTEX_CALLBACKS) {
@@ -696,7 +680,7 @@ public class Parse {
    *
    * @param listener the listener to register
    */
-  /* package */ static void unregisterParseCallbacks(ParseCallbacks listener) {
+  static void unregisterParseCallbacks(ParseCallbacks listener) {
     synchronized (MUTEX_CALLBACKS) {
       if (callbacks == null) {
         return;
@@ -728,8 +712,8 @@ public class Parse {
     return callbacks;
   }
 
-  /* package */ interface ParseCallbacks {
-    public void onParseInitialized();
+  interface ParseCallbacks {
+    void onParseInitialized();
   }
 
   //endregion
@@ -757,8 +741,7 @@ public class Parse {
    * <li>{@link #LOG_LEVEL_NONE}</li>
    * </ul>
    *
-   * @param logLevel
-   *          The level of logcat logging that Parse should do.
+   * @param logLevel The level of logcat logging that Parse should do.
    */
   public static void setLogLevel(int logLevel) {
     PLog.setLogLevel(logLevel);
@@ -778,73 +761,7 @@ public class Parse {
     throw new AssertionError();
   }
 
-  private static List<ParseNetworkInterceptor> interceptors;
-
-  // Initialize all necessary http clients and add interceptors to these http clients
-  private static void initializeParseHttpClientsWithParseNetworkInterceptors(List<ParseNetworkInterceptor> interceptors) {
-    // This means developers have not called addInterceptor method so we should do nothing.
-    if (interceptors == null) {
-      return;
-    }
-
-    List<ParseHttpClient> clients = new ArrayList<>();
-
-    // Rest http client
-    clients.add(ParsePlugins.get().restClient());
-    // AWS http client
-    clients.add(ParseCorePlugins.getInstance().getFileController().awsClient());
-
-    // Add interceptors to http clients
-    for (ParseHttpClient parseHttpClient : clients) {
-      // We need to add the decompress interceptor before the external interceptors to return
-      // a decompressed response to Parse.
-      parseHttpClient.addInternalInterceptor(new ParseDecompressInterceptor());
-      for (ParseNetworkInterceptor interceptor : interceptors) {
-        parseHttpClient.addExternalInterceptor(interceptor);
-      }
-    }
-  }
-
-
-  /**
-   * Add a {@link ParseNetworkInterceptor}. You must invoke
-   * {@code addParseNetworkInterceptor(ParseNetworkInterceptor)} before
-   * {@link #initialize(Context)}. You can add multiple {@link ParseNetworkInterceptor}.
-   * 
-   * @param interceptor
-   *          {@link ParseNetworkInterceptor} to be added.
-   */
-  public static void addParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
-    if (isInitialized()) {
-      throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
-          + " must be invoked before `Parse#initialize(Context)`");
-    }
-    if (interceptors == null) {
-      interceptors = new ArrayList<>();
-    }
-    interceptors.add(interceptor);
-  }
-
-  /**
-   * Remove a given {@link ParseNetworkInterceptor}. You must invoke
-   * {@code removeParseNetworkInterceptor(ParseNetworkInterceptor)}  before
-   * {@link #initialize(Context)}.
-   *
-   * @param interceptor
-   *          {@link ParseNetworkInterceptor} to be removed.
-   */
-  public static void removeParseNetworkInterceptor(ParseNetworkInterceptor interceptor) {
-    if (isInitialized()) {
-      throw new IllegalStateException("`Parse#addParseNetworkInterceptor(ParseNetworkInterceptor)`"
-          + " must be invoked before `Parse#initialize(Context)`");
-    }
-    if (interceptors == null) {
-      return;
-    }
-    interceptors.remove(interceptor);
-  }
-
-  /* package */ static String externalVersionName() {
+  static String externalVersionName() {
     return "a" + ParseObject.VERSION_NAME;
   }
 }

@@ -41,7 +41,7 @@ import bolts.Task;
   /* package */ ParseHttpClient awsClient() {
     synchronized (lock) {
       if (awsClient == null) {
-        awsClient = ParsePlugins.get().newHttpClient();
+        awsClient = ParsePlugins.get().awsClient();
       }
       return awsClient;
     }
