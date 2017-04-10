@@ -65,7 +65,7 @@ class ParsePlugins {
     File filesDir;
 
     ParseHttpClient restClient;
-    ParseHttpClient awsClient;
+    ParseHttpClient fileClient;
 
     private ParsePlugins(Parse.Configuration configuration) {
         this.configuration = configuration;
@@ -79,12 +79,12 @@ class ParsePlugins {
         return configuration.clientKey;
     }
 
-    ParseHttpClient awsClient() {
+    ParseHttpClient fileClient() {
         synchronized (lock) {
-            if (awsClient == null) {
-                awsClient = ParseHttpClient.createClient(configuration.awsClientBuilder);
+            if (fileClient == null) {
+                fileClient = ParseHttpClient.createClient(configuration.clientBuilder);
             }
-            return awsClient;
+            return fileClient;
         }
     }
 

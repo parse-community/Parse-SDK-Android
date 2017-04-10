@@ -269,23 +269,23 @@ public class ParseFileControllerTest {
 
   @Test
   public void testFetchAsyncAlreadyCancelled() throws Exception{
-    ParseHttpClient awsClient = mock(ParseHttpClient.class);
-    ParseFileController controller = new ParseFileController(null, null).awsClient(awsClient);
+    ParseHttpClient fileClient = mock(ParseHttpClient.class);
+    ParseFileController controller = new ParseFileController(null, null).fileClient(fileClient);
 
     ParseFile.State state = new ParseFile.State.Builder().build();
     Task<Void> cancellationToken = Task.cancelled();
     Task<File> task = controller.fetchAsync(state, null, null, cancellationToken);
     task.waitForCompletion();
 
-    verify(awsClient, times(0)).execute(any(ParseHttpRequest.class));
+    verify(fileClient, times(0)).execute(any(ParseHttpRequest.class));
     assertTrue(task.isCancelled());
   }
 
   @Test
   public void testFetchAsyncCached() throws Exception {
-    ParseHttpClient awsClient = mock(ParseHttpClient.class);
+    ParseHttpClient fileClient = mock(ParseHttpClient.class);
     File root = temporaryFolder.getRoot();
-    ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
+    ParseFileController controller = new ParseFileController(null, root).fileClient(fileClient);
 
     File file = new File(root, "cached_file_name");
     ParseFileUtils.writeStringToFile(file, "hello", "UTF-8");
@@ -296,7 +296,7 @@ public class ParseFileControllerTest {
     Task<File> task = controller.fetchAsync(state, null, null, null);
     File result = ParseTaskUtils.wait(task);
 
-    verify(awsClient, times(0)).execute(any(ParseHttpRequest.class));
+    verify(fileClient, times(0)).execute(any(ParseHttpRequest.class));
     assertEquals(file, result);
     assertEquals("hello", ParseFileUtils.readFileToString(result, "UTF-8"));
   }
@@ -310,12 +310,12 @@ public class ParseFileControllerTest {
         .setContent(new ByteArrayInputStream(data))
         .build();
 
-    ParseHttpClient awsClient = mock(ParseHttpClient.class);
-    when(awsClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
+    ParseHttpClient fileClient = mock(ParseHttpClient.class);
+    when(fileClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
     // Make sure cache dir does not exist
     File root = new File(temporaryFolder.getRoot(), "cache");
     assertFalse(root.exists());
-    ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
+    ParseFileController controller = new ParseFileController(null, root).fileClient(fileClient);
 
     ParseFile.State state = new ParseFile.State.Builder()
         .name("file_name")
@@ -324,7 +324,7 @@ public class ParseFileControllerTest {
     Task<File> task = controller.fetchAsync(state, null, null, null);
     File result = ParseTaskUtils.wait(task);
 
-    verify(awsClient, times(1)).execute(any(ParseHttpRequest.class));
+    verify(fileClient, times(1)).execute(any(ParseHttpRequest.class));
     assertTrue(result.exists());
     assertEquals("hello", ParseFileUtils.readFileToString(result, "UTF-8"));
     assertFalse(controller.getTempFile(state).exists());
@@ -335,11 +335,11 @@ public class ParseFileControllerTest {
     // TODO(grantland): Remove once we no longer rely on retry logic.
     ParseRequest.setDefaultInitialRetryDelay(1L);
 
-    ParseHttpClient awsClient = mock(ParseHttpClient.class);
-    when(awsClient.execute(any(ParseHttpRequest.class))).thenThrow(new IOException());
+    ParseHttpClient fileClient = mock(ParseHttpClient.class);
+    when(fileClient.execute(any(ParseHttpRequest.class))).thenThrow(new IOException());
 
     File root = temporaryFolder.getRoot();
-    ParseFileController controller = new ParseFileController(null, root).awsClient(awsClient);
+    ParseFileController controller = new ParseFileController(null, root).fileClient(fileClient);
 
     // We need to set url to make getTempFile() work and check it
     ParseFile.State state = new ParseFile.State.Builder()
@@ -349,7 +349,7 @@ public class ParseFileControllerTest {
     task.waitForCompletion();
 
     // TODO(grantland): Abstract out command runner so we don't have to account for retries.
-    verify(awsClient, times(5)).execute(any(ParseHttpRequest.class));
+    verify(fileClient, times(5)).execute(any(ParseHttpRequest.class));
     assertTrue(task.isFaulted());
     Exception error = task.getError();
     assertThat(error, instanceOf(ParseException.class));

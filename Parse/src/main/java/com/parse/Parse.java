@@ -50,7 +50,6 @@ public class Parse {
       private String server;
       private boolean localDataStoreEnabled;
       private OkHttpClient.Builder clientBuilder;
-      private OkHttpClient.Builder awsClientBuilder;
 
       /**
        * Initialize a bulider with a given context.
@@ -181,18 +180,6 @@ public class Parse {
       }
 
       /**
-       * Set the {@link okhttp3.OkHttpClient.Builder} to use when communicating with the AWS
-       * <p>
-       *
-       * @param builder The client builder, which will be modified for compatibility
-       * @return The same builder, for easy chaining.
-       */
-      public Builder awsClientBuilder(OkHttpClient.Builder builder) {
-        awsClientBuilder = builder;
-        return this;
-      }
-
-      /**
        * Construct this builder into a concrete {@code Configuration} instance.
        *
        * @return A constructed {@code Configuration} object.
@@ -208,7 +195,6 @@ public class Parse {
     final String server;
     final boolean localDataStoreEnabled;
     final OkHttpClient.Builder clientBuilder;
-    final OkHttpClient.Builder awsClientBuilder;
 
 
     private Configuration(Builder builder) {
@@ -218,7 +204,6 @@ public class Parse {
       this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
       this.clientBuilder = builder.clientBuilder;
-      this.awsClientBuilder = builder.awsClientBuilder;
     }
   }
 
