@@ -629,6 +629,19 @@ public class Parse {
     }
   }
 
+  static void checkInit() {
+    if (ParsePlugins.get() == null) {
+      throw new RuntimeException("You must call Parse.initialize(Context)"
+              + " before using the Parse library.");
+    }
+
+    if (ParsePlugins.get().applicationId() == null) {
+      throw new RuntimeException("applicationId is null. "
+              + "You must call Parse.initialize(Context)"
+              + " before using the Parse library.");
+    }
+  }
+
   static void checkContext() {
     if (ParsePlugins.Android.get().applicationContext() == null) {
       throw new RuntimeException("applicationContext is null. "
