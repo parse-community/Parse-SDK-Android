@@ -54,6 +54,6 @@ public class ParseFileRequestTest extends TestCase {
     assertTrue(task.getError() instanceof ParseException);
     ParseException error = (ParseException) task.getError();
     assertEquals(error.getCode(), ParseException.CONNECTION_FAILED);
-    assertTrue(error.getMessage().contains("Download from S3"));
+    assertTrue(error.getMessage().contains("Download from file server"));
   }
 }
