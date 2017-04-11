@@ -8,8 +8,6 @@
  */
 package com.parse;
 
-import com.parse.ParseCorePlugins;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

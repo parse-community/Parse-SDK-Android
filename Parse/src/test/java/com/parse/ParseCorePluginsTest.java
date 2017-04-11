@@ -24,10 +24,11 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseCorePluginsTest extends TeardownPluginsParseTest {
+public class ParseCorePluginsTest extends ResetPluginsParseTest {
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     Parse.Configuration configuration = new Parse.Configuration.Builder(null)
             .applicationId("1234")
             .build();

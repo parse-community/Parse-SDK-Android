@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseInstallationTest extends TeardownPluginsParseTest {
+public class ParseInstallationTest extends ResetPluginsParseTest {
   private static final String KEY_INSTALLATION_ID = "installationId";
   private static final String KEY_DEVICE_TYPE = "deviceType";
   private static final String KEY_APP_NAME = "appName";
@@ -55,7 +55,8 @@ public class ParseInstallationTest extends TeardownPluginsParseTest {
   private Locale defaultLocale;
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     ParseObject.registerSubclass(ParseInstallation.class);
 
     defaultLocale = Locale.getDefault();

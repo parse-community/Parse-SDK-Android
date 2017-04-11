@@ -51,13 +51,14 @@ import static org.mockito.Mockito.when;
 // For ParseExecutors.main()
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseUserTest extends TeardownPluginsParseTest {
+public class ParseUserTest extends ResetPluginsParseTest {
 
   @Rule
   public ExpectedException thrown= ExpectedException.none();
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     ParseObject.registerSubclass(ParseUser.class);
     ParseObject.registerSubclass(ParseSession.class);
   }

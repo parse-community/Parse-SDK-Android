@@ -29,12 +29,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class CachedCurrentUserControllerTest extends TeardownPluginsParseTest {
+public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
 
   private static final String KEY_AUTH_DATA = "authData";
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     ParseObject.registerSubclass(ParseUser.class);
   }
 

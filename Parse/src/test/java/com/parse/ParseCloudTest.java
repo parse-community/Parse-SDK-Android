@@ -40,12 +40,11 @@ import static org.mockito.Mockito.when;
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseCloudTest extends TeardownPluginsParseTest {
+public class ParseCloudTest extends ResetPluginsParseTest {
 
   @Before
-  public void setUp() {
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
+  public void setUp() throws Exception {
+    super.setUp();
     ParseTestUtils.setTestParseUser();
   }
 

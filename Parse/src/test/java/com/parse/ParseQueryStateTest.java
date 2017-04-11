@@ -30,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseQueryStateTest extends TeardownPluginsParseTest {
+public class ParseQueryStateTest extends ResetPluginsParseTest {
 
   @Test
   public void testDefaults() {
