@@ -77,7 +77,7 @@ public class ParseRequestTest {
     verify(mockHttpClient, times(5)).execute(any(ParseHttpRequest.class));
   }
 
-  // TODO(grantland): Move to ParseAWSRequestTest or ParseCountingByteArrayHttpBodyTest
+  // TODO(grantland): Move to ParseFileRequestTest or ParseCountingByteArrayHttpBodyTest
   @Test
   public void testDownloadProgress() throws Exception {
     ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
@@ -90,8 +90,8 @@ public class ParseRequestTest {
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
     File tempFile = temporaryFolder.newFile("test");
-    ParseAWSRequest request =
-        new ParseAWSRequest(ParseHttpRequest.Method.GET, "localhost", tempFile);
+    ParseFileRequest request =
+        new ParseFileRequest(ParseHttpRequest.Method.GET, "localhost", tempFile);
     TestProgressCallback downloadProgressCallback = new TestProgressCallback();
     Task<Void> task = request.executeAsync(mockHttpClient, null, downloadProgressCallback);
 

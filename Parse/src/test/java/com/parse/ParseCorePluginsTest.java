@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,20 +22,17 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
-// For org.apache.http
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
-public class ParseCorePluginsTest {
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+public class ParseCorePluginsTest extends ResetPluginsParseTest {
 
   @Before
-  public void setUp() {
-    ParsePlugins.initialize("1234", "1234");
-  }
-
-  @After
-  public void tearDown() {
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
+  public void setUp() throws Exception {
+    super.setUp();
+    Parse.Configuration configuration = new Parse.Configuration.Builder(null)
+            .applicationId("1234")
+            .build();
+    ParsePlugins.initialize(configuration);
   }
 
   @Test

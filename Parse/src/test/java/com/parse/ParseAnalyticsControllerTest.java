@@ -36,7 +36,7 @@ import static org.mockito.Mockito.when;
 
 // For android.net.Uri
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseAnalyticsControllerTest {
 
   @Before

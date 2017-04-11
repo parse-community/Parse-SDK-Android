@@ -8,40 +8,41 @@
  */
 package com.parse;
 
-import android.net.SSLSessionCache;
+import android.support.annotation.Nullable;
 
+import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-import com.parse.http.ParseNetworkInterceptor;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * The base class of a httpclient. It takes an http request, sends it to the server
- * and gets response. It can be implemented by different http library such as Apache http,
- * Android URLConnection, Square OKHttp and so on.
- */
-/** package */ abstract class ParseHttpClient<LibraryRequest, LibraryResponse> {
-  private static final String TAG = "com.parse.ParseHttpClient";
+import okhttp3.Call;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.BufferedSink;
 
-  private static final String URLCONNECTION_NAME = "net.java.URLConnection";
-  private static final String OKHTTP_NAME = "com.squareup.okhttp3";
+class ParseHttpClient {
 
+  private final static String OKHTTP_GET = "GET";
+  private final static String OKHTTP_POST = "POST";
+  private final static String OKHTTP_PUT = "PUT";
+  private final static String OKHTTP_DELETE = "DELETE";
+
+  public static ParseHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
+    return new ParseHttpClient(builder);
+  }
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
-
-  public static ParseHttpClient createClient(int socketOperationTimeout,
-      SSLSessionCache sslSessionCache) {
-    String httpClientLibraryName;
-    ParseHttpClient httpClient;
-    httpClientLibraryName = OKHTTP_NAME;
-    httpClient = new ParseOkHttpClient(socketOperationTimeout, sslSessionCache);
-    PLog.i(TAG, "Using " + httpClientLibraryName + " library for networking communication.");
-    return httpClient;
-  }
 
   public static void setMaxConnections(int maxConnections) {
     if (maxConnections <= 0) {
@@ -54,98 +55,189 @@ import java.util.List;
     System.setProperty(KEEP_ALIVE_PROPERTY_NAME, String.valueOf(isKeepAlive));
   }
 
+  private OkHttpClient okHttpClient;
   private boolean hasExecuted;
 
-  // There is no need to keep locks for interceptor lists since they will only be changed before
-  // we make network request
-  private List<ParseNetworkInterceptor> internalInterceptors;
-  private List<ParseNetworkInterceptor> externalInterceptors;
+  ParseHttpClient(@Nullable OkHttpClient.Builder builder) {
 
-  /* package */ abstract ParseHttpResponse executeInternal(ParseHttpRequest request)
-      throws IOException;
-
-  /* package */ abstract LibraryRequest getRequest(ParseHttpRequest parseRequest)
-      throws IOException;
-
-  /* package */ abstract ParseHttpResponse getResponse(LibraryResponse okHttpResponse)
-      throws IOException;
-
-  /* package */ void addInternalInterceptor(ParseNetworkInterceptor interceptor) {
-    // If we do not have the restriction, we may have read/write conflict on the interceptorList
-    // and need to add lock to protect it. If in the future we need to add interceptor after
-    // httpclient start to execute, it is safe to remove this check and add lock.
-    if (hasExecuted) {
-      throw new IllegalStateException(
-          "`ParseHttpClient#addInternalInterceptor(ParseNetworkInterceptor)` can only be invoked " +
-              "before `ParseHttpClient` execute any request");
+    if (builder == null) {
+      builder = new OkHttpClient.Builder();
     }
 
-    if (internalInterceptors == null) {
-      internalInterceptors = new ArrayList<>();
-    }
-    internalInterceptors.add(interceptor);
-  }
+    // Don't handle redirects. We copy the setting from AndroidHttpClient.
+    // For detail, check https://quip.com/Px8jAxnaun2r
+    builder.followRedirects(false);
 
-   /* package */ void addExternalInterceptor(ParseNetworkInterceptor interceptor) {
-    // No need to check hasExecuted since this method will only be called before Parse.initialize()
-    if (externalInterceptors == null) {
-      externalInterceptors = new ArrayList<>();
-    }
-    externalInterceptors.add(interceptor);
+    okHttpClient = builder.build();
   }
 
   public final ParseHttpResponse execute(ParseHttpRequest request) throws IOException {
     if (!hasExecuted) {
       hasExecuted = true;
     }
-    ParseNetworkInterceptor.Chain chain = new ParseNetworkInterceptorChain(0, 0, request);
-    return chain.proceed(request);
+    return executeInternal(request);
   }
 
-  private class ParseNetworkInterceptorChain implements ParseNetworkInterceptor.Chain {
-    private final int internalIndex;
-    private final int externalIndex;
-    private final ParseHttpRequest request;
+  ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
+    Request okHttpRequest = getRequest(parseRequest);
+    Call okHttpCall = okHttpClient.newCall(okHttpRequest);
 
-    ParseNetworkInterceptorChain(int internalIndex, int externalIndex, ParseHttpRequest request) {
-      this.internalIndex = internalIndex;
-      this.externalIndex = externalIndex;
-      this.request = request;
+    Response okHttpResponse = okHttpCall.execute();
+
+    return getResponse(okHttpResponse);
+  }
+
+  ParseHttpResponse getResponse(Response okHttpResponse)
+          throws IOException {
+    // Status code
+    int statusCode = okHttpResponse.code();
+
+    // Content
+    InputStream content = okHttpResponse.body().byteStream();
+
+    // Total size
+    int totalSize = (int) okHttpResponse.body().contentLength();
+
+    // Reason phrase
+    String reasonPhrase = okHttpResponse.message();
+
+    // Headers
+    Map<String, String> headers = new HashMap<>();
+    for (String name : okHttpResponse.headers().names()) {
+      headers.put(name, okHttpResponse.header(name));
+    }
+
+    // Content type
+    String contentType = null;
+    ResponseBody body = okHttpResponse.body();
+    if (body != null && body.contentType() != null) {
+      contentType = body.contentType().toString();
+    }
+
+    return new ParseHttpResponse.Builder()
+            .setStatusCode(statusCode)
+            .setContent(content)
+            .setTotalSize(totalSize)
+            .setReasonPhrase(reasonPhrase)
+            .setHeaders(headers)
+            .setContentType(contentType)
+            .build();
+  }
+
+  Request getRequest(ParseHttpRequest parseRequest) throws IOException {
+    Request.Builder okHttpRequestBuilder = new Request.Builder();
+    ParseHttpRequest.Method method = parseRequest.getMethod();
+    // Set method
+    switch (method) {
+      case GET:
+        okHttpRequestBuilder.get();
+        break;
+      case DELETE:
+      case POST:
+      case PUT:
+        // Since we need to set body and method at the same time for DELETE, POST, PUT, we will do it in
+        // the following.
+        break;
+      default:
+        // This case will never be reached since we have already handled this case in
+        // ParseRequest.newRequest().
+        throw new IllegalStateException("Unsupported http method " + method.toString());
+    }
+    // Set url
+    okHttpRequestBuilder.url(parseRequest.getUrl());
+
+    // Set Header
+    Headers.Builder okHttpHeadersBuilder = new Headers.Builder();
+    for (Map.Entry<String, String> entry : parseRequest.getAllHeaders().entrySet()) {
+      okHttpHeadersBuilder.add(entry.getKey(), entry.getValue());
+    }
+    // OkHttp automatically add gzip header so we do not need to deal with it
+    Headers okHttpHeaders = okHttpHeadersBuilder.build();
+    okHttpRequestBuilder.headers(okHttpHeaders);
+
+    // Set Body
+    ParseHttpBody parseBody = parseRequest.getBody();
+    ParseOkHttpRequestBody okHttpRequestBody = null;
+    if (parseBody != null) {
+      okHttpRequestBody = new ParseOkHttpRequestBody(parseBody);
+    }
+    switch (method) {
+      case PUT:
+        okHttpRequestBuilder.put(okHttpRequestBody);
+        break;
+      case POST:
+        okHttpRequestBuilder.post(okHttpRequestBody);
+        break;
+      case DELETE:
+        okHttpRequestBuilder.delete(okHttpRequestBody);
+    }
+    return okHttpRequestBuilder.build();
+  }
+
+  private ParseHttpRequest getParseHttpRequest(Request okHttpRequest) {
+    ParseHttpRequest.Builder parseRequestBuilder = new ParseHttpRequest.Builder();
+    // Set method
+    switch (okHttpRequest.method()) {
+      case OKHTTP_GET:
+        parseRequestBuilder.setMethod(ParseHttpRequest.Method.GET);
+        break;
+      case OKHTTP_DELETE:
+        parseRequestBuilder.setMethod(ParseHttpRequest.Method.DELETE);
+        break;
+      case OKHTTP_POST:
+        parseRequestBuilder.setMethod(ParseHttpRequest.Method.POST);
+        break;
+      case OKHTTP_PUT:
+        parseRequestBuilder.setMethod(ParseHttpRequest.Method.PUT);
+        break;
+      default:
+        // This should never happen
+        throw new IllegalArgumentException(
+                "Invalid http method " + okHttpRequest.method());
+    }
+
+    // Set url
+    parseRequestBuilder.setUrl(okHttpRequest.url().toString());
+
+    // Set Header
+    for (Map.Entry<String, List<String>> entry : okHttpRequest.headers().toMultimap().entrySet()) {
+      parseRequestBuilder.addHeader(entry.getKey(), entry.getValue().get(0));
+    }
+
+    // Set Body
+    ParseOkHttpRequestBody okHttpBody = (ParseOkHttpRequestBody) okHttpRequest.body();
+    if (okHttpBody != null) {
+      parseRequestBuilder.setBody(okHttpBody.getParseHttpBody());
+    }
+    return parseRequestBuilder.build();
+  }
+
+  private static class ParseOkHttpRequestBody extends RequestBody {
+
+    private ParseHttpBody parseBody;
+
+    public ParseOkHttpRequestBody(ParseHttpBody parseBody) {
+      this.parseBody = parseBody;
     }
 
     @Override
-    public ParseHttpRequest getRequest() {
-      return request;
+    public long contentLength() throws IOException {
+      return parseBody.getContentLength();
     }
 
     @Override
-    public ParseHttpResponse proceed(ParseHttpRequest request) throws IOException {
-      if (internalInterceptors != null && internalIndex < internalInterceptors.size()) {
-        // There's another internal interceptor in the chain. Call that.
-        ParseNetworkInterceptor.Chain chain =
-            new ParseNetworkInterceptorChain(internalIndex + 1, externalIndex, request);
-        return internalInterceptors.get(internalIndex).intercept(chain);
-      }
-
-      if (externalInterceptors != null && externalIndex < externalInterceptors.size()) {
-        // There's another external interceptor in the chain. Call that.
-        ParseNetworkInterceptor.Chain chain =
-            new ParseNetworkInterceptorChain(internalIndex, externalIndex + 1, request);
-        return externalInterceptors.get(externalIndex).intercept(chain);
-      }
-
-      // No more interceptors. Do HTTP.
-      return executeInternal(request);
+    public MediaType contentType() {
+      String contentType = parseBody.getContentType();
+      return contentType == null ? null : MediaType.parse(parseBody.getContentType());
     }
-  }
 
-  /**
-   * When we find developers use interceptors, since we need expose the raw
-   * response(ungziped response) to interceptors, we need to disable the transparent ungzip.
-   *
-   * @return {@code true} if we should disable the http library level auto decompress.
-   */
-  /* package */ boolean disableHttpLibraryAutoDecompress() {
-    return externalInterceptors != null && externalInterceptors.size() > 0;
+    @Override
+    public void writeTo(BufferedSink bufferedSink) throws IOException {
+      parseBody.writeTo(bufferedSink.outputStream());
+    }
+
+    public ParseHttpBody getParseHttpBody() {
+      return parseBody;
+    }
   }
 }

@@ -29,19 +29,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class CachedCurrentUserControllerTest {
+public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
 
   private static final String KEY_AUTH_DATA = "authData";
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     ParseObject.registerSubclass(ParseUser.class);
   }
 
   @After
-  public void tearDown() {
+  public void tearDown() throws Exception {
+    super.tearDown();
     ParseObject.unregisterSubclass(ParseUser.class);
-    ParsePlugins.reset();
   }
 
   //region testSetAsync

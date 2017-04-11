@@ -47,7 +47,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseConfigTest {
 
   @Before

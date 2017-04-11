@@ -22,12 +22,12 @@ import bolts.Task;
  * Request returns a byte array of the response and provides a callback the progress of the data
  * read from the network.
  */
-/** package */ class ParseAWSRequest extends ParseRequest<Void> {
+/** package */ class ParseFileRequest extends ParseRequest<Void> {
 
   // The temp file is used to save the ParseFile content when we fetch it from server
   private final File tempFile;
 
-  public ParseAWSRequest(ParseHttpRequest.Method method, String url, File tempFile) {
+  public ParseFileRequest(ParseHttpRequest.Method method, String url, File tempFile) {
     super(method, url);
     this.tempFile = tempFile;
   }
@@ -41,7 +41,7 @@ import bolts.Task;
     } else {
       String action = method == ParseHttpRequest.Method.GET ? "Download from" : "Upload to";
       return Task.forError(new ParseException(ParseException.CONNECTION_FAILED, String.format(
-        "%s S3 failed. %s", action, response.getReasonPhrase())));
+        "%s file server failed. %s", action, response.getReasonPhrase())));
     }
 
     if (method != ParseHttpRequest.Method.GET) {

@@ -27,7 +27,7 @@ import bolts.Task;
   private final ParseHttpClient restClient;
   private final File cachePath;
 
-  private ParseHttpClient awsClient;
+  private ParseHttpClient fileClient;
 
   public ParseFileController(ParseHttpClient restClient, File cachePath) {
     this.restClient = restClient;
@@ -35,21 +35,21 @@ import bolts.Task;
   }
 
   /**
-   * Gets the AWS http client if exists, otherwise lazily creates since developers might not always
+   * Gets the file http client if exists, otherwise lazily creates since developers might not always
    * use our download mechanism.
    */
-  /* package */ ParseHttpClient awsClient() {
+  /* package */ ParseHttpClient fileClient() {
     synchronized (lock) {
-      if (awsClient == null) {
-        awsClient = ParsePlugins.get().newHttpClient();
+      if (fileClient == null) {
+        fileClient = ParsePlugins.get().fileClient();
       }
-      return awsClient;
+      return fileClient;
     }
   }
 
-  /* package for tests */ ParseFileController awsClient(ParseHttpClient awsClient) {
+  /* package for tests */ ParseFileController fileClient(ParseHttpClient fileClient) {
     synchronized (lock) {
-      this.awsClient = awsClient;
+      this.fileClient = fileClient;
     }
     return this;
   }
@@ -206,12 +206,12 @@ import bolts.Task;
         final File tempFile = getTempFile(state);
 
         // network
-        final ParseAWSRequest request =
-            new ParseAWSRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
+        final ParseFileRequest request =
+            new ParseFileRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
 
         // We do not need to delete the temp file since we always try to overwrite it
         return request.executeAsync(
-            awsClient(),
+            fileClient(),
             null,
             downloadProgressCallback,
             cancellationToken).continueWithTask(new Continuation<Void, Task<File>>() {

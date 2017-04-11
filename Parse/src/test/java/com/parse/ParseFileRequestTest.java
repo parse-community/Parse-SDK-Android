@@ -22,7 +22,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ParseAWSRequestTest extends TestCase {
+public class ParseFileRequestTest extends TestCase {
 
   @Override
   protected void tearDown() throws Exception {
@@ -45,8 +45,8 @@ public class ParseAWSRequestTest extends TestCase {
     ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
     when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
 
-    ParseAWSRequest request =
-        new ParseAWSRequest(ParseHttpRequest.Method.GET, "http://parse.com", null);
+    ParseFileRequest request =
+        new ParseFileRequest(ParseHttpRequest.Method.GET, "http://parse.com", null);
     Task<Void> task = request.executeAsync(mockHttpClient);
     task.waitForCompletion();
 
@@ -54,6 +54,6 @@ public class ParseAWSRequestTest extends TestCase {
     assertTrue(task.getError() instanceof ParseException);
     ParseException error = (ParseException) task.getError();
     assertEquals(error.getCode(), ParseException.CONNECTION_FAILED);
-    assertTrue(error.getMessage().contains("Download from S3"));
+    assertTrue(error.getMessage().contains("Download from file server"));
   }
 }

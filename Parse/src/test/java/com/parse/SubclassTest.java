@@ -21,7 +21,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-public class SubclassTest {
+public class SubclassTest extends ResetPluginsParseTest {
   /**
    * This is a subclass of ParseObject that will be used below. We're going to imagine a world in
    * which every "Person" is an instance of "The Flash".
@@ -79,6 +79,7 @@ public class SubclassTest {
 
   @Before
   public void setUp() throws Exception {
+    super.setUp();
     ParseObject.registerParseSubclasses();
     ParseObject.registerSubclass(Person.class);
     ParseObject.registerSubclass(ClassWithDirtyingConstructor.class);
@@ -86,6 +87,7 @@ public class SubclassTest {
 
   @After
   public void tearDown() throws Exception {
+    super.tearDown();
     ParseObject.unregisterParseSubclasses();
     ParseObject.unregisterSubclass(Person.class);
     ParseObject.unregisterSubclass(ClassWithDirtyingConstructor.class);

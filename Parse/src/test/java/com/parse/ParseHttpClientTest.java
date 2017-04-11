@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
 import okhttp3.Headers;
+import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -36,7 +37,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseHttpClientTest {
 
   // We can not use ParameterizedRobolectricTestRunner right now since Robolectric use
@@ -46,12 +47,12 @@ public class ParseHttpClientTest {
   @Test
   public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
     doSingleParseHttpClientExecuteWithResponse(
-        200, "OK", "Success", new ParseOkHttpClient(10000, null));  }
+        200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));  }
 
   @Test
   public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
     doSingleParseHttpClientExecuteWithResponse(
-        404, "NOT FOUND", "Error", new ParseOkHttpClient(10000, null));  }
+        404, "NOT FOUND", "Error", ParseHttpClient.createClient(new OkHttpClient.Builder()));  }
 
   // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
   // not do that since in unit test env, URLConnection does not use OKHttp internally, so there is
@@ -60,7 +61,7 @@ public class ParseHttpClientTest {
   @Test
   public void testParseOkHttpClientExecuteWithGzipResponse() throws Exception {
     doSingleParseHttpClientExecuteWithGzipResponse(
-        200, "OK", "Success", new ParseOkHttpClient(10000, null));
+        200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));
   }
 
   private void doSingleParseHttpClientExecuteWithResponse(int responseCode, String responseStatus,
