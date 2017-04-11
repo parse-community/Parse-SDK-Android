@@ -44,6 +44,8 @@ public class ParseCloudTest extends TeardownPluginsParseTest {
 
   @Before
   public void setUp() {
+    ParseCorePlugins.getInstance().reset();
+    ParsePlugins.reset();
     ParseTestUtils.setTestParseUser();
   }
 
