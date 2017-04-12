@@ -63,7 +63,6 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 
  [parse.com]: https://parseplatform.github.io/
  [guide]: http://parseplatform.github.io/docs/android/guide/
- [blog]: https://blog.parse.com/
 
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
  [snap]: https://oss.sonatype.org/content/repositories/snapshots/

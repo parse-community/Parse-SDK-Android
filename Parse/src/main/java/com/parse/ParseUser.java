@@ -1460,7 +1460,7 @@ public class ParseUser extends ParseObject {
   /**
    * Enables revocable sessions. This method is only required if you wish to use
    * {@link ParseSession} APIs and do not have revocable sessions enabled in your application
-   * settings on <a href="http://parse.com">parse.com</a>.
+   * settings on your parse server.
    * <p/>
    * Upon successful completion of this {@link Task}, {@link ParseSession} APIs will be available
    * for use.
