@@ -39,5 +39,5 @@ public interface LogOutCallback extends ParseCallback1<ParseException> {
    *          The exception raised by the log out, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseException e);
+  void done(ParseException e);
 }

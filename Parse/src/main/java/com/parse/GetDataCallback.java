@@ -35,6 +35,6 @@ public interface GetDataCallback extends ParseCallback2<byte[], ParseException> 
    *          The exception raised by the fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(byte[] data, ParseException e);
+  void done(byte[] data, ParseException e);
 }
 

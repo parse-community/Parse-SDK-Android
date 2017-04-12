@@ -24,7 +24,7 @@ import bolts.Task;
    * @param cancellationToken Cancellation token.
    * @return A {@link Task} that resolves to the results of the find.
    */
-  public <T extends ParseObject> Task<List<T>> findAsync(ParseQuery.State<T> state, ParseUser user,
+  <T extends ParseObject> Task<List<T>> findAsync(ParseQuery.State<T> state, ParseUser user,
       Task<Void> cancellationToken);
 
   /**
@@ -34,7 +34,7 @@ import bolts.Task;
    * @param cancellationToken Cancellation token.
    * @return A {@link Task} that resolves to the results of the count.
    */
-  public <T extends ParseObject> Task<Integer> countAsync(ParseQuery.State<T> state, ParseUser user,
+  <T extends ParseObject> Task<Integer> countAsync(ParseQuery.State<T> state, ParseUser user,
       Task<Void> cancellationToken);
 
   /**
@@ -46,6 +46,6 @@ import bolts.Task;
    * there is at least one result or {@link ParseException#OBJECT_NOT_FOUND} if there are no
    * results.
    */
-  public <T extends ParseObject> Task<T> getFirstAsync(ParseQuery.State<T> state, ParseUser user,
+  <T extends ParseObject> Task<T> getFirstAsync(ParseQuery.State<T> state, ParseUser user,
       Task<Void> cancellationToken);
 }

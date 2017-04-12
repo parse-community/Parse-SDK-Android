@@ -40,5 +40,5 @@ public interface ConfigCallback extends ParseCallback2<ParseConfig, ParseExcepti
    *          The exception raised by the fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseConfig config, ParseException e);
+  void done(ParseConfig config, ParseException e);
 }
