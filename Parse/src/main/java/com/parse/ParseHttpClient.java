@@ -17,7 +17,6 @@ import com.parse.http.ParseHttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -78,7 +77,7 @@ class ParseHttpClient {
     return executeInternal(request);
   }
 
-  ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
+  private ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
     Request okHttpRequest = getRequest(parseRequest);
     Call okHttpCall = okHttpClient.newCall(okHttpRequest);
 
@@ -172,44 +171,6 @@ class ParseHttpClient {
         okHttpRequestBuilder.delete(okHttpRequestBody);
     }
     return okHttpRequestBuilder.build();
-  }
-
-  private ParseHttpRequest getParseHttpRequest(Request okHttpRequest) {
-    ParseHttpRequest.Builder parseRequestBuilder = new ParseHttpRequest.Builder();
-    // Set method
-    switch (okHttpRequest.method()) {
-      case OKHTTP_GET:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.GET);
-        break;
-      case OKHTTP_DELETE:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.DELETE);
-        break;
-      case OKHTTP_POST:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.POST);
-        break;
-      case OKHTTP_PUT:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.PUT);
-        break;
-      default:
-        // This should never happen
-        throw new IllegalArgumentException(
-                "Invalid http method " + okHttpRequest.method());
-    }
-
-    // Set url
-    parseRequestBuilder.setUrl(okHttpRequest.url().toString());
-
-    // Set Header
-    for (Map.Entry<String, List<String>> entry : okHttpRequest.headers().toMultimap().entrySet()) {
-      parseRequestBuilder.addHeader(entry.getKey(), entry.getValue().get(0));
-    }
-
-    // Set Body
-    ParseOkHttpRequestBody okHttpBody = (ParseOkHttpRequestBody) okHttpRequest.body();
-    if (okHttpBody != null) {
-      parseRequestBuilder.setBody(okHttpBody.getParseHttpBody());
-    }
-    return parseRequestBuilder.build();
   }
 
   private static class ParseOkHttpRequestBody extends RequestBody {
