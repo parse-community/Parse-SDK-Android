@@ -74,9 +74,7 @@ import bolts.TaskCompletionSource;
         requests.put(requestParameters);
       }
       parameters.put("requests", requests);
-    } catch (JSONException e) {
-      throw new RuntimeException(e);
-    } catch (MalformedURLException e) {
+    } catch (JSONException | MalformedURLException e) {
       throw new RuntimeException(e);
     }
 

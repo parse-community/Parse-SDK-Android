@@ -12,14 +12,11 @@ import android.content.Context;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
@@ -135,8 +132,6 @@ import java.util.Date;
       File f = createKeyValueCacheFile(key);
       try {
         ParseFileUtils.writeByteArrayToFile(f, value.getBytes("UTF-8"));
-      } catch (UnsupportedEncodingException e) {
-        // do nothing
       } catch (IOException e) {
         // do nothing
       }

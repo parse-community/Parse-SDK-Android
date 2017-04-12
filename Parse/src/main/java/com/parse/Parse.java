@@ -15,11 +15,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
@@ -545,8 +543,6 @@ public class Parse {
             f.close();
             String diskApplicationId = new String(bytes, "UTF-8");
             matches = diskApplicationId.equals(applicationId);
-          } catch (FileNotFoundException e) {
-            // Well, it existed a minute ago. Let's assume it doesn't match.
           } catch (IOException e) {
             // Hmm, the applicationId file was malformed or something. Assume it
             // doesn't match.
@@ -568,11 +564,6 @@ public class Parse {
           FileOutputStream out = new FileOutputStream(applicationIdFile);
           out.write(applicationId.getBytes("UTF-8"));
           out.close();
-        } catch (FileNotFoundException e) {
-          // Nothing we can really do about it.
-        } catch (UnsupportedEncodingException e) {
-          // Nothing we can really do about it. This would mean Java doesn't
-          // understand UTF-8, which is unlikely.
         } catch (IOException e) {
           // Nothing we can really do about it.
         }
