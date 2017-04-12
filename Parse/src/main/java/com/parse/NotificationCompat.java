@@ -314,7 +314,7 @@ import android.widget.RemoteViews;
      */
     @Deprecated
     public Notification getNotification() {
-      return (Notification) IMPL.build(this);
+      return IMPL.build(this);
     }
 
     /**
@@ -322,7 +322,7 @@ import android.widget.RemoteViews;
      * object.
      */
     public Notification build() {
-      return (Notification) IMPL.build(this);
+      return IMPL.build(this);
     }
 
     protected static CharSequence limitCharSequenceLength(CharSequence cs) {

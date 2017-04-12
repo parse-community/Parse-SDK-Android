@@ -1363,7 +1363,7 @@ public class ParseObject {
    */
   /* package */ Task<Void> handleSaveResultAsync(
       final ParseObject.State result, final ParseOperationSet operationsBeforeSave) {
-    Task<Void> task = Task.forResult((Void) null);
+    Task<Void> task = Task.forResult(null);
 
     final boolean success = result != null;
     synchronized (mutex) {
@@ -1875,7 +1875,7 @@ public class ParseObject {
    * Should only be called on success.
    */
   /* package */ Task<Void> handleFetchResultAsync(final ParseObject.State result) {
-    Task<Void> task = Task.forResult((Void) null);
+    Task<Void> task = Task.forResult(null);
 
     /*
      * If this object is in the offline store, then we need to make sure that we pull in any dirty
