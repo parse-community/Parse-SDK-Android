@@ -8,14 +8,14 @@
  */
 package com.parse;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * Subclass ParseTraverser to make an function to be run recursively on every object pointed to on
@@ -133,7 +133,7 @@ import org.json.JSONObject;
    * Causes the traverser to traverse all objects pointed to by root, recursively.
    */
   public void traverse(Object root) {
-    IdentityHashMap<Object, Object> seen = new IdentityHashMap<Object, Object>();
+    IdentityHashMap<Object, Object> seen = new IdentityHashMap<>();
     traverseInternal(root, yieldRoot, seen);
   }
 }

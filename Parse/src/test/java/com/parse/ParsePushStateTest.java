@@ -166,7 +166,7 @@ public class ParsePushStateTest {
   @Test(expected = IllegalArgumentException.class)
   public void testChannelSetNormalChannelSetWithNullChannel() {
     ParsePush.State.Builder builder = new ParsePush.State.Builder();
-    Set<String> channelSet = new HashSet<>();;
+    Set<String> channelSet = new HashSet<>();
     channelSet.add(null);
 
     ParsePush.State state = builder
@@ -178,7 +178,7 @@ public class ParsePushStateTest {
   @Test
   public void testChannelSetNormalChannelSet() {
     ParsePush.State.Builder builder = new ParsePush.State.Builder();
-    Set<String> channelSet = new HashSet<>();;
+    Set<String> channelSet = new HashSet<>();
     channelSet.add("foo");
     channelSet.add("bar");
 

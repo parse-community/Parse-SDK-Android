@@ -1314,7 +1314,7 @@ public class ParseQuery<T extends ParseObject> {
    * @return A {@link Task} that will be resolved when the count has completed.
    */
   public Task<Integer> countInBackground() {
-    State.Builder<T> copy = new State.Builder<T>(builder);
+    State.Builder<T> copy = new State.Builder<>(builder);
     final State<T> state = copy.setLimit(0).build();
     return countAsync(state);
   }
@@ -1327,7 +1327,7 @@ public class ParseQuery<T extends ParseObject> {
    *          callback.done(count, e) will be called when the count completes.
    */
   public void countInBackground(final CountCallback callback) {
-    State.Builder<T> copy = new State.Builder<T>(builder);
+    State.Builder<T> copy = new State.Builder<>(builder);
     final State<T> state = copy.setLimit(0).build();
 
     // Hack to workaround CountCallback's non-uniform signature.

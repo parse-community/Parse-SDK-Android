@@ -182,7 +182,7 @@ public class ParseQueryTest {
     when(controller.countAsync(
       any(ParseQuery.State.class),
       any(ParseUser.class),
-      any(Task.class))).thenReturn(Task.<Integer>forResult(0));
+      any(Task.class))).thenReturn(Task.forResult(0));
 
     final ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
 
@@ -198,7 +198,7 @@ public class ParseQueryTest {
     when(controller.countAsync(
       any(ParseQuery.State.class),
       any(ParseUser.class),
-      any(Task.class))).thenReturn(Task.<Integer>forResult(0));
+      any(Task.class))).thenReturn(Task.forResult(0));
 
     final ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
 
@@ -213,7 +213,7 @@ public class ParseQueryTest {
     when(controller.countAsync(
       any(ParseQuery.State.class),
       any(ParseUser.class),
-      any(Task.class))).thenReturn(Task.<Integer>forResult(0));
+      any(Task.class))).thenReturn(Task.forResult(0));
 
     ArgumentCaptor<ParseQuery.State> state = ArgumentCaptor.forClass(ParseQuery.State.class);
 
@@ -230,7 +230,7 @@ public class ParseQueryTest {
     when(controller.countAsync(
       any(ParseQuery.State.class),
       any(ParseUser.class),
-      any(Task.class))).thenReturn(Task.<Integer>forResult(0));
+      any(Task.class))).thenReturn(Task.forResult(0));
 
     ArgumentCaptor<ParseQuery.State> state = ArgumentCaptor.forClass(ParseQuery.State.class);
 
