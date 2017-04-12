@@ -129,7 +129,7 @@ import org.json.JSONObject;
 
     if (!isLocalId(localId)) {
       throw new IllegalStateException("Generated an invalid local id: \"" + localId + "\". "
-          + "This should never happen. Contact us at https://parse.com/help");
+          + "This should never happen. Open a bug at https://github.com/parse-community/parse-server");
     }
 
     return localId;
