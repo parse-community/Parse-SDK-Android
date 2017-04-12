@@ -29,28 +29,26 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.BufferedSink;
 
+/**
+ * Internal http client which wraps an {@link OkHttpClient}
+ */
 class ParseHttpClient {
 
-  private final static String OKHTTP_GET = "GET";
-  private final static String OKHTTP_POST = "POST";
-  private final static String OKHTTP_PUT = "PUT";
-  private final static String OKHTTP_DELETE = "DELETE";
-
-  public static ParseHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
+  static ParseHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
     return new ParseHttpClient(builder);
   }
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
 
-  public static void setMaxConnections(int maxConnections) {
+  static void setMaxConnections(int maxConnections) {
     if (maxConnections <= 0) {
       throw new IllegalArgumentException("Max connections should be large than 0");
     }
     System.setProperty(MAX_CONNECTIONS_PROPERTY_NAME, String.valueOf(maxConnections));
   }
 
-  public static void setKeepAlive(boolean isKeepAlive) {
+  static void setKeepAlive(boolean isKeepAlive) {
     System.setProperty(KEEP_ALIVE_PROPERTY_NAME, String.valueOf(isKeepAlive));
   }
 
@@ -77,7 +75,13 @@ class ParseHttpClient {
     return executeInternal(request);
   }
 
-  private ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
+  /**
+   * Execute internal. Keep default protection for tests
+   * @param parseRequest request
+   * @return response
+   * @throws IOException exception
+   */
+  ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
     Request okHttpRequest = getRequest(parseRequest);
     Call okHttpCall = okHttpClient.newCall(okHttpRequest);
 
@@ -177,7 +181,7 @@ class ParseHttpClient {
 
     private ParseHttpBody parseBody;
 
-    public ParseOkHttpRequestBody(ParseHttpBody parseBody) {
+    ParseOkHttpRequestBody(ParseHttpBody parseBody) {
       this.parseBody = parseBody;
     }
 
@@ -195,10 +199,6 @@ class ParseHttpClient {
     @Override
     public void writeTo(BufferedSink bufferedSink) throws IOException {
       parseBody.writeTo(bufferedSink.outputStream());
-    }
-
-    public ParseHttpBody getParseHttpBody() {
-      return parseBody;
     }
   }
 }
