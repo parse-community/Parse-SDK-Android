@@ -276,8 +276,7 @@ public class ParsePushTest {
     when(controller.subscribeInBackground(anyString())).thenReturn(Task.<Void>forResult(null));
     ParseCorePlugins.getInstance().registerPushChannelsController(controller);
 
-    ParsePush push = new ParsePush();
-    ParseTaskUtils.wait(push.subscribeInBackground("test"));
+    ParseTaskUtils.wait(ParsePush.subscribeInBackground("test"));
     verify(controller, times(1)).subscribeInBackground("test");
   }
 
@@ -290,7 +289,7 @@ public class ParsePushTest {
     ParsePush push = new ParsePush();
     final Semaphore done = new Semaphore(0);
     final Capture<Exception> exceptionCapture = new Capture<>();
-    push.subscribeInBackground("test", new SaveCallback() {
+    ParsePush.subscribeInBackground("test", new SaveCallback() {
       @Override
       public void done(ParseException e) {
         exceptionCapture.set(e);
@@ -309,8 +308,7 @@ public class ParsePushTest {
     when(controller.subscribeInBackground(anyString())).thenReturn(Task.<Void>forError(exception));
     ParseCorePlugins.getInstance().registerPushChannelsController(controller);
 
-    ParsePush push = new ParsePush();
-    Task<Void> pushTask = push.subscribeInBackground("test");
+    Task<Void> pushTask = ParsePush.subscribeInBackground("test");
     pushTask.waitForCompletion();
     verify(controller, times(1)).subscribeInBackground("test");
     assertTrue(pushTask.isFaulted());
@@ -327,7 +325,7 @@ public class ParsePushTest {
     ParsePush push = new ParsePush();
     final Semaphore done = new Semaphore(0);
     final Capture<Exception> exceptionCapture = new Capture<>();
-    push.subscribeInBackground("test", new SaveCallback() {
+    ParsePush.subscribeInBackground("test", new SaveCallback() {
       @Override
       public void done(ParseException e) {
         exceptionCapture.set(e);
@@ -349,8 +347,7 @@ public class ParsePushTest {
     when(controller.unsubscribeInBackground(anyString())).thenReturn(Task.<Void>forResult(null));
     ParseCorePlugins.getInstance().registerPushChannelsController(controller);
 
-    ParsePush push = new ParsePush();
-    ParseTaskUtils.wait(push.unsubscribeInBackground("test"));
+    ParseTaskUtils.wait(ParsePush.unsubscribeInBackground("test"));
     verify(controller, times(1)).unsubscribeInBackground("test");
   }
 
@@ -360,10 +357,9 @@ public class ParsePushTest {
     when(controller.unsubscribeInBackground(anyString())).thenReturn(Task.<Void>forResult(null));
     ParseCorePlugins.getInstance().registerPushChannelsController(controller);
 
-    ParsePush push = new ParsePush();
     final Semaphore done = new Semaphore(0);
     final Capture<Exception> exceptionCapture = new Capture<>();
-    push.unsubscribeInBackground("test", new SaveCallback() {
+    ParsePush.unsubscribeInBackground("test", new SaveCallback() {
       @Override
       public void done(ParseException e) {
         exceptionCapture.set(e);
@@ -383,8 +379,7 @@ public class ParsePushTest {
         .thenReturn(Task.<Void>forError(exception));
     ParseCorePlugins.getInstance().registerPushChannelsController(controller);
 
-    ParsePush push = new ParsePush();
-    Task<Void> pushTask = push.unsubscribeInBackground("test");
+    Task<Void> pushTask = ParsePush.unsubscribeInBackground("test");
     pushTask.waitForCompletion();
     verify(controller, times(1)).unsubscribeInBackground("test");
     assertTrue(pushTask.isFaulted());
@@ -402,7 +397,7 @@ public class ParsePushTest {
     ParsePush push = new ParsePush();
     final Semaphore done = new Semaphore(0);
     final Capture<Exception> exceptionCapture = new Capture<>();
-    push.unsubscribeInBackground("test", new SaveCallback() {
+    ParsePush.unsubscribeInBackground("test", new SaveCallback() {
       @Override
       public void done(ParseException e) {
         exceptionCapture.set(e);
