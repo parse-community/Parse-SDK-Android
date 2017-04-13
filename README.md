@@ -6,7 +6,7 @@
 
 
 A library that gives you access to the powerful Parse cloud platform from your Android app.
-For more information about Parse and its features, see [the website][parse.com] and [getting started][guide].
+For more information about Parse and its features, see [the website][parseplatform.org] and [getting started][guide].
 
 ## Download
 Download [the latest JAR][latest] or define in Gradle:
@@ -61,7 +61,7 @@ We want to make contributing to this project as easy and transparent as possible
 
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
- [parse.com]: http://docs.parseplatform.org/
+ [parseplatform.org]: http://parseplatform.org/
  [guide]: http://docs.parseplatform.org/android/guide/
 
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
