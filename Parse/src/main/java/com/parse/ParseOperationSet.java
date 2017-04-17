@@ -11,16 +11,16 @@ package com.parse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A set of field-level operations that can be performed on an object, corresponding to one command.
  * For example, all of the data for a single call to save() will be packaged here. It is assumed
  * that the ParseObject that owns the operations handles thread-safety.
  */
-/** package */ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
+/** package */ class ParseOperationSet extends ConcurrentHashMap<String, ParseFieldOperation> {
   private static final long serialVersionUID = 1L;
 
   private static final String REST_KEY_IS_SAVE_EVENTUALLY = "__isSaveEventually";
@@ -31,6 +31,8 @@ import java.util.UUID;
 
   // Does this set correspond to a call to saveEventually?
   private boolean isSaveEventually = false;
+
+  private final Object mutex = new Object();
   
   /**
    * Creates a new operation set with a random UUID.
@@ -57,11 +59,15 @@ import java.util.UUID;
   }
 
   public void setIsSaveEventually(boolean value) {
-    isSaveEventually = value;
+    synchronized (mutex) {
+      isSaveEventually = value;
+    }
   }
 
   public boolean isSaveEventually() {
-    return isSaveEventually;
+    synchronized (mutex) {
+      return isSaveEventually;
+    }
   }
   
   /**
@@ -71,6 +77,9 @@ import java.util.UUID;
   public void mergeFrom(ParseOperationSet other) {
     for (String key : other.keySet()) {
       ParseFieldOperation operation1 = other.get(key);
+      if (operation1 == null) {
+        continue;
+      }
       ParseFieldOperation operation2 = get(key);
       if (operation2 != null) {
         operation2 = operation2.mergeWithPrevious(operation1);
@@ -88,7 +97,9 @@ import java.util.UUID;
     JSONObject operationSetJSON = new JSONObject();
     for (String key : keySet()) {
       ParseFieldOperation op = get(key);
-      operationSetJSON.put(key, op.encode(objectEncoder));
+      if (op != null) {
+        operationSetJSON.put(key, op.encode(objectEncoder));
+      }
     }
 
     operationSetJSON.put(REST_KEY_UUID, uuid);
