@@ -47,6 +47,8 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
   private static final String KEY_TIME_ZONE = "timeZone";
   private static final String KEY_LOCALE_IDENTIFIER = "localeIdentifier";
   private static final String KEY_APP_VERSION = "appVersion";
+  private static final String KEY_OS_VERSION = "osVersion";
+  private static final int EXPECTED_SDK_VERSION = 21;
 
   private Locale defaultLocale;
 
@@ -79,7 +81,8 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         "pushType",
         "timeZone",
         "localeIdentifier",
-        "appVersion"
+        "appVersion",
+            "osVersion"
     };
 
     ParseInstallation installation = new ParseInstallation();
@@ -201,7 +204,6 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     mocksForUpdateBeforeSave();
 
     Locale.setDefault(new Locale("en", "US"));
-
     ParseInstallation installation = new ParseInstallation();
     installation.updateBeforeSave();
 
@@ -217,6 +219,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
     assertEquals(packageName, installation.getString(KEY_APP_IDENTIFIER));
     assertEquals(appName, installation.getString(KEY_APP_NAME));
+    assertEquals(EXPECTED_SDK_VERSION, installation.getInt(KEY_OS_VERSION));
     assertEquals(appVersion, installation.getString(KEY_APP_VERSION));
     // Make sure we update device info
     assertEquals("android", installation.getString(KEY_DEVICE_TYPE));
