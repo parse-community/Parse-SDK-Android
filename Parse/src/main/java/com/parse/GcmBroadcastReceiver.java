@@ -12,12 +12,30 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @exclude
  */
 public class GcmBroadcastReceiver extends BroadcastReceiver {
-  @Override
-  public final void onReceive(Context context, Intent intent) {
-    ServiceUtils.runWakefulIntentInService(context, intent, PushService.class);
-  }
+
+    private final Set<BroadcastReceiver> subReceivers = new HashSet<>();
+
+    @Override
+    public final void onReceive(Context context, Intent intent) {
+        ServiceUtils.runWakefulIntentInService(context, intent, PushService.class);
+        for (BroadcastReceiver broadcastReceiver : subReceivers) {
+            broadcastReceiver.onReceive(context, intent);
+        }
+    }
+
+    protected final void addBroadcastReceiver(BroadcastReceiver broadcastReceiver) {
+        subReceivers.add(broadcastReceiver);
+    }
+
+    protected final void removeBroadcastReceiver(BroadcastReceiver broadcastReceiver) {
+        subReceivers.remove(broadcastReceiver);
+    }
+
 }
