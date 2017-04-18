@@ -18,10 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@code ParseParcelableEncoder} can be used to parcel objects such as
- * {@link com.parse.ParseObject} into a {@link android.os.Parcel}.
+ * A {@code ParseParcelableEncoder} can be used to parcel objects into a {@link android.os.Parcel}.
+ *
+ * This is capable of parceling {@link ParseObject}s, but the result can likely be a
+ * {@link StackOverflowError} due to circular references in the objects tree.
+ * When needing to parcel {@link ParseObject}, use the stateful {@link ParseObjectParcelEncoder}.
  *
  * @see ParseParcelDecoder
+ * @see ParseObjectParcelEncoder
  */
 /* package */ class ParseParcelEncoder {
 

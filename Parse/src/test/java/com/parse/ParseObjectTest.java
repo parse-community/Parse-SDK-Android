@@ -49,7 +49,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseObjectTest {
 
   @Rule
@@ -636,6 +636,7 @@ public class ParseObjectTest {
 
     tcs.setResult(null);
     saveTask.waitForCompletion();
+    Parse.setLocalDatastore(null);
   }
 
   @Test
@@ -688,6 +689,7 @@ public class ParseObjectTest {
     deleteTask.waitForCompletion(); // complete deletion on original object.
     assertFalse(other.isDeleting);
     assertTrue(other.isDeleted);
+    Parse.setLocalDatastore(null);
   }
 
   //endregion

@@ -21,7 +21,12 @@ import java.util.Map;
  * A {@code ParseParcelableDecoder} can be used to unparcel objects such as
  * {@link com.parse.ParseObject} from a {@link android.os.Parcel}.
  *
+ * This is capable of decoding objects and pointers to them.
+ * However, for improved behavior in the case of {@link ParseObject}s, use the stateful
+ * implementation {@link ParseObjectParcelDecoder}.
+ *
  * @see ParseParcelEncoder
+ * @see ParseObjectParcelDecoder
  */
 /* package */ class ParseParcelDecoder {
 
