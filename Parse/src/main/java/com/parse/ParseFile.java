@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,7 +43,7 @@ import bolts.TaskCompletionSource;
  * object.save();
  * </pre>
  */
-public class ParseFile {
+public class ParseFile implements Parcelable {
 
   /* package for tests */ static ParseFileController getFileController() {
     return ParseCorePlugins.getInstance().getFileController();
@@ -66,7 +69,8 @@ public class ParseFile {
     };
   }
 
-  /* package */ static class State {
+  // For test
+  protected final static class State implements Parcelable {
 
     /* package */ static class Builder {
 
@@ -125,6 +129,36 @@ public class ParseFile {
     public String url() {
       return url;
     }
+
+    @Override
+    public int describeContents() {
+      return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+      dest.writeString(this.name);
+      dest.writeString(this.contentType);
+      dest.writeString(this.url);
+    }
+
+    protected State(Parcel in) {
+      this.name = in.readString();
+      this.contentType = in.readString();
+      this.url = in.readString();
+    }
+
+    public static final Creator<State> CREATOR = new Creator<State>() {
+      @Override
+      public State createFromParcel(Parcel source) {
+        return new State(source);
+      }
+
+      @Override
+      public State[] newArray(int size) {
+        return new State[size];
+      }
+    };
   }
 
   private State state;
@@ -705,4 +739,35 @@ public class ParseFile {
 
     return json;
   }
+
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeParcelable(this.state, flags);
+    dest.writeByteArray(this.data);
+    dest.writeSerializable(this.file);
+  }
+
+  protected ParseFile(Parcel in) {
+    this.state = in.readParcelable(ParseFile.State.class.getClassLoader());
+    this.data = in.createByteArray();
+    this.file = (File) in.readSerializable();
+  }
+
+  public static final Creator<ParseFile> CREATOR = new Creator<ParseFile>() {
+    @Override
+    public ParseFile createFromParcel(Parcel source) {
+      return new ParseFile(source);
+    }
+
+    @Override
+    public ParseFile[] newArray(int size) {
+      return new ParseFile[size];
+    }
+  };
 }
