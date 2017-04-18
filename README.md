@@ -4,6 +4,8 @@
 [![Maven Central][maven-svg]][maven-link]
 [![License][license-svg]][license-link]
 
+[![Join Chat](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/ParsePlatform/Chat)
+
 
 A library that gives you access to the powerful Parse cloud platform from your Android app.
 For more information about Parse and its features, see [the website][parseplatform.org] and [getting started][guide].
