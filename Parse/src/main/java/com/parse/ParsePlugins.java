@@ -121,7 +121,7 @@ class ParsePlugins {
                         return chain.proceed(request);
                     }
                 });
-                restClient = ParseHttpClient.createClient(configuration.clientBuilder);
+                restClient = ParseHttpClient.createClient(clientBuilder);
             }
             return restClient;
         }
