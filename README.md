@@ -48,6 +48,7 @@ We want to make contributing to this project as easy and transparent as possible
 ## Other Parse Projects
 
  - [ParseUI for Android][parseui-link]
+ - [ParseLiveQuery for Android][parselivequery-link]
  - [ParseFacebookUtils for Android][parsefacebookutils-link]
  - [ParseTwitterUtils for Android][parsetwitterutils-link]
 
@@ -77,6 +78,7 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
 
  [parseui-link]: https://github.com/parse-community/ParseUI-Android
+ [parselivequery-link]: https://github.com/parse-community/ParseLiveQuery-Android
  [parsefacebookutils-link]: https://github.com/parse-community/ParseFacebookUtils-Android
  [parsetwitterutils-link]: https://github.com/parse-community/ParseTwitterUtils-Android
 
