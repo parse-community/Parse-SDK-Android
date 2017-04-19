@@ -225,7 +225,7 @@ public class ParseFile implements Parcelable {
   }
 
   /**
-   * Creates a new file instance from a Parcel {@code source}. This is used when unparceling
+   * Creates a new file instance from a {@link Parcel} source. This is used when unparceling
    * a non-dirty ParseFile. Subclasses that need Parcelable behavior should provide their own
    * {@link android.os.Parcelable.Creator} and override this constructor.
    *
@@ -233,6 +233,17 @@ public class ParseFile implements Parcelable {
    *          the source Parcel
    */
   protected ParseFile(Parcel source) {
+    this(source, ParseParcelDecoder.get());
+  }
+
+  /**
+   * Creates a new file instance from a {@link Parcel} using the given {@link ParseParcelDecoder}.
+   * The decoder is currently unused, but it might be in the future, plus this is the pattern we
+   * are using in parcelable classes.
+   * @param source the parcel
+   * @param decoder the decoder
+   */
+  ParseFile(Parcel source, ParseParcelDecoder decoder) {
     this(new State.Builder()
           .url(source.readString())
           .name(source.readString())
@@ -732,6 +743,10 @@ public class ParseFile implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
+    writeToParcel(dest, ParseParcelEncoder.get());
+  }
+
+  void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     if (isDirty()) {
       throw new RuntimeException("Unable to parcel an unsaved ParseFile.");
     }

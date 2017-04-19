@@ -497,7 +497,7 @@ public class ParseObjectTest {
 
   @Test
   public void testParcelable() throws Exception {
-    // TODO test ParseGeoPoint and ParseFile after merge
+    // TODO test ParseGeoPoint after merge
     ParseObject object = ParseObject.createWithoutData("Test", "objectId");
     object.isDeleted = true;
     object.put("long", 200L);
@@ -528,6 +528,9 @@ public class ParseObjectTest {
     ParseRelation<ParseObject> rel = new ParseRelation<>(object, "relation");
     rel.add(related);
     object.put("relation", rel);
+    // File
+    ParseFile file = new ParseFile(new ParseFile.State.Builder().url("fileUrl").build());
+    object.put("file", file);
 
     Parcel parcel = Parcel.obtain();
     object.writeToParcel(parcel, 0);
@@ -553,6 +556,7 @@ public class ParseObjectTest {
     assertEquals(newRel.getKey(), rel.getKey());
     assertEquals(newRel.getKnownObjects().size(), rel.getKnownObjects().size());
     newRel.hasKnownObject(related);
+    assertEquals(newObject.getParseFile("file").getUrl(), object.getParseFile("file").getUrl());
   }
 
   @Test

@@ -59,6 +59,9 @@ import java.util.Map;
       case ParseParcelEncoder.TYPE_OP:
         return ParseFieldOperations.decode(source, this);
 
+      case ParseParcelEncoder.TYPE_FILE:
+        return new ParseFile(source, this);
+
       case ParseParcelEncoder.TYPE_ACL:
         return new ParseACL(source, this);
 
