@@ -18,11 +18,11 @@ import java.util.HashMap;
   private HashMap<K, WeakReference<V>> map;
   
   public WeakValueHashMap() {
-    map = new HashMap<K, WeakReference<V>>();
+    map = new HashMap<>();
   }
 
   public void put(K key, V value) {
-    map.put(key, new WeakReference<V>(value));
+    map.put(key, new WeakReference<>(value));
   }
   
   /**

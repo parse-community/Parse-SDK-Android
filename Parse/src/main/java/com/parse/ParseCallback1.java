@@ -25,5 +25,5 @@ package com.parse;
    * @param t
    *          Generally an {@link Throwable} that was thrown by the operation, if there was any.
    */
-  public void done(T t);
+  void done(T t);
 }

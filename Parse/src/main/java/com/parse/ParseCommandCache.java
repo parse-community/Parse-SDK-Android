@@ -437,7 +437,7 @@ import bolts.TaskCompletionSource;
    */
   private <T> T waitForTaskWithoutLock(Task<T> task) throws ParseException {
     synchronized (lock) {
-      final Capture<Boolean> finished = new Capture<Boolean>(false);
+      final Capture<Boolean> finished = new Capture<>(false);
       task.continueWith(new Continuation<T, Void>() {
         @Override
         public Void then(Task<T> task) throws Exception {

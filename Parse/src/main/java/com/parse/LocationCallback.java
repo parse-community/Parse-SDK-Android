@@ -44,5 +44,5 @@ public interface LocationCallback extends ParseCallback2<ParseGeoPoint, ParseExc
    *          The exception raised by the location fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseGeoPoint geoPoint, ParseException e);
+  void done(ParseGeoPoint geoPoint, ParseException e);
 }

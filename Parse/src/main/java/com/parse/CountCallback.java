@@ -44,5 +44,5 @@ public interface CountCallback {
    * @param e
    *          The exception raised by the count, or null if it succeeded.
    */
-  public void done(int count, ParseException e);
+  void done(int count, ParseException e);
 }

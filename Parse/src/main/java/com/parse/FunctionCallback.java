@@ -45,5 +45,5 @@ public interface FunctionCallback<T> extends ParseCallback2<T, ParseException> {
    *          The exception raised by the cloud call, or {@code null} if it succeeded.
    */
   @Override
-  public void done(T object, ParseException e);
+  void done(T object, ParseException e);
 }

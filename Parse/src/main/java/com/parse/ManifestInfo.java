@@ -463,7 +463,7 @@ import java.util.List;
   }
 
   private static boolean isGooglePlayServicesAvailable() {
-    return Build.VERSION.SDK_INT >= 8 && getPackageInfo("com.google.android.gsf") != null;
+    return getPackageInfo("com.google.android.gsf") != null;
   }
 
   private static ManifestCheckResult gcmSupportLevel() {

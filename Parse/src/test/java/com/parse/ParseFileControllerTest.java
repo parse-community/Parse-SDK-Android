@@ -62,7 +62,7 @@ public class ParseFileControllerTest {
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
-  public void testGetCacheFile() {
+  public void testGetCacheFile() throws Exception {
     File root = temporaryFolder.getRoot();
     ParseFileController controller = new ParseFileController(null, root);
 

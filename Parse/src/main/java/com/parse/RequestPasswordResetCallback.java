@@ -43,5 +43,5 @@ public interface RequestPasswordResetCallback extends ParseCallback1<ParseExcept
    *          email address.
    */
   @Override
-  public void done(ParseException e);
+  void done(ParseException e);
 }

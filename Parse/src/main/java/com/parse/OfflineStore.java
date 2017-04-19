@@ -106,7 +106,7 @@ import bolts.TaskCompletionSource;
               }
             }
             tasks.clear();
-            return Task.forResult((Void) null);
+            return Task.forResult(null);
           }
         }
       });
