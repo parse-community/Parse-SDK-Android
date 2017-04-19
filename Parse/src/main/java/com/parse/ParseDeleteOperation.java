@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +17,8 @@ import org.json.JSONObject;
  * An operation where a field is deleted from the object.
  */
 /** package */ class ParseDeleteOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Delete";
+
   private static final ParseDeleteOperation defaultInstance = new ParseDeleteOperation();
 
   public static ParseDeleteOperation getInstance() {
@@ -27,8 +31,13 @@ import org.json.JSONObject;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "Delete");
+    output.put("__op", OP_NAME);
     return output;
+  }
+
+  @Override
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
+    dest.writeString(OP_NAME);
   }
 
   @Override

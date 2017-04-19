@@ -8,13 +8,19 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,16 +38,27 @@ import bolts.TaskCompletionSource;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseObjectTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
+
+  @Before
+  public void setUp() {
+    ParseFieldOperations.registerDefaultDecoders(); // to test JSON / Parcel decoding
+  }
 
   @After
   public void tearDown() {
@@ -62,8 +79,6 @@ public class ParseObjectTest {
             "}," +
         "\"age\":33" +
         "}");
-
-    ParseFieldOperations.registerDefaultDecoders();
 
     ParseObject parseObject = ParseObject.fromJSONPayload(json, ParseDecoder.get());
     assertEquals("GameScore", parseObject.getClassName());
@@ -93,20 +108,10 @@ public class ParseObjectTest {
     List<Task<Void>> tasks = new ArrayList<>();
 
     // Mocked to let save work
-    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
-    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
-    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+    mockCurrentUserController();
 
     // Mocked to simulate in-flight save
-    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource();
-    ParseObjectController objectController = mock(ParseObjectController.class);
-    when(objectController.saveAsync(
-        any(ParseObject.State.class),
-        any(ParseOperationSet.class),
-        anyString(),
-        any(ParseDecoder.class)))
-        .thenReturn(tcs.getTask());
-    ParseCorePlugins.getInstance().registerObjectController(objectController);
+    TaskCompletionSource<ParseObject.State> tcs = mockObjectControllerForSave();
 
     // New clean object
     ParseObject object = new ParseObject("TestObject");
@@ -165,20 +170,10 @@ public class ParseObjectTest {
     List<Task<Void>> tasks = new ArrayList<>();
 
     // Mocked to let save work
-    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
-    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
-    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+    mockCurrentUserController();
 
     // Mocked to simulate in-flight save
-    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource();
-    ParseObjectController objectController = mock(ParseObjectController.class);
-    when(objectController.saveAsync(
-        any(ParseObject.State.class),
-        any(ParseOperationSet.class),
-        anyString(),
-        any(ParseDecoder.class)))
-        .thenReturn(tcs.getTask());
-    ParseCorePlugins.getInstance().registerObjectController(objectController);
+    TaskCompletionSource<ParseObject.State> tcs = mockObjectControllerForSave();
 
     // New clean object
     ParseObject object = new ParseObject("TestObject");
@@ -497,4 +492,235 @@ public class ParseObjectTest {
   }
   
   //endregion
+
+  //region testParcelable
+
+  @Test
+  public void testParcelable() throws Exception {
+    // TODO test ParseGeoPoint and ParseFile after merge
+    ParseObject object = ParseObject.createWithoutData("Test", "objectId");
+    object.isDeleted = true;
+    object.put("long", 200L);
+    object.put("double", 30D);
+    object.put("int", 50);
+    object.put("string", "test");
+    object.put("date", new Date(200));
+    object.put("null", JSONObject.NULL);
+    // Collection
+    object.put("collection", Arrays.asList("test1", "test2"));
+    // Pointer
+    ParseObject other = ParseObject.createWithoutData("Test", "otherId");
+    object.put("pointer", other);
+    // Map
+    Map<String, Object> map = new HashMap<>();
+    map.put("key1", "value");
+    map.put("key2", 50);
+    object.put("map", map);
+    // Bytes
+    byte[] bytes = new byte[2];
+    object.put("bytes", bytes);
+    // ACL
+    ParseACL acl = new ParseACL();
+    acl.setReadAccess("reader", true);
+    object.setACL(acl);
+    // Relation
+    ParseObject related = ParseObject.createWithoutData("RelatedClass", "relatedId");
+    ParseRelation<ParseObject> rel = new ParseRelation<>(object, "relation");
+    rel.add(related);
+    object.put("relation", rel);
+
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+
+    ParseObject newObject = ParseObject.CREATOR.createFromParcel(parcel);
+    assertEquals(newObject.getClassName(), object.getClassName());
+    assertEquals(newObject.isDeleted, object.isDeleted);
+    assertEquals(newObject.hasChanges(), object.hasChanges());
+    assertEquals(newObject.getLong("long"), object.getLong("long"));
+    assertEquals(newObject.getDouble("double"), object.getDouble("double"), 0);
+    assertEquals(newObject.getInt("int"), object.getInt("int"));
+    assertEquals(newObject.getString("string"), object.getString("string"));
+    assertEquals(newObject.getDate("date"), object.getDate("date"));
+    assertEquals(newObject.get("null"), object.get("null"));
+    assertEquals(newObject.getList("collection"), object.getList("collection"));
+    assertEquals(newObject.getParseObject("pointer").getClassName(), other.getClassName());
+    assertEquals(newObject.getParseObject("pointer").getObjectId(), other.getObjectId());
+    assertEquals(newObject.getMap("map"), object.getMap("map"));
+    assertEquals(newObject.getBytes("bytes").length, bytes.length);
+    assertEquals(newObject.getACL().getReadAccess("reader"), acl.getReadAccess("reader"));
+    ParseRelation newRel = newObject.getRelation("relation");
+    assertEquals(newRel.getKey(), rel.getKey());
+    assertEquals(newRel.getKnownObjects().size(), rel.getKnownObjects().size());
+    newRel.hasKnownObject(related);
+  }
+
+  @Test
+  public void testRecursiveParcel() throws Exception {
+    ParseObject object = new ParseObject("Test");
+    object.setObjectId("id");
+    object.put("self", object);
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, new ParseObjectParcelEncoder(object));
+    parcel.setDataPosition(0);
+    ParseObject newObject = ParseObject.createFromParcel(parcel, new ParseObjectParcelDecoder());
+    assertEquals(newObject.getObjectId(), "id");
+    assertEquals(newObject.getParseObject("self").getObjectId(), "id");
+    assertEquals(newObject.getParseObject("self").getParseObject("self").getObjectId(), "id");
+  }
+
+  @Test
+  public void testParcelWhileSaving() throws Exception {
+    mockCurrentUserController();
+    TaskCompletionSource<ParseObject.State> tcs = mockObjectControllerForSave();
+
+    // Create multiple ParseOperationSets
+    List<Task<Void>> tasks = new ArrayList<>();
+    ParseObject object = new ParseObject("TestObject");
+    object.setObjectId("id");
+    object.put("key", "value");
+    object.put("number", 5);
+    tasks.add(object.saveInBackground());
+
+    object.put("key", "newValue");
+    object.increment("number", 6);
+    tasks.add(object.saveInBackground());
+
+    object.increment("number", -1);
+    tasks.add(object.saveInBackground());
+
+    // Ensure Log.w is called...
+    assertTrue(object.hasOutstandingOperations());
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    ParseObject other = ParseObject.CREATOR.createFromParcel(parcel);
+    assertTrue(other.isDirty("key"));
+    assertTrue(other.isDirty("number"));
+    assertEquals(other.getString("key"), "newValue");
+    assertEquals(other.getNumber("number"), 10);
+    // By design, when LDS is off, we assume that old operations failed even if
+    // they are still running on the old instance.
+    assertFalse(other.hasOutstandingOperations());
+
+    // Force finish save operations on the old instance.
+    tcs.setResult(null);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
+  }
+
+  @Test
+  public void testParcelWhileSavingWithLDSEnabled() throws Exception {
+    mockCurrentUserController();
+    TaskCompletionSource<ParseObject.State> tcs = mockObjectControllerForSave();
+
+    ParseObject object = new ParseObject("TestObject");
+    object.setObjectId("id");
+    OfflineStore lds = mock(OfflineStore.class);
+    when(lds.getObject("TestObject", "id")).thenReturn(object);
+    Parse.setLocalDatastore(lds);
+
+    object.put("key", "value");
+    object.increment("number", 3);
+    Task<Void> saveTask = object.saveInBackground();
+    assertTrue(object.hasOutstandingOperations()); // Saving
+    assertFalse(object.isDirty()); // Not dirty because it's saving
+
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    ParseObject other = ParseObject.CREATOR.createFromParcel(parcel);
+    assertSame(object, other);
+    assertTrue(other.hasOutstandingOperations()); // Still saving
+    assertFalse(other.isDirty()); // Still not dirty
+    assertEquals(other.getNumber("number"), 3);
+
+    tcs.setResult(null);
+    saveTask.waitForCompletion();
+    Parse.setLocalDatastore(null);
+  }
+
+  @Test
+  public void testParcelWhileDeleting() throws Exception {
+    mockCurrentUserController();
+    TaskCompletionSource<Void> tcs = mockObjectControllerForDelete();
+
+    ParseObject object = new ParseObject("TestObject");
+    object.setObjectId("id");
+    Task<Void> deleteTask = object.deleteInBackground();
+
+    // ensure Log.w is called..
+    assertTrue(object.isDeleting);
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    ParseObject other = ParseObject.CREATOR.createFromParcel(parcel);
+    // By design, when LDS is off, we assume that old operations failed even if
+    // they are still running on the old instance.
+    assertFalse(other.isDeleting);
+    assertTrue(object.isDeleting);
+
+    tcs.setResult(null);
+    deleteTask.waitForCompletion();
+    assertFalse(object.isDeleting);
+    assertTrue(object.isDeleted);
+  }
+
+  @Test
+  public void testParcelWhileDeletingWithLDSEnabled() throws Exception {
+    mockCurrentUserController();
+    TaskCompletionSource<Void> tcs = mockObjectControllerForDelete();
+
+    ParseObject object = new ParseObject("TestObject");
+    object.setObjectId("id");
+    OfflineStore lds = mock(OfflineStore.class);
+    when(lds.getObject("TestObject", "id")).thenReturn(object);
+    Parse.setLocalDatastore(lds);
+    Task<Void> deleteTask = object.deleteInBackground();
+
+    assertTrue(object.isDeleting);
+    Parcel parcel = Parcel.obtain();
+    object.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    ParseObject other = ParseObject.CREATOR.createFromParcel(parcel);
+    assertSame(object, other);
+    assertTrue(other.isDeleting); // Still deleting
+
+    tcs.setResult(null);
+    deleteTask.waitForCompletion(); // complete deletion on original object.
+    assertFalse(other.isDeleting);
+    assertTrue(other.isDeleted);
+    Parse.setLocalDatastore(null);
+  }
+
+  //endregion
+
+  private static void mockCurrentUserController() {
+    ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
+    when(userController.getCurrentSessionTokenAsync()).thenReturn(Task.forResult("token"));
+    when(userController.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
+    ParseCorePlugins.getInstance().registerCurrentUserController(userController);
+  }
+
+  // Returns a tcs to control the operation.
+  private static TaskCompletionSource<ParseObject.State> mockObjectControllerForSave() {
+    TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource<>();
+    ParseObjectController objectController = mock(ParseObjectController.class);
+    when(objectController.saveAsync(
+        any(ParseObject.State.class), any(ParseOperationSet.class),
+        anyString(), any(ParseDecoder.class))
+    ).thenReturn(tcs.getTask());
+    ParseCorePlugins.getInstance().registerObjectController(objectController);
+    return tcs;
+  }
+
+  // Returns a tcs to control the operation.
+  private static TaskCompletionSource<Void> mockObjectControllerForDelete() {
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+    ParseObjectController objectController = mock(ParseObjectController.class);
+    when(objectController.deleteAsync(
+        any(ParseObject.State.class), anyString())
+    ).thenReturn(tcs.getTask());
+    ParseCorePlugins.getInstance().registerObjectController(objectController);
+    return tcs;
+  }
 }

@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,7 +24,7 @@ import org.json.JSONObject;
  * A class that is used to access all of the children of a many-to-many relationship. Each instance
  * of Parse.Relation is associated with a particular parent object and key.
  */
-public class ParseRelation<T extends ParseObject> {
+public class ParseRelation<T extends ParseObject> implements Parcelable {
   private final Object mutex = new Object();
 
   // The owning object of this ParseRelation.
@@ -59,7 +62,7 @@ public class ParseRelation<T extends ParseObject> {
   }
 
   /**
-   * Parses a relation from JSON.
+   * Parses a relation from JSON with the given decoder.
    */
   /* package */ ParseRelation(JSONObject jsonObject, ParseDecoder decoder) {
     this.parent = null;
@@ -72,6 +75,21 @@ public class ParseRelation<T extends ParseObject> {
       for (int i = 0; i < objectsArray.length(); ++i) {
         knownObjects.add((ParseObject)decoder.decode(objectsArray.optJSONObject(i)));
       }
+    }
+  }
+
+  /**
+   * Creates a ParseRelation from a Parcel with the given decoder.
+   */
+  /* package */ ParseRelation(Parcel source, ParseParcelDecoder decoder) {
+    if (source.readByte() == 1) this.key = source.readString();
+    if (source.readByte() == 1) this.targetClass = source.readString();
+    if (source.readByte() == 1) this.parentClassName = source.readString();
+    if (source.readByte() == 1) this.parentObjectId = source.readString();
+    if (source.readByte() == 1) this.parent = new WeakReference<>((ParseObject) decoder.decode(source));
+    int size = source.readInt();
+    for (int i = 0; i < size; i++) {
+      knownObjects.add((ParseObject) decoder.decode(source));
     }
   }
 
@@ -224,4 +242,47 @@ public class ParseRelation<T extends ParseObject> {
   /* package for tests */ Set<ParseObject> getKnownObjects() {
     return knownObjects;
   }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    writeToParcel(dest, new ParseObjectParcelEncoder());
+  }
+
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+    synchronized (mutex) {
+      // Fields are all nullable.
+      dest.writeByte(key != null ? (byte) 1 : 0);
+      if (key != null) dest.writeString(key);
+      dest.writeByte(targetClass != null ? (byte) 1 : 0);
+      if (targetClass != null) dest.writeString(targetClass);
+      dest.writeByte(parentClassName != null ? (byte) 1 : 0);
+      if (parentClassName != null) dest.writeString(parentClassName);
+      dest.writeByte(parentObjectId != null ? (byte) 1 : 0);
+      if (parentObjectId != null) dest.writeString(parentObjectId);
+      boolean has = parent != null && parent.get() != null;
+      dest.writeByte(has ? (byte) 1 : 0);
+      if (has) encoder.encode(parent.get(), dest);
+      dest.writeInt(knownObjects.size());
+      for (ParseObject obj : knownObjects) {
+        encoder.encode(obj, dest);
+      }
+    }
+  }
+
+  public final static Creator<ParseRelation> CREATOR = new Creator<ParseRelation>() {
+    @Override
+    public ParseRelation createFromParcel(Parcel source) {
+      return new ParseRelation(source, new ParseObjectParcelDecoder());
+    }
+
+    @Override
+    public ParseRelation[] newArray(int size) {
+      return new ParseRelation[size];
+    }
+  };
 }

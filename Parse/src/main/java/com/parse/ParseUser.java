@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import android.os.Bundle;
+import android.os.Parcel;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -37,6 +40,8 @@ public class ParseUser extends ParseObject {
 
   private static final List<String> READ_ONLY_KEYS = Collections.unmodifiableList(
       Arrays.asList(KEY_SESSION_TOKEN, KEY_AUTH_DATA));
+
+  private static final String PARCEL_KEY_IS_CURRENT_USER = "_isCurrentUser";
 
   /**
    * Constructs a query for {@code ParseUser}.
@@ -124,6 +129,11 @@ public class ParseUser extends ParseObject {
       isNew = builder.isNew;
     }
 
+    /* package */ State(Parcel source, String className, ParseParcelDecoder decoder) {
+        super(source, className, decoder);
+        isNew = source.readByte() == 1;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Builder newBuilder() {
@@ -149,6 +159,12 @@ public class ParseUser extends ParseObject {
 
     public boolean isNew() {
       return isNew;
+    }
+
+    @Override
+    protected void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+      super.writeToParcel(dest, encoder);
+      dest.writeByte(isNew ? (byte) 1 : 0);
     }
   }
 
@@ -1451,6 +1467,24 @@ public class ParseUser extends ParseObject {
     synchronized (isAutoUserEnabledMutex) {
       return autoUserEnabled;
     }
+  }
+
+  //endregion
+
+  //region Parcelable
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    synchronized (mutex) {
+      outState.putBoolean(PARCEL_KEY_IS_CURRENT_USER, isCurrentUser);
+    }
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedState) {
+    super.onRestoreInstanceState(savedState);
+    setIsCurrentUser(savedState.getBoolean(PARCEL_KEY_IS_CURRENT_USER, false));
   }
 
   //endregion

@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +22,10 @@ import org.json.JSONObject;
  * An operation where a ParseRelation's value is modified.
  */
 /** package */ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperation {
+  /* package */ final static String OP_NAME_ADD = "AddRelation";
+  /* package */ final static String OP_NAME_REMOVE = "RemoveRelation";
+  /* package */ final static String OP_NAME_BATCH = "Batch";
+
   // The className of the target objects.
   private final String targetClass;
 
@@ -155,19 +161,19 @@ import org.json.JSONObject;
 
     if (relationsToAdd.size() > 0) {
       adds = new JSONObject();
-      adds.put("__op", "AddRelation");
+      adds.put("__op", OP_NAME_ADD);
       adds.put("objects", convertSetToArray(relationsToAdd, objectEncoder));
     }
 
     if (relationsToRemove.size() > 0) {
       removes = new JSONObject();
-      removes.put("__op", "RemoveRelation");
+      removes.put("__op", OP_NAME_REMOVE);
       removes.put("objects", convertSetToArray(relationsToRemove, objectEncoder));
     }
 
     if (adds != null && removes != null) {
       JSONObject result = new JSONObject();
-      result.put("__op", "Batch");
+      result.put("__op", OP_NAME_BATCH);
       JSONArray ops = new JSONArray();
       ops.put(adds);
       ops.put(removes);
@@ -187,6 +193,30 @@ import org.json.JSONObject;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
+    if (relationsToAdd.isEmpty() && relationsToRemove.isEmpty()) {
+      throw new IllegalArgumentException("A ParseRelationOperation was created without any data.");
+    }
+    if (relationsToAdd.size() > 0 && relationsToRemove.size() > 0) {
+      dest.writeString(OP_NAME_BATCH);
+    }
+    if (relationsToAdd.size() > 0) {
+      dest.writeString(OP_NAME_ADD);
+      dest.writeInt(relationsToAdd.size());
+      for (ParseObject object : relationsToAdd) {
+        parcelableEncoder.encode(object, dest);
+      }
+    }
+    if (relationsToRemove.size() > 0) {
+      dest.writeString(OP_NAME_REMOVE);
+      dest.writeInt(relationsToRemove.size());
+      for (ParseObject object : relationsToRemove) {
+        parcelableEncoder.encode(object, dest);
+      }
+    }
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     if (previous == null) {
       return this;
