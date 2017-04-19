@@ -463,7 +463,11 @@ import java.util.List;
   }
 
   private static boolean isGooglePlayServicesAvailable() {
-    return Build.VERSION.SDK_INT >= 8 && getPackageInfo("com.google.android.gsf") != null;
+    Intent intent = new Intent(GcmRegistrar.REGISTER_ACTION);
+    intent.setPackage("com.google.android.gsf");
+    List<ResolveInfo> services = Parse.getApplicationContext().getPackageManager().
+            queryIntentServices(intent, 0);
+    return services != null && services.size() > 0;
   }
 
   private static ManifestCheckResult gcmSupportLevel() {
