@@ -17,11 +17,9 @@ import android.support.annotation.CallSuper;
  * @exclude
  */
 public class GcmBroadcastReceiver extends BroadcastReceiver {
-
-    @Override
-    @CallSuper
-    public void onReceive(Context context, Intent intent) {
-        ServiceUtils.runWakefulIntentInService(context, intent, PushService.class);
-    }
-
+  @Override
+  @CallSuper
+  public void onReceive(Context context, Intent intent) {
+    ServiceUtils.runWakefulIntentInService(context, intent, PushService.class);
+  }
 }
