@@ -149,13 +149,16 @@ public class ParseInstallation extends ParseObject {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         // Retry the fetch as a save operation because this Installation was deleted on the server.
-        if(task.getError() != null
-                && task.getError() instanceof ParseException
-                && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
-          synchronized (mutex) {
-            setState(new State.Builder(getState()).objectId(null).build());
-            markAllFieldsDirty();
-            return ParseInstallation.super.saveAsync(sessionToken, toAwait);
+        if (task.getError() != null
+            && task.getError() instanceof ParseException) {
+          int errCode = ((ParseException) task.getError()).getCode();
+          if (errCode == ParseException.OBJECT_NOT_FOUND
+              || (errCode == ParseException.MISSING_REQUIRED_FIELD_ERROR && getObjectId() == null)) {
+            synchronized (mutex) {
+              setState(new State.Builder(getState()).objectId(null).build());
+              markAllFieldsDirty();
+              return ParseInstallation.super.saveAsync(sessionToken, toAwait);
+            }
           }
         }
         return task;
