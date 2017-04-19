@@ -53,6 +53,7 @@ import java.util.Map;
   /* package */ final static String TYPE_NULL = "Null";
   /* package */ final static String TYPE_NATIVE = "Native";
   /* package */ final static String TYPE_OP = "Operation";
+  /* package */ final static String TYPE_FILE = "ParseFile";
 
   public void encode(Object object, Parcel dest) {
     try {
@@ -75,7 +76,8 @@ import java.util.Map;
         ((ParseFieldOperation) object).encode(dest, this);
 
       } else if (object instanceof ParseFile) {
-        throw new IllegalArgumentException("Not supported yet");
+        dest.writeString(TYPE_FILE);
+        ((ParseFile) object).writeToParcel(dest, this);
 
       } else if (object instanceof ParseGeoPoint) {
         throw new IllegalArgumentException("Not supported yet");
