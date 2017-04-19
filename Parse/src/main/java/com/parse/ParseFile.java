@@ -240,6 +240,7 @@ public class ParseFile implements Parcelable {
    * Creates a new file instance from a {@link Parcel} using the given {@link ParseParcelDecoder}.
    * The decoder is currently unused, but it might be in the future, plus this is the pattern we
    * are using in parcelable classes.
+   *
    * @param source the parcel
    * @param decoder the decoder
    */
