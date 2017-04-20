@@ -416,34 +416,32 @@ import java.util.List;
     return true;
   }
 
-  private static boolean checkResolveInfo(Class<? extends BroadcastReceiver> clazz, List<ResolveInfo> infoList) {
+  private static boolean checkResolveInfo(Class<? extends BroadcastReceiver> clazz, List<ResolveInfo> infoList, String permission) {
     for (ResolveInfo info : infoList) {
-      if (info.activityInfo != null && clazz.getCanonicalName().equals(info.activityInfo.name)) {
-        return true;
+      if (info.activityInfo != null) {
+        final Class resolveInfoClass;
+        try {
+          resolveInfoClass = Class.forName(info.activityInfo.name);
+        } catch (ClassNotFoundException e) {
+          break;
+        }
+        if (clazz.isAssignableFrom(resolveInfoClass) && (permission == null || permission.equals(info.activityInfo.permission))) {
+            return true;
+        }
       }
     }
 
     return false;
   }
 
-  private static boolean checkReceiver(Class<? extends BroadcastReceiver> clazz, String permission, Intent[] intents) {    
-    ActivityInfo receiver = getReceiverInfo(clazz); 
-
-    if (receiver == null) {
-      return false;
-    }
-    
-    if (permission != null && !permission.equals(receiver.permission)) {
-      return false;
-    }
-    
+  private static boolean checkReceiver(Class<? extends BroadcastReceiver> clazz, String permission, Intent[] intents) {
     for (Intent intent : intents) {
       List<ResolveInfo> receivers = getPackageManager().queryBroadcastReceivers(intent, 0);
       if (receivers.isEmpty()) {
         return false;
       }
 
-      if (!checkResolveInfo(clazz, receivers)) {
+      if (!checkResolveInfo(clazz, receivers, permission)) {
         return false;
       }
     }
