@@ -106,6 +106,20 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     }
   }
 
+  @Test (expected = RuntimeException.class)
+  public void testInstallationObjectIdCannotBeChanged() throws Exception {
+    boolean hasException = false;
+    ParseInstallation installation = new ParseInstallation();
+    try {
+      installation.put("objectId", "abc");
+    } catch (IllegalArgumentException e) {
+      assertTrue(e.getMessage().contains("Cannot modify"));
+      hasException = true;
+    }
+    assertTrue(hasException);
+    installation.setObjectId("abc");
+  }
+
   @Test
   public void testSaveAsync() throws Exception {
     String sessionToken = "sessionToken";
