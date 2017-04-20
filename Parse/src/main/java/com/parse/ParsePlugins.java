@@ -26,6 +26,7 @@ class ParsePlugins {
     private static final String INSTALLATION_ID_LOCATION = "installationId";
 
     private static final Object LOCK = new Object();
+    private static final String TAG = "com.parse.ParsePlugins";
     private static ParsePlugins instance;
 
     // TODO(grantland): Move towards a Config/Builder parameter pattern to allow other configurations
@@ -37,7 +38,8 @@ class ParsePlugins {
     static void set(ParsePlugins plugins) {
         synchronized (LOCK) {
             if (instance != null) {
-                throw new IllegalStateException("ParsePlugins is already initialized");
+                PLog.w(TAG, "ParsePlugins is already initialized");
+                return;
             }
             instance = plugins;
         }
