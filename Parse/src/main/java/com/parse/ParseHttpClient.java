@@ -61,10 +61,6 @@ class ParseHttpClient {
       builder = new OkHttpClient.Builder();
     }
 
-    // Don't handle redirects. We copy the setting from AndroidHttpClient.
-    // For detail, check https://quip.com/Px8jAxnaun2r
-    builder.followRedirects(false);
-
     okHttpClient = builder.build();
   }
 
