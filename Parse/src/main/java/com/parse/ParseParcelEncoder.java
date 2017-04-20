@@ -41,7 +41,7 @@ import java.util.Map;
     return ParseEncoder.isValidType(value);
   }
 
-  /* package */ final static String TYPE_OBJECT = "ParseObject";
+  /* package */ final static String TYPE_OBJECT = "Object";
   /* package */ final static String TYPE_POINTER = "Pointer";
   /* package */ final static String TYPE_DATE = "Date";
   /* package */ final static String TYPE_BYTES = "Bytes";
@@ -53,7 +53,8 @@ import java.util.Map;
   /* package */ final static String TYPE_NULL = "Null";
   /* package */ final static String TYPE_NATIVE = "Native";
   /* package */ final static String TYPE_OP = "Operation";
-  /* package */ final static String TYPE_FILE = "ParseFile";
+  /* package */ final static String TYPE_FILE = "File";
+  /* package */ final static String TYPE_GEOPOINT = "GeoPoint";
 
   public void encode(Object object, Parcel dest) {
     try {
@@ -80,7 +81,8 @@ import java.util.Map;
         ((ParseFile) object).writeToParcel(dest, this);
 
       } else if (object instanceof ParseGeoPoint) {
-        throw new IllegalArgumentException("Not supported yet");
+        dest.writeString(TYPE_GEOPOINT);
+        ((ParseGeoPoint) object).writeToParcel(dest, this);
 
       } else if (object instanceof ParseACL) {
         dest.writeString(TYPE_ACL);
