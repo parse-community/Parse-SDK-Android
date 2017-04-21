@@ -194,6 +194,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         any(ParseOperationSet.class),
         eq(sessionToken),
         any(ParseDecoder.class));
+    Parse.setLocalDatastore(null);
   }
 
   @Test
