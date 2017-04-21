@@ -135,6 +135,11 @@ public class ParseException extends Exception {
   public static final int INVALID_EMAIL_ADDRESS = 125;
 
   /**
+   * Error code indicating that required field is missing.
+   */
+  public static final int MISSING_REQUIRED_FIELD_ERROR = 135;
+
+  /**
    * Error code indicating that a unique field was given a value that is already taken.
    */
   public static final int DUPLICATE_VALUE = 137;
