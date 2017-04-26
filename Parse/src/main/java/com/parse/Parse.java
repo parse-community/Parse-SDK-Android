@@ -34,6 +34,8 @@ import okhttp3.OkHttpClient;
  * library.
  */
 public class Parse {
+  private static final String TAG = "com.parse.Parse";
+
   /**
    * Represents an opaque configuration for the {@code Parse} SDK configuration.
    */
@@ -359,6 +361,10 @@ public class Parse {
   }
 
   public static void initialize(Configuration configuration) {
+    if (isInitialized()) {
+      PLog.w(TAG, "Parse is already initialized");
+      return;
+    }
     // NOTE (richardross): We will need this here, as ParsePlugins uses the return value of
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
