@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import bolts.Capture;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
@@ -564,17 +565,52 @@ public class ParseObjectTest {
   }
 
   @Test
-  public void testRecursiveParcel() throws Exception {
-    ParseObject object = new ParseObject("Test");
-    object.setObjectId("id");
-    object.put("self", object);
+  public void testParcelWithCircularReference() throws Exception {
+    ParseObject parent = new ParseObject("Parent");
+    ParseObject child = new ParseObject("Child");
+    parent.setObjectId("parentId");
+    parent.put("self", parent);
+    child.setObjectId("childId");
+    child.put("self", child);
+    child.put("parent", parent);
+    parent.put("child", child);
+
     Parcel parcel = Parcel.obtain();
-    object.writeToParcel(parcel, new ParseObjectParcelEncoder(object));
+    parent.writeToParcel(parcel, 0);
     parcel.setDataPosition(0);
-    ParseObject newObject = ParseObject.createFromParcel(parcel, new ParseObjectParcelDecoder());
-    assertEquals(newObject.getObjectId(), "id");
-    assertEquals(newObject.getParseObject("self").getObjectId(), "id");
-    assertEquals(newObject.getParseObject("self").getParseObject("self").getObjectId(), "id");
+    parent = ParseObject.CREATOR.createFromParcel(parcel);
+    assertEquals(parent.getObjectId(), "parentId");
+    assertEquals(parent.getParseObject("self").getObjectId(), "parentId");
+    child = parent.getParseObject("child");
+    assertEquals(child.getObjectId(), "childId");
+    assertEquals(child.getParseObject("self").getObjectId(), "childId");
+    assertEquals(child.getParseObject("parent").getObjectId(), "parentId");
+  }
+
+  @Test
+  public void testParcelWithCircularReferenceFromServer() throws Exception {
+    ParseObject parent = new ParseObject("Parent");
+    ParseObject child = new ParseObject("Child");
+    parent.setState(new ParseObject.State.Builder("Parent")
+        .objectId("parentId")
+        .put("self", parent)
+        .put("child", child).build());
+        parent.setObjectId("parentId");
+    child.setState(new ParseObject.State.Builder("Child")
+        .objectId("childId")
+        .put("self", child)
+        .put("parent", parent).build());
+
+    Parcel parcel = Parcel.obtain();
+    parent.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    parent = ParseObject.CREATOR.createFromParcel(parcel);
+    assertEquals(parent.getObjectId(), "parentId");
+    assertEquals(parent.getParseObject("self").getObjectId(), "parentId");
+    child = parent.getParseObject("child");
+    assertEquals(child.getObjectId(), "childId");
+    assertEquals(child.getParseObject("self").getObjectId(), "childId");
+    assertEquals(child.getParseObject("parent").getObjectId(), "parentId");
   }
 
   @Test

@@ -27,6 +27,7 @@ import java.util.Set;
     if (ids.contains(id)) {
       encodePointer(object.getClassName(), id, dest);
     } else {
+      ids.add(id);
       super.encodeParseObject(object, dest);
     }
   }
