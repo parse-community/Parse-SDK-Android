@@ -237,10 +237,10 @@ bintray {
         vcsUrl = 'https://github.com/ParsePlatform/Parse-SDK-Android'
 
         version {
-            name = version
+            name = project.version
             desc = projDescription
             released = new Date()
-            vcsTag = version
+            vcsTag = project.version
         }
     }
 }
