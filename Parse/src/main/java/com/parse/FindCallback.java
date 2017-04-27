@@ -45,5 +45,5 @@ public interface FindCallback<T extends ParseObject> extends ParseCallback2<List
    *          The exception raised by the save, or null if it succeeded.
    */
   @Override
-  public void done(List<T> objects, ParseException e);
+  void done(List<T> objects, ParseException e);
 }

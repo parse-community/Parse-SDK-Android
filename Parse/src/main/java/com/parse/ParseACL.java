@@ -8,12 +8,16 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A {@code ParseACL} is used to control which users can access or modify a particular object. Each
@@ -22,7 +26,7 @@ import java.util.Map;
  * permissions to "the public" so that, for example, any user could read a particular object but
  * only a particular set of users could write to that object.
  */
-public class ParseACL {
+public class ParseACL implements Parcelable {
   private static final String PUBLIC_KEY = "*";
   private final static String UNRESOLVED_KEY = "*unresolved";
   private static final String KEY_ROLE_PREFIX = "role:";
@@ -61,6 +65,11 @@ public class ParseACL {
       return json;
     }
 
+    /* package */ void toParcel(Parcel parcel) {
+      parcel.writeByte(readPermission ? (byte) 1 : 0);
+      parcel.writeByte(writePermission ? (byte) 1 : 0);
+    }
+
     /* package */ boolean getReadPermission() {
       return readPermission;
     }
@@ -73,6 +82,10 @@ public class ParseACL {
       boolean read = object.optBoolean(READ_PERMISSION, false);
       boolean write = object.optBoolean(WRITE_PERMISSION, false);
       return new Permissions(read, write);
+    }
+
+    /* package */ static Permissions createPermissionsFromParcel(Parcel parcel) {
+        return new Permissions(parcel.readByte() == 1, parcel.readByte() == 1);
     }
   }
 
@@ -205,7 +218,7 @@ public class ParseACL {
   }
 
   /* package for tests */ void resolveUser(ParseUser user) {
-    if (user != unresolvedUser) {
+    if (!isUnresolvedUser(user)) {
       return;
     }
     if (permissionsById.containsKey(UNRESOLVED_KEY)) {
@@ -336,11 +349,18 @@ public class ParseACL {
   private void prepareUnresolvedUser(ParseUser user) {
     // Registers a listener for the user so that when it is saved, the
     // unresolved ACL will be resolved.
-    if (this.unresolvedUser != user) {
+    if (!isUnresolvedUser(user)) {
       permissionsById.remove(UNRESOLVED_KEY);
       unresolvedUser = user;
-      user.registerSaveListener(new UserResolutionListener(this));
+      unresolvedUser.registerSaveListener(new UserResolutionListener(this));
     }
+  }
+
+  private boolean isUnresolvedUser(ParseUser other) {
+    // This might be a different instance, but if they have the same local id, assume it's correct.
+    if (other == null || unresolvedUser == null) return false;
+    return other == unresolvedUser || (other.getObjectId() == null &&
+        other.getOrCreateLocalId().equals(unresolvedUser.getOrCreateLocalId()));
   }
 
   /**
@@ -349,7 +369,7 @@ public class ParseACL {
    * {@code true} or a role that the user belongs to has read access.
    */
   public boolean getReadAccess(ParseUser user) {
-    if (user == unresolvedUser) {
+    if (isUnresolvedUser(user)) {
       return getReadAccess(UNRESOLVED_KEY);
     }
     if (user.isLazy()) {
@@ -381,7 +401,7 @@ public class ParseACL {
    * {@code true} or a role that the user belongs to has write access.
    */
   public boolean getWriteAccess(ParseUser user) {
-    if (user == unresolvedUser) {
+    if (isUnresolvedUser(user)) {
       return getWriteAccess(UNRESOLVED_KEY);
     }
     if (user.isLazy()) {
@@ -535,5 +555,57 @@ public class ParseACL {
 
   /* package for tests */ Map<String, Permissions> getPermissionsById() {
     return permissionsById;
+  }
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    writeToParcel(dest, new ParseObjectParcelEncoder());
+  }
+
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+    dest.writeByte(shared ? (byte) 1 : 0);
+    dest.writeInt(permissionsById.size());
+    Set<String> keys = permissionsById.keySet();
+    for (String key : keys) {
+      dest.writeString(key);
+      Permissions permissions = permissionsById.get(key);
+      permissions.toParcel(dest);
+    }
+    dest.writeByte(unresolvedUser != null ? (byte) 1 : 0);
+    if (unresolvedUser != null) {
+      // Encoder will create a local id for unresolvedUser, so we recognize it after unparcel.
+      encoder.encode(unresolvedUser, dest);
+    }
+  }
+
+  public final static Creator<ParseACL> CREATOR = new Creator<ParseACL>() {
+    @Override
+    public ParseACL createFromParcel(Parcel source) {
+      return new ParseACL(source, new ParseObjectParcelDecoder());
+    }
+
+    @Override
+    public ParseACL[] newArray(int size) {
+      return new ParseACL[size];
+    }
+  };
+
+  /* package */ ParseACL(Parcel source, ParseParcelDecoder decoder) {
+    shared = source.readByte() == 1;
+    int size = source.readInt();
+    for (int i = 0; i < size; i++) {
+      String key = source.readString();
+      Permissions permissions = Permissions.createPermissionsFromParcel(source);
+      permissionsById.put(key, permissions);
+    }
+    if (source.readByte() == 1) {
+      unresolvedUser = (ParseUser) decoder.decode(source);
+      unresolvedUser.registerSaveListener(new UserResolutionListener(this));
+    }
   }
 }

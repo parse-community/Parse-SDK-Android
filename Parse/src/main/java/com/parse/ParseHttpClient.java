@@ -17,7 +17,6 @@ import com.parse.http.ParseHttpResponse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Call;
@@ -30,28 +29,26 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okio.BufferedSink;
 
+/**
+ * Internal http client which wraps an {@link OkHttpClient}
+ */
 class ParseHttpClient {
 
-  private final static String OKHTTP_GET = "GET";
-  private final static String OKHTTP_POST = "POST";
-  private final static String OKHTTP_PUT = "PUT";
-  private final static String OKHTTP_DELETE = "DELETE";
-
-  public static ParseHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
+  static ParseHttpClient createClient(@Nullable OkHttpClient.Builder builder) {
     return new ParseHttpClient(builder);
   }
 
   private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
   private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
 
-  public static void setMaxConnections(int maxConnections) {
+  static void setMaxConnections(int maxConnections) {
     if (maxConnections <= 0) {
       throw new IllegalArgumentException("Max connections should be large than 0");
     }
     System.setProperty(MAX_CONNECTIONS_PROPERTY_NAME, String.valueOf(maxConnections));
   }
 
-  public static void setKeepAlive(boolean isKeepAlive) {
+  static void setKeepAlive(boolean isKeepAlive) {
     System.setProperty(KEEP_ALIVE_PROPERTY_NAME, String.valueOf(isKeepAlive));
   }
 
@@ -64,10 +61,6 @@ class ParseHttpClient {
       builder = new OkHttpClient.Builder();
     }
 
-    // Don't handle redirects. We copy the setting from AndroidHttpClient.
-    // For detail, check https://quip.com/Px8jAxnaun2r
-    builder.followRedirects(false);
-
     okHttpClient = builder.build();
   }
 
@@ -78,6 +71,12 @@ class ParseHttpClient {
     return executeInternal(request);
   }
 
+  /**
+   * Execute internal. Keep default protection for tests
+   * @param parseRequest request
+   * @return response
+   * @throws IOException exception
+   */
   ParseHttpResponse executeInternal(ParseHttpRequest parseRequest) throws IOException {
     Request okHttpRequest = getRequest(parseRequest);
     Call okHttpCall = okHttpClient.newCall(okHttpRequest);
@@ -174,49 +173,11 @@ class ParseHttpClient {
     return okHttpRequestBuilder.build();
   }
 
-  private ParseHttpRequest getParseHttpRequest(Request okHttpRequest) {
-    ParseHttpRequest.Builder parseRequestBuilder = new ParseHttpRequest.Builder();
-    // Set method
-    switch (okHttpRequest.method()) {
-      case OKHTTP_GET:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.GET);
-        break;
-      case OKHTTP_DELETE:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.DELETE);
-        break;
-      case OKHTTP_POST:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.POST);
-        break;
-      case OKHTTP_PUT:
-        parseRequestBuilder.setMethod(ParseHttpRequest.Method.PUT);
-        break;
-      default:
-        // This should never happen
-        throw new IllegalArgumentException(
-                "Invalid http method " + okHttpRequest.method());
-    }
-
-    // Set url
-    parseRequestBuilder.setUrl(okHttpRequest.url().toString());
-
-    // Set Header
-    for (Map.Entry<String, List<String>> entry : okHttpRequest.headers().toMultimap().entrySet()) {
-      parseRequestBuilder.addHeader(entry.getKey(), entry.getValue().get(0));
-    }
-
-    // Set Body
-    ParseOkHttpRequestBody okHttpBody = (ParseOkHttpRequestBody) okHttpRequest.body();
-    if (okHttpBody != null) {
-      parseRequestBuilder.setBody(okHttpBody.getParseHttpBody());
-    }
-    return parseRequestBuilder.build();
-  }
-
   private static class ParseOkHttpRequestBody extends RequestBody {
 
     private ParseHttpBody parseBody;
 
-    public ParseOkHttpRequestBody(ParseHttpBody parseBody) {
+    ParseOkHttpRequestBody(ParseHttpBody parseBody) {
       this.parseBody = parseBody;
     }
 
@@ -234,10 +195,6 @@ class ParseHttpClient {
     @Override
     public void writeTo(BufferedSink bufferedSink) throws IOException {
       parseBody.writeTo(bufferedSink.outputStream());
-    }
-
-    public ParseHttpBody getParseHttpBody() {
-      return parseBody;
     }
   }
 }

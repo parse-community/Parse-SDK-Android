@@ -37,5 +37,5 @@ public interface GetDataStreamCallback extends ParseCallback2<InputStream, Parse
    *          The exception raised by the fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(InputStream input, ParseException e);
+  void done(InputStream input, ParseException e);
 }

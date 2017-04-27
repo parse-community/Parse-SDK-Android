@@ -43,5 +43,5 @@ public interface RefreshCallback extends ParseCallback2<ParseObject, ParseExcept
    *          The exception raised by the login, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseObject object, ParseException e);
+  void done(ParseObject object, ParseException e);
 }

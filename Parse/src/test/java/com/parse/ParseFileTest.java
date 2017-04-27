@@ -8,13 +8,18 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.InputStream;
@@ -36,6 +41,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileTest {
 
   @Rule
@@ -43,6 +50,7 @@ public class ParseFileTest {
 
   @Before
   public void setup() {
+    ParseCorePlugins.getInstance().reset();
     ParseTestUtils.setTestParseUser();
   }
 
@@ -489,6 +497,33 @@ public class ParseFileTest {
     for (int i = 0; i < getDataTasks.size(); i++ ) {
       assertTrue("Task #" + i + " was not cancelled", getDataTasks.get(i).isCancelled());
     }
+  }
+
+  @Test
+  public void testParcelable() {
+    String mime = "mime";
+    String name = "name";
+    String url = "url";
+    ParseFile file = new ParseFile(new ParseFile.State.Builder()
+        .name(name)
+        .mimeType(mime)
+        .url(url)
+        .build());
+    Parcel parcel = Parcel.obtain();
+    file.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    file = ParseFile.CREATOR.createFromParcel(parcel);
+    assertEquals(file.getName(), name);
+    assertEquals(file.getUrl(), url);
+    assertEquals(file.getState().mimeType(), mime);
+    assertFalse(file.isDirty());
+  }
+
+  @Test( expected = RuntimeException.class )
+  public void testDontParcelIfDirty() {
+    ParseFile file = new ParseFile(new ParseFile.State.Builder().build());
+    Parcel parcel = Parcel.obtain();
+    file.writeToParcel(parcel, 0);
   }
 
   // TODO(grantland): testEncode

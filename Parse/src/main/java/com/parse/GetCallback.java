@@ -43,5 +43,5 @@ public interface GetCallback<T extends ParseObject> extends ParseCallback2<T, Pa
    *          The exception raised by the fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(T object, ParseException e);
+  void done(T object, ParseException e);
 }

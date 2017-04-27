@@ -106,7 +106,7 @@ import bolts.TaskCompletionSource;
               }
             }
             tasks.clear();
-            return Task.forResult((Void) null);
+            return Task.forResult(null);
           }
         }
       });
@@ -1456,7 +1456,17 @@ import bolts.TaskCompletionSource;
       if (oldObjectId.equals(newObjectId)) {
         return;
       }
-      throw new RuntimeException("objectIds cannot be changed in offline mode.");
+      /**
+       * Special case for re-saving installation if it was deleted on the server
+       * @see ParseInstallation#saveAsync(String, Task)
+       */
+      if (object instanceof ParseInstallation
+          && newObjectId == null) {
+        classNameAndObjectIdToObjectMap.remove(Pair.create(object.getClassName(), oldObjectId));
+        return;
+      } else {
+        throw new RuntimeException("objectIds cannot be changed in offline mode.");
+      }
     }
 
     String className = object.getClassName();

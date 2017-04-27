@@ -8,6 +8,11 @@
  */
 package com.parse;
 
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,9 +51,10 @@ import bolts.TaskCompletionSource;
  * The basic workflow for accessing existing data is to use a {@link ParseQuery} to specify which
  * existing data to retrieve.
  */
-public class ParseObject {
+public class ParseObject implements Parcelable {
   private static final String AUTO_CLASS_NAME = "_Automatic";
-  /* package */ static final String VERSION_NAME = "1.15.2-SNAPSHOT";
+  /* package */ static final String VERSION_NAME = "1.15.2";
+  private static final String TAG = "ParseObject";
 
   /*
   REST JSON Keys
@@ -92,6 +98,14 @@ public class ParseObject {
         return new ParseUser.State.Builder();
       }
       return new Builder(className);
+    }
+
+    /* package */ static State createFromParcel(Parcel source, ParseParcelDecoder decoder) {
+      String className = source.readString();
+      if ("_User".equals(className)) {
+        return new ParseUser.State(source, className, decoder);
+      }
+      return new State(source, className, decoder);
     }
 
     /** package */ static abstract class Init<T extends Init> {
@@ -262,6 +276,26 @@ public class ParseObject {
       availableKeys = new HashSet<>(builder.availableKeys);
     }
 
+    /* package */ State(Parcel parcel, String clazz, ParseParcelDecoder decoder) {
+      className = clazz; // Already read
+      objectId = parcel.readByte() == 1 ? parcel.readString() : null;
+      createdAt = parcel.readLong();
+      long updated = parcel.readLong();
+      updatedAt = updated > 0 ? updated : createdAt;
+      int size = parcel.readInt();
+      HashMap<String, Object> map = new HashMap<>();
+      for (int i = 0; i < size; i++) {
+        String key = parcel.readString();
+        Object obj = decoder.decode(parcel);
+        map.put(key, obj);
+      }
+      serverData = Collections.unmodifiableMap(map);
+      isComplete = parcel.readByte() == 1;
+      List<String> available = new ArrayList<>();
+      parcel.readStringList(available);
+      availableKeys = new HashSet<>(available);
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends Init<?>> T newBuilder() {
       return (T) new Builder(this);
@@ -304,6 +338,24 @@ public class ParseObject {
       return availableKeys;
     }
 
+    protected void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+      dest.writeString(className);
+      dest.writeByte(objectId != null ? (byte) 1 : 0);
+      if (objectId != null) {
+        dest.writeString(objectId);
+      }
+      dest.writeLong(createdAt);
+      dest.writeLong(updatedAt);
+      dest.writeInt(serverData.size());
+      Set<String> keys = serverData.keySet();
+      for (String key : keys) {
+        dest.writeString(key);
+        encoder.encode(serverData.get(key), dest);
+      }
+      dest.writeByte(isComplete ? (byte) 1 : 0);
+      dest.writeStringList(new ArrayList<>(availableKeys));
+    }
+
     @Override
     public String toString() {
       return String.format(Locale.US, "%s@%s[" +
@@ -330,12 +382,14 @@ public class ParseObject {
   // Cached State
   private final Map<String, Object> estimatedData;
 
-  private String localId;
+  /* package */ String localId;
   private final ParseMulticastDelegate<ParseObject> saveEvent = new ParseMulticastDelegate<>();
 
   /* package */ boolean isDeleted;
+  /* package */ boolean isDeleting; // Since delete ops are queued, we don't need a counter.
   //TODO (grantland): Derive this off the EventuallyPins as opposed to +/- count.
   /* package */ int isDeletingEventually;
+  private boolean ldsEnabledWhenParceling;
 
   private static final ThreadLocal<String> isCreatingPointerForObjectId =
       new ThreadLocal<String>() {
@@ -1363,7 +1417,7 @@ public class ParseObject {
    */
   /* package */ Task<Void> handleSaveResultAsync(
       final ParseObject.State result, final ParseOperationSet operationsBeforeSave) {
-    Task<Void> task = Task.forResult((Void) null);
+    Task<Void> task = Task.forResult(null);
 
     final boolean success = result != null;
     synchronized (mutex) {
@@ -1875,7 +1929,7 @@ public class ParseObject {
    * Should only be called on success.
    */
   /* package */ Task<Void> handleFetchResultAsync(final ParseObject.State result) {
-    Task<Void> task = Task.forResult((Void) null);
+    Task<Void> task = Task.forResult(null);
 
     /*
      * If this object is in the offline store, then we need to make sure that we pull in any dirty
@@ -2106,6 +2160,7 @@ public class ParseObject {
     return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
+        isDeleting = true;
         if (state.objectId() == null) {
           return task.cast(); // no reason to call delete since it doesn't exist
         }
@@ -2115,6 +2170,12 @@ public class ParseObject {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         return handleDeleteResultAsync();
+      }
+    }).continueWith(new Continuation<Void, Void>() {
+      @Override
+      public Void then(Task<Void> task) throws Exception {
+        isDeleting = false;
+        return null;
       }
     });
   }
@@ -4171,6 +4232,132 @@ public class ParseObject {
   public void unpin() throws ParseException {
     ParseTaskUtils.wait(unpinInBackground());
   }
+
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+      writeToParcel(dest, new ParseObjectParcelEncoder(this));
+  }
+
+  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+    synchronized (mutex) {
+      // Developer warnings.
+      ldsEnabledWhenParceling = Parse.isLocalDatastoreEnabled();
+      boolean saving = hasOutstandingOperations();
+      boolean deleting = isDeleting || isDeletingEventually > 0;
+      if (saving) {
+        Log.w(TAG, "About to parcel a ParseObject while a save / saveEventually operation is " +
+            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+            "these tasks end. If not, it will act as if these tasks have failed. This means that " +
+            "the subsequent call to save() will update again the same keys, and this is dangerous " +
+            "for certain operations, like increment(). To avoid inconsistencies, wait for operations " +
+            "to end before parceling.");
+      }
+      if (deleting) {
+        Log.w(TAG, "About to parcel a ParseObject while a delete / deleteEventually operation is " +
+            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+            "these tasks end. If not, it will assume it's not deleted, and might incorrectly " +
+            "return false for isDirty(). To avoid inconsistencies, wait for operations to end " +
+            "before parceling.");
+      }
+      // Write className and id first, regardless of state.
+      dest.writeString(getClassName());
+      String objectId = getObjectId();
+      dest.writeByte(objectId != null ? (byte) 1 : 0);
+      if (objectId != null) dest.writeString(objectId);
+      // Write state and other members
+      state.writeToParcel(dest, encoder);
+      dest.writeByte(localId != null ? (byte) 1 : 0);
+      if (localId != null) dest.writeString(localId);
+      dest.writeByte(isDeleted ? (byte) 1 : 0);
+      // Care about dirty changes and ongoing tasks.
+      ParseOperationSet set;
+      if (hasOutstandingOperations()) {
+        // There's more than one set. Squash the queue, creating copies
+        // to preserve the original queue when LDS is enabled.
+        set = new ParseOperationSet();
+        for (ParseOperationSet operationSet : operationSetQueue) {
+          ParseOperationSet copy = new ParseOperationSet(operationSet);
+          copy.mergeFrom(set);
+          set = copy;
+        }
+      } else {
+        set = operationSetQueue.getLast();
+      }
+      set.setIsSaveEventually(false);
+      set.toParcel(dest, encoder);
+      // Pass a Bundle to subclasses.
+      Bundle bundle = new Bundle();
+      onSaveInstanceState(bundle);
+      dest.writeBundle(bundle);
+    }
+  }
+
+  public final static Creator<ParseObject> CREATOR = new Creator<ParseObject>() {
+    @Override
+    public ParseObject createFromParcel(Parcel source) {
+      return ParseObject.createFromParcel(source, new ParseObjectParcelDecoder());
+    }
+
+    @Override
+    public ParseObject[] newArray(int size) {
+      return new ParseObject[size];
+    }
+  };
+
+  /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelDecoder decoder) {
+    String className = source.readString();
+    String objectId = source.readByte() == 1 ? source.readString() : null;
+    // Create empty object (might be the same instance if LDS is enabled)
+    // and pass to decoder before unparceling child objects in State
+    ParseObject object = createWithoutData(className, objectId);
+    if (decoder instanceof ParseObjectParcelDecoder) {
+      ((ParseObjectParcelDecoder) decoder).addKnownObject(object);
+    }
+    State state = State.createFromParcel(source, decoder);
+    object.setState(state);
+    if (source.readByte() == 1) object.localId = source.readString();
+    if (source.readByte() == 1) object.isDeleted = true;
+    // If object.ldsEnabledWhenParceling is true, we got this from OfflineStore.
+    // There is no need to restore operations in that case.
+    boolean restoreOperations = !object.ldsEnabledWhenParceling;
+    ParseOperationSet set = ParseOperationSet.fromParcel(source, decoder);
+    if (restoreOperations) {
+      for (String key : set.keySet()) {
+        ParseFieldOperation op = set.get(key);
+        object.performOperation(key, op); // Update ops and estimatedData
+      }
+    }
+    Bundle bundle = source.readBundle(ParseObject.class.getClassLoader());
+    object.onRestoreInstanceState(bundle);
+    return object;
+  }
+
+  /**
+   * Called when parceling this ParseObject.
+   * Subclasses can put values into the provided {@link Bundle} and receive them later
+   * {@link #onRestoreInstanceState(Bundle)}. Note that internal fields are already parceled by
+   * the framework.
+   *
+   * @param outState Bundle to host extra values
+   */
+  protected void onSaveInstanceState(Bundle outState) {}
+
+  /**
+   * Called when unparceling this ParseObject.
+   * Subclasses can read values from the provided {@link Bundle} that were previously put
+   * during {@link #onSaveInstanceState(Bundle)}. At this point the internal state is already
+   * recovered.
+   *
+   * @param savedState Bundle to read the values from
+   */
+  protected void onRestoreInstanceState(Bundle savedState) {}
+
 }
 
 // [1] Normally we should only construct the command from state when it's our turn in the

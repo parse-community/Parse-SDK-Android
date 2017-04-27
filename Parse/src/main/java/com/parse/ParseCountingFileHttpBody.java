@@ -36,7 +36,7 @@ import java.io.OutputStream;
       throw new IllegalArgumentException("Output stream may not be null");
     }
 
-    final FileInputStream fileInput = new FileInputStream(file);;
+    final FileInputStream fileInput = new FileInputStream(file);
     try {
       byte[] buffer = new byte[DEFAULT_CHUNK_SIZE];
       int n;

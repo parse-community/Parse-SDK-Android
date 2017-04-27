@@ -8,12 +8,12 @@
  */
 package com.parse;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * PushHistory manages a fixed-length history of pushes received. It is used by to dedup recently
@@ -60,8 +60,8 @@ import org.json.JSONObject;
    */
   public PushHistory(int maxHistoryLength, JSONObject json) {
     this.maxHistoryLength = maxHistoryLength;
-    this.entries = new PriorityQueue<Entry>(maxHistoryLength + 1);
-    this.pushIds = new HashSet<String>(maxHistoryLength + 1);
+    this.entries = new PriorityQueue<>(maxHistoryLength + 1);
+    this.pushIds = new HashSet<>(maxHistoryLength + 1);
     this.lastTime = null;
     
     if (json != null) {
@@ -69,7 +69,7 @@ import org.json.JSONObject;
       if (jsonHistory != null) {
         Iterator<String> it = jsonHistory.keys();
         while (it.hasNext()) {
-          String pushId = (String)it.next();
+          String pushId = it.next();
           String timestamp = jsonHistory.optString(pushId, null);
           
           if (pushId != null && timestamp != null) {

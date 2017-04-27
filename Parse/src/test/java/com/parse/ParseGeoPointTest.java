@@ -8,10 +8,17 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.*;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseGeoPointTest {
 
   @Test
@@ -29,5 +36,16 @@ public class ParseGeoPointTest {
     ParseGeoPoint copy = new ParseGeoPoint(point);
     assertEquals(lat, copy.getLatitude(), 0);
     assertEquals(lng, copy.getLongitude(), 0);
+  }
+
+  @Test
+  public void testParcelable() {
+    ParseGeoPoint point = new ParseGeoPoint(30d, 50d);
+    Parcel parcel = Parcel.obtain();
+    point.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    point = ParseGeoPoint.CREATOR.createFromParcel(parcel);
+    assertEquals(point.getLatitude(), 30d, 0);
+    assertEquals(point.getLongitude(), 50d, 0);
   }
 }

@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +22,8 @@ import org.json.JSONObject;
  * An operation that adds a new element to an array field.
  */
 /** package */ class ParseAddOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Add";
+
   protected final ArrayList<Object> objects = new ArrayList<>();
 
   public ParseAddOperation(Collection<?> coll) {
@@ -29,12 +33,21 @@ import org.json.JSONObject;
   @Override
   public JSONObject encode(ParseEncoder objectEncoder) throws JSONException {
     JSONObject output = new JSONObject();
-    output.put("__op", "Add");
+    output.put("__op", OP_NAME);
     output.put("objects", objectEncoder.encode(objects));
     return output;
   }
 
   @Override
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
+    dest.writeString(OP_NAME);
+    dest.writeInt(objects.size());
+    for (Object object : objects) {
+      parcelableEncoder.encode(object, dest);
+    }
+  }
+
+    @Override
   public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
     if (previous == null) {
       return this;

@@ -37,5 +37,5 @@ public interface GetFileCallback extends ParseCallback2<File, ParseException> {
    *          The exception raised by the fetch, or {@code null} if it succeeded.
    */
   @Override
-  public void done(File file, ParseException e);
+  void done(File file, ParseException e);
 }

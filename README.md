@@ -4,6 +4,8 @@
 [![Maven Central][maven-svg]][maven-link]
 [![License][license-svg]][license-link]
 
+[![Join Chat](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/ParsePlatform/Chat)
+
 
 A library that gives you access to the powerful Parse cloud platform from your Android app.
 For more information about Parse and its features, see [the website][parseplatform.org] and [getting started][guide].
@@ -13,7 +15,7 @@ Download [the latest JAR][latest] or define in Gradle:
 
 ```groovy
 dependencies {
-  compile 'com.parse:parse-android:1.15.1'
+  compile 'com.parse:parse-android:1.15.2'
 }
 ```
 
@@ -46,6 +48,7 @@ We want to make contributing to this project as easy and transparent as possible
 ## Other Parse Projects
 
  - [ParseUI for Android][parseui-link]
+ - [ParseLiveQuery for Android][parselivequery-link]
  - [ParseFacebookUtils for Android][parsefacebookutils-link]
  - [ParseTwitterUtils for Android][parsetwitterutils-link]
 
@@ -75,6 +78,7 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
 
  [parseui-link]: https://github.com/parse-community/ParseUI-Android
+ [parselivequery-link]: https://github.com/parse-community/ParseLiveQuery-Android
  [parsefacebookutils-link]: https://github.com/parse-community/ParseFacebookUtils-Android
  [parsetwitterutils-link]: https://github.com/parse-community/ParseTwitterUtils-Android
 

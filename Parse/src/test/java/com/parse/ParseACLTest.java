@@ -8,15 +8,16 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,11 +31,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
+@RunWith(RobolectricTestRunner.class)
+@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseACLTest {
 
   private final static String UNRESOLVED_KEY = "*unresolved";
@@ -162,6 +166,52 @@ public class ParseACLTest {
 
   //endregion
 
+  //region parcelable
+
+  @Test
+  public void testParcelable() throws Exception {
+    ParseACL acl = new ParseACL();
+    acl.setReadAccess("userId", true);
+    ParseUser user = new ParseUser();
+    user.setObjectId("userId2");
+    acl.setReadAccess(user, true);
+    acl.setRoleWriteAccess("role", true);
+    acl.setShared(true);
+
+    Parcel parcel = Parcel.obtain();
+    acl.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    acl = ParseACL.CREATOR.createFromParcel(parcel);
+
+    assertTrue(acl.getReadAccess("userId"));
+    assertTrue(acl.getReadAccess(user));
+    assertTrue(acl.getRoleWriteAccess("role"));
+    assertTrue(acl.isShared());
+    assertFalse(acl.getPublicReadAccess());
+    assertFalse(acl.getPublicWriteAccess());
+  }
+
+  @Test
+  public void testParcelableWithUnresolvedUser() throws Exception {
+    ParseFieldOperations.registerDefaultDecoders(); // Needed for unparceling ParseObjects
+    ParseACL acl = new ParseACL();
+    ParseUser unresolved = new ParseUser();
+    setLazy(unresolved);
+    acl.setReadAccess(unresolved, true);
+
+    // unresolved users need a local id when parcelling and unparcelling.
+    // Since we don't have an Android environment, local id creation will fail.
+    unresolved.localId = "localId";
+    Parcel parcel = Parcel.obtain();
+    acl.writeToParcel(parcel, 0);
+    parcel.setDataPosition(0);
+    // Do not user ParseObjectParcelDecoder because it requires local ids
+    acl = new ParseACL(parcel, new ParseParcelDecoder());
+    assertTrue(acl.getReadAccess(unresolved));
+  }
+
+  //endregion
+
   //region testCreateACLFromJSONObject
 
   @Test
@@ -197,7 +247,11 @@ public class ParseACLTest {
     ParseACL acl = new ParseACL();
     acl.setReadAccess(unresolvedUser, true);
 
-    acl.resolveUser(new ParseUser());
+    ParseUser other = new ParseUser();
+    // local id creation fails if we don't have Android environment
+    unresolvedUser.localId = "someId";
+    other.localId = "someOtherId";
+    acl.resolveUser(other);
 
     // Make sure unresolvedUser is not changed
     assertSame(unresolvedUser, acl.getUnresolvedUser());

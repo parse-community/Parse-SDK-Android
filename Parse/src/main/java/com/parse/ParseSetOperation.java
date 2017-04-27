@@ -11,7 +11,12 @@ package com.parse;
 /**
  * An operation where a field is set to a given value regardless of its previous value.
  */
+
+import android.os.Parcel;
+
 /** package */ class ParseSetOperation implements ParseFieldOperation {
+  /* package */ final static String OP_NAME = "Set";
+
   private final Object value;
 
   public ParseSetOperation(Object newValue) {
@@ -25,6 +30,12 @@ package com.parse;
   @Override
   public Object encode(ParseEncoder objectEncoder) {
     return objectEncoder.encode(value);
+  }
+
+  @Override
+  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
+    dest.writeString(OP_NAME);
+    parcelableEncoder.encode(value, dest);
   }
 
   @Override

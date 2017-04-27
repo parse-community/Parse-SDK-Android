@@ -60,7 +60,7 @@ import bolts.TaskCompletionSource;
   /* package */ static Task<Location> getCurrentLocationAsync(Context context,
       long timeout, Criteria criteria) {
     final TaskCompletionSource<Location> tcs = new TaskCompletionSource<>();
-    final Capture<ScheduledFuture<?>> timeoutFuture = new Capture<ScheduledFuture<?>>();
+    final Capture<ScheduledFuture<?>> timeoutFuture = new Capture<>();
     final LocationManager manager =
         (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     final LocationListener listener = new LocationListener() {

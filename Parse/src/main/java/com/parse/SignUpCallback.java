@@ -41,5 +41,5 @@ public interface SignUpCallback extends ParseCallback1<ParseException> {
    *          The exception raised by the signUp, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseException e);
+  void done(ParseException e);
 }

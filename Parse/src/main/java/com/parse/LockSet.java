@@ -16,13 +16,13 @@ import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 
 /** package */ class LockSet {
-  private static WeakHashMap<Lock, Long> stableIds = new WeakHashMap<Lock, Long>();
+  private static final WeakHashMap<Lock, Long> stableIds = new WeakHashMap<>();
   private static long nextStableId = 0L;
 
   private final Set<Lock> locks;
 
   public LockSet(Collection<Lock> locks) {
-    this.locks = new TreeSet<Lock>(new Comparator<Lock>() {
+    this.locks = new TreeSet<>(new Comparator<Lock>() {
       @Override
       public int compare(Lock lhs, Lock rhs) {
         Long lhsId = getStableId(lhs);

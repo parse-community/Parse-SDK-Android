@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -138,5 +140,30 @@ import java.util.UUID;
     }
 
     return operationSet;
+  }
+
+  /**
+   * Parcels this operation set into a Parcel with the given encoder.
+   */
+  /* package */ void toParcel(Parcel dest, ParseParcelEncoder encoder) {
+    dest.writeString(uuid);
+    dest.writeByte(isSaveEventually ? (byte) 1 : 0);
+    dest.writeInt(size());
+    for (String key : keySet()) {
+      dest.writeString(key);
+      encoder.encode(get(key), dest);
+    }
+  }
+
+  /* package */ static ParseOperationSet fromParcel(Parcel source, ParseParcelDecoder decoder) {
+    ParseOperationSet set = new ParseOperationSet(source.readString());
+    set.setIsSaveEventually(source.readByte() == 1);
+    int size = source.readInt();
+    for (int i = 0; i < size; i++) {
+      String key = source.readString();
+      ParseFieldOperation op = (ParseFieldOperation) decoder.decode(source);
+      set.put(key, op);
+    }
+    return set;
   }
 }

@@ -33,7 +33,7 @@ import java.io.IOException;
   private static final String TAG = "com.parse.ParsePushRouter";
   private static final String LEGACY_STATE_LOCATION = "pushState";
   private static final String STATE_LOCATION = "push";
-  private static int MAX_HISTORY_LENGTH = 10;
+  private static final int MAX_HISTORY_LENGTH = 10;
 
   private static PushRouter instance;
   public static synchronized PushRouter getInstance() {

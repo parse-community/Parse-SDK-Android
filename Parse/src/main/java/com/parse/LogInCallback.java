@@ -43,5 +43,5 @@ public interface LogInCallback extends ParseCallback2<ParseUser, ParseException>
    *          The exception raised by the login, or {@code null} if it succeeded.
    */
   @Override
-  public void done(ParseUser user, ParseException e);
+  void done(ParseUser user, ParseException e);
 }

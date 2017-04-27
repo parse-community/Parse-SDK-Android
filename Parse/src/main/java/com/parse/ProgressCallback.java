@@ -20,5 +20,5 @@ public interface ProgressCallback {
   /**
    * Override this function with your desired callback.
    */
-  public void done(Integer percentDone);
+  void done(Integer percentDone);
 }

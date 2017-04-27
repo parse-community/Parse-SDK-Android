@@ -92,7 +92,7 @@ import java.nio.charset.Charset;
       if (file.isDirectory()) {
         throw new IOException("File '" + file + "' exists but is a directory");
       }
-      if (file.canRead() == false) {
+      if (!file.canRead()) {
         throw new IOException("File '" + file + "' cannot be read");
       }
     } else {
@@ -148,13 +148,13 @@ import java.nio.charset.Charset;
       if (file.isDirectory()) {
         throw new IOException("File '" + file + "' exists but is a directory");
       }
-      if (file.canWrite() == false) {
+      if (!file.canWrite()) {
         throw new IOException("File '" + file + "' cannot be written to");
       }
     } else {
       File parent = file.getParentFile();
-      if (parent != null && parent.exists() == false) {
-        if (parent.mkdirs() == false) {
+      if (parent != null && !parent.exists()) {
+        if (!parent.mkdirs()) {
           throw new IOException("File '" + file + "' could not be created");
         }
       }
@@ -170,7 +170,6 @@ import java.nio.charset.Charset;
    * @param srcFile the file to be moved
    * @param destFile the destination file
    * @throws NullPointerException if source or destination is {@code null}
-   * @throws FileExistsException if the destination file exists
    * @throws IOException if source or destination is invalid
    * @throws IOException if an IO error occurs moving the file
    * @since 1.4
@@ -225,7 +224,6 @@ import java.nio.charset.Charset;
    * @throws IOException if source or destination is invalid
    * @throws IOException if an IO error occurs during copying
    * @throws IOException if the output file length is not the same as the input file length after the copy completes
-   * @see #copyFileToDirectory(File, File)
    * @see #copyFile(File, File, boolean)
    */
   public static void copyFile(final File srcFile, final File destFile) throws IOException {
@@ -255,7 +253,6 @@ import java.nio.charset.Charset;
    * @throws IOException if source or destination is invalid
    * @throws IOException if an IO error occurs during copying
    * @throws IOException if the output file length is not the same as the input file length after the copy completes
-   * @see #copyFileToDirectory(File, File, boolean)
    * @see #doCopyFile(File, File, boolean)
    */
   public static void copyFile(final File srcFile, final File destFile,
@@ -266,7 +263,7 @@ import java.nio.charset.Charset;
     if (destFile == null) {
       throw new NullPointerException("Destination must not be null");
     }
-    if (srcFile.exists() == false) {
+    if (!srcFile.exists()) {
       throw new FileNotFoundException("Source '" + srcFile + "' does not exist");
     }
     if (srcFile.isDirectory()) {
@@ -281,7 +278,7 @@ import java.nio.charset.Charset;
         throw new IOException("Destination '" + parentFile + "' directory cannot be created");
       }
     }
-    if (destFile.exists() && destFile.canWrite() == false) {
+    if (destFile.exists() && !destFile.canWrite()) {
       throw new IOException("Destination '" + destFile + "' exists but is read-only");
     }
     doCopyFile(srcFile, destFile, preserveFileDate);
@@ -475,9 +472,6 @@ import java.nio.charset.Charset;
    * <p>
    * Will not return true if there is a Symbolic Link anywhere in the path,
    * only if the specific file is.
-   * <p>
-   * <b>Note:</b> the current implementation always returns {@code false} if the system
-   * is detected as Windows using {@link FilenameUtils#isSystemWindows()}
    * <p>
    * For code that runs on Java 1.7 or later, use the following method instead:
    * <br>
