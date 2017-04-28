@@ -11,7 +11,7 @@ ext {
     projDescription = 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
     artifact = 'parse-android'
     projName = 'Parse-Android'
-    gitLink = 'https://github.com/ParsePlatform/Parse-SDK-Android'
+    gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
 }
 buildscript {
     repositories {
@@ -229,13 +229,15 @@ coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacoco
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_API_KEY')
+
+    configurations = ["archives"]
+
     pkg {
         repo = 'maven'
         name = 'com.parse:parse-android'
         userOrg = 'parse'
         licenses = ['BSD License']
-        vcsUrl = 'https://github.com/ParsePlatform/Parse-SDK-Android'
-
+        vcsUrl = 'https://github.com/parse-community/Parse-SDK-Android'
         version {
             name = project.version
             desc = projDescription
@@ -245,40 +247,4 @@ bintray {
     }
 }
 
-def pomConfig = {
-    licenses {
-        license {
-            name 'BSD License'
-            url 'https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE'
-            distribution 'repo'
-        }
-    }
-
-    developers {
-        developer {
-            id 'parse'
-            name 'Parse'
-        }
-    }
-}
-
-// Create the publication with the pom configuration:
-apply plugin: 'maven-publish'
-
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            groupId group
-            artifactId artifact
-            version version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', desc)
-                root.appendNode('name', projName)
-                root.appendNode('url', gitLink)
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
 // End of Bintray plugin
