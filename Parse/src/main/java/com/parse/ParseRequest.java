@@ -62,7 +62,12 @@ import bolts.TaskCompletionSource;
     return executor;
   }
 
-  /* package */ static final ExecutorService NETWORK_EXECUTOR = newThreadPoolExecutor(
+  /**
+   * This executor should be used for any network operation, in all subclasses.
+   * Chaining network operations with tasks consumed by Task.BACKGROUND_EXECUTOR , which is smaller,
+   * will cause performance bottlenecks and possibly lock the whole SDK.
+   */
+  protected static final ExecutorService NETWORK_EXECUTOR = newThreadPoolExecutor(
       CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
       new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE), sThreadFactory);
 
@@ -147,7 +152,7 @@ import bolts.TaskCompletionSource;
         }
         return task;
       }
-    }, Task.BACKGROUND_EXECUTOR);
+    }, NETWORK_EXECUTOR);
   }
 
   protected abstract Task<Response> onResponseAsync(ParseHttpResponse response,
