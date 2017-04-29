@@ -251,7 +251,7 @@ def pomConfig = {
     licenses {
         license {
             name 'BSD License'
-            url 'https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE'
+            url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
             distribution 'repo'
         }
     }
