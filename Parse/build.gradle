@@ -230,7 +230,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_API_KEY')
 
-    configurations = ["archives"]
+    publications = ["MyPublication"]
 
     pkg {
         repo = 'maven'
@@ -243,6 +243,45 @@ bintray {
             desc = projDescription
             released = new Date()
             vcsTag = project.version
+        }
+    }
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name 'BSD License'
+            url 'https://github.com/ParsePlatform/Parse-SDK-Android/blob/master/LICENSE'
+            distribution 'repo'
+        }
+    }
+
+    developers {
+        developer {
+            id 'parse'
+            name 'Parse'
+        }
+    }
+}
+
+// Create the publication with the pom configuration:
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            groupId group
+            // We have to specify it here because otherwise Bintray's plugin will assume the artifact's name is Parse
+            artifactId artifact
+            artifacts = [androidSourcesJar, bundleRelease]
+            version version
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', projDescription)
+                root.appendNode('name', projName)
+                root.appendNode('url', gitLink)
+                root.children().last() + pomConfig
+            }
         }
     }
 }
