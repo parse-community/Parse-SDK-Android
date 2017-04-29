@@ -256,6 +256,10 @@ def pomConfig = {
         }
     }
 
+    scm {
+       url gitLink
+    }
+
     developers {
         developer {
             id 'parse'
