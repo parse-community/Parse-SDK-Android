@@ -1,3 +1,4 @@
 include ':Parse'
 include ':ParseStarterProject'
 
+project(":Parse").name = "parse-android"
