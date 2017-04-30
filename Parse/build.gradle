@@ -232,6 +232,7 @@ bintray {
 
     publications = ["MyPublication"]
 
+    publish = true
     pkg {
         repo = 'maven'
         name = 'com.parse:parse-android'
@@ -243,6 +244,14 @@ bintray {
             desc = projDescription
             released = new Date()
             vcsTag = project.version
+
+            // Sonatype username/passwrod must be set for this operation to happen
+            mavenCentralSync {
+              sync = true
+              user = ossrhUsername
+              password = ossrhPassword
+              close = '1' // release automatically
+           }
         }
     }
 }
