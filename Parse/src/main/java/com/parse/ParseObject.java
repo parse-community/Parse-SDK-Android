@@ -53,7 +53,7 @@ import bolts.TaskCompletionSource;
  */
 public class ParseObject implements Parcelable {
   private static final String AUTO_CLASS_NAME = "_Automatic";
-  /* package */ static final String VERSION_NAME = "1.15.3";
+  /* package */ static final String VERSION_NAME = BuildConfig.VERSION_NAME;
   private static final String TAG = "ParseObject";
 
   /*
