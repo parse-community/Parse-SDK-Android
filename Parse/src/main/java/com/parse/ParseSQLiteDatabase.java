@@ -63,15 +63,26 @@ import bolts.TaskCompletionSource;
     //TODO (grantland): if (!writable) -- do we have to serialize everything?
     openFlags = flags;
 
+    final TaskCompletionSource<Void> currentTcs = new TaskCompletionSource<>();
+
     taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> toAwait) throws Exception {
-        synchronized (currentLock) {
-          current = toAwait;
-        }
+        toAwait.continueWith(new Continuation<Void, Void>() {
+          @Override
+          public Void then(Task<Void> task) throws Exception {
+            currentTcs.setResult(null);
+            return null;
+          }
+        });
         return tcs.getTask();
       }
     });
+
+    synchronized (currentLock) {
+      // current ends when toAwait ends
+      current = currentTcs.getTask();
+    }
   }
 
   public Task<Boolean> isReadOnlyAsync() {
