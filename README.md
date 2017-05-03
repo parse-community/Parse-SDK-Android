@@ -68,7 +68,7 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [guide]: http://docs.parseplatform.org/android/guide/
 
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
- [snap]: https://oss.sonatype.org/content/repositories/snapshots/
+ [snap]: https://oss.jfrog.org/artifactory/oss-snapshot-local/com/parse/parse-android/
 
  [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master
  [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-Android
