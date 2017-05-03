@@ -107,6 +107,7 @@ class ParsePlugins {
                                         String.valueOf(ManifestInfo.getVersionCode()))
                                 .set(ParseRESTCommand.HEADER_APP_DISPLAY_VERSION,
                                         ManifestInfo.getVersionName())
+                                .set(ParseRESTCommand.HEADER_OS_VERSION, Build.VERSION.RELEASE)
                                 .set(ParseRESTCommand.USER_AGENT, userAgent());
                         if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID) == null) {
                             // We can do this synchronously since the caller is already on a background thread
