@@ -123,6 +123,30 @@ def isSnapshot = version.endsWith('-SNAPSHOT')
 def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
 def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
 
+def pomConfig = {
+    licenses {
+        license {
+            name 'BSD License'
+            url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
+            distribution 'repo'
+        }
+    }
+
+    scm {
+       connection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
+       developerConnection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
+       url gitLink
+    }
+
+    developers {
+        developer {
+            id 'parse'
+            name 'Parse'
+        }
+    }
+}
+
+
 uploadArchives {
     repositories.mavenDeployer {
         beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
@@ -135,34 +159,15 @@ uploadArchives {
             authentication(userName: ossrhUsername, password: ossrhPassword)
         }
 
-        pom.project {
+        def basePom = {
             name projName
             artifactId = artifact
             packaging 'aar'
             description projDescription
             url gitLink
-
-            scm {
-                connection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
-                developerConnection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
-                url 'https://github.com/parse-community/Parse-SDK-Android'
-            }
-
-            licenses {
-                license {
-                    name 'BSD License'
-                    url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
-                    distribution 'repo'
-                }
-            }
-
-            developers {
-                developer {
-                    id 'parse'
-                    name 'Parse'
-                }
-            }
         }
+
+        pom.project basePom << pomConfig
     }
 }
 
@@ -252,27 +257,6 @@ bintray {
               password = ossrhPassword
               close = '1' // release automatically
            }
-        }
-    }
-}
-
-def pomConfig = {
-    licenses {
-        license {
-            name 'BSD License'
-            url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
-            distribution 'repo'
-        }
-    }
-
-    scm {
-       url gitLink
-    }
-
-    developers {
-        developer {
-            id 'parse'
-            name 'Parse'
         }
     }
 }
