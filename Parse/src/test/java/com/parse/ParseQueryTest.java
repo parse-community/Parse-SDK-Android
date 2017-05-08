@@ -28,6 +28,7 @@ import bolts.TaskCompletionSource;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -105,73 +106,56 @@ public class ParseQueryTest {
   }
 
   @Test
-  public void testQueriesOnlyRunOneNetworkConnection() throws ParseException {
-    TestQueryController controller = new TestQueryController();
-    ParseCorePlugins.getInstance().registerQueryController(controller);
+  public void testMultipleQueries() throws ParseException {
+    TestQueryController controller1 = new TestQueryController();
+    TestQueryController controller2 = new TestQueryController();
 
-    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
+    TaskCompletionSource<Void> tcs1 = new TaskCompletionSource<>();
+    TaskCompletionSource<Void> tcs2 = new TaskCompletionSource<>();
+    controller1.await(tcs1.getTask());
+    controller2.await(tcs2.getTask());
+
+    ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
+    query.setUser(new ParseUser());
+
+    ParseCorePlugins.getInstance().registerQueryController(controller1);
+    query.findInBackground();
+    assertTrue(query.isRunning());
+
+    ParseCorePlugins.getInstance().reset();
+    ParseCorePlugins.getInstance().registerQueryController(controller2);
+    query.countInBackground();
+    assertTrue(query.isRunning());
+
+    // Stop the first operation.
+    tcs1.setResult(null);
+    assertTrue(query.isRunning());
+
+    // Stop the second.
+    tcs2.setResult(null);
+    assertFalse(query.isRunning());
+  }
+
+  @Test
+  public void testMultipleQueriesWithInflightChanges() throws ParseException {
+    Parse.enableLocalDatastore(null);
+    TestQueryController controller = new TestQueryController();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
     query.setUser(new ParseUser());
-    Task<Void> task = query.findInBackground().makeVoid();
 
-    try {
-      query.find();
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.findInBackground(new FindCallback<ParseObject>() {
-        @Override
-        public void done(List<ParseObject> objects, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.count();
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.countInBackground(new CountCallback() {
-        @Override
-        public void done(int count, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.get("abc");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.getInBackground("abc", new GetCallback<ParseObject>() {
-        @Override
-        public void done(ParseObject object, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    tcs.setResult(null);
-    ParseTaskUtils.wait(task);
+    ParseCorePlugins.getInstance().registerQueryController(controller);
+    List<Task<Void>> tasks = Arrays.asList(
+        query.fromNetwork().findInBackground().makeVoid(),
+        query.fromLocalDatastore().findInBackground().makeVoid(),
+        query.setLimit(10).findInBackground().makeVoid(),
+        query.whereEqualTo("key", "value").countInBackground().makeVoid());
+    assertTrue(query.isRunning());
+    tcs.trySetResult(null);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
+    assertFalse(query.isRunning());
   }
 
   @Test
@@ -238,6 +222,29 @@ public class ParseQueryTest {
     query.countInBackground(null);
     verify(controller, times(1)).countAsync(state.capture(), any(ParseUser.class), any(Task.class));
     assertEquals(0, state.getValue().limit());
+  }
+
+  @Test
+  public void testIsRunning() throws ParseException {
+    TestQueryController controller = new TestQueryController();
+    ParseCorePlugins.getInstance().registerQueryController(controller);
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
+    controller.await(tcs.getTask());
+
+    ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
+    query.setUser(new ParseUser());
+    assertFalse(query.isRunning());
+    query.findInBackground();
+    assertTrue(query.isRunning());
+    tcs.setResult(null);
+    assertFalse(query.isRunning());
+    // Run another
+    tcs = new TaskCompletionSource<>();
+    controller.await(tcs.getTask());
+    query.findInBackground();
+    assertTrue(query.isRunning());
+    query.cancel();
+    assertFalse(query.isRunning());
   }
 
   @Test
