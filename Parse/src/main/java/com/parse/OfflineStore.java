@@ -1462,7 +1462,9 @@ import bolts.TaskCompletionSource;
        */
       if (object instanceof ParseInstallation
           && newObjectId == null) {
-        classNameAndObjectIdToObjectMap.remove(Pair.create(object.getClassName(), oldObjectId));
+        synchronized (lock) {
+          classNameAndObjectIdToObjectMap.remove(Pair.create(object.getClassName(), oldObjectId));
+        }
         return;
       } else {
         throw new RuntimeException("objectIds cannot be changed in offline mode.");
