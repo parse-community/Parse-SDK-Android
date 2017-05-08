@@ -241,51 +241,6 @@ public class ParseQueryTest {
   }
 
   @Test
-  public void testQueriesFreezeDuringExecution() throws ParseException {
-    ParseObject.registerSubclass(ParseUser.class);
-    TestQueryController controller = new TestQueryController();
-    ParseCorePlugins.getInstance().registerQueryController(controller);
-
-    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
-    controller.await(tcs.getTask());
-
-    ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
-    query.setUser(new ParseUser());
-    Task<Void> task = query.findInBackground().cast();
-
-    try {
-      query.whereEqualTo("foo", "bar");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.include("foo");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.orderByAscending("foo");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.orderByDescending("bar");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    tcs.setResult(null);
-    ParseTaskUtils.wait(task);
-  }
-
-  @Test
   public void testQueryCancellation() throws ParseException {
     TestQueryController controller = new TestQueryController();
     ParseCorePlugins.getInstance().registerQueryController(controller);

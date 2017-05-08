@@ -890,8 +890,8 @@ public class ParseQuery<T extends ParseObject> {
   private ParseUser user;
 
   private final Object lock = new Object();
-  private boolean isRunning = false;
-  private TaskCompletionSource<Void> cts;
+  private int isRunning = 0;
+  private TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
 
   /**
    * Constructs a query for a {@link ParseObject} subclass type. A default query with no further
@@ -960,33 +960,21 @@ public class ParseQuery<T extends ParseObject> {
     return ParseUser.getCurrentUserAsync();
   }
 
-  private void checkIfRunning() {
-    checkIfRunning(false);
-  }
-
-  private void checkIfRunning(boolean grabLock) {
-    synchronized (lock) {
-      if (isRunning) {
-        throw new RuntimeException(
-            "This query has an outstanding network connection. You have to wait until it's done.");
-      } else if (grabLock) {
-        isRunning = true;
-        cts = Task.create();
-      }
-    }
-  }
-
   /**
    * Cancels the current network request (if one is running).
    */
   //TODO (grantland): Deprecate and replace with CancellationTokens
   public void cancel() {
     synchronized (lock) {
-      if (cts != null) {
-        cts.trySetCancelled();
-        cts = null;
-      }
-      isRunning = false;
+      cts.trySetCancelled();
+      cts = new TaskCompletionSource<>();
+      isRunning = 0;
+    }
+  }
+
+  public boolean isRunning() {
+    synchronized (lock) {
+      return isRunning > 0;
     }
   }
 
@@ -1030,8 +1018,6 @@ public class ParseQuery<T extends ParseObject> {
    * @see ParseQuery#fromPin(String)
    */
   public ParseQuery<T> setCachePolicy(CachePolicy newCachePolicy) {
-    checkIfRunning();
-
     builder.setCachePolicy(newCachePolicy);
     return this;
   }
@@ -1052,9 +1038,7 @@ public class ParseQuery<T extends ParseObject> {
    *
    * @see ParseQuery#setCachePolicy(CachePolicy)
    */
-  /* package */ ParseQuery<T> fromNetwork() {
-    checkIfRunning();
-
+  public ParseQuery<T> fromNetwork() {
     builder.fromNetwork();
     return this;
   }
@@ -1088,7 +1072,6 @@ public class ParseQuery<T extends ParseObject> {
    * @see ParseQuery#setCachePolicy(CachePolicy)
    */
   public ParseQuery<T> fromPin() {
-    checkIfRunning();
     builder.fromPin();
     return this;
   }
@@ -1105,7 +1088,6 @@ public class ParseQuery<T extends ParseObject> {
    * @see ParseQuery#setCachePolicy(CachePolicy)
    */
   public ParseQuery<T> fromPin(String name) {
-    checkIfRunning();
     builder.fromPin(name);
     return this;
   }
@@ -1118,8 +1100,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> ignoreACLs() {
-    checkIfRunning();
-
     builder.ignoreACLs();
     return this;
   }
@@ -1130,8 +1110,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> setMaxCacheAge(long maxAgeInMilliseconds) {
-    checkIfRunning();
-
     builder.setMaxCacheAge(maxAgeInMilliseconds);
     return this;
   }
@@ -1144,11 +1122,11 @@ public class ParseQuery<T extends ParseObject> {
     return builder.getMaxCacheAge();
   }
 
-  /**
-   * Wraps a callable with checking that only one of these is running.
-   */
-  private <TResult> Task<TResult> doWithRunningCheck(Callable<Task<TResult>> runnable) {
-    checkIfRunning(true);
+
+  private <TResult> Task<TResult> perform(Callable<Task<TResult>> runnable) {
+    synchronized (lock) {
+      isRunning++;
+    }
     Task<TResult> task;
     try {
       task = runnable.call();
@@ -1159,11 +1137,8 @@ public class ParseQuery<T extends ParseObject> {
       @Override
       public Task<TResult> then(Task<TResult> task) throws Exception {
         synchronized (lock) {
-          isRunning = false;
-          if (cts != null) {
-            cts.trySetResult(null);
-          }
-          cts = null;
+          // cancel() drops the count to 0 so we have to check
+          isRunning = Math.max(isRunning-1, 0);
         }
         return task;
       }
@@ -1212,7 +1187,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<List<T>> findAsync(final State<T> state) {
-    return doWithRunningCheck(new Callable<Task<List<T>>>() {
+    return perform(new Callable<Task<List<T>>>() {
       @Override
       public Task<List<T>> call() throws Exception {
         return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<List<T>>>() {
@@ -1279,7 +1254,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<T> getFirstAsync(final State<T> state) {
-    return doWithRunningCheck(new Callable<Task<T>>() {
+    return perform(new Callable<Task<T>>() {
       @Override
       public Task<T> call() throws Exception {
         return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<T>>() {
@@ -1356,7 +1331,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<Integer> countAsync(final State<T> state) {
-    return doWithRunningCheck(new Callable<Task<Integer>>() {
+    return perform(new Callable<Task<Integer>>() {
       @Override
       public Task<Integer> call() throws Exception {
         return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<Integer>>() {
@@ -1525,7 +1500,7 @@ public class ParseQuery<T extends ParseObject> {
       final ParseQuery.State<T> state,
       final ParseCallback2<TResult, ParseException> callback,
       final CacheThenNetworkCallable<T, Task<TResult>> delegate) {
-    return doWithRunningCheck(new Callable<Task<TResult>>() {
+    return perform(new Callable<Task<TResult>>() {
       @Override
       public Task<TResult> call() throws Exception {
         return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<TResult>>() {
@@ -1573,7 +1548,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereEqualTo(String key, Object value) {
-    checkIfRunning();
     builder.whereEqualTo(key, value);
     return this;
   }
@@ -1589,7 +1563,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereLessThan(String key, Object value) {
-    checkIfRunning();
     builder.addCondition(key, "$lt", value);
     return this;
   }
@@ -1605,7 +1578,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereNotEqualTo(String key, Object value) {
-    checkIfRunning();
     builder.addCondition(key, "$ne", value);
     return this;
   }
@@ -1621,7 +1593,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereGreaterThan(String key, Object value) {
-    checkIfRunning();
     builder.addCondition(key, "$gt", value);
     return this;
   }
@@ -1637,7 +1608,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereLessThanOrEqualTo(String key, Object value) {
-    checkIfRunning();
     builder.addCondition(key, "$lte", value);
     return this;
   }
@@ -1653,7 +1623,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereGreaterThanOrEqualTo(String key, Object value) {
-    checkIfRunning();
     builder.addCondition(key, "$gte", value);
     return this;
   }
@@ -1669,7 +1638,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereContainedIn(String key, Collection<? extends Object> values) {
-    checkIfRunning();
     builder.addCondition(key, "$in", values);
     return this;
   }
@@ -1689,7 +1657,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereContainsAll(String key, Collection<?> values) {
-    checkIfRunning();
     builder.addCondition(key, "$all", values);
     return this;
   }
@@ -1707,7 +1674,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereMatchesQuery(String key, ParseQuery<?> query) {
-    checkIfRunning();
     builder.whereMatchesQuery(key, query.getBuilder());
     return this;
   }
@@ -1725,7 +1691,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereDoesNotMatchQuery(String key, ParseQuery<?> query) {
-    checkIfRunning();
     builder.whereDoesNotMatchQuery(key, query.getBuilder());
     return this;
   }
@@ -1743,7 +1708,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereMatchesKeyInQuery(String key, String keyInQuery, ParseQuery<?> query) {
-    checkIfRunning();
     builder.whereMatchesKeyInQuery(key, keyInQuery, query.getBuilder());
     return this;
   }
@@ -1762,7 +1726,6 @@ public class ParseQuery<T extends ParseObject> {
    */
   public ParseQuery<T> whereDoesNotMatchKeyInQuery(String key, String keyInQuery,
       ParseQuery<?> query) {
-    checkIfRunning();
     builder.whereDoesNotMatchKeyInQuery(key, keyInQuery, query.getBuilder());
     return this;
   }
@@ -1778,7 +1741,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereNotContainedIn(String key, Collection<? extends Object> values) {
-    checkIfRunning();
     builder.addCondition(key, "$nin", values);
     return this;
   }
@@ -1794,7 +1756,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereNear(String key, ParseGeoPoint point) {
-    checkIfRunning();
     builder.whereNear(key, point);
     return this;
   }
@@ -1814,7 +1775,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereWithinMiles(String key, ParseGeoPoint point, double maxDistance) {
-    checkIfRunning();
     return whereWithinRadians(key, point, maxDistance / ParseGeoPoint.EARTH_MEAN_RADIUS_MILE);
   }
 
@@ -1833,7 +1793,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereWithinKilometers(String key, ParseGeoPoint point, double maxDistance) {
-    checkIfRunning();
     return whereWithinRadians(key, point, maxDistance / ParseGeoPoint.EARTH_MEAN_RADIUS_KM);
   }
 
@@ -1850,7 +1809,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereWithinRadians(String key, ParseGeoPoint point, double maxDistance) {
-    checkIfRunning();
     builder.whereNear(key, point)
         .maxDistance(key, maxDistance);
     return this;
@@ -1870,7 +1828,6 @@ public class ParseQuery<T extends ParseObject> {
    */
   public ParseQuery<T> whereWithinGeoBox(
       String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
-    checkIfRunning();
     builder.whereWithin(key, southwest, northeast);
     return this;
   }
@@ -1888,7 +1845,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereMatches(String key, String regex) {
-    checkIfRunning();
     builder.addCondition(key, "$regex", regex);
     return this;
   }
@@ -1910,7 +1866,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereMatches(String key, String regex, String modifiers) {
-    checkIfRunning();
     builder.addCondition(key, "$regex", regex);
     if (modifiers.length() != 0) {
       builder.addCondition(key, "$options", modifiers);
@@ -1979,7 +1934,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> include(String key) {
-    checkIfRunning();
     builder.include(key);
     return this;
   }
@@ -1999,7 +1953,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> selectKeys(Collection<String> keys) {
-    checkIfRunning();
     builder.selectKeys(keys);
     return this;
   }
@@ -2013,7 +1966,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereExists(String key) {
-    checkIfRunning();
     builder.addCondition(key, "$exists", true);
     return this;
   }
@@ -2027,7 +1979,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereDoesNotExist(String key) {
-    checkIfRunning();
     builder.addCondition(key, "$exists", false);
     return this;
   }
@@ -2040,7 +1991,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> orderByAscending(String key) {
-    checkIfRunning();
     builder.orderByAscending(key);
     return this;
   }
@@ -2055,7 +2005,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> addAscendingOrder(String key) {
-    checkIfRunning();
     builder.addAscendingOrder(key);
     return this;
   }
@@ -2068,7 +2017,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> orderByDescending(String key) {
-    checkIfRunning();
     builder.orderByDescending(key);
     return this;
   }
@@ -2083,7 +2031,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> addDescendingOrder(String key) {
-    checkIfRunning();
     builder.addDescendingOrder(key);
     return this;
   }
@@ -2098,7 +2045,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> setLimit(int newLimit) {
-    checkIfRunning();
     builder.setLimit(newLimit);
     return this;
   }
@@ -2119,7 +2065,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> setSkip(int newSkip) {
-    checkIfRunning();
     builder.setSkip(newSkip);
     return this;
   }
@@ -2146,7 +2091,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> setTrace(boolean shouldTrace) {
-    checkIfRunning();
     builder.setTracingEnabled(shouldTrace);
     return this;
   }
