@@ -3471,6 +3471,8 @@ public class ParseObject implements Parcelable {
       if (acl == null) {
         return null;
       }
+      String className = acl.getClass().getSimpleName();
+      Log.d("CLASS: " + className);
       if (!(acl instanceof ParseACL)) {
         throw new RuntimeException("only ACLs can be stored in the ACL key");
       }
