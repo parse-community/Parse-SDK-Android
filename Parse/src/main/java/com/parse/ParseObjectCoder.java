@@ -62,9 +62,6 @@ import java.util.Iterator;
         // TODO(grantland): Use cached value from hashedObjects if it's a set operation.
       }
 
-      if (state.objectId() != null) {
-        objectJSON.put(KEY_OBJECT_ID, state.objectId());
-      }
     } catch (JSONException e) {
       throw new RuntimeException("could not serialize object to JSON");
     }
