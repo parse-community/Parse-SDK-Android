@@ -889,9 +889,9 @@ public class ParseQuery<T extends ParseObject> {
   private final State.Builder<T> builder;
   private ParseUser user;
 
-  private final Object lock = new Object();
-  private int isRunning = 0;
-  private TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
+  // Just like ParseFile
+  private Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
+      new HashSet<TaskCompletionSource<?>>());
 
   /**
    * Constructs a query for a {@link ParseObject} subclass type. A default query with no further
@@ -961,21 +961,19 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   /**
-   * Cancels the current network request (if one is running).
+   * Cancels the current network request(s) (if any is running).
    */
   //TODO (grantland): Deprecate and replace with CancellationTokens
   public void cancel() {
-    synchronized (lock) {
-      cts.trySetCancelled();
-      cts = new TaskCompletionSource<>();
-      isRunning = 0;
+    Set<TaskCompletionSource<?>> tasks = new HashSet<>(currentTasks);
+    for (TaskCompletionSource<?> tcs : tasks) {
+      tcs.trySetCancelled();
     }
+    currentTasks.removeAll(tasks);
   }
 
   public boolean isRunning() {
-    synchronized (lock) {
-      return isRunning > 0;
-    }
+    return currentTasks.size() > 0;
   }
 
   /**
@@ -1123,10 +1121,13 @@ public class ParseQuery<T extends ParseObject> {
   }
 
 
-  private <TResult> Task<TResult> perform(Callable<Task<TResult>> runnable) {
-    synchronized (lock) {
-      isRunning++;
-    }
+  /**
+   * Wraps the runnable operation and keeps it in sync with the given tcs, so we know how many
+   * operations are running (currentTasks.size()) and can cancel them.
+   */
+  private <TResult> Task<TResult> perform(Callable<Task<TResult>> runnable, final TaskCompletionSource<?> tcs) {
+    currentTasks.add(tcs);
+
     Task<TResult> task;
     try {
       task = runnable.call();
@@ -1136,10 +1137,8 @@ public class ParseQuery<T extends ParseObject> {
     return task.continueWithTask(new Continuation<TResult, Task<TResult>>() {
       @Override
       public Task<TResult> then(Task<TResult> task) throws Exception {
-        synchronized (lock) {
-          // cancel() drops the count to 0 so we have to check
-          isRunning = Math.max(isRunning-1, 0);
-        }
+        tcs.trySetResult(null); // release
+        currentTasks.remove(tcs);
         return task;
       }
     });
@@ -1187,6 +1186,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<List<T>> findAsync(final State<T> state) {
+    final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     return perform(new Callable<Task<List<T>>>() {
       @Override
       public Task<List<T>> call() throws Exception {
@@ -1194,11 +1194,11 @@ public class ParseQuery<T extends ParseObject> {
           @Override
           public Task<List<T>> then(Task<ParseUser> task) throws Exception {
             final ParseUser user = task.getResult();
-            return findAsync(state, user, cts.getTask());
+            return findAsync(state, user, tcs.getTask());
           }
         });
       }
-    });
+    }, tcs);
   }
 
   /* package */ Task<List<T>> findAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -1254,6 +1254,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<T> getFirstAsync(final State<T> state) {
+    final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     return perform(new Callable<Task<T>>() {
       @Override
       public Task<T> call() throws Exception {
@@ -1261,11 +1262,11 @@ public class ParseQuery<T extends ParseObject> {
           @Override
           public Task<T> then(Task<ParseUser> task) throws Exception {
             final ParseUser user = task.getResult();
-            return getFirstAsync(state, user, cts.getTask());
+            return getFirstAsync(state, user, tcs.getTask());
           }
         });
       }
-    });
+    }, tcs);
   }
 
   private Task<T> getFirstAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -1331,6 +1332,7 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   private Task<Integer> countAsync(final State<T> state) {
+    final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     return perform(new Callable<Task<Integer>>() {
       @Override
       public Task<Integer> call() throws Exception {
@@ -1338,11 +1340,11 @@ public class ParseQuery<T extends ParseObject> {
           @Override
           public Task<Integer> then(Task<ParseUser> task) throws Exception {
             final ParseUser user = task.getResult();
-            return countAsync(state, user, cts.getTask());
+            return countAsync(state, user, tcs.getTask());
           }
         });
       }
-    });
+    }, tcs);
   }
 
   private Task<Integer> countAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -1500,6 +1502,8 @@ public class ParseQuery<T extends ParseObject> {
       final ParseQuery.State<T> state,
       final ParseCallback2<TResult, ParseException> callback,
       final CacheThenNetworkCallable<T, Task<TResult>> delegate) {
+
+    final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     return perform(new Callable<Task<TResult>>() {
       @Override
       public Task<TResult> call() throws Exception {
@@ -1514,7 +1518,7 @@ public class ParseQuery<T extends ParseObject> {
                 .setCachePolicy(CachePolicy.NETWORK_ONLY)
                 .build();
 
-            Task<TResult> executionTask = delegate.call(cacheState, user, cts.getTask());
+            Task<TResult> executionTask = delegate.call(cacheState, user, tcs.getTask());
             executionTask = ParseTaskUtils.callbackOnMainThreadAsync(executionTask, callback);
             return executionTask.continueWithTask(new Continuation<TResult, Task<TResult>>() {
               @Override
@@ -1522,13 +1526,13 @@ public class ParseQuery<T extends ParseObject> {
                 if (task.isCancelled()) {
                   return task;
                 }
-                return delegate.call(networkState, user, cts.getTask());
+                return delegate.call(networkState, user, tcs.getTask());
               }
             });
           }
         });
       }
-    });
+    }, tcs);
   }
 
   private interface CacheThenNetworkCallable<T extends ParseObject, TResult> {
