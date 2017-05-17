@@ -9,6 +9,7 @@ buildscript {
 }
 
 plugins {
+    id "com.jfrog.artifactory" version "4.4.17"
     id "com.jfrog.bintray" version "1.7.3"
     id 'com.github.ben-manes.versions' version '0.14.0'
 }
