@@ -11,7 +11,7 @@ A library that gives you access to the powerful Parse cloud platform from your A
 For more information about Parse and its features, see [the website][parseplatform.org] and [getting started][guide].
 
 ## Download
-Download [the latest JAR][latest] or define in Gradle:
+Add the dependency in Gradle:
 
 ```groovy
 dependencies {
