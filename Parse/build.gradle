@@ -72,23 +72,6 @@ dependencies {
 
 android.libraryVariants.all { variant ->
     def name = variant.buildType.name
-    def jar = project.tasks.create(name: "jar${name.capitalize()}", type: Jar) {
-        dependsOn variant.javaCompile
-        from variant.javaCompile.destinationDir
-
-        manifest {
-            attributes(
-                    "Bundle-Name": 'parse-android',
-                    "Bundle-Version": project.version
-            )
-        }
-
-        exclude '**/R.class'
-        exclude '**/R\$*.class'
-        exclude '**/Manifest.class'
-        exclude '**/Manifest\$*.class'
-        exclude '**/BuildConfig.class'
-    }
 
     def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
         description "Generates Javadoc for $variant.name."
@@ -113,7 +96,6 @@ android.libraryVariants.all { variant ->
     }
 
     if (name.equals(BuilderConstants.RELEASE)) {
-        artifacts.add('archives', jar);
         artifacts.add('archives', javadocJar);
     }
 }
