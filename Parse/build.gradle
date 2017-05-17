@@ -35,6 +35,10 @@ android {
         consumerProguardFiles 'release-proguard.pro'
     }
 
+    packagingOptions {
+        exclude '**/BuildConfig.class'
+    }
+
     lintOptions {
         abortOnError false
     }
