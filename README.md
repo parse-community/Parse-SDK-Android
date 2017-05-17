@@ -19,7 +19,7 @@ dependencies {
 }
 ```
 
-Snapshots of the development version are available in [Sonatype's `snapshots` repository][snap].
+Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
 
 ## Usage
 Everything can done through the supplied gradle wrapper:
