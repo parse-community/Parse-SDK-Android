@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class ParsePlugins {
+public class ParsePlugins {
 
     private static final String INSTALLATION_ID_LOCATION = "installationId";
 
