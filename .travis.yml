@@ -21,7 +21,7 @@ before_install:
     - pip install --user codecov
 
 script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport --info
+  - ./gradlew clean testDebugUnitTest jacocoTestReport
 
 after_success:
   - ./gradlew coveralls
