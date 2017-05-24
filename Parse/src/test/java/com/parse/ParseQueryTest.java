@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -390,6 +392,20 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testWhereContainsAllStartingWith() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    List<String> values = Arrays.asList("value", "valueAgain");
+    List<String> valuesConverted = Arrays.asList(
+        buildStartsWithPattern("value"),
+        buildStartsWithPattern("valueAgain")
+    );
+
+    query.whereContainsAllStartingWith("key", values);
+
+    verifyCondition(query, "key", "$all", valuesConverted);
+  }
+
+  @Test
   public void testWhereNotContainedIn() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     List<String> values = Arrays.asList("value", "valueAgain");
@@ -425,7 +441,7 @@ public class ParseQueryTest {
     String value = "prefix";
     query.whereStartsWith("key", value);
 
-    verifyCondition(query, "key", "$regex", "^" + Pattern.quote(value));
+    verifyCondition(query, "key", "$regex", buildStartsWithPattern(value));
   }
 
   @Test
@@ -903,5 +919,10 @@ public class ParseQueryTest {
         }
       })).cast();
     }
+  }
+
+  @NonNull
+  private String buildStartsWithPattern(String value) {
+    return "^" + Pattern.quote(value);
   }
 }
