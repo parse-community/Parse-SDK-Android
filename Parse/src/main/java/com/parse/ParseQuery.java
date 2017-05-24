@@ -1724,12 +1724,12 @@ public class ParseQuery<T extends ParseObject> {
    *          The values that will match.
    * @return this, so you can chain this call.
    */
-  public ParseQuery<T> whereContainsAllStartingWith(String key, Collection<String> values) {
+  public ParseQuery<T> whereContainsAllStartsWith(String key, Collection<String> values) {
     checkIfRunning();
 
-    ArrayList<String> regexValues = new ArrayList<>();
+    ArrayList<Pattern> regexValues = new ArrayList<>();
     for (String value : values) {
-      regexValues.add(startingWithRegex(value));
+      regexValues.add(Pattern.compile(buildStartsWithRegex(value)));
     }
 
     return whereContainsAll(key, regexValues);
@@ -2015,7 +2015,7 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereStartsWith(String key, String prefix) {
-    String regex = startingWithRegex(prefix);
+    String regex = buildStartsWithRegex(prefix);
     whereMatches(key, regex);
     return this;
   }
@@ -2227,7 +2227,7 @@ public class ParseQuery<T extends ParseObject> {
    * @return The string converted as regex for start word matching.
    */
   @NonNull
-  private String startingWithRegex(String prefix) {
+  private String buildStartsWithRegex(String prefix) {
     return "^" + Pattern.quote(prefix);
   }
 }

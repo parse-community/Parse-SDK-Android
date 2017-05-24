@@ -400,9 +400,9 @@ public class ParseQueryTest {
         buildStartsWithPattern("valueAgain")
     );
 
-    query.whereContainsAllStartingWith("key", values);
+    query.whereContainsAllStartsWith("key", values);
 
-    verifyCondition(query, "key", "$all", valuesConverted);
+    verifyConditionAsString(query, "key", "$all", valuesConverted);
   }
 
   @Test
@@ -835,6 +835,20 @@ public class ParseQueryTest {
     }
   }
 
+  private static void verifyConditionAsString(
+      ParseQuery query, String key, String conditionKey, List values) {
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints =
+        (ParseQuery.KeyConstraints) queryConstraints.get(key);
+    Collection<String> list = (Collection<String>) keyConstraints.get(conditionKey);
+    assertEquals(values.size(), list.size());
+    for (Object listValue : list) {
+      assertTrue(values.contains(listValue.toString()));
+    }
+  }
+  
   //endregion
 
   /**
