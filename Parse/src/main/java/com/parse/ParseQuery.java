@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1699,6 +1701,31 @@ public class ParseQuery<T extends ParseObject> {
    * {@code ParseQuery}.
    * <p/>
    * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
+   * Add a constraint to the query that requires a particular key's value to contain each one of
+   * the provided list of values entirely or just starting with given strings.
+   *
+   * @param key
+   *          The key to check. This key's value must be an array.
+   * @param values
+   *          The values that will match.
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> whereContainsAllStartingWith(String key, Collection<String> values) {
+    checkIfRunning();
+
+    ArrayList<String> regexValues = new ArrayList<>();
+    for (String value : values) {
+      regexValues.add(startingWithRegex(value));
+    }
+
+    return whereContainsAll(key, regexValues);
+  }
+
+  /**
+   * Add a constraint to the query that requires a particular key's value match another
+   * {@code ParseQuery}.
+   * <p/>
+   * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
    *
    * @param key
    *          The key to check.
@@ -1947,7 +1974,7 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereStartsWith(String key, String prefix) {
-    String regex = "^" + Pattern.quote(prefix);
+    String regex = startingWithRegex(prefix);
     whereMatches(key, regex);
     return this;
   }
@@ -2149,5 +2176,16 @@ public class ParseQuery<T extends ParseObject> {
     checkIfRunning();
     builder.setTracingEnabled(shouldTrace);
     return this;
+  }
+
+  /**
+   * Helper method to convert a string to regex for start word matching.
+   *
+   * @param prefix String to use as prefix in regex.
+   * @return The string converted as regex for start word matching.
+   */
+  @NonNull
+  private String startingWithRegex(String prefix) {
+    return "^" + Pattern.quote(prefix);
   }
 }
