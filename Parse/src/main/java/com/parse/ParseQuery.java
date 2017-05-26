@@ -1677,10 +1677,6 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   /**
-   * Add a constraint to the query that requires a particular key's value match another
-   * {@code ParseQuery}.
-   * <p/>
-   * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
    * Add a constraint to the query that requires a particular key's value to contain every one of
    * the provided list of values.
    *
@@ -1697,17 +1693,13 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   /**
-   * Add a constraint to the query that requires a particular key's value match another
-   * {@code ParseQuery}.
-   * <p/>
-   * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
    * Add a constraint to the query that requires a particular key's value to contain each one of
-   * the provided list of values entirely or just starting with given strings.
+   * the provided list of strings entirely or just starting with given strings.
    *
    * @param key
    *          The key to check. This key's value must be an array.
    * @param values
-   *          The values that will match.
+   *          The values that will match entirely or starting with them.
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereContainsAllStartsWith(String key, Collection<String> values) {
