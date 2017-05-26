@@ -31,8 +31,8 @@ import bolts.Task;
     return eventuallyTask.makeVoid();
   }
 
-  public Task<Void> trackAppOpenedInBackground(String pushHash, String sessionToken) {
-    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushHash,
+  public Task<Void> trackAppOpenedInBackground(String pushId, String sessionToken) {
+    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushId,
         sessionToken);
 
     Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);

@@ -204,11 +204,7 @@ public class ParseAnalyticsTest {
   public void testTrackAppOpenedInBackgroundDuplicatedIntent() throws Exception {
     Intent intent = makeIntentWithParseData("test");
     ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
-
-    verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
-
     ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
-
     verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
   }
 
@@ -243,7 +239,7 @@ public class ParseAnalyticsTest {
 
   @Test
   public void testGetPushHashFromIntentNullIntent() throws Exception {
-    String pushHash = ParseAnalytics.getPushHashFromIntent(null);
+    String pushHash = ParseAnalytics.getPushIdFromIntent(null);
 
     assertEquals(null, pushHash);
   }
@@ -257,7 +253,7 @@ public class ParseAnalyticsTest {
     bundle.putString("data_wrong_key", json.toString());
     intent.putExtras(bundle);
 
-    String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
+    String pushHash = ParseAnalytics.getPushIdFromIntent(intent);
 
     assertEquals(null, pushHash);
   }
@@ -271,9 +267,9 @@ public class ParseAnalyticsTest {
     bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, json.toString());
     intent.putExtras(bundle);
 
-    String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
+    String pushHash = ParseAnalytics.getPushIdFromIntent(intent);
 
-    assertEquals("", pushHash);
+    assertEquals(null, pushHash);
   }
 
   @Test
@@ -283,7 +279,7 @@ public class ParseAnalyticsTest {
     bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, "error_data");
     intent.putExtras(bundle);
 
-    String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
+    String pushHash = ParseAnalytics.getPushIdFromIntent(intent);
 
     assertEquals(null, pushHash);
   }
@@ -292,19 +288,21 @@ public class ParseAnalyticsTest {
   public void testGetPushHashFromIntentNormalIntent() throws Exception {
     Intent intent = makeIntentWithParseData("test");
 
-    String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
+    String pushHash = ParseAnalytics.getPushIdFromIntent(intent);
 
     assertEquals("test", pushHash);
   }
 
   //endregion
 
-  private Intent makeIntentWithParseData(String pushHash) throws JSONException {
+  private Intent makeIntentWithParseData(String id) throws JSONException {
     Intent intent = new Intent();
     Bundle bundle = new Bundle();
-    JSONObject json = new JSONObject();
-    json.put("push_hash", pushHash);
-    bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, json.toString());
+    JSONObject pushData = new JSONObject();
+    JSONObject parseMetadata = new JSONObject();
+    parseMetadata.put("id", id);
+    pushData.put("parseMetadata", parseMetadata);
+    bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, pushData.toString());
     intent.putExtras(bundle);
     return intent;
   }

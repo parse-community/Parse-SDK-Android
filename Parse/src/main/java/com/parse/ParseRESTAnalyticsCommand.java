@@ -29,12 +29,12 @@ import java.util.Map;
   private static final String PATH = "events/%s";
 
   private static final String KEY_AT = "at";
-  private static final String KEY_PUSH_HASH = "push_hash";
+  private static final String KEY_PUSH_ID = "push_id";
   private static final String KEY_DIMENSIONS = "dimensions";
 
   public static ParseRESTAnalyticsCommand trackAppOpenedCommand(
-      String pushHash, String sessionToken) {
-    return trackEventCommand(EVENT_APP_OPENED, pushHash, null, sessionToken);
+      String pushId, String sessionToken) {
+    return trackEventCommand(EVENT_APP_OPENED, pushId, null, sessionToken);
   }
 
   public static ParseRESTAnalyticsCommand trackEventCommand(
@@ -43,13 +43,13 @@ import java.util.Map;
   }
 
   /* package */ static ParseRESTAnalyticsCommand trackEventCommand(
-      String eventName, String pushHash, Map<String, String> dimensions, String sessionToken) {
+      String eventName, String pushId, Map<String, String> dimensions, String sessionToken) {
     String httpPath = String.format(PATH, Uri.encode(eventName));
     JSONObject parameters = new JSONObject();
     try {
       parameters.put(KEY_AT, NoObjectsEncoder.get().encode(new Date()));
-      if (pushHash != null) {
-        parameters.put(KEY_PUSH_HASH, pushHash);
+      if (pushId != null) {
+        parameters.put(KEY_PUSH_ID, pushId);
       }
       if (dimensions != null) {
         parameters.put(KEY_DIMENSIONS, NoObjectsEncoder.get().encode(dimensions));

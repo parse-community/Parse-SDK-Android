@@ -105,7 +105,7 @@ public class ParseAnalyticsControllerTest {
 
     // Execute
     ParseAnalyticsController controller = new ParseAnalyticsController(queue);
-    ParseTaskUtils.wait(controller.trackAppOpenedInBackground("pushHash", "sessionToken"));
+    ParseTaskUtils.wait(controller.trackAppOpenedInBackground("pushId", "sessionToken"));
 
     // Verify eventuallyQueue.enqueueEventuallyAsync
     ArgumentCaptor<ParseRESTCommand> command = ArgumentCaptor.forClass(ParseRESTCommand.class);
@@ -120,7 +120,7 @@ public class ParseAnalyticsControllerTest {
     assertTrue(command.getValue() instanceof ParseRESTAnalyticsCommand);
     assertTrue(command.getValue().httpPath.contains(ParseRESTAnalyticsCommand.EVENT_APP_OPENED));
     assertEquals("sessionToken", command.getValue().getSessionToken());
-    assertEquals("pushHash", command.getValue().jsonParameters.get("push_hash"));
+    assertEquals("pushId", command.getValue().jsonParameters.get("push_id"));
   }
 
   //endregion
