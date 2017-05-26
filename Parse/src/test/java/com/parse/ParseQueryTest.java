@@ -416,15 +416,20 @@ public class ParseQueryTest {
   @Test
   public void testWhereContainsAllStartingWith() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
-    List<String> values = Arrays.asList("value", "valueAgain");
-    List<String> valuesConverted = Arrays.asList(
-        buildStartsWithPattern("value"),
-        buildStartsWithPattern("valueAgain")
-    );
+    String value = "value";
+    String valueAgain = "valueAgain";
+    List<String> values = Arrays.asList(value, valueAgain);
+
+    ParseQuery.KeyConstraints valueConverted = new ParseQuery.KeyConstraints();
+    valueConverted.put("$regex", buildStartsWithPattern(value));
+    ParseQuery.KeyConstraints valueAgainConverted = new ParseQuery.KeyConstraints();
+    valueAgainConverted.put("$regex", buildStartsWithPattern(valueAgain));
+    List<ParseQuery.KeyConstraints> valuesConverted =
+        Arrays.asList(valueConverted, valueAgainConverted);
 
     query.whereContainsAllStartsWith("key", values);
 
-    verifyConditionAsString(query, "key", "$all", valuesConverted);
+    verifyCondition(query, "key", "$all", valuesConverted);
   }
 
   @Test
@@ -777,20 +782,6 @@ public class ParseQueryTest {
     }
   }
 
-  private static void verifyConditionAsString(
-      ParseQuery query, String key, String conditionKey, List values) {
-    // We generate a state to verify the content of the builder
-    ParseQuery.State state = query.getBuilder().build();
-    ParseQuery.QueryConstraints queryConstraints = state.constraints();
-    ParseQuery.KeyConstraints keyConstraints =
-        (ParseQuery.KeyConstraints) queryConstraints.get(key);
-    Collection<String> list = (Collection<String>) keyConstraints.get(conditionKey);
-    assertEquals(values.size(), list.size());
-    for (Object listValue : list) {
-      assertTrue(values.contains(listValue.toString()));
-    }
-  }
-  
   //endregion
 
   /**

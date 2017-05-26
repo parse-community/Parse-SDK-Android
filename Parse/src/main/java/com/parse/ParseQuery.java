@@ -1705,12 +1705,14 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> whereContainsAllStartsWith(String key, Collection<String> values) {
     checkIfRunning();
 
-    ArrayList<Pattern> regexValues = new ArrayList<>();
+    ArrayList<KeyConstraints> startsWithConstraints = new ArrayList<>();
     for (String value : values) {
-      regexValues.add(Pattern.compile(buildStartsWithRegex(value)));
+      KeyConstraints keyConstraints = new KeyConstraints();
+      keyConstraints.put("$regex", buildStartsWithRegex(value));
+      startsWithConstraints.add(keyConstraints);
     }
 
-    return whereContainsAll(key, regexValues);
+    return whereContainsAll(key, startsWithConstraints);
   }
 
   /**

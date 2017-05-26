@@ -22,7 +22,6 @@ import org.robolectric.annotation.Config;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -160,14 +159,6 @@ public class ParseEncoderTest {
     JSONObject relationConstraintJSON = (JSONObject) testClassObject.encode(relationConstraint);
     assertNotNull(relationConstraintJSON);
     assertEquals(">", relationConstraintJSON.getString("key"));
-  }
-
-  @Test
-  public void testPattern() throws JSONException {
-    Pattern pattern = Pattern.compile("^\\Qvalue\\E");
-    JSONObject patternJSON = (JSONObject) testClassObject.encode(pattern);
-    assertNotNull(patternJSON);
-    assertEquals("^\\Qvalue\\E", patternJSON.getString("$regex"));
   }
 
   @Test

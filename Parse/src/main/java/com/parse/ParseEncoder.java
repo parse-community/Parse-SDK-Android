@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * A {@code ParseEncoder} can be used to transform objects such as {@link ParseObjects} into JSON
@@ -41,8 +40,7 @@ import java.util.regex.Pattern;
         || value instanceof ParseACL
         || value instanceof ParseFile
         || value instanceof ParseGeoPoint
-        || value instanceof ParseRelation
-        || value instanceof Pattern;
+        || value instanceof ParseRelation;
   }
 
   public Object encode(Object object) {
@@ -120,12 +118,6 @@ import java.util.regex.Pattern;
 
       if (object instanceof ParseQuery.RelationConstraint) {
         return ((ParseQuery.RelationConstraint) object).encode(this);
-      }
-
-      if (object instanceof Pattern) {
-        JSONObject json = new JSONObject();
-        json.put("$regex", object.toString());
-        return json;
       }
 
       if (object == null) {
