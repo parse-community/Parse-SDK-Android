@@ -43,7 +43,8 @@ abstract class ParseEncoder {
         || value instanceof ParseGeoPoint
         || value instanceof ParsePolygon
         || value instanceof ParseRelation
-        || value instanceof Pattern;
+        || value instanceof Pattern
+        || value instanceof ParseRelation;
   }
 
   public Object encode(Object object) {
@@ -129,12 +130,6 @@ abstract class ParseEncoder {
 
       if (object instanceof ParseQuery.RelationConstraint) {
         return ((ParseQuery.RelationConstraint) object).encode(this);
-      }
-
-      if (object instanceof Pattern) {
-        JSONObject json = new JSONObject();
-        json.put("$regex", object.toString());
-        return json;
       }
 
       if (object == null) {
