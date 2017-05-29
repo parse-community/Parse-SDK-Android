@@ -527,6 +527,12 @@ public class ParseQuery<T extends ParseObject> {
         return this;
       }
 
+      // Used by clear
+      /* package */ Builder<T> clear(String key) {
+        where.remove(key);
+        return this;
+      }
+
       //endregion
 
       //region Order
@@ -2085,6 +2091,18 @@ public class ParseQuery<T extends ParseObject> {
    */
   public String getClassName() {
     return builder.getClassName();
+  }
+
+  /**
+   * Clears constraints related to the given key, if any was set previously.
+   * Order, includes and selected keys are not affected by this operation.
+   *
+   * @param key key to be cleared from current constraints.
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> clear(String key) {
+    builder.clear(key);
+    return this;
   }
 
   /**

@@ -564,6 +564,18 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testClear() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    query.whereEqualTo("key", "value");
+    query.whereEqualTo("otherKey", "otherValue");
+    verifyCondition(query, "key", "value");
+    verifyCondition(query, "otherKey", "otherValue");
+    query.clear("key");
+    verifyCondition(query, "key", null);
+    verifyCondition(query, "otherKey", "otherValue"); // still.
+  }
+
+  @Test
   public void testOr() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     query.whereEqualTo("key", "value");
@@ -682,6 +694,13 @@ public class ParseQueryTest {
     query.setSkip(5);
 
     assertEquals(5, query.getSkip());
+  }
+
+  private static void verifyCondition(ParseQuery query, String key, Object value) {
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    assertEquals(value, queryConstraints.get(key));
   }
 
   private static void verifyCondition(
