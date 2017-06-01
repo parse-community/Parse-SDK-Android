@@ -54,6 +54,7 @@ public class ParsePushStateTest {
 
     assertEquals(null, state.expirationTime());
     assertEquals(null, state.expirationTimeInterval());
+    assertEquals(null, state.pushTime());
     assertEquals(null, state.channelSet());
     JSONAssert.assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
     assertEquals(null, state.pushToAndroid());
@@ -68,6 +69,7 @@ public class ParsePushStateTest {
     ParsePush.State state = mock(ParsePush.State.class);
     when(state.expirationTime()).thenReturn(1L);
     when(state.expirationTimeInterval()).thenReturn(2L);
+    when(state.pushTime()).thenReturn(3L);
     Set channelSet = Sets.newSet("one", "two");
     when(state.channelSet()).thenReturn(channelSet);
     JSONObject data = new JSONObject();
@@ -82,6 +84,7 @@ public class ParsePushStateTest {
     ParsePush.State copy = new ParsePush.State.Builder(state).build();
     assertSame(1L, copy.expirationTime());
     assertSame(2L, copy.expirationTimeInterval());
+    assertSame(3L, copy.pushTime());
     Set channelSetCopy = copy.channelSet();
     assertNotSame(channelSet, channelSetCopy);
     assertTrue(channelSetCopy.size() == 2 && channelSetCopy.contains("one"));
@@ -147,6 +150,55 @@ public class ParsePushStateTest {
         .build();
 
     assertEquals(100L, state.expirationTimeInterval().longValue());
+  }
+
+  //endregion
+
+  //region testPushTime
+
+  @Test
+  public void testPushTimeNullTime() {
+    ParsePush.State.Builder builder = new ParsePush.State.Builder();
+
+    ParsePush.State state = builder
+        .pushTime(null)
+        .data(new JSONObject())
+        .build();
+
+    assertEquals(null, state.pushTime());
+  }
+
+  @Test
+  public void testPushTimeNormalTime() {
+    ParsePush.State.Builder builder = new ParsePush.State.Builder();
+
+    long time = System.currentTimeMillis() / 1000 + 1000;
+    ParsePush.State state = builder
+        .pushTime(time)
+        .data(new JSONObject())
+        .build();
+
+    assertEquals(time, state.pushTime().longValue());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testPushTimeInThePast() {
+    ParsePush.State.Builder builder = new ParsePush.State.Builder();
+
+    ParsePush.State state = builder
+        .pushTime(System.currentTimeMillis() - 1000)
+        .data(new JSONObject())
+        .build();
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testPushTimeTwoWeeksFromNow() {
+    ParsePush.State.Builder builder = new ParsePush.State.Builder();
+
+    ParsePush.State state = builder
+        .pushTime(System.currentTimeMillis() + 60*60*24*7*3)
+        .data(new JSONObject())
+        .build();
   }
 
   //endregion

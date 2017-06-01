@@ -206,6 +206,26 @@ public class ParsePushTest {
 
   //endregion
 
+  //region testSetPushTime
+
+  // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
+  // builder test cases should be in ParsePushState test
+  @Test
+  public void testSetPushTime() throws Exception {
+    ParsePush push = new ParsePush();
+    long time = System.currentTimeMillis() / 1000 + 1000;
+    push.setPushTime(time);
+
+    // Right now it is hard for us to test a builder, so we build a state to test the builder is
+    // set correctly
+    // We have to set message otherwise build() will throw an exception
+    push.setMessage("message");
+    ParsePush.State state = push.builder.build();
+    assertEquals(time, state.pushTime().longValue());
+  }
+
+  //endregion
+
   //region testSetPushToIOS
 
   // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive

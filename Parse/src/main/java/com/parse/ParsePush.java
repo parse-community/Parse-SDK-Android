@@ -73,6 +73,7 @@ public class ParsePush {
             : new ParseQuery<>(new ParseQuery.State.Builder<ParseInstallation>(state.queryState()));
         this.expirationTime = state.expirationTime();
         this.expirationTimeInterval = state.expirationTimeInterval();
+        this.pushTime = state.pushTime();
         this.pushToIOS = state.pushToIOS();
         this.pushToAndroid = state.pushToAndroid();
         // Since in state.build() we check data is not null, we do not need to check it again here.

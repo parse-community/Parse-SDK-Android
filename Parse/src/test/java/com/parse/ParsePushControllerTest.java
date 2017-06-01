@@ -83,6 +83,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     // Verify device type and query
@@ -113,6 +114,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
     // Verify device type and query
@@ -121,6 +123,36 @@ public class ParsePushControllerTest {
         jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
             .getString(ParsePush.KEY_DATA_MESSAGE));
     assertEquals(1400000000, jsonParameters.getLong(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
+  }
+
+  @Test
+  public void testBuildRESTSendPushCommandWithPushTime() throws Exception {
+    ParseHttpClient restClient = mock(ParseHttpClient.class);
+    ParsePushController controller = new ParsePushController(restClient);
+
+    // Build PushState
+    JSONObject data = new JSONObject();
+    data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
+    long pushTime = System.currentTimeMillis() / 1000 + 1000;
+    ParsePush.State state = new ParsePush.State.Builder()
+        .data(data)
+        .pushTime(pushTime)
+        .build();
+
+    // Build command
+    ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
+
+    // Verify command
+    JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
+    // Verify device type and query
+    assertEquals("{}", jsonParameters.get(ParseRESTPushCommand.KEY_WHERE).toString());
+    assertEquals("hello world",
+        jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+            .getString(ParsePush.KEY_DATA_MESSAGE));
+    assertEquals(pushTime, jsonParameters.getLong(ParseRESTPushCommand.KEY_PUSH_TIME));
   }
 
   @Test
@@ -141,6 +173,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
     // Verify device type and query
@@ -172,6 +205,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     assertFalse(jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_WHERE)
@@ -206,6 +240,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
@@ -235,6 +270,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
@@ -265,6 +301,7 @@ public class ParsePushControllerTest {
 
     // Verify command
     JSONObject jsonParameters = pushCommand.jsonParameters;
+    assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
