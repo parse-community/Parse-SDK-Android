@@ -4,25 +4,26 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:2.3.2'
     }
 }
 
 plugins {
-    id "com.jfrog.artifactory" version "4.4.17"
+    id "com.jfrog.artifactory" version "4.4.18"
     id "com.jfrog.bintray" version "1.7.3"
-    id 'com.github.ben-manes.versions' version '0.14.0'
+    id 'com.github.ben-manes.versions' version '0.15.0'
 }
 
 allprojects {
     repositories {
         jcenter()
+        maven { url "https://maven.google.com" }
     }
 }
 
 ext {
     compileSdkVersion = 25
-    buildToolsVersion = "25.0.2"
+    buildToolsVersion = "25.0.3"
 
     supportLibVersion = '25.3.1'
 

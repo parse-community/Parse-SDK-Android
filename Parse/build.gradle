@@ -51,14 +51,13 @@ android {
 }
 
 ext {
-    okhttpVersion = '3.6.0'
+    okhttpVersion = '3.8.0'
 }
 
 dependencies {
     compile "com.android.support:support-annotations:$supportLibVersion"
     compile 'com.parse.bolts:bolts-tasks:1.4.0'
     compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    provided 'com.facebook.stetho:stetho:1.4.2'
 
     //Be aware, tests fail on 3.3.2 Wait to update until
     //java.lang.NoClassDefFoundError: android/content/pm/VersionedPackage
