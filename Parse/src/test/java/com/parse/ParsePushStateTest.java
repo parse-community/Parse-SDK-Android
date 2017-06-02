@@ -186,7 +186,7 @@ public class ParsePushStateTest {
     ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
     ParsePush.State state = builder
-        .pushTime(System.currentTimeMillis() - 1000)
+        .pushTime(System.currentTimeMillis() / 1000 - 1000)
         .data(new JSONObject())
         .build();
   }
@@ -196,7 +196,7 @@ public class ParsePushStateTest {
     ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
     ParsePush.State state = builder
-        .pushTime(System.currentTimeMillis() + 60*60*24*7*3)
+        .pushTime(System.currentTimeMillis() / 1000 + 60*60*24*7*3)
         .data(new JSONObject())
         .build();
   }
