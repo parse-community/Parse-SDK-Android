@@ -55,6 +55,7 @@ public class ParsePush {
       private ParseQuery<ParseInstallation> query;
       private Long expirationTime;
       private Long expirationTimeInterval;
+      private Long pushTime;
       private Boolean pushToIOS;
       private Boolean pushToAndroid;
       private JSONObject data;
@@ -72,6 +73,7 @@ public class ParsePush {
             : new ParseQuery<>(new ParseQuery.State.Builder<ParseInstallation>(state.queryState()));
         this.expirationTime = state.expirationTime();
         this.expirationTimeInterval = state.expirationTimeInterval();
+        this.pushTime = state.pushTime();
         this.pushToIOS = state.pushToIOS();
         this.pushToAndroid = state.pushToAndroid();
         // Since in state.build() we check data is not null, we do not need to check it again here.
@@ -93,6 +95,18 @@ public class ParsePush {
       public Builder expirationTimeInterval(Long expirationTimeInterval) {
         this.expirationTimeInterval = expirationTimeInterval;
         expirationTime = null;
+        return this;
+      }
+
+      public Builder pushTime(Long pushTime) {
+        if (pushTime != null) {
+          long now = System.currentTimeMillis() / 1000;
+          long twoWeeks = 60*60*24*7*2;
+          checkArgument(pushTime > now, "Scheduled push time can not be in the past");
+          checkArgument(pushTime < now + twoWeeks, "Scheduled push time can not be more than " +
+              "two weeks in the future");
+        }
+        this.pushTime = pushTime;
         return this;
       }
 
@@ -151,6 +165,7 @@ public class ParsePush {
     private final ParseQuery.State<ParseInstallation> queryState;
     private final Long expirationTime;
     private final Long expirationTimeInterval;
+    private final Long pushTime;
     private final Boolean pushToIOS;
     private final Boolean pushToAndroid;
     private final JSONObject data;
@@ -161,6 +176,7 @@ public class ParsePush {
       this.queryState = builder.query == null ? null : builder.query.getBuilder().build();
       this.expirationTime = builder.expirationTime;
       this.expirationTimeInterval = builder.expirationTimeInterval;
+      this.pushTime = builder.pushTime;
       this.pushToIOS = builder.pushToIOS;
       this.pushToAndroid = builder.pushToAndroid;
       // Since in builder.build() we check data is not null, we do not need to check it again here.
@@ -187,6 +203,10 @@ public class ParsePush {
 
     public Long expirationTimeInterval() {
       return expirationTimeInterval;
+    }
+
+    public Long pushTime() {
+      return pushTime;
     }
 
     public Boolean pushToIOS() {
@@ -419,6 +439,14 @@ public class ParsePush {
   public void clearExpiration() {
     builder.expirationTime(null);
     builder.expirationTimeInterval(null);
+  }
+
+  /**
+   * Sets a UNIX epoch timestamp at which this notification should be delivered, in seconds (UTC).
+   * Scheduled time can not be in the past and must be at most two weeks in the future.
+   */
+  public void setPushTime(long time) {
+    builder.pushTime(time);
   }
 
   /**

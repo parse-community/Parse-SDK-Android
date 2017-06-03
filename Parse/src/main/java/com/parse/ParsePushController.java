@@ -43,6 +43,7 @@ import bolts.Task;
       }
     }
     return ParseRESTPushCommand.sendPushCommand(state.queryState(), state.channelSet(), deviceType,
-        state.expirationTime(), state.expirationTimeInterval(), state.data(), sessionToken);
+        state.expirationTime(), state.expirationTimeInterval(), state.pushTime(), state.data(),
+        sessionToken);
   }
 }
