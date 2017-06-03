@@ -19,6 +19,15 @@ import java.util.Set;
 
 /** package */ class ParseRESTQueryCommand extends ParseRESTCommand {
 
+  /* package */ final static String KEY_ORDER = "order";
+  /* package */ final static String KEY_WHERE = "where";
+  /* package */ final static String KEY_KEYS = "keys";
+  /* package */ final static String KEY_INCLUDE = "include";
+  /* package */ final static String KEY_LIMIT = "limit";
+  /* package */ final static String KEY_COUNT = "count";
+  /* package */ final static String KEY_SKIP = "skip";
+  /* package */ final static String KEY_TRACE = "trace";
+
   public static <T extends ParseObject> ParseRESTQueryCommand findCommand(
       ParseQuery.State<T> state, String sessionToken) {
     String httpPath = String.format("classes/%s", state.className());
@@ -41,38 +50,41 @@ import java.util.Set;
     HashMap<String, String> parameters = new HashMap<>();
     List<String> order = state.order();
     if (!order.isEmpty()) {
-      parameters.put("order", ParseTextUtils.join(",", order));
+      parameters.put(KEY_ORDER, ParseTextUtils.join(",", order));
     }
 
     ParseQuery.QueryConstraints conditions = state.constraints();
     if (!conditions.isEmpty()) {
       JSONObject encodedConditions =
           (JSONObject) encoder.encode(conditions);
-      parameters.put("where", encodedConditions.toString());
+      parameters.put(KEY_WHERE, encodedConditions.toString());
     }
 
     // This is nullable since we allow unset selectedKeys as well as no selectedKeys
     Set<String> selectedKeys = state.selectedKeys();
     if (selectedKeys != null) {
-      parameters.put("keys", ParseTextUtils.join(",", selectedKeys));
+      parameters.put(KEY_KEYS, ParseTextUtils.join(",", selectedKeys));
     }
 
     Set<String> includeds = state.includes();
     if (!includeds.isEmpty()) {
-      parameters.put("include", ParseTextUtils.join(",", includeds));
+      parameters.put(KEY_INCLUDE, ParseTextUtils.join(",", includeds));
+    }
+
+    // Respect what the caller wanted for limit, even if count is true, because
+    // parse-server supports it. Currently with our APIs, when counting, limit will always be 0,
+    // but that logic is in ParseQuery class and we should not do that again here.
+    int limit = state.limit();
+    if (limit >= 0) {
+      parameters.put(KEY_LIMIT, Integer.toString(limit));
     }
 
     if (count) {
-      parameters.put("count", Integer.toString(1));
+      parameters.put(KEY_COUNT, Integer.toString(1));
     } else {
-      int limit = state.limit();
-      if (limit >= 0) {
-        parameters.put("limit", Integer.toString(limit));
-      }
-
       int skip = state.skip();
       if (skip > 0) {
-        parameters.put("skip", Integer.toString(skip));
+        parameters.put(KEY_SKIP, Integer.toString(skip));
       }
     }
 
@@ -83,7 +95,7 @@ import java.util.Set;
     }
 
     if (state.isTracingEnabled()) {
-      parameters.put("trace", Integer.toString(1));
+      parameters.put(KEY_TRACE, Integer.toString(1));
     }
     return parameters;
   }
