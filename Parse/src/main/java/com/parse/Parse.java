@@ -259,7 +259,7 @@ public class Parse {
     Parse.offlineStore = offlineStore;
   }
 
-  static boolean isLocalDatastoreEnabled() {
+  public static boolean isLocalDatastoreEnabled() {
     return isLocalDatastoreEnabled;
   }
 
