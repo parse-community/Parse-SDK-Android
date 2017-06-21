@@ -1,6 +1,7 @@
 branches:
   only:
     - master
+    - /^\d+\.\d+\.\d+$/ # regex
 
 language: android
 sudo: false
