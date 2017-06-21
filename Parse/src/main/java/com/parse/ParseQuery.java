@@ -468,6 +468,12 @@ public class ParseQuery<T extends ParseObject> {
         return addCondition(key, "$within", dictionary);
       }
 
+      public Builder<T> whereGeoWithin(String key, List<ParseGeoPoint> points) {
+        Map<String, List<ParseGeoPoint>> dictionary = new HashMap<>();
+        dictionary.put("$polygon", points);
+        return addCondition(key, "$geoWithin", dictionary);
+      }
+
       public Builder<T> whereGeoIntersects(String key, ParseGeoPoint point) {
         Map<String, ParseGeoPoint> dictionary = new HashMap<>();
         dictionary.put("$point", point);
@@ -1845,6 +1851,25 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> whereWithinGeoBox(
       String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
     builder.whereWithin(key, southwest, northeast);
+    return this;
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within and on the bounds of a given polygon.
+   * Supports closed and open (last point is connected to first) paths
+   *
+   * Polygon must have at least 3 points
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param points
+   *          Array of ParseGeoPoint
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> whereWithinPolygon(
+          String key, List<ParseGeoPoint> points) {
+    builder.whereGeoWithin(key, points);
     return this;
   }
 
