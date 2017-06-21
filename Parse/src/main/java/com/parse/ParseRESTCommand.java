@@ -31,7 +31,7 @@ import bolts.Task;
 /**
  * A helper object to send requests to the server.
  */
-/** package */ class ParseRESTCommand extends ParseRequest<JSONObject> {
+/** package */ public class ParseRESTCommand extends ParseRequest<JSONObject> {
 
   /* package */ static final String HEADER_APPLICATION_ID = "X-Parse-Application-Id";
   /* package */ static final String HEADER_CLIENT_KEY = "X-Parse-Client-Key";

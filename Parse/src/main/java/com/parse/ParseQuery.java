@@ -297,7 +297,7 @@ public class ParseQuery<T extends ParseObject> {
     }
   }
 
-  /* package */ static class State<T extends ParseObject> {
+  /* package */ public static class State<T extends ParseObject> {
 
     /* package */ static class Builder<T extends ParseObject> {
 
