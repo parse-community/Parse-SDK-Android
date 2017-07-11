@@ -236,7 +236,7 @@ import bolts.Task;
       decider = new Decider() {
         @Override
         public boolean decide(Object constraint, Object value) {
-          return ((String) value).matches(constraint.toString());
+          return ((String) value).matches(((KeyConstraints)constraint).get("$regex").toString());
         }
       };
     } else {
@@ -390,9 +390,13 @@ import bolts.Task;
    * All values in a $all constraint must be a starting with another string regex.
    */
   private static Collection<?> cleanRegexStartsWith(Collection<?> constraints) {
-    ArrayList<String> cleanedValues = new ArrayList<>();
+    ArrayList<KeyConstraints> cleanedValues = new ArrayList<>();
     for (Object constraint : constraints) {
-      String cleanedRegex = cleanRegexStartsWith((String) constraint);
+      if (!(constraint instanceof KeyConstraints)) {
+        return null;
+      }
+
+      KeyConstraints cleanedRegex = cleanRegexStartsWith((KeyConstraints) constraint);
       if (cleanedRegex == null) {
         return null;
       }
@@ -409,28 +413,35 @@ import bolts.Task;
    * If given string is not a regex to match a string at the beginning of another string, then null
    * is returned.
    */
-  private static String cleanRegexStartsWith(String regex) {
+  private static KeyConstraints cleanRegexStartsWith(KeyConstraints regex) {
     if (!isStartsWithRegex(regex)) {
       return null;
     }
 
     // remove all instances of \Q and \E from the remaining text & escape single quotes
-    String literalizedString = regex.replaceAll("([^\\\\])(\\\\E)", "$1")
+    String literalizedString = ((String)regex.get("$regex"))
+        .replaceAll("([^\\\\])(\\\\E)", "$1")
         .replaceAll("([^\\\\])(\\\\Q)", "$1")
         .replaceAll("^\\\\E", "")
         .replaceAll("^\\\\Q", "")
         .replaceAll("([^'])'", "$1''")
         .replaceAll("^'([^'])", "''$1");
 
-    return '^' + literalizedString + ".*";
+    regex.put("$regex", literalizedString + ".*");
+    return regex;
   }
 
   /**
    * Check if given constraint is a regex to match strings that starts with another string.
    */
   private static boolean isStartsWithRegex(Object constraint) {
-    return constraint != null && constraint instanceof String &&
-        ((String)constraint).startsWith("^");
+    if (constraint == null || !(constraint instanceof KeyConstraints)) {
+      return false;
+    }
+
+    KeyConstraints keyConstraints = (KeyConstraints) constraint;
+    return keyConstraints.size() == 1 && keyConstraints.containsKey("$regex") &&
+        ((String)keyConstraints.get("$regex")).startsWith("^");
   }
 
   /**

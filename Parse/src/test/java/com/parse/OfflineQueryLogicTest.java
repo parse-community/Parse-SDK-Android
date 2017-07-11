@@ -395,25 +395,25 @@ public class OfflineQueryLogicTest {
     query = new ParseQuery.State.Builder<>("TestObject")
         .addCondition("foo", "$all",
             Arrays.asList(
-                buildStartsWithRegex("foo"),
-                buildStartsWithRegex("bar")))
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar")))
         .build();
     assertTrue(matches(logic, query, object));
 
     query = new ParseQuery.State.Builder<>("TestObject")
         .addCondition("foo", "$all",
             Arrays.asList(
-                buildStartsWithRegex("fo"),
-                buildStartsWithRegex("b")))
+                buildStartsWithRegexKeyConstraint("fo"),
+                buildStartsWithRegexKeyConstraint("b")))
         .build();
     assertTrue(matches(logic, query, object));
 
     query = new ParseQuery.State.Builder<>("TestObject")
         .addCondition("foo", "$all",
             Arrays.asList(
-                buildStartsWithRegex("foo"),
-                buildStartsWithRegex("bar"),
-                buildStartsWithRegex("qux")))
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar"),
+                buildStartsWithRegexKeyConstraint("qux")))
         .build();
     assertFalse(matches(logic, query, object));
 
@@ -439,19 +439,43 @@ public class OfflineQueryLogicTest {
     query = new ParseQuery.State.Builder<>("TestObject")
         .addCondition("foo", "$all",
             Arrays.asList(
-                buildStartsWithRegex("foo"),
-                buildStartsWithRegex("bar")))
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar")))
         .build();
     assertTrue(matches(logic, query, object));
 
     query = new ParseQuery.State.Builder<>("TestObject")
         .addCondition("foo", "$all",
             Arrays.asList(
-                buildStartsWithRegex("fo"),
+                buildStartsWithRegexKeyConstraint("fo"),
+                buildStartsWithRegex("ba"),
                 "b"))
         .build();
     thrown.expect(IllegalArgumentException.class);
     assertFalse(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("fo"),
+                "b"))
+        .build();
+    thrown.expect(IllegalArgumentException.class);
+    assertFalse(matches(logic, query, object));
+  }
+
+  /**
+   * Helper method to convert a string to a key constraint to match strings that starts with given
+   * string.
+   *
+   * @param prefix String to use as prefix in regex.
+   * @return The key constraint for word matching at the beginning of a string.
+   */
+  @NonNull
+  private ParseQuery.KeyConstraints buildStartsWithRegexKeyConstraint(String prefix) {
+    ParseQuery.KeyConstraints constraint = new ParseQuery.KeyConstraints();
+    constraint.put("$regex", buildStartsWithRegex(prefix));
+    return constraint;
   }
 
   /**
