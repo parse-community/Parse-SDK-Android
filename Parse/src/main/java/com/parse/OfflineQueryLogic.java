@@ -231,12 +231,24 @@ import bolts.Task;
           && lhs.getLongitude() == rhs.getLongitude();
     }
 
-    return compare(constraint, value, new Decider() {
-      @Override
-      public boolean decide(Object constraint, Object value) {
-        return constraint.equals(value);
-      }
-    });
+    Decider decider;
+    if (isStartsWithRegex(constraint)) {
+      decider = new Decider() {
+        @Override
+        public boolean decide(Object constraint, Object value) {
+          return ((String) value).matches(constraint.toString());
+        }
+      };
+    } else {
+      decider = new Decider() {
+        @Override
+        public boolean decide(Object constraint, Object value) {
+          return constraint.equals(value);
+        }
+      };
+    }
+
+    return compare(constraint, value, decider);
   }
 
   /**
@@ -342,6 +354,13 @@ import bolts.Task;
     }
 
     if (constraint instanceof Collection) {
+      if (isAnyValueRegexStartsWith((Collection<?>) constraint)) {
+        constraint = cleanRegexStartsWith((Collection<?>) constraint);
+        if (constraint == null) {
+          throw new IllegalArgumentException("All values in $all queries must be of starting with regex or non regex.");
+        }
+      }
+
       for (Object requiredItem : (Collection<?>) constraint) {
         if (!matchesEqualConstraint(requiredItem, value)) {
           return false;
@@ -350,6 +369,68 @@ import bolts.Task;
       return true;
     }
     throw new IllegalArgumentException("Constraint type not supported for $all queries.");
+  }
+
+  /**
+   * Check if any of the collection constraints is a regex to match strings that starts with another
+   * string.
+   */
+  private static boolean isAnyValueRegexStartsWith(Collection<?> constraints) {
+    for (Object constraint : constraints) {
+      if (isStartsWithRegex(constraint)) {
+        return true;
+      }
+    };
+
+    return false;
+  }
+
+  /**
+   * Cleans all regex constraints. If any of the constraints is not a regex, then null is returned.
+   * All values in a $all constraint must be a starting with another string regex.
+   */
+  private static Collection<?> cleanRegexStartsWith(Collection<?> constraints) {
+    ArrayList<String> cleanedValues = new ArrayList<>();
+    for (Object constraint : constraints) {
+      String cleanedRegex = cleanRegexStartsWith((String) constraint);
+      if (cleanedRegex == null) {
+        return null;
+      }
+
+      cleanedValues.add(cleanedRegex);
+    }
+
+    return cleanedValues;
+  }
+
+  /**
+   * Creates a regex pattern to match a substring at the beginning of another string.
+   *
+   * If given string is not a regex to match a string at the beginning of another string, then null
+   * is returned.
+   */
+  private static String cleanRegexStartsWith(String regex) {
+    if (!isStartsWithRegex(regex)) {
+      return null;
+    }
+
+    // remove all instances of \Q and \E from the remaining text & escape single quotes
+    String literalizedString = regex.replaceAll("([^\\\\])(\\\\E)", "$1")
+        .replaceAll("([^\\\\])(\\\\Q)", "$1")
+        .replaceAll("^\\\\E", "")
+        .replaceAll("^\\\\Q", "")
+        .replaceAll("([^'])'", "$1''")
+        .replaceAll("^'([^'])", "''$1");
+
+    return '^' + literalizedString + ".*";
+  }
+
+  /**
+   * Check if given constraint is a regex to match strings that starts with another string.
+   */
+  private static boolean isStartsWithRegex(Object constraint) {
+    return constraint != null && constraint instanceof String &&
+        ((String)constraint).startsWith("^");
   }
 
   /**
