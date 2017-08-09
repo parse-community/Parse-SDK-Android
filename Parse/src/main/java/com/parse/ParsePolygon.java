@@ -97,7 +97,7 @@ public class ParsePolygon implements Parcelable {
    *          The polygon's coordinates.
    */
   public void setCoordinates(List<ParseGeoPoint> coords) {
-    this.coordinates = ParsePolygon._validate(coords);
+    this.coordinates = ParsePolygon.validate(coords);
   }
 
   /**
@@ -110,7 +110,7 @@ public class ParsePolygon implements Parcelable {
   /**
    * Get converts coordinate to JSONArray.
    */
-  public JSONArray coordinatesToJSONArray() throws JSONException{
+  protected JSONArray coordinatesToJSONArray() throws JSONException{
     JSONArray points = new JSONArray();
     for (ParseGeoPoint coordinate : coordinates) {
       JSONArray point = new JSONArray();
@@ -163,7 +163,7 @@ public class ParsePolygon implements Parcelable {
   /**
    * Throws exception for invalid coordinates.
    */
-  static List<ParseGeoPoint> _validate(List<ParseGeoPoint> coords) {
+  static List<ParseGeoPoint> validate(List<ParseGeoPoint> coords) {
     if (coords.size() < 3) {
       throw new IllegalArgumentException("Polygon must have at least 3 GeoPoints");
     }
