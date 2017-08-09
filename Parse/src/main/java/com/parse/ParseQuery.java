@@ -468,6 +468,12 @@ public class ParseQuery<T extends ParseObject> {
         return addCondition(key, "$within", dictionary);
       }
 
+      public Builder<T> whereGeoIntersects(String key, ParseGeoPoint point) {
+        Map<String, ParseGeoPoint> dictionary = new HashMap<>();
+        dictionary.put("$point", point);
+        return addCondition(key, "$geoIntersects", dictionary);
+      }
+
       public Builder<T> addCondition(String key, String condition,
           Collection<? extends Object> value) {
         return addConditionInternal(key, condition, Collections.unmodifiableCollection(value));
@@ -1839,6 +1845,23 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> whereWithinGeoBox(
       String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
     builder.whereWithin(key, southwest, northeast);
+    return this;
+  }
+
+  /**
+   * Add a constraint to the query that requires a particular key's
+   * coordinates that contains a {@link ParseGeoPoint}s
+   *
+   * (Requires parse-server@2.6.0)
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param point
+   *          ParseGeoPoint
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> wherePolygonContains(String key, ParseGeoPoint point) {
+    builder.whereGeoIntersects(key, point);
     return this;
   }
 

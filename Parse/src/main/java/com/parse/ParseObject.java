@@ -3458,6 +3458,24 @@ public class ParseObject implements Parcelable {
   }
 
   /**
+   * Access a {@link ParsePolygon} value.
+   *
+   * @param key
+   *          The key to access the value for
+   * @return {@code null} if there is no such key or if it is not a {@link ParsePolygon}.
+   */
+  public ParsePolygon getParsePolygon(String key) {
+    synchronized (mutex) {
+      checkGetAccess(key);
+      Object value = estimatedData.get(key);
+      if (!(value instanceof ParsePolygon)) {
+        return null;
+      }
+      return (ParsePolygon) value;
+    }
+  }
+
+  /**
    * Access the {@link ParseACL} governing this object.
    */
   public ParseACL getACL() {
