@@ -1,6 +1,7 @@
 branches:
   only:
     - master
+    - /^\d+\.\d+\.\d+$/ # regex
 
 language: android
 sudo: false
@@ -20,7 +21,7 @@ before_install:
     - pip install --user codecov
 
 script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport --info
+  - ./gradlew clean testDebugUnitTest jacocoTestReport
 
 after_success:
   - ./gradlew coveralls

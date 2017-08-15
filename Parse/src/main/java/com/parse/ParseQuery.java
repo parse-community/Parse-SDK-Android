@@ -473,6 +473,12 @@ public class ParseQuery<T extends ParseObject> {
         dictionary.put("$polygon", points);
         return addCondition(key, "$geoWithin", dictionary);
       }
+      
+      public Builder<T> whereGeoIntersects(String key, ParseGeoPoint point) {
+        Map<String, ParseGeoPoint> dictionary = new HashMap<>();
+        dictionary.put("$point", point);
+        return addCondition(key, "$geoIntersects", dictionary);
+      }
 
       public Builder<T> addCondition(String key, String condition,
           Collection<? extends Object> value) {
@@ -945,7 +951,7 @@ public class ParseQuery<T extends ParseObject> {
   /* package */ State.Builder<T> getBuilder() {
     return builder;
   }
-
+  
   /**
    * Sets the user to be used for this query.
    *
@@ -1866,6 +1872,23 @@ public class ParseQuery<T extends ParseObject> {
     builder.whereGeoWithin(key, points);
     return this;
   }
+  /**
+   * Add a constraint to the query that requires a particular key's
+   * coordinates that contains a {@link ParseGeoPoint}s
+   *
+   * (Requires parse-server@2.6.0)
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param point
+   *          ParseGeoPoint
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> wherePolygonContains(String key, ParseGeoPoint point) {
+    builder.whereGeoIntersects(key, point);
+    return this;
+  }
+
   /**
    * Add a regular expression constraint for finding string values that match the provided regular
    * expression.
