@@ -40,6 +40,7 @@ import java.util.Map;
         || value instanceof ParseACL
         || value instanceof ParseFile
         || value instanceof ParseGeoPoint
+        || value instanceof ParsePolygon
         || value instanceof ParseRelation;
   }
 
@@ -81,6 +82,14 @@ import java.util.Map;
         json.put("__type", "GeoPoint");
         json.put("latitude", point.getLatitude());
         json.put("longitude", point.getLongitude());
+        return json;
+      }
+
+      if (object instanceof ParsePolygon) {
+        ParsePolygon polygon = (ParsePolygon) object;
+        JSONObject json = new JSONObject();
+        json.put("__type", "Polygon");
+        json.put("coordinates", polygon.coordinatesToJSONArray());
         return json;
       }
 
