@@ -105,7 +105,7 @@ import java.util.Set;
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-          list.set(i, decoder.decode(source));
+          list.add(i, decoder.decode(source));
         }
         return new ParseAddOperation(list);
       }
@@ -123,7 +123,7 @@ import java.util.Set;
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-          list.set(i, decoder.decode(source));
+          list.add(i, decoder.decode(source));
         }
         return new ParseAddUniqueOperation(list);
       }
@@ -141,7 +141,7 @@ import java.util.Set;
         int size = source.readInt();
         List<Object> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-          list.set(i, decoder.decode(source));
+          list.add(i, decoder.decode(source));
         }
         return new ParseRemoveOperation(list);
       }
