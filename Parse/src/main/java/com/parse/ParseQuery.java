@@ -1863,14 +1863,17 @@ public class ParseQuery<T extends ParseObject> {
    *
    * @param key
    *          The key to be constrained.
-   * @param points
-   *          Array of ParseGeoPoint
+   * @param value
+   *          List<ParseGeoPoint> or ParsePolygon
    * @return this, so you can chain this call.
    */
-  public ParseQuery<T> whereWithinPolygon(
-          String key, List<ParseGeoPoint> points) {
+  public ParseQuery<T> whereWithinPolygon(String key, List<ParseGeoPoint> points) {
     builder.whereGeoWithin(key, points);
     return this;
+  }
+
+  public ParseQuery<T> whereWithinPolygon(String key, ParsePolygon polygon) {
+    return whereWithinPolygon(key, polygon.getCoordinates());
   }
 
   /**
