@@ -6,9 +6,50 @@
 
 [![Join Chat](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/ParsePlatform/Chat)
 
-
 A library that gives you access to the powerful Parse cloud platform from your Android app.
-For more information about Parse and its features, see [the website][parseplatform.org] and [getting started][guide].
+For more information about Parse and its features, see [the website][parseplatform.org], [blog][blog] and [getting started][guide].
+
+
+
+
+## Getting Started
+### Installation
+- **Gradle**
+
+  Add the dependency in Gradle:
+
+  ```groovy
+  dependencies {
+    compile 'com.parse:parse-android:1.15.8'
+  }
+  ```
+
+  Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
+
+- **Compiling for yourself**
+
+  If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release](releases). Open the project in Android Studio and run the following commands:
+  
+  ```
+  ./gradlew clean jarRelease
+  ```
+  Outputs can be found in `Parse/build/libs/`
+  
+  If you want to manually compile the SDK, clone it locally, and run the following commands in the root directory of the repository:
+
+      # To pull in extra dependencies (Bolts and OCMock)
+      git submodule update --init --recursive
+
+      # To install all the gems
+      bundle install
+
+      # Build & Package the Frameworks
+      rake package:frameworks
+
+    Compiled frameworks will be in 2 archives: `Parse-iOS.zip` and `Parse-OSX.zip` inside the `build/release` folder, and you can link them as you'd please.
+    
+    
+    
 
 ## Download
 Add the dependency in Gradle:
@@ -43,7 +84,7 @@ Results can be found in `Parse/build/reports/`
 Results can be found in `Parse/build/reports/`
 
 ## How Do I Contribute?
-We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
+We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](contributing).
 
 ## Other Parse Projects
 
@@ -65,6 +106,7 @@ We want to make contributing to this project as easy and transparent as possible
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
  [parseplatform.org]: http://parseplatform.org/
+ [blog]: http://blog.parse.com/
  [guide]: http://docs.parseplatform.org/android/guide/
 
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
@@ -84,3 +126,6 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE
+
+ [releases]: https://github.com/parse-community/Parse-SDK-Android/releases
+ [contributing]: https://github.com/parse-community/Parse-SDK-Android/blob/master/CONTRIBUTING.md
