@@ -26,27 +26,16 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
 
-- **Option 2:** Compiling for yourself
+- **Option 2:** Compiling for yourself into JAR/AAR file
 
-  If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release](releases). Open the project in Android Studio and run the following commands:
+  If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release](releases). Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
   
   ```
   ./gradlew clean jarRelease
   ```
-  Outputs can be found in `Parse/build/libs/`
+  Output file can be found in `Parse/build/outputs/` with extension .aar
   
-  If you want to manually compile the SDK, clone it locally, and run the following commands in the root directory of the repository:
-
-      # To pull in extra dependencies (Bolts and OCMock)
-      git submodule update --init --recursive
-
-      # To install all the gems
-      bundle install
-
-      # Build & Package the Frameworks
-      rake package:frameworks
-
-    Compiled frameworks will be in 2 archives: `Parse-iOS.zip` and `Parse-OSX.zip` inside the `build/release` folder, and you can link them as you'd please.
+  You can link to your project to your AAR file as you please.
     
  ### Setup
 - **Option 1:** Setup in the Manifest
@@ -108,25 +97,8 @@ For more information about Parse and its features, see [the website][parseplatfo
  </application>
  ```
 
-## Download
-Add the dependency in Gradle:
-
-```groovy
-dependencies {
-  compile 'com.parse:parse-android:1.15.8'
-}
-```
-
-Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
-
 ## Usage
 Everything can done through the supplied gradle wrapper:
-
-### Compile a JAR
-```
-./gradlew clean jarRelease
-```
-Outputs can be found in `Parse/build/libs/`
 
 ### Run the Tests
 ```
