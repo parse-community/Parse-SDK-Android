@@ -23,7 +23,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
 
-- **Option 2:** Compiling for yourself into JAR/AAR file
+- **Option 2:** Compiling for yourself into AAR file
 
   If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release][releases]. Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
   
