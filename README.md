@@ -157,4 +157,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [license-link]: https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE
 
  [releases]: https://github.com/parse-community/Parse-SDK-Android/releases
- [contributing]: https://github.com/parse-community/Parse-SDK-Android/blob/master/CONTRIBUTING.md
+ [contributing]: CONTRIBUTING.md
