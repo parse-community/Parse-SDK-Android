@@ -481,6 +481,23 @@ import bolts.Task;
   }
 
   /**
+   * Matches $geoWithin constraints.
+   */
+  private static boolean matchesGeoWithinConstraint(Object constraint, Object value)
+      throws ParseException {
+    if (value == null || value == JSONObject.NULL) {
+      return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    HashMap<String, List<ParseGeoPoint>> constraintMap =
+      (HashMap<String, List<ParseGeoPoint>>) constraint;
+    List<ParseGeoPoint> points = constraintMap.get("$polygon");
+    ParsePolygon polygon = new ParsePolygon(points);
+    ParseGeoPoint point = (ParseGeoPoint) value;
+    return polygon.containsPoint(point);
+  }
+  /**
    * Returns true iff the given value matches the given operator and constraint.
    *
    * @throws UnsupportedOperationException
@@ -534,6 +551,9 @@ import bolts.Task;
 
       case "$within":
         return matchesWithinConstraint(constraint, value);
+
+      case "$geoWithin":
+        return matchesGeoWithinConstraint(constraint, value);
 
       case "$geoIntersects":
         return matchesGeoIntersectsConstraint(constraint, value);
