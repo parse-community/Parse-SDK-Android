@@ -72,8 +72,9 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 
  [build-status-svg]: https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master
  [build-status-link]: https://travis-ci.org/parse-community/Parse-SDK-Android
- [coverage-status-svg]: https://coveralls.io/repos/parse-community/Parse-SDK-Android/badge.svg?branch=master&service=github
- [coverage-status-link]: https://coveralls.io/github/parse-community/Parse-SDK-Android?branch=master
+ 
+ [coverage-status-svg]: https://img.shields.io/codecov/c/github/parse-community/Parse-SDK-Android/master.svg
+ [coverage-status-link]: https://codecov.io/github/parse-community/Parse-SDK-Android?branch=master
  [maven-svg]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android/badge.svg?style=flat
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
 
