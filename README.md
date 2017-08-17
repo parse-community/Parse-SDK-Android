@@ -14,9 +14,9 @@ For more information about Parse and its features, see [the website][parseplatfo
 
 ## Getting Started
 ### Installation
-- **Gradle**
+- **Option 1:** Gradle
 
-  Add the dependency in Gradle:
+  Add dependency to the application level `build.gradle` file.
 
   ```groovy
   dependencies {
@@ -26,7 +26,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
 
-- **Compiling for yourself**
+- **Option 2:** Compiling for yourself
 
   If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release](releases). Open the project in Android Studio and run the following commands:
   
@@ -48,8 +48,65 @@ For more information about Parse and its features, see [the website][parseplatfo
 
     Compiled frameworks will be in 2 archives: `Parse-iOS.zip` and `Parse-OSX.zip` inside the `build/release` folder, and you can link them as you'd please.
     
-    
-    
+ ### Setup
+- **Option 1:** Setup in the Manifest
+
+  You may define `com.parse.SERVER_URL` and `com.parse.APPLICATION_ID` meta-data in your `AndroidManifest.xml`:
+
+  ```
+  <application ...>
+    <meta-data
+      android:name="com.parse.SERVER_URL"
+      android:value="@string/parse_server_url" />
+    <meta-data
+      android:name="com.parse.APPLICATION_ID"
+      android:value="@string/parse_app_id" />
+    ...
+  </application>
+  ```
+  
+  Initialize Parse in a custom class that extends `Application`:
+  ```
+  import com.parse.Parse;
+  import android.app.Application;
+
+  public class App extends Application {
+    @Override
+    public void onCreate() {
+      super.onCreate();
+      Parse.initialize(this);
+    }
+  }
+  ```
+  
+- **Option 2:** Setup in the Application
+  
+  Initialize Parse in a custom class that extends `Application`:
+  ```
+  import com.parse.Parse;
+  import android.app.Application;
+
+  public class App extends Application {
+    @Override
+    public void onCreate() {
+      super.onCreate();
+      Parse.initialize(new Parse.Configuration.Builder(this)
+        .applicationId("YOUR_APP_ID")
+        .server("http://localhost:1337/parse/")
+        .build()
+      );
+    }
+  }
+  ```
+  
+ For either option, the custom `Application` class must be registered in `AndroidManifest.xml`:
+ ```
+ <application
+   android:name=".App"
+   ...>
+   ...
+ </application>
+ ```
 
 ## Download
 Add the dependency in Gradle:
