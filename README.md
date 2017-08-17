@@ -9,9 +9,6 @@
 A library that gives you access to the powerful Parse cloud platform from your Android app.
 For more information about Parse and its features, see [the website][parseplatform.org], [blog][blog] and [getting started][guide].
 
-
-
-
 ## Getting Started
 ### Installation
 - **Option 1:** Gradle
@@ -28,7 +25,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
 - **Option 2:** Compiling for yourself into JAR/AAR file
 
-  If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release](releases). Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
+  If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release][releases]. Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
   
   ```
   ./gradlew clean jarRelease
@@ -113,7 +110,7 @@ Results can be found in `Parse/build/reports/`
 Results can be found in `Parse/build/reports/`
 
 ## How Do I Contribute?
-We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](contributing).
+We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines][contributing].
 
 ## Other Parse Projects
 
