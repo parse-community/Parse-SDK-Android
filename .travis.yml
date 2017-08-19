@@ -14,8 +14,8 @@ android:
     - tools
     - platform-tools
     - build-tools-25.0.3
-    - android-25
-    - doc-25
+    - android-26
+    - doc-26
 
 before_install:
     - pip install --user codecov
