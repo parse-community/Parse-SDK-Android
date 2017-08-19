@@ -94,6 +94,9 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   /** The name of the meta-data field used to override the icon used in Notifications. */
   public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
 
+  /** The name of the meta-data field used to override the channel id used in Notifications. */
+  public static final String PROPERTY_PUSH_CHANNEL = "com.parse.push.notification_channel";
+
   protected static final int SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT = 38;
 
   /**
@@ -261,6 +264,27 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   }
 
   /**
+   * Retrieves the channel id to be used in a {@link Notification}. The default implementation uses
+   * the channelId specified by {@code com.parse.push.notification_channel} {@code meta-data} in your
+   * {@code AndroidManifest.xml} with a fallback to "parse_push".
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param intent
+   *      An {@code Intent} containing the channel and data of the current push notification.
+   * @return
+   *      The string of the channel name
+   */
+  protected String getChannelId(Context context, Intent intent) {
+    Bundle metaData = ManifestInfo.getApplicationMetadata(context);
+    String channelId = null;
+    if (metaData != null) {
+      channelId = metaData.getString(PROPERTY_PUSH_CHANNEL);
+    }
+    return channelId == null ? "parse_push" : channelId;
+  }
+
+  /**
    * Retrieves the small icon to be used in a {@link Notification}. The default implementation uses
    * the icon specified by {@code com.parse.push.notification_icon} {@code meta-data} in your
    * {@code AndroidManifest.xml} with a fallback to the launcher icon for this package. To conform
@@ -366,7 +390,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
 
     // The purpose of setDefaults(Notification.DEFAULT_ALL) is to inherit notification properties
     // from system defaults
-    NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context);
+    NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context, this.getChannelId(context, intent));
     parseBuilder.setContentTitle(title)
         .setContentText(alert)
         .setTicker(tickerText)

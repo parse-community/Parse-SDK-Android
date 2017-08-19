@@ -57,7 +57,7 @@ import android.widget.RemoteViews;
     @Override
     public Notification build(Builder builder) {
       Notification result = builder.mNotification;
-      NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(builder.mContext);
+      NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(builder.mContext, builder.mChannelId);
       newBuilder.setContentTitle(builder.mContentTitle);
       newBuilder.setContentText(builder.mContentText);
       newBuilder.setContentIntent(builder.mContentIntent);
@@ -95,6 +95,9 @@ import android.widget.RemoteViews;
           }
         }
       }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        postJellyBeanBuilder.setChannelId(b.mChannelId);
+      }
       return postJellyBeanBuilder.build();
     }
   }
@@ -117,6 +120,7 @@ import android.widget.RemoteViews;
     private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
 
     Context mContext;
+    String mChannelId;
 
     CharSequence mContentTitle;
     CharSequence mContentText;
@@ -138,8 +142,9 @@ import android.widget.RemoteViews;
      *      RemoteViews. The Context will not be held past the lifetime of this
      *      Builder object.
      */
-    public Builder(Context context) {
+    public Builder(Context context, String channelId) {
       mContext = context;
+      mChannelId = channelId;
 
       // Set defaults to match the defaults of a Notification
       mNotification.when = System.currentTimeMillis();
