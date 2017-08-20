@@ -10,6 +10,8 @@ package com.parse;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -94,9 +96,6 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   /** The name of the meta-data field used to override the icon used in Notifications. */
   public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
 
-  /** The name of the meta-data field used to override the channel id used in Notifications. */
-  public static final String PROPERTY_PUSH_CHANNEL = "com.parse.push.notification_channel";
-
   protected static final int SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT = 38;
 
   /**
@@ -168,9 +167,10 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     }
 
     Notification notification = getNotification(context, intent);
+    NotificationChannel notificationChannel = getNotificationChannel(context, intent);
 
     if (notification != null) {
-      ParseNotificationManager.getInstance().showNotification(context, notification);
+      ParseNotificationManager.getInstance().showNotification(context, notification, notificationChannel);
     }
   }
 
@@ -264,24 +264,21 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   }
 
   /**
-   * Retrieves the channel id to be used in a {@link Notification}. The default implementation uses
-   * the channelId specified by {@code com.parse.push.notification_channel} {@code meta-data} in your
-   * {@code AndroidManifest.xml} with a fallback to "parse_push".
+   * Retrieves the channel to be used in a {@link Notification} if API >= 26, if not null. The default returns a new channel
+   * with id "parse_push", name "Push notifications" and default importance.
    *
    * @param context
    *      The {@code Context} in which the receiver is running.
    * @param intent
    *      An {@code Intent} containing the channel and data of the current push notification.
    * @return
-   *      The string of the channel name
+   *      The notification channel
    */
-  protected String getChannelId(Context context, Intent intent) {
-    Bundle metaData = ManifestInfo.getApplicationMetadata(context);
-    String channelId = null;
-    if (metaData != null) {
-      channelId = metaData.getString(PROPERTY_PUSH_CHANNEL);
+  protected NotificationChannel getNotificationChannel(Context context, Intent intent) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      return new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
     }
-    return channelId == null ? "parse_push" : channelId;
+    return null;
   }
 
   /**
@@ -388,9 +385,11 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     PendingIntent pDeleteIntent = PendingIntent.getBroadcast(context, deleteIntentRequestCode,
         deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+    NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+
     // The purpose of setDefaults(Notification.DEFAULT_ALL) is to inherit notification properties
     // from system defaults
-    NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context, this.getChannelId(context, intent));
+    NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context);
     parseBuilder.setContentTitle(title)
         .setContentText(alert)
         .setTicker(tickerText)
@@ -399,6 +398,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         .setContentIntent(pContentIntent)
         .setDeleteIntent(pDeleteIntent)
         .setAutoCancel(true)
+        .setNotificationChannel(notificationChannel)
         .setDefaults(Notification.DEFAULT_ALL);
     if (alert != null
         && alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {

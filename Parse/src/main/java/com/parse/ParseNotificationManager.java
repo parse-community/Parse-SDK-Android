@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -20,6 +21,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.SparseIntArray;
 
@@ -48,7 +50,7 @@ import android.util.SparseIntArray;
     return notificationCount.get();
   }
   
-  public void showNotification(Context context, Notification notification) {
+  public void showNotification(Context context, Notification notification, NotificationChannel notificationChannel) {
     if (context != null && notification != null) {
       notificationCount.incrementAndGet();
       
@@ -59,6 +61,10 @@ import android.util.SparseIntArray;
         
         // Pick an id that probably won't overlap anything
         int notificationId = (int)System.currentTimeMillis();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+          nm.createNotificationChannel(notificationChannel);
+        }
 
         try {
           nm.notify(notificationId, notification);

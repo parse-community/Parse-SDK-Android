@@ -18,6 +18,7 @@ package com.parse;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -57,7 +58,7 @@ import android.widget.RemoteViews;
     @Override
     public Notification build(Builder builder) {
       Notification result = builder.mNotification;
-      NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(builder.mContext, builder.mChannelId);
+      NotificationCompat.Builder newBuilder = new NotificationCompat.Builder(builder.mContext);
       newBuilder.setContentTitle(builder.mContentTitle);
       newBuilder.setContentText(builder.mContentText);
       newBuilder.setContentIntent(builder.mContentIntent);
@@ -96,7 +97,7 @@ import android.widget.RemoteViews;
         }
       }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        postJellyBeanBuilder.setChannelId(b.mChannelId);
+        postJellyBeanBuilder.setChannelId(b.mNotificationChannel.getId());
       }
       return postJellyBeanBuilder.build();
     }
@@ -120,7 +121,6 @@ import android.widget.RemoteViews;
     private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
 
     Context mContext;
-    String mChannelId;
 
     CharSequence mContentTitle;
     CharSequence mContentText;
@@ -128,6 +128,7 @@ import android.widget.RemoteViews;
     Bitmap mLargeIcon;
     int mPriority;
     Style mStyle;
+    NotificationChannel mNotificationChannel;
 
     Notification mNotification = new Notification();
 
@@ -142,9 +143,8 @@ import android.widget.RemoteViews;
      *      RemoteViews. The Context will not be held past the lifetime of this
      *      Builder object.
      */
-    public Builder(Context context, String channelId) {
+    public Builder(Context context) {
       mContext = context;
-      mChannelId = channelId;
 
       // Set defaults to match the defaults of a Notification
       mNotification.when = System.currentTimeMillis();
@@ -190,6 +190,14 @@ import android.widget.RemoteViews;
      */
     public Builder setContentTitle(CharSequence title) {
       mContentTitle = limitCharSequenceLength(title);
+      return this;
+    }
+
+    /**
+     * Set the notification channel of the notification, in a standard notification.
+     */
+    public Builder setNotificationChannel(NotificationChannel channel) {
+      mNotificationChannel = channel;
       return this;
     }
 
