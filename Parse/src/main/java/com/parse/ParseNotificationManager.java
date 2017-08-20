@@ -62,6 +62,7 @@ import android.util.SparseIntArray;
         // Pick an id that probably won't overlap anything
         int notificationId = (int)System.currentTimeMillis();
 
+        // Android doesn't recreate a new channel if the properties of the channel hasn't changed
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
           nm.createNotificationChannel(notificationChannel);
         }
