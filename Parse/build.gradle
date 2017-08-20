@@ -51,7 +51,7 @@ android {
 }
 
 ext {
-    okhttpVersion = '3.8.0'
+    okhttpVersion = '3.8.1'
 }
 
 dependencies {
