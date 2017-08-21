@@ -97,7 +97,7 @@ import android.widget.RemoteViews;
         }
       }
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        postJellyBeanBuilder.setChannelId(b.mNotificationChannel.getId());
+        postJellyBeanBuilder.setChannelId(b.mNotificationChannelId);
       }
       return postJellyBeanBuilder.build();
     }
@@ -128,7 +128,7 @@ import android.widget.RemoteViews;
     Bitmap mLargeIcon;
     int mPriority;
     Style mStyle;
-    NotificationChannel mNotificationChannel;
+    String mNotificationChannelId;
 
     Notification mNotification = new Notification();
 
@@ -196,8 +196,8 @@ import android.widget.RemoteViews;
     /**
      * Set the notification channel of the notification, in a standard notification.
      */
-    public Builder setNotificationChannel(NotificationChannel channel) {
-      mNotificationChannel = channel;
+    public Builder setNotificationChannel(String notificationChannelId) {
+      mNotificationChannelId = notificationChannelId;
       return this;
     }
 

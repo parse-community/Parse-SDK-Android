@@ -416,7 +416,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel notificationChannel = getNotificationChannel(context, intent);
       createNotificationChannel(context, notificationChannel);
-      parseBuilder.setNotificationChannel(notificationChannel);
+      parseBuilder.setNotificationChannel(notificationChannel.getId());
     }
 
     if (alert != null
