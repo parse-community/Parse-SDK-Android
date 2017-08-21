@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -167,10 +168,9 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     }
 
     Notification notification = getNotification(context, intent);
-    NotificationChannel notificationChannel = getNotificationChannel(context, intent);
 
     if (notification != null) {
-      ParseNotificationManager.getInstance().showNotification(context, notification, notificationChannel);
+      ParseNotificationManager.getInstance().showNotification(context, notification);
     }
   }
 
@@ -274,11 +274,14 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
    * @return
    *      The notification channel
    */
+  @TargetApi(Build.VERSION_CODES.O)
   protected NotificationChannel getNotificationChannel(Context context, Intent intent) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      return new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
-    }
-    return null;
+    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    NotificationChannel notificationChannel = new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
+
+    // Android doesn't create a new channel if the properties of the channel hasn't changed
+    nm.createNotificationChannel(notificationChannel);
+    return notificationChannel;
   }
 
   /**
@@ -385,7 +388,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     PendingIntent pDeleteIntent = PendingIntent.getBroadcast(context, deleteIntentRequestCode,
         deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-    NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+
 
     // The purpose of setDefaults(Notification.DEFAULT_ALL) is to inherit notification properties
     // from system defaults
@@ -398,8 +401,13 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         .setContentIntent(pContentIntent)
         .setDeleteIntent(pDeleteIntent)
         .setAutoCancel(true)
-        .setNotificationChannel(notificationChannel)
         .setDefaults(Notification.DEFAULT_ALL);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+      parseBuilder.setNotificationChannel(notificationChannel);
+    }
+
     if (alert != null
         && alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
       parseBuilder.setStyle(new NotificationCompat.Builder.BigTextStyle().bigText(alert));

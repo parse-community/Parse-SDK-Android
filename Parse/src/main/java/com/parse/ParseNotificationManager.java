@@ -50,7 +50,7 @@ import android.util.SparseIntArray;
     return notificationCount.get();
   }
   
-  public void showNotification(Context context, Notification notification, NotificationChannel notificationChannel) {
+  public void showNotification(Context context, Notification notification) {
     if (context != null && notification != null) {
       notificationCount.incrementAndGet();
       
@@ -61,11 +61,6 @@ import android.util.SparseIntArray;
         
         // Pick an id that probably won't overlap anything
         int notificationId = (int)System.currentTimeMillis();
-
-        // Android doesn't recreate a new channel if the properties of the channel hasn't changed
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-          nm.createNotificationChannel(notificationChannel);
-        }
 
         try {
           nm.notify(notificationId, notification);
