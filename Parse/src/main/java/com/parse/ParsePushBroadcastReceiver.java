@@ -276,12 +276,22 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
    */
   @TargetApi(Build.VERSION_CODES.O)
   protected NotificationChannel getNotificationChannel(Context context, Intent intent) {
-    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    NotificationChannel notificationChannel = new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
+    return new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
+  }
 
-    // Android doesn't create a new channel if the properties of the channel hasn't changed
+  /**
+   * Creates the notification channel with the NotificationManager. Channel is not recreated
+   * if the channel properties are unchanged.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param notificationChannel
+   *      The {@code NotificationChannel} to be created.
+   */
+  @TargetApi(Build.VERSION_CODES.O)
+  protected void createNotificationChannel(Context context, NotificationChannel notificationChannel) {
+    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     nm.createNotificationChannel(notificationChannel);
-    return notificationChannel;
   }
 
   /**
@@ -405,6 +415,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+      createNotificationChannel(context, notificationChannel);
       parseBuilder.setNotificationChannel(notificationChannel);
     }
 
