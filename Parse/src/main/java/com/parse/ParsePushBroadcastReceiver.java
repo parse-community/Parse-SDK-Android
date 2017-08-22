@@ -8,8 +8,11 @@
  */
 package com.parse;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -261,6 +264,37 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   }
 
   /**
+   * Retrieves the channel to be used in a {@link Notification} if API >= 26, if not null. The default returns a new channel
+   * with id "parse_push", name "Push notifications" and default importance.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param intent
+   *      An {@code Intent} containing the channel and data of the current push notification.
+   * @return
+   *      The notification channel
+   */
+  @TargetApi(Build.VERSION_CODES.O)
+  protected NotificationChannel getNotificationChannel(Context context, Intent intent) {
+    return new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
+  }
+
+  /**
+   * Creates the notification channel with the NotificationManager. Channel is not recreated
+   * if the channel properties are unchanged.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param notificationChannel
+   *      The {@code NotificationChannel} to be created.
+   */
+  @TargetApi(Build.VERSION_CODES.O)
+  protected void createNotificationChannel(Context context, NotificationChannel notificationChannel) {
+    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    nm.createNotificationChannel(notificationChannel);
+  }
+
+  /**
    * Retrieves the small icon to be used in a {@link Notification}. The default implementation uses
    * the icon specified by {@code com.parse.push.notification_icon} {@code meta-data} in your
    * {@code AndroidManifest.xml} with a fallback to the launcher icon for this package. To conform
@@ -364,6 +398,8 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     PendingIntent pDeleteIntent = PendingIntent.getBroadcast(context, deleteIntentRequestCode,
         deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+
+
     // The purpose of setDefaults(Notification.DEFAULT_ALL) is to inherit notification properties
     // from system defaults
     NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context);
@@ -376,6 +412,13 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         .setDeleteIntent(pDeleteIntent)
         .setAutoCancel(true)
         .setDefaults(Notification.DEFAULT_ALL);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+      createNotificationChannel(context, notificationChannel);
+      parseBuilder.setNotificationChannel(notificationChannel.getId());
+    }
+
     if (alert != null
         && alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
       parseBuilder.setStyle(new NotificationCompat.Builder.BigTextStyle().bigText(alert));
