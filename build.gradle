@@ -2,6 +2,7 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
@@ -17,7 +18,7 @@ plugins {
 allprojects {
     repositories {
         jcenter()
-        maven { url "https://maven.google.com" }
+        google()
     }
 }
 
@@ -25,8 +26,8 @@ ext {
     compileSdkVersion = 26
     buildToolsVersion = "26.0.1"
 
-    supportLibVersion = '25.3.1'
+    supportLibVersion = '26.0.1'
 
-    minSdkVersion = 9
+    minSdkVersion = 14
     targetSdkVersion = 26
 }
