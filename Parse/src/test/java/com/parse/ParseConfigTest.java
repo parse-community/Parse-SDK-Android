@@ -48,16 +48,12 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
-public class ParseConfigTest {
+public class ParseConfigTest extends ResetPluginsParseTest {
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    super.setUp();
     ParseTestUtils.setTestParseUser();
-  }
-
-  @After
-  public void tearDown() {
-    ParseCorePlugins.getInstance().reset();
   }
 
   //region testConstructor

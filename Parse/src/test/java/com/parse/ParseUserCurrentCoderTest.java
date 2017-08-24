@@ -92,9 +92,6 @@ public class ParseUserCurrentCoderTest {
     Map<String, String> twitterAuthData = authData.get("twitter");
     assertEquals("twitterId", twitterAuthData.get("id"));
     assertEquals("twitterAccessToken", twitterAuthData.get("access_token"));
-    // Make sure objectJson does not have sessionToken and authData anymore
-    assertFalse(objectJson.has(KEY_SESSION_TOKEN));
-    assertFalse(objectJson.has(KEY_AUTH_DATA));
   }
 
   @Test
