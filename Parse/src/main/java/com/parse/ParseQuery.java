@@ -468,6 +468,18 @@ public class ParseQuery<T extends ParseObject> {
         return addCondition(key, "$within", dictionary);
       }
 
+      public Builder<T> whereGeoWithin(String key, List<ParseGeoPoint> points) {
+        Map<String, List<ParseGeoPoint>> dictionary = new HashMap<>();
+        dictionary.put("$polygon", points);
+        return addCondition(key, "$geoWithin", dictionary);
+      }
+
+      public Builder<T> whereGeoIntersects(String key, ParseGeoPoint point) {
+        Map<String, ParseGeoPoint> dictionary = new HashMap<>();
+        dictionary.put("$point", point);
+        return addCondition(key, "$geoIntersects", dictionary);
+      }
+
       public Builder<T> addCondition(String key, String condition,
           Collection<? extends Object> value) {
         return addConditionInternal(key, condition, Collections.unmodifiableCollection(value));
@@ -1839,6 +1851,45 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> whereWithinGeoBox(
       String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
     builder.whereWithin(key, southwest, northeast);
+    return this;
+  }
+
+  /**
+   * Adds a constraint to the query that requires a particular key's
+   * coordinates be contained within and on the bounds of a given polygon.
+   * Supports closed and open (last point is connected to first) paths
+   *
+   * Polygon must have at least 3 points
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param value
+   *          List<ParseGeoPoint> or ParsePolygon
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> whereWithinPolygon(String key, List<ParseGeoPoint> points) {
+    builder.whereGeoWithin(key, points);
+    return this;
+  }
+
+  public ParseQuery<T> whereWithinPolygon(String key, ParsePolygon polygon) {
+    return whereWithinPolygon(key, polygon.getCoordinates());
+  }
+
+  /**
+   * Add a constraint to the query that requires a particular key's
+   * coordinates that contains a {@link ParseGeoPoint}s
+   *
+   * (Requires parse-server@2.6.0)
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param point
+   *          ParseGeoPoint
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> wherePolygonContains(String key, ParseGeoPoint point) {
+    builder.whereGeoIntersects(key, point);
     return this;
   }
 

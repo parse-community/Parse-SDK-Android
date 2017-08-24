@@ -281,6 +281,44 @@ public class OfflineQueryLogicTest {
   }
 
   @Test
+  public void testMatchesEqualsWithPolygon() throws Exception {
+    List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+    points.add(new ParseGeoPoint(0,0));
+    points.add(new ParseGeoPoint(0,1));
+    points.add(new ParseGeoPoint(1,1));
+    points.add(new ParseGeoPoint(1,0));
+
+    ParsePolygon polygon = new ParsePolygon(points);
+    ParseObject object = new ParseObject("TestObject");
+    object.put("polygon", polygon);
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereEqualTo("polygon", polygon)
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    List<ParseGeoPoint> diff = new ArrayList<ParseGeoPoint>();
+    diff.add(new ParseGeoPoint(0,0));
+    diff.add(new ParseGeoPoint(0,10));
+    diff.add(new ParseGeoPoint(10,10));
+    diff.add(new ParseGeoPoint(10,0));
+    diff.add(new ParseGeoPoint(0,0));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereEqualTo("polygon", new ParsePolygon(diff))
+        .build();
+    assertFalse(matches(logic, query, object));
+
+    // Not Polygon
+    object = new ParseObject("TestObject");
+    object.put("polygon", "A");
+    assertFalse(matches(logic, query, object));
+  }
+
+  @Test
   public void testMatchesEqualsWithNumbers() throws ParseException {
     OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
@@ -501,6 +539,77 @@ public class OfflineQueryLogicTest {
     assertTrue(matches(logic, query, object));
 
     object.put("point", fb);
+    assertFalse(matches(logic, query, object));
+
+    // Non-existant key
+    object = new ParseObject("TestObject");
+    assertFalse(matches(logic, query, object));
+  }
+
+  @Test
+  public void testMatchesGeoIntersects() throws ParseException {
+    List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+    points.add(new ParseGeoPoint(0,0));
+    points.add(new ParseGeoPoint(0,1));
+    points.add(new ParseGeoPoint(1,1));
+    points.add(new ParseGeoPoint(1,0));
+
+    ParseGeoPoint inside = new ParseGeoPoint(0.5,0.5);
+    ParseGeoPoint outside = new ParseGeoPoint(10,10);
+
+    ParsePolygon polygon = new ParsePolygon(points);
+
+    ParseObject object = new ParseObject("TestObject");
+    object.put("polygon", polygon);
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereGeoIntersects("polygon", inside)
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereGeoIntersects("polygon", outside)
+        .build();
+    assertFalse(matches(logic, query, object));
+
+    // Non-existant key
+    object = new ParseObject("TestObject");
+    assertFalse(matches(logic, query, object));
+  }
+
+  @Test
+  public void testMatchesGeoWithin() throws ParseException {
+    List<ParseGeoPoint> smallBox = new ArrayList<ParseGeoPoint>();
+    smallBox.add(new ParseGeoPoint(0,0));
+    smallBox.add(new ParseGeoPoint(0,1));
+    smallBox.add(new ParseGeoPoint(1,1));
+    smallBox.add(new ParseGeoPoint(1,0));
+
+    List<ParseGeoPoint> largeBox = new ArrayList<ParseGeoPoint>();
+    largeBox.add(new ParseGeoPoint(0,0));
+    largeBox.add(new ParseGeoPoint(0,10));
+    largeBox.add(new ParseGeoPoint(10,10));
+    largeBox.add(new ParseGeoPoint(10,0));
+
+    ParseGeoPoint point = new ParseGeoPoint(5,5);
+
+    //ParsePolygon polygon = new ParsePolygon(points);
+
+    ParseObject object = new ParseObject("TestObject");
+    object.put("point", point);
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereGeoWithin("point", largeBox)
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .whereGeoWithin("point", smallBox)
+        .build();
     assertFalse(matches(logic, query, object));
 
     // Non-existant key

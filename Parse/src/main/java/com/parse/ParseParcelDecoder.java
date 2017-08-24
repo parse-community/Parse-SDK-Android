@@ -65,6 +65,9 @@ import java.util.Map;
       case ParseParcelEncoder.TYPE_GEOPOINT:
         return new ParseGeoPoint(source, this);
 
+      case ParseParcelEncoder.TYPE_POLYGON:
+        return new ParsePolygon(source, this);
+          
       case ParseParcelEncoder.TYPE_ACL:
         return new ParseACL(source, this);
 

@@ -57,24 +57,24 @@ import org.json.JSONObject;
     }
     return outputMap;
   }
-  
+
   /**
    * Gets the <code>ParseObject</code> another object points to. By default a new
    * object will be created.
    */
   protected ParseObject decodePointer(String className, String objectId) {
-    return ParseObject.createWithoutData(className, objectId); 
+    return ParseObject.createWithoutData(className, objectId);
   }
 
   public Object decode(Object object) {
     if (object instanceof JSONArray) {
       return convertJSONArrayToList((JSONArray) object);
     }
-    
+
     if (!(object instanceof JSONObject)) {
       return object;
     }
-    
+
     JSONObject jsonObject = (JSONObject) object;
 
     String opString = jsonObject.optString("__op", null);
@@ -121,6 +121,20 @@ import org.json.JSONObject;
       return new ParseGeoPoint(latitude, longitude);
     }
 
+    if (typeString.equals("Polygon")) {
+      List<ParseGeoPoint> coordinates = new ArrayList<ParseGeoPoint>();
+      try {
+        JSONArray array = jsonObject.getJSONArray("coordinates");
+        for (int i = 0; i < array.length(); ++i) {
+          JSONArray point = array.getJSONArray(i);
+          coordinates.add(new ParseGeoPoint(point.getDouble(0), point.getDouble(1)));
+        }
+      } catch (JSONException e) {
+        throw new RuntimeException(e);
+      }
+      return new ParsePolygon(coordinates);
+    }
+
     if (typeString.equals("Object")) {
       return ParseObject.fromJSON(jsonObject, null, this);
     }
@@ -132,7 +146,7 @@ import org.json.JSONObject;
     if (typeString.equals("OfflineObject")) {
       throw new RuntimeException("An unexpected offline pointer was encountered.");
     }
-    
+
     return null;
   }
 }

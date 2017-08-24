@@ -531,6 +531,67 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testWhereWithinPolygon() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
+    ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
+    ParseGeoPoint point3 = new ParseGeoPoint(30, 30);
+
+    List<ParseGeoPoint> points = Arrays.asList(point1, point2, point3);
+    query.whereWithinPolygon("key", points);
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints = (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoWithin");
+    List<Object> list = (List<Object>) map.get("$polygon");
+    assertEquals(3, list.size());
+    assertTrue(list.contains(point1));
+    assertTrue(list.contains(point2));
+    assertTrue(list.contains(point3));
+  }
+
+  @Test
+  public void testWhereWithinPolygonWithPolygon() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
+    ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
+    ParseGeoPoint point3 = new ParseGeoPoint(30, 30);
+
+    List<ParseGeoPoint> points = Arrays.asList(point1, point2, point3);
+    query.whereWithinPolygon("key", new ParsePolygon(points));
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints = (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoWithin");
+    List<Object> list = (List<Object>) map.get("$polygon");
+    assertEquals(3, list.size());
+    assertTrue(list.contains(point1));
+    assertTrue(list.contains(point2));
+    assertTrue(list.contains(point3));
+  }
+
+  @Test
+  public void testWherePolygonContains() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point = new ParseGeoPoint(10, 10);
+
+    query.wherePolygonContains("key", point);
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints =
+        (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoIntersects");
+    ParseGeoPoint geoPoint = (ParseGeoPoint) map.get("$point");
+    assertEquals(geoPoint, point);
+  }
+
+  @Test
   public void testWhereWithinRadians() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     ParseGeoPoint point = new ParseGeoPoint(10, 10);
@@ -741,7 +802,7 @@ public class ParseQueryTest {
       assertEquals(map.get(constraintKey), values.get(constraintKey));
     }
   }
-  
+
   //endregion
 
   /**

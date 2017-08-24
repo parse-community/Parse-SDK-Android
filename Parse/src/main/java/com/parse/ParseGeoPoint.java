@@ -49,7 +49,7 @@ public class ParseGeoPoint implements Parcelable {
 
   /**
    * Creates a new point with the specified latitude and longitude.
-   * 
+   *
    * @param latitude
    *          The point's latitude.
    * @param longitude
@@ -96,7 +96,7 @@ public class ParseGeoPoint implements Parcelable {
 
   /**
    * Set latitude. Valid range is (-90.0, 90.0). Extremes should not be used.
-   * 
+   *
    * @param latitude
    *          The point's latitude.
    */
@@ -116,7 +116,7 @@ public class ParseGeoPoint implements Parcelable {
 
   /**
    * Set longitude. Valid range is (-180.0, 180.0). Extremes should not be used.
-   * 
+   *
    * @param longitude
    *          The point's longitude.
    */
@@ -137,7 +137,7 @@ public class ParseGeoPoint implements Parcelable {
   /**
    * Get distance in radians between this point and another {@code ParseGeoPoint}. This is the
    * smallest angular distance between the two points.
-   * 
+   *
    * @param point
    *          {@code ParseGeoPoint} describing the other point being measured against.
    */
@@ -162,7 +162,7 @@ public class ParseGeoPoint implements Parcelable {
 
   /**
    * Get distance between this point and another {@code ParseGeoPoint} in kilometers.
-   * 
+   *
    * @param point
    *          {@code ParseGeoPoint} describing the other point being measured against.
    */
@@ -172,7 +172,7 @@ public class ParseGeoPoint implements Parcelable {
 
   /**
    * Get distance between this point and another {@code ParseGeoPoint} in kilometers.
-   * 
+   *
    * @param point
    *          {@code ParseGeoPoint} describing the other point being measured against.
    */
@@ -274,7 +274,7 @@ public class ParseGeoPoint implements Parcelable {
    *   times for a fix.
    * * For better battery efficiency and faster location fixes, you can set
    *   {@link Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
-   * 
+   *
    * @param timeout
    *          The number of milliseconds to allow before timing out.
    * @param criteria
@@ -288,6 +288,18 @@ public class ParseGeoPoint implements Parcelable {
   public static void getCurrentLocationInBackground(long timeout, Criteria criteria,
       LocationCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(getCurrentLocationInBackground(timeout, criteria), callback);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null || !(obj instanceof ParseGeoPoint)) {
+      return false;
+    }
+    if (obj == this) {
+      return true;
+    }
+    return ((ParseGeoPoint) obj).getLatitude() == latitude &&
+    ((ParseGeoPoint) obj).getLongitude() == longitude;
   }
 
   @Override

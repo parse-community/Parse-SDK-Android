@@ -20,6 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -100,6 +101,21 @@ public class ParseEncoderTest {
     assertEquals("GeoPoint", geoPointJSON.getString("__type"));
     assertEquals(30, geoPointJSON.getDouble("latitude"), DELTA);
     assertEquals(-20, geoPointJSON.getDouble("longitude"), DELTA);
+  }
+
+  @Test
+  public void testParsePolygon() throws JSONException {
+    List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+    points.add(new ParseGeoPoint(0,0));
+    points.add(new ParseGeoPoint(0,1));
+    points.add(new ParseGeoPoint(1,1));
+    points.add(new ParseGeoPoint(1,0));
+
+    ParsePolygon parsePolygon = new ParsePolygon(points);
+    JSONObject polygonJSON = (JSONObject) testClassObject.encode(parsePolygon);
+    assertNotNull(polygonJSON);
+    assertEquals("Polygon", polygonJSON.getString("__type"));
+    assertEquals(parsePolygon.coordinatesToJSONArray(), polygonJSON.getJSONArray("coordinates"));
   }
 
   @Test
