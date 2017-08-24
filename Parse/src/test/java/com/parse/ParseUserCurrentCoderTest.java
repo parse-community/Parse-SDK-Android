@@ -111,4 +111,19 @@ public class ParseUserCurrentCoderTest {
     // We always return non-null for authData()
     assertEquals(0, state.authData().size());
   }
+
+  @Test
+  public void testEncodeDecodeWithNullValues() throws Exception {
+    ParseUser.State state = new ParseUser.State.Builder()
+        .sessionToken(null)
+        .authData(null)
+        .build();
+    ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
+    JSONObject object = coder.encode(state, null, PointerEncoder.get());
+    ParseUser.State.Builder builder =
+            coder.decode(new ParseUser.State.Builder(), object, ParseDecoder.get());
+    state = builder.build();
+    assertNull(state.sessionToken());
+    assertEquals(0, state.authData().size());
+  }
 }
