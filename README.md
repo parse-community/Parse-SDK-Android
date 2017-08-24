@@ -21,7 +21,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   ```groovy
   dependencies {
-    compile 'com.parse:parse-android:1.15.8'
+    compile 'com.parse:parse-android:1.16.0'
   }
   ```
 
@@ -43,7 +43,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   You may define `com.parse.SERVER_URL` and `com.parse.APPLICATION_ID` meta-data in your `AndroidManifest.xml`:
 
-  ```
+  ```xml
   <application ...>
     <meta-data
       android:name="com.parse.SERVER_URL"
@@ -55,24 +55,11 @@ For more information about Parse and its features, see [the website][parseplatfo
   </application>
   ```
   
-  Initialize Parse in a custom class that extends `Application`:
-  ```
-  import com.parse.Parse;
-  import android.app.Application;
-
-  public class App extends Application {
-    @Override
-    public void onCreate() {
-      super.onCreate();
-      Parse.initialize(this);
-    }
-  }
-  ```
-  
 - **Option 2:** Setup in the Application
   
   Initialize Parse in a custom class that extends `Application`:
-  ```
+  
+  ```java
   import com.parse.Parse;
   import android.app.Application;
 
@@ -90,7 +77,8 @@ For more information about Parse and its features, see [the website][parseplatfo
   ```
   
  For either option, the custom `Application` class must be registered in `AndroidManifest.xml`:
- ```
+ 
+ ```xml
  <application
    android:name=".App"
    ...>
