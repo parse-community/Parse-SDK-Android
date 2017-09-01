@@ -68,8 +68,10 @@ import java.util.Random;
  * {@link #onPushOpen(Context, Intent)}, or {@link #onPushDismiss(Context, Intent)}.
  * To make minor changes to the appearance of a notification, override
  * {@link #getSmallIconId(Context, Intent)} or {@link #getLargeIcon(Context, Intent)}. To completely
- * change the Notification generated, override {@link #getNotification(Context, Intent)}. To change
- * the Activity launched when a user opens a Notification, override
+ * change the Notification generated, override {@link #getNotification(Context, Intent)}. To
+ * change the NotificationChannel generated, override {@link #getNotificationChannel(Context, Intent)}. To
+ * change how the NotificationChannel is created, override {@link #createNotificationChannel(Context, NotificationChannel)}.
+ * To change the Activity launched when a user opens a Notification, override
  * {@link #getActivity(Context, Intent)}.
  */
 // Hack note: Javadoc smashes the last two paragraphs together without the <p> tags.
