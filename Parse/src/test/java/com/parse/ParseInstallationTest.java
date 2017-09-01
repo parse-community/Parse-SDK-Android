@@ -27,6 +27,7 @@ import java.util.TimeZone;
 import bolts.Task;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -253,8 +254,16 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     installation.updateBeforeSave();
 
     // Make sure we update timezone
-    String zone = TimeZone.getDefault().getID();
-    assertEquals(zone, installation.getString(KEY_TIME_ZONE));
+    String zone = installation.getString(KEY_TIME_ZONE);
+    String deviceZone = TimeZone.getDefault().getID();
+    if (zone != null) {
+        assertEquals(zone, deviceZone);
+    } else {
+        // If it's not updated it's because it was not acceptable.
+        assertFalse(deviceZone.equals("GMT"));
+        assertFalse(deviceZone.indexOf("/") > 0);
+    }
+
     // Make sure we update version info
     Context context = Parse.getApplicationContext();
     String packageName = context.getPackageName();
@@ -265,9 +274,11 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     assertEquals(packageName, installation.getString(KEY_APP_IDENTIFIER));
     assertEquals(appName, installation.getString(KEY_APP_NAME));
     assertEquals(appVersion, installation.getString(KEY_APP_VERSION));
+
     // Make sure we update device info
     assertEquals("android", installation.getString(KEY_DEVICE_TYPE));
     assertEquals("installationId", installation.getString(KEY_INSTALLATION_ID));
+
     // Make sure we update the locale identifier
     assertEquals("en-US", installation.getString(KEY_LOCALE_IDENTIFIER));
   }
