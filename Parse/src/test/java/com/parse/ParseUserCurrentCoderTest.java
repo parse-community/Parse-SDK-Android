@@ -92,9 +92,6 @@ public class ParseUserCurrentCoderTest {
     Map<String, String> twitterAuthData = authData.get("twitter");
     assertEquals("twitterId", twitterAuthData.get("id"));
     assertEquals("twitterAccessToken", twitterAuthData.get("access_token"));
-    // Make sure objectJson does not have sessionToken and authData anymore
-    assertFalse(objectJson.has(KEY_SESSION_TOKEN));
-    assertFalse(objectJson.has(KEY_AUTH_DATA));
   }
 
   @Test
@@ -109,6 +106,21 @@ public class ParseUserCurrentCoderTest {
     ParseUser.State state = builder.build();
     assertNull(state.sessionToken());
     // We always return non-null for authData()
+    assertEquals(0, state.authData().size());
+  }
+
+  @Test
+  public void testEncodeDecodeWithNullValues() throws Exception {
+    ParseUser.State state = new ParseUser.State.Builder()
+        .sessionToken(null)
+        .authData(null)
+        .build();
+    ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
+    JSONObject object = coder.encode(state, null, PointerEncoder.get());
+    ParseUser.State.Builder builder =
+            coder.decode(new ParseUser.State.Builder(), object, ParseDecoder.get());
+    state = builder.build();
+    assertNull(state.sessionToken());
     assertEquals(0, state.authData().size());
   }
 }

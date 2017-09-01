@@ -11,6 +11,7 @@ package com.parse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import static com.parse.ParseUser.State;
@@ -54,7 +55,11 @@ import static com.parse.ParseUser.State;
   @Override
   public <T extends ParseObject.State> JSONObject encode(
       T state, ParseOperationSet operations, ParseEncoder encoder) {
+
     // FYI we'll be double writing sessionToken and authData for now...
+    // This is important. super.encode() has no notion of sessionToken and authData, so it treats them
+    // like objects (simply passed to the encoder). This means that a null sessionToken will become
+    // JSONObject.NULL. This must be accounted in #decode().
     JSONObject objectJSON = super.encode(state, operations, encoder);
 
     String sessionToken = ((State) state).sessionToken();
@@ -90,17 +95,20 @@ import static com.parse.ParseUser.State;
   @Override
   public <T extends ParseObject.State.Init<?>> T decode(
       T builder, JSONObject json, ParseDecoder decoder) {
-    ParseUser.State.Builder userBuilder = (State.Builder) builder;
+    ParseUser.State.Builder userBuilder = (State.Builder) super.decode(builder, json, decoder);
+
+    // super.decode will read its own values and add them to the builder using put().
+    // This means the state for session token and auth data might be illegal, returning
+    // unexpected types. For instance if sessionToken was null, now it's JSONObject.NULL.
+    // We must overwrite these possibly wrong values.
     String newSessionToken = json.optString(KEY_SESSION_TOKEN, null);
-    if (newSessionToken != null) {
-      userBuilder.sessionToken(newSessionToken);
-      json.remove(KEY_SESSION_TOKEN);
-    }
+    userBuilder.sessionToken(newSessionToken);
 
     JSONObject newAuthData = json.optJSONObject(KEY_AUTH_DATA);
-    if (newAuthData != null) {
+    if (newAuthData == null) {
+      userBuilder.authData(null);
+    } else {
       try {
-        // Merge in auth data.
         @SuppressWarnings("rawtypes")
         Iterator i = newAuthData.keys();
         while (i.hasNext()) {
@@ -113,10 +121,8 @@ import static com.parse.ParseUser.State;
       } catch (JSONException e) {
         throw new RuntimeException(e);
       }
-      json.remove(KEY_AUTH_DATA);
     }
 
-    // FYI we'll be double writing sessionToken and authData for now...
-    return super.decode(builder, json, decoder);
+    return (T) userBuilder;
   }
 }
