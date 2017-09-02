@@ -10,7 +10,7 @@ package com.parse;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.IBinder;
+import android.support.annotation.WorkerThread;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +19,8 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import bolts.Task;
+
 /**
  * Proxy Service while running in GCM mode.
  *
@@ -26,57 +28,22 @@ import java.util.concurrent.Executors;
  * {@link android.app.IntentService} where all incoming {@link Intent}s will be handled
  * sequentially.
  */
-/** package */ class GCMService implements ProxyService {
-  private static final String TAG = "GCMService";
+/** package */ class GcmPushHandler implements PushHandler {
+  private static final String TAG = "GcmPushHandler";
 
-  public static final String REGISTER_RESPONSE_ACTION =
-      "com.google.android.c2dm.intent.REGISTRATION";
-  public static final String RECEIVE_PUSH_ACTION =
-      "com.google.android.c2dm.intent.RECEIVE";
+  static final String REGISTER_RESPONSE_ACTION = "com.google.android.c2dm.intent.REGISTRATION";
+  static final String RECEIVE_PUSH_ACTION = "com.google.android.c2dm.intent.RECEIVE";
 
-  private final WeakReference<Service> parent;
-  private ExecutorService executor;
-
-  /* package */ GCMService(Service parent) {
-    this.parent = new WeakReference<>(parent);
-  }
+  GcmPushHandler() {}
 
   @Override
-  public void onCreate() {
-    executor = Executors.newSingleThreadExecutor();
+  public Task<Void> initialize() {
+    return GcmRegistrar.getInstance().registerAsync();
   }
 
+  @WorkerThread
   @Override
-  public void onDestroy() {
-    if (executor != null) {
-      executor.shutdown();
-      executor = null;
-    }
-  }
-
-  @Override
-  public int onStartCommand(final Intent intent, int flags, final int startId) {
-    executor.execute(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          onHandleIntent(intent);
-        } finally {
-          ServiceUtils.completeWakefulIntent(intent);
-          stopParent(startId); // automatically stops service if this is the last outstanding task
-        }
-      }
-    });
-
-    return Service.START_NOT_STICKY;
-  }
-
-  @Override
-  public IBinder onBind(Intent intent) {
-    return null;
-  }
-
-  private void onHandleIntent(Intent intent) {
+  public void handlePush(Intent intent) {
     if (intent != null) {
       String action = intent.getAction();
       if (REGISTER_RESPONSE_ACTION.equals(action)) {
@@ -89,17 +56,18 @@ import java.util.concurrent.Executors;
     }
   }
 
+  @WorkerThread
   private void handleGcmRegistrationIntent(Intent intent) {
     try {
-      // Have to block here since GCMService is basically an IntentService, and the service is
-      // may exit before async handling of the registration is complete if we don't wait for it to
-      // complete.
+      // Have to block here since we are already in a background thread and as soon as we return,
+      // PushService may exit.
       GcmRegistrar.getInstance().handleRegistrationIntentAsync(intent).waitForCompletion();
     } catch (InterruptedException e) {
       // do nothing
     }
   }
 
+  @WorkerThread
   private void handleGcmPushIntent(Intent intent) {
     String messageType = intent.getStringExtra("message_type");
     if (messageType != null) {
@@ -129,13 +97,4 @@ import java.util.concurrent.Executors;
     }
   }
 
-  /**
-   * Stop the parent Service, if we're still running.
-   */
-  private void stopParent(int startId) {
-    Service p = parent.get();
-    if (p != null) {
-      p.stopSelf(startId);
-    }
-  }
 }
