@@ -86,7 +86,7 @@ public class ParseRESTUserCommandTest {
     ParseRESTUserCommand command =
         ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
 
-    assertEquals("classes/_User", command.httpPath);
+    assertEquals("users", command.httpPath);
     assertEquals(ParseHttpRequest.Method.POST, command.method);
     assertEquals("value", command.jsonParameters.getString("key"));
     assertEquals("sessionToken", command.getSessionToken());
