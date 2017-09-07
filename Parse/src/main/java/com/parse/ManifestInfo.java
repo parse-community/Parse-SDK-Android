@@ -134,12 +134,12 @@ import java.util.List;
    */
   /* package */ static List<ResolveInfo> getIntentReceivers(String... actions) {
     Context context = getContext();
+    PackageManager pm = context.getPackageManager();
     String packageName = context.getPackageName();
     List<ResolveInfo> list = new ArrayList<>();
 
     for (String action : actions) {
-      list.addAll(
-          context.getPackageManager().queryBroadcastReceivers(
+      list.addAll(pm.queryBroadcastReceivers(
               new Intent(action),
               PackageManager.GET_INTENT_FILTERS));
     }
@@ -153,30 +153,6 @@ import java.util.List;
     return list;
   }
 
-  private static boolean usesPushBroadcastReceivers() {
-    int intentsRegistered = 0;
-    if (hasIntentReceiver(ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE)) {
-      intentsRegistered++;
-    }
-
-    if (hasIntentReceiver(ParsePushBroadcastReceiver.ACTION_PUSH_OPEN)) {
-      intentsRegistered++;
-    }
-
-    if (hasIntentReceiver(ParsePushBroadcastReceiver.ACTION_PUSH_DELETE)) {
-      intentsRegistered++;
-    }
-
-    if (intentsRegistered != 0 && intentsRegistered != 3) {
-      throw new SecurityException(
-          "The Parse Push BroadcastReceiver must implement a filter for all of " +
-          ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
-          ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
-          ParsePushBroadcastReceiver.ACTION_PUSH_DELETE);
-    }
-    return intentsRegistered == 3;
-  }
-  
   // Should only be used for tests.
   static void setPushType(PushType newPushType) {
     synchronized (lock) {
@@ -191,102 +167,53 @@ import java.util.List;
   public static PushType getPushType() {
     synchronized (lock) {
       if (pushType == null) {
-        boolean isGooglePlayServicesAvailable = isGooglePlayServicesAvailable();
-        boolean hasAnyGcmSpecificDeclaration = hasAnyGcmSpecificDeclaration();
-        ManifestCheckResult gcmSupportLevel = gcmSupportLevel();
-
-        boolean hasPushBroadcastReceiver = usesPushBroadcastReceivers();
-        boolean hasRequiredGcmDeclarations = (gcmSupportLevel != ManifestCheckResult.MISSING_REQUIRED_DECLARATIONS);
-        if (hasPushBroadcastReceiver && isGooglePlayServicesAvailable && hasRequiredGcmDeclarations) {
-          pushType = PushType.GCM;
-        } else {
-          pushType = PushType.NONE;
-
-          if (hasAnyGcmSpecificDeclaration) {
-            if (!hasPushBroadcastReceiver) {
-            /* Throw an error if someone migrated from an old SDK and hasn't yet started using
-             * ParsePushBroadcastReceiver. */
-              PLog.e(TAG, "Push is currently disabled. This is probably because you migrated " +
-                  "from an older version of Parse. This version of Parse requires your app to " +
-                  "have a BroadcastReceiver that handles " +
-                  ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
-                  ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
-                  ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
-                  "these lines to your AndroidManifest.xml:\n\n" +
-                  " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
-                  "   android:exported=false>\n" +
-                  "  <intent-filter>\n" +
-                  "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
-                  "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
-                  "     <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
-                  "   </intent-filter>\n" +
-                  " </receiver>");
-            }
-
-            if (!isGooglePlayServicesAvailable) {
-              PLog.e(TAG, "Cannot use GCM for push on this device because Google Play " +
-                  "Services is not available. Install Google Play Services from the Play Store.");
-            }
-
-            // Emit warnings if the client doesn't get push due to misconfiguration of the manifest.
-            if (!hasRequiredGcmDeclarations) {
-            /*
-             * If we detect that the app has some GCM-specific declarations, but not all required
-             * declarations for GCM, then most likely the client means to use GCM but misconfigured
-             * their manifest. Log an error in this case.
-             */
-              PLog.e(TAG, "Cannot use GCM for push because the app manifest is missing some " +
-                  "required declarations. Please " + getGcmManifestMessage());
-            }
-          }
-        }
-
+        pushType = findPushType();
         PLog.v(TAG, "Using " + pushType + " for push.");
-
-        /*
-         * If we selected gcm but the manifest is missing some optional declarations, warn so
-         * the user knows how to add those optional declarations.
-         */
-        if (Parse.getLogLevel() <= Parse.LOG_LEVEL_WARNING) {
-          if (pushType == PushType.GCM && gcmSupportLevel == ManifestCheckResult.MISSING_OPTIONAL_DECLARATIONS) {
-            PLog.w(TAG, "Using GCM for Parse Push, but the app manifest is missing some optional " +
-                "declarations that should be added for maximum reliability. Please " +
-                getGcmManifestMessage());
-          }
-        }
       }
     }
-    
     return pushType;
+  }
+
+
+  private static PushType findPushType() {
+    if (!ParsePushBroadcastReceiver.isSupported()) {
+      return PushType.NONE;
+    }
+
+    if (!PushService.isSupported()) {
+      return PushType.NONE;
+    }
+
+    // Ordered by preference. TODO: let someone inject here
+    PushType[] types = new PushType[]{ PushType.GCM, PushType.NONE };
+    for (PushType type : types) {
+      PushHandler handler = PushService.createPushHandler(type);
+      PushHandler.SupportLevel level = handler.isSupported();
+      String message = handler.getWarningMessage(level);
+      switch (level) {
+        case MISSING_REQUIRED_DECLARATIONS: // Can't use. notify.
+          if (message != null) PLog.e(TAG, message);
+          break;
+        case MISSING_OPTIONAL_DECLARATIONS: // Using anyway.
+          if (message != null) PLog.w(TAG, message);
+          return type;
+        case SUPPORTED:
+          return type;
+      }
+    }
+    return PushType.NONE;
   }
 
   /*
    * Returns a message that can be written to the system log if an app expects push to be enabled,
    * but push isn't actually enabled because the manifest is misconfigured.
    */
-  static String getNonePushTypeLogMessage() {
+  static String getPushDisabledMessage() {
     return "Push is not configured for this app because the app manifest is missing required " +
-        "declarations. Please add the following declarations to your app manifest to use GCM for " +
-        "push: " + getGcmManifestMessage();
+        "declarations. To configure GCM, please add the following declarations to your app manifest: " +
+        GcmPushHandler.getWarningMessage();
   }
 
-  private enum ManifestCheckResult {
-    /* 
-     * Manifest has all required and optional declarations necessary to support this push service.
-     */
-    HAS_ALL_DECLARATIONS,
-
-    /*
-     * Manifest has all required declarations to support this push service, but is missing some
-     * optional declarations.
-     */
-    MISSING_OPTIONAL_DECLARATIONS,
-
-    /*
-     * Manifest doesn't have enough required declarations to support this push service.
-     */
-    MISSING_REQUIRED_DECLARATIONS
-  }
   
   private static Context getContext() {
     return Parse.getApplicationContext();
@@ -327,7 +254,7 @@ import java.util.List;
     return info;
   }
 
-  private static ServiceInfo getServiceInfo(Class<? extends Service> clazz) {
+  static ServiceInfo getServiceInfo(Class<? extends Service> clazz) {
     ServiceInfo info = null;
     try {
       info = getPackageManager().getServiceInfo(new ComponentName(getContext(), clazz), 0);
@@ -355,7 +282,7 @@ import java.util.List;
    * <strong>Note:</strong> This package might have requested all the permissions, but may not
    * be granted all of them.
    */
-  private static boolean hasRequestedPermissions(Context context, String... permissions) {
+  static boolean hasRequestedPermissions(Context context, String... permissions) {
     String packageName = context.getPackageName();
     try {
       PackageInfo pi = context.getPackageManager().getPackageInfo(
@@ -376,7 +303,7 @@ import java.util.List;
    * <strong>Note:</strong> This package might have requested all the permissions, but may not
    * be granted all of them.
    */
-  private static boolean hasGrantedPermissions(Context context, String... permissions) {
+  static boolean hasGrantedPermissions(Context context, String... permissions) {
     String packageName = context.getPackageName();
     PackageManager packageManager = context.getPackageManager();
     for (String permission : permissions) {
@@ -406,7 +333,7 @@ import java.util.List;
     return false;
   }
 
-  private static boolean checkReceiver(Class<? extends BroadcastReceiver> clazz, String permission, Intent[] intents) {
+  static boolean checkReceiver(Class<? extends BroadcastReceiver> clazz, String permission, Intent[] intents) {
     for (Intent intent : intents) {
       List<ResolveInfo> receivers = getPackageManager().queryBroadcastReceivers(intent, 0);
       if (receivers.isEmpty()) {
@@ -421,100 +348,7 @@ import java.util.List;
     return true;
   }
 
-  private static boolean hasAnyGcmSpecificDeclaration() {
-    Context context = getContext();
-    if (hasRequestedPermissions(context, "com.google.android.c2dm.permission.RECEIVE") ||
-        hasRequestedPermissions(context, context.getPackageName() + ".permission.C2D_MESSAGE") ||
-        getReceiverInfo(GcmBroadcastReceiver.class) != null) {
-      return true;
-    }
-
-    return false;
-  }
-
-  private static boolean isGooglePlayServicesAvailable() {
+  static boolean isGooglePlayServicesAvailable() {
     return getPackageInfo("com.google.android.gsf") != null;
-  }
-
-  private static ManifestCheckResult gcmSupportLevel() {
-    Context context = getContext();
-    if (getServiceInfo(PushService.class) == null) {
-      return ManifestCheckResult.MISSING_REQUIRED_DECLARATIONS;
-    }
-
-    String[] requiredPermissions = new String[] {
-      "android.permission.INTERNET",
-      "android.permission.ACCESS_NETWORK_STATE",
-      "android.permission.WAKE_LOCK",
-      "com.google.android.c2dm.permission.RECEIVE",
-      context.getPackageName() + ".permission.C2D_MESSAGE"
-    };
-    
-    if (!hasRequestedPermissions(context, requiredPermissions)) {
-      return ManifestCheckResult.MISSING_REQUIRED_DECLARATIONS;
-    }
-    
-    String packageName = context.getPackageName();
-    String rcvrPermission = "com.google.android.c2dm.permission.SEND";
-    Intent[] intents = new Intent[] {
-      new Intent(GcmPushHandler.RECEIVE_PUSH_ACTION)
-        .setPackage(packageName)
-        .addCategory(packageName),
-      new Intent(GcmPushHandler.REGISTER_RESPONSE_ACTION)
-        .setPackage(packageName)
-        .addCategory(packageName),
-    };
-    
-    if (!checkReceiver(GcmBroadcastReceiver.class, rcvrPermission, intents)) {
-      return ManifestCheckResult.MISSING_REQUIRED_DECLARATIONS;
-    }
-
-    String[] optionalPermissions = new String[] {
-      "android.permission.VIBRATE"
-    };
-
-    if (!hasGrantedPermissions(context, optionalPermissions)) {
-      return ManifestCheckResult.MISSING_OPTIONAL_DECLARATIONS;
-    }
-    
-    return ManifestCheckResult.HAS_ALL_DECLARATIONS;
-  }
-  
-  private static String getGcmManifestMessage() {
-    String packageName = getContext().getPackageName();
-    String gcmPackagePermission = packageName + ".permission.C2D_MESSAGE";
-    return "make sure that these permissions are declared as children " +
-        "of the root <manifest> element:\n" + 
-        "\n" + 
-        "<uses-permission android:name=\"android.permission.INTERNET\" />\n" +
-        "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n" +
-        "<uses-permission android:name=\"android.permission.VIBRATE\" />\n" +
-        "<uses-permission android:name=\"android.permission.WAKE_LOCK\" />\n" +
-        "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\" />\n" +
-        "<uses-permission android:name=\"com.google.android.c2dm.permission.RECEIVE\" />\n" +
-        "<permission android:name=\"" + gcmPackagePermission + "\" " +
-        "android:protectionLevel=\"signature\" />\n" +
-        "<uses-permission android:name=\"" + gcmPackagePermission + "\" />\n" +
-        "\n" +
-        "Also, please make sure that these services and broadcast receivers are declared as " +
-        "children of the <application> element:\n" +
-        "\n" +
-        "<service android:name=\"com.parse.PushService\" />\n" +
-        "<receiver android:name=\"com.parse.GcmBroadcastReceiver\" " +
-        "android:permission=\"com.google.android.c2dm.permission.SEND\">\n" +
-        "  <intent-filter>\n" +
-        "    <action android:name=\"com.google.android.c2dm.intent.RECEIVE\" />\n" +
-        "    <action android:name=\"com.google.android.c2dm.intent.REGISTRATION\" />\n" +
-        "    <category android:name=\"" + packageName + "\" />\n" +
-        "  </intent-filter>\n" +
-        "</receiver>\n" +
-        "<receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"" +
-        " android:exported=false>\n" +
-        "  <intent-filter>\n" +
-        "    <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
-        "    <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
-        "    <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
-        "  </intent-filter>\n" +
-        "</receiver>";
   }
 }

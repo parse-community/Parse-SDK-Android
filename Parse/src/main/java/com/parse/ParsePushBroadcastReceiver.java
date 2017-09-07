@@ -25,6 +25,8 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -100,6 +102,47 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
 
   protected static final int SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT = 38;
+
+  private static final List<String> REQUIRED_ACTIONS = Arrays.asList(
+      ACTION_PUSH_RECEIVE, ACTION_PUSH_OPEN, ACTION_PUSH_DELETE);
+
+  /**
+   * Called at startup at the moment of parsing the manifest, to see
+   * if it was correctly set-up.
+   */
+  static boolean isSupported() {
+    int actions = 0;
+    for (String action : REQUIRED_ACTIONS) {
+      if (ManifestInfo.hasIntentReceiver(action)) actions++;
+    }
+
+    if (actions < REQUIRED_ACTIONS.size()) {
+      if (actions > 0) {
+        throw new IllegalStateException(
+            "The Parse Push BroadcastReceiver must implement a filter for all of " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_DELETE);
+      } else {
+        PLog.e(TAG, "Push is currently disabled. Parse SDK requires your app to " +
+            "have a BroadcastReceiver that handles " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
+            "these lines to your AndroidManifest.xml:\n\n" +
+            " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
+            "   android:exported=false>\n" +
+            "  <intent-filter>\n" +
+            "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
+            "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
+            "     <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
+            "   </intent-filter>\n" +
+            " </receiver>");
+      }
+      return false;
+    }
+    return true;
+  }
 
   /**
    * Delegates the generic {@code onReceive} event to a notification lifecycle event.
