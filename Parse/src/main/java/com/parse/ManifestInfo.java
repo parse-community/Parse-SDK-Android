@@ -184,10 +184,10 @@ import java.util.List;
       return PushType.NONE;
     }
 
-    // Ordered by preference. TODO: let someone inject here
-    PushType[] types = new PushType[]{ PushType.GCM, PushType.NONE };
+    // Ordered by preference.
+    PushType[] types = PushType.types();
     for (PushType type : types) {
-      PushHandler handler = PushService.createPushHandler(type);
+      PushHandler handler = PushHandler.Factory.create(type);
       PushHandler.SupportLevel level = handler.isSupported();
       String message = handler.getWarningMessage(level);
       switch (level) {

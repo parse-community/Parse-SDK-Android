@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import java.util.List;
+
 /** package */ enum PushType {
   NONE("none"),
   GCM("gcm");
@@ -31,5 +33,11 @@ package com.parse;
   @Override
   public String toString() {
     return pushType;
+  }
+
+  // Preference ordered list.
+  // TODO: let someone inject here if we want public handlers
+  static PushType[] types() {
+    return new PushType[]{ GCM, NONE };
   }
 }

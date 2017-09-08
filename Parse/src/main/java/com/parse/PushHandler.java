@@ -16,6 +16,8 @@ import android.support.annotation.WorkerThread;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 import bolts.Task;
 
 /**
@@ -27,6 +29,17 @@ import bolts.Task;
  * or initializing. They should not be 'stateful' in this sense.
  */
 /** package */ interface PushHandler {
+
+  // TODO: let someone extend this somehow if we want to publicize handlers
+  class Factory {
+    static PushHandler create(PushType type) {
+      switch (type) {
+        case GCM: return new GcmPushHandler();
+        case NONE: return new FallbackHandler();
+      }
+      return null;
+    }
+  }
 
   enum SupportLevel {
     /*
@@ -47,7 +60,7 @@ import bolts.Task;
   }
 
 
- /**
+  /**
    * Whether this push handler is supported by the current device and manifest configuration.
    * Implementors can parse the manifest file using utilities in {@link ManifestInfo}.
    * @return true if supported
@@ -83,4 +96,30 @@ import bolts.Task;
    */
   @WorkerThread
   void handlePush(Intent intent);
+
+
+  class FallbackHandler implements PushHandler {
+
+    private FallbackHandler() {};
+
+    @Nullable
+    @Override
+    public String getWarningMessage(SupportLevel level) {
+      return null;
+    }
+
+    @NonNull
+    @Override
+    public SupportLevel isSupported() {
+      return SupportLevel.SUPPORTED;
+    }
+
+    @Override
+    public Task<Void> initialize() {
+      return Task.forResult(null);
+    }
+
+    @Override
+    public void handlePush(Intent intent) {}
+  }
 }

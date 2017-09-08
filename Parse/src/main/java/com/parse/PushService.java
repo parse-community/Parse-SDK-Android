@@ -157,24 +157,8 @@ public final class PushService extends Service {
     super();
   }
 
-  static PushHandler createDefaultPushHandler() {
-    return createPushHandler(ManifestInfo.getPushType());
-  }
-
-  static PushHandler createPushHandler(PushType type) {
-    switch (type) {
-      case GCM:
-        return new GcmPushHandler();
-      case NONE:
-      default:
-        // No op handler.
-        return new PushHandler() {
-          public SupportLevel isSupported() { return SupportLevel.SUPPORTED; }
-          public String getWarningMessage(SupportLevel level) { return null; }
-          public Task<Void> initialize() { return Task.forResult(null); }
-          public void handlePush(Intent intent) {}
-        };
-    }
+  static PushHandler createPushHandler() {
+    return PushHandler.Factory.create(ManifestInfo.getPushType());
   }
 
   /**
@@ -187,7 +171,7 @@ public final class PushService extends Service {
 
   static Task<Void> initialize() {
     // Some handlers might need initialization.
-    return createDefaultPushHandler().initialize();
+    return createPushHandler().initialize();
   }
 
   /**
@@ -208,7 +192,7 @@ public final class PushService extends Service {
     }
 
     executor = Executors.newSingleThreadExecutor();
-    handler = createDefaultPushHandler();
+    handler = createPushHandler();
     dispatchOnServiceCreated(this);
   }
 
