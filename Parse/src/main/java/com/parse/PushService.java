@@ -15,6 +15,7 @@ import android.os.IBinder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -85,7 +86,6 @@ public final class PushService extends Service {
   private static final String TAG = "com.parse.PushService";
 
   //region ServiceLifecycleCallbacks used for testing
-  // TODO: the whole region is unused.
 
   private static List<ServiceLifecycleCallbacks> serviceLifecycleCallbacks = null;
   
@@ -161,6 +161,11 @@ public final class PushService extends Service {
     return PushHandler.Factory.create(ManifestInfo.getPushType());
   }
 
+  // For tests
+  void setPushHandler(PushHandler handler) {
+    this.handler = handler;
+  }
+
   /**
    * Called at startup at the moment of parsing the manifest, to see
    * if it was correctly set-up.
@@ -180,7 +185,7 @@ public final class PushService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    if (ParsePlugins.Android.get().applicationContext() == null) {
+    if (ParsePlugins.Android.get() == null) {
       PLog.e(TAG, "The Parse push service cannot start because Parse.initialize "
           + "has not yet been called. If you call Parse.initialize from "
           + "an Activity's onCreate, that call should instead be in the "
