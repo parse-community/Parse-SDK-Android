@@ -68,11 +68,11 @@ public class PushServiceTest extends ResetPluginsParseTest {
   @Test
   public void testDefaultHandler() {
     ManifestInfo.setPushType(PushType.NONE);
-    PushHandler handler = PushService.createPushHandler();
+    PushHandler handler = PushServiceUtils.createPushHandler();
     assertTrue(handler instanceof PushHandler.FallbackHandler);
 
     ManifestInfo.setPushType(PushType.GCM);
-    handler = PushService.createPushHandler();
+    handler = PushServiceUtils.createPushHandler();
     assertTrue(handler instanceof GcmPushHandler);
   }
 

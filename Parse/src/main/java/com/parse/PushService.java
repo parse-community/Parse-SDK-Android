@@ -9,17 +9,17 @@
 package com.parse;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import bolts.Task;
 
 /**
  * A service to listen for push notifications. This operates in the same process as the parent
@@ -81,9 +81,62 @@ import bolts.Task;
  * The {@link ParsePushBroadcastReceiver} listens to this intent to track an app open event and
  * launch the app's launcher activity. To customize this behavior override
  * {@link ParsePushBroadcastReceiver#onPushOpen(Context, Intent)}.
+ *
+ * Starting with Android O, this is replaced by {@link PushService26}.
  */
 public final class PushService extends Service {
   private static final String TAG = "com.parse.PushService";
+
+  //region run and dispose
+
+  private static final String WAKE_LOCK_EXTRA = "parseWakeLockId";
+  private static final SparseArray<ParseWakeLock> wakeLocks = new SparseArray<>();
+  private static int wakeLockId = 0;
+
+  /*
+   * Same as Context.startService, but acquires a wake lock before starting the service. The wake
+   * lock must later be released by calling dispose().
+   */
+  static boolean run(Context context, Intent intent) {
+    String reason = intent.toString();
+    ParseWakeLock wl = ParseWakeLock.acquireNewWakeLock(context, PowerManager.PARTIAL_WAKE_LOCK, reason, 0);
+
+    synchronized (wakeLocks) {
+      intent.putExtra(WAKE_LOCK_EXTRA, wakeLockId);
+      wakeLocks.append(wakeLockId, wl);
+      wakeLockId++;
+    }
+
+    intent.setClass(context, PushService.class);
+    ComponentName name = context.startService(intent);
+    if (name == null) {
+      PLog.e(TAG, "Could not start the service. Make sure that the XML tag "
+          + "<service android:name=\"" + PushService.class + "\" /> is in your "
+          + "AndroidManifest.xml as a child of the <application> element.");
+      dispose(intent);
+      return false;
+    }
+    return true;
+  }
+
+  static void dispose(Intent intent) {
+    if (intent != null && intent.hasExtra(WAKE_LOCK_EXTRA)) {
+      int id = intent.getIntExtra(WAKE_LOCK_EXTRA, -1);
+      ParseWakeLock wakeLock;
+
+      synchronized (wakeLocks) {
+        wakeLock = wakeLocks.get(id);
+        wakeLocks.remove(id);
+      }
+
+      if (wakeLock == null) {
+        PLog.e(TAG, "Got wake lock id of " + id + " in intent, but no such lock found in " +
+            "global map. Was disposePushService called twice for the same intent?");
+      } else {
+        wakeLock.release();
+      }
+    }
+  }
 
   //region ServiceLifecycleCallbacks used for testing
 
@@ -103,45 +156,26 @@ public final class PushService extends Service {
     }
   }
 
-  /* package */ static void unregisterServiceLifecycleCallbacks(
-      ServiceLifecycleCallbacks callbacks) {
+  /* package */ static void unregisterServiceLifecycleCallbacks(ServiceLifecycleCallbacks callbacks) {
     synchronized (PushService.class) {
       serviceLifecycleCallbacks.remove(callbacks);
-      if (serviceLifecycleCallbacks.size() <= 0) {
-        serviceLifecycleCallbacks = null;
-      }
     }
   }
 
   private static void dispatchOnServiceCreated(Service service) {
-    Object[] callbacks = collectServiceLifecycleCallbacks();
-    if (callbacks != null) {
-      for (Object callback : callbacks) {
-        ((ServiceLifecycleCallbacks) callback).onServiceCreated(service);
+    if (serviceLifecycleCallbacks != null) {
+      for (ServiceLifecycleCallbacks callback : serviceLifecycleCallbacks) {
+        callback.onServiceCreated(service);
       }
     }
   }
 
   private static void dispatchOnServiceDestroyed(Service service) {
-    Object[] callbacks = collectServiceLifecycleCallbacks();
-    if (callbacks != null) {
-      for (Object callback : callbacks) {
-        ((ServiceLifecycleCallbacks) callback).onServiceDestroyed(service);
+    if (serviceLifecycleCallbacks != null) {
+      for (ServiceLifecycleCallbacks callback : serviceLifecycleCallbacks) {
+        callback.onServiceDestroyed(service);
       }
     }
-  }
-
-  private static Object[] collectServiceLifecycleCallbacks() {
-    Object[] callbacks = null;
-    synchronized (PushService.class) {
-      if (serviceLifecycleCallbacks == null) {
-        return null;
-      }
-      if (serviceLifecycleCallbacks.size() > 0) {
-        callbacks = serviceLifecycleCallbacks.toArray();
-      }
-    }
-    return callbacks;
   }
 
   //endregion
@@ -157,10 +191,6 @@ public final class PushService extends Service {
     super();
   }
 
-  static PushHandler createPushHandler() {
-    return PushHandler.Factory.create(ManifestInfo.getPushType());
-  }
-
   // For tests
   void setPushHandler(PushHandler handler) {
     this.handler = handler;
@@ -174,10 +204,6 @@ public final class PushService extends Service {
     return ManifestInfo.getServiceInfo(PushService.class) != null;
   }
 
-  static Task<Void> initialize() {
-    // Some handlers might need initialization.
-    return createPushHandler().initialize();
-  }
 
   /**
    * Client code should not call {@code onCreate} directly.
@@ -197,7 +223,7 @@ public final class PushService extends Service {
     }
 
     executor = Executors.newSingleThreadExecutor();
-    handler = createPushHandler();
+    handler = PushServiceUtils.createPushHandler();
     dispatchOnServiceCreated(this);
   }
 
@@ -216,7 +242,7 @@ public final class PushService extends Service {
         try {
           handler.handlePush(intent);
         } finally {
-          ServiceUtils.completeWakefulIntent(intent);
+          dispose(intent);
           stopSelf(startId);
         }
       }
