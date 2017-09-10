@@ -31,7 +31,8 @@ import bolts.Task;
 import bolts.TaskCompletionSource;
 
 /**
- * A class that manages registering for GCM and updating the registration if it is out of date.
+ * A class that manages registering for GCM and updating the registration if it is out of date,
+ * used by {@link com.parse.GcmPushHandler}.
  */
 /** package */ class GcmRegistrar {
   private static final String TAG = "com.parse.GcmRegistrar";
@@ -181,7 +182,7 @@ import bolts.TaskCompletionSource;
    * Should be called by a broadcast receiver or service to handle the GCM registration response
    * intent (com.google.android.c2dm.intent.REGISTRATION).
    */
-  public Task<Void> handleRegistrationIntentAsync(Intent intent) {
+  Task<Void> handleRegistrationIntentAsync(Intent intent) {
     List<Task<Void>> tasks = new ArrayList<>();
     /*
      * We have to parse the response here because GCM may send us a new registration_id

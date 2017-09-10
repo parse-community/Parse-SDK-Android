@@ -69,7 +69,7 @@ import bolts.Task;
     if (!loggedManifestError && ManifestInfo.getPushType() == PushType.NONE) {
       loggedManifestError = true;
       PLog.e(TAG, "Tried to subscribe or unsubscribe from a channel, but push is not enabled " +
-          "correctly. " + ManifestInfo.getNonePushTypeLogMessage());
+          "correctly. " + ManifestInfo.getPushDisabledMessage());
     }
   }
 }
