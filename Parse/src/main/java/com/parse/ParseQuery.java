@@ -1692,8 +1692,6 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereContainsAllStartsWith(String key, Collection<String> values) {
-    checkIfRunning();
-
     ArrayList<KeyConstraints> startsWithConstraints = new ArrayList<>();
     for (String value : values) {
       KeyConstraints keyConstraints = new KeyConstraints();
