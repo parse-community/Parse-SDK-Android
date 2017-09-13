@@ -55,6 +55,7 @@ import java.util.Map;
   /* package */ final static String TYPE_OP = "Operation";
   /* package */ final static String TYPE_FILE = "File";
   /* package */ final static String TYPE_GEOPOINT = "GeoPoint";
+  /* package */ final static String TYPE_POLYGON = "Polygon";
 
   public void encode(Object object, Parcel dest) {
     try {
@@ -83,6 +84,10 @@ import java.util.Map;
       } else if (object instanceof ParseGeoPoint) {
         dest.writeString(TYPE_GEOPOINT);
         ((ParseGeoPoint) object).writeToParcel(dest, this);
+
+      } else if (object instanceof ParsePolygon) {
+        dest.writeString(TYPE_POLYGON);
+        ((ParsePolygon) object).writeToParcel(dest, this);
 
       } else if (object instanceof ParseACL) {
         dest.writeString(TYPE_ACL);

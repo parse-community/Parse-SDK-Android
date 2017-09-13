@@ -30,6 +30,7 @@ import bolts.TaskCompletionSource;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -107,73 +108,56 @@ public class ParseQueryTest {
   }
 
   @Test
-  public void testQueriesOnlyRunOneNetworkConnection() throws ParseException {
-    TestQueryController controller = new TestQueryController();
-    ParseCorePlugins.getInstance().registerQueryController(controller);
+  public void testMultipleQueries() throws ParseException {
+    TestQueryController controller1 = new TestQueryController();
+    TestQueryController controller2 = new TestQueryController();
 
-    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
+    TaskCompletionSource<Void> tcs1 = new TaskCompletionSource<>();
+    TaskCompletionSource<Void> tcs2 = new TaskCompletionSource<>();
+    controller1.await(tcs1.getTask());
+    controller2.await(tcs2.getTask());
+
+    ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
+    query.setUser(new ParseUser());
+
+    ParseCorePlugins.getInstance().registerQueryController(controller1);
+    query.findInBackground();
+    assertTrue(query.isRunning());
+
+    ParseCorePlugins.getInstance().reset();
+    ParseCorePlugins.getInstance().registerQueryController(controller2);
+    query.countInBackground();
+    assertTrue(query.isRunning());
+
+    // Stop the first operation.
+    tcs1.setResult(null);
+    assertTrue(query.isRunning());
+
+    // Stop the second.
+    tcs2.setResult(null);
+    assertFalse(query.isRunning());
+  }
+
+  @Test
+  public void testMultipleQueriesWithInflightChanges() throws ParseException {
+    Parse.enableLocalDatastore(null);
+    TestQueryController controller = new TestQueryController();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
     query.setUser(new ParseUser());
-    Task<Void> task = query.findInBackground().makeVoid();
 
-    try {
-      query.find();
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.findInBackground(new FindCallback<ParseObject>() {
-        @Override
-        public void done(List<ParseObject> objects, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.count();
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.countInBackground(new CountCallback() {
-        @Override
-        public void done(int count, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.get("abc");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.getInBackground("abc", new GetCallback<ParseObject>() {
-        @Override
-        public void done(ParseObject object, ParseException e) {
-        }
-      });
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    tcs.setResult(null);
-    ParseTaskUtils.wait(task);
+    ParseCorePlugins.getInstance().registerQueryController(controller);
+    List<Task<Void>> tasks = Arrays.asList(
+        query.fromNetwork().findInBackground().makeVoid(),
+        query.fromLocalDatastore().findInBackground().makeVoid(),
+        query.setLimit(10).findInBackground().makeVoid(),
+        query.whereEqualTo("key", "value").countInBackground().makeVoid());
+    assertTrue(query.isRunning());
+    tcs.trySetResult(null);
+    ParseTaskUtils.wait(Task.whenAll(tasks));
+    assertFalse(query.isRunning());
   }
 
   @Test
@@ -243,48 +227,26 @@ public class ParseQueryTest {
   }
 
   @Test
-  public void testQueriesFreezeDuringExecution() throws ParseException {
-    ParseObject.registerSubclass(ParseUser.class);
+  public void testIsRunning() throws ParseException {
     TestQueryController controller = new TestQueryController();
     ParseCorePlugins.getInstance().registerQueryController(controller);
-
-    TaskCompletionSource<Void> tcs = new TaskCompletionSource();
+    TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
     controller.await(tcs.getTask());
 
     ParseQuery<ParseObject> query = ParseQuery.getQuery("TestObject");
     query.setUser(new ParseUser());
-    Task<Void> task = query.findInBackground().cast();
-
-    try {
-      query.whereEqualTo("foo", "bar");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.include("foo");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.orderByAscending("foo");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
-    try {
-      query.orderByDescending("bar");
-      fail("Should've thrown an exception.");
-    } catch (RuntimeException e) {
-      // do nothing
-    }
-
+    assertFalse(query.isRunning());
+    query.findInBackground();
+    assertTrue(query.isRunning());
     tcs.setResult(null);
-    ParseTaskUtils.wait(task);
+    assertFalse(query.isRunning());
+    // Run another
+    tcs = new TaskCompletionSource<>();
+    controller.await(tcs.getTask());
+    query.findInBackground();
+    assertTrue(query.isRunning());
+    query.cancel();
+    assertFalse(query.isRunning());
   }
 
   @Test
@@ -590,6 +552,67 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testWhereWithinPolygon() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
+    ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
+    ParseGeoPoint point3 = new ParseGeoPoint(30, 30);
+
+    List<ParseGeoPoint> points = Arrays.asList(point1, point2, point3);
+    query.whereWithinPolygon("key", points);
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints = (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoWithin");
+    List<Object> list = (List<Object>) map.get("$polygon");
+    assertEquals(3, list.size());
+    assertTrue(list.contains(point1));
+    assertTrue(list.contains(point2));
+    assertTrue(list.contains(point3));
+  }
+
+  @Test
+  public void testWhereWithinPolygonWithPolygon() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
+    ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
+    ParseGeoPoint point3 = new ParseGeoPoint(30, 30);
+
+    List<ParseGeoPoint> points = Arrays.asList(point1, point2, point3);
+    query.whereWithinPolygon("key", new ParsePolygon(points));
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints = (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoWithin");
+    List<Object> list = (List<Object>) map.get("$polygon");
+    assertEquals(3, list.size());
+    assertTrue(list.contains(point1));
+    assertTrue(list.contains(point2));
+    assertTrue(list.contains(point3));
+  }
+
+  @Test
+  public void testWherePolygonContains() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    ParseGeoPoint point = new ParseGeoPoint(10, 10);
+
+    query.wherePolygonContains("key", point);
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints =
+        (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map map = (Map) keyConstraints.get("$geoIntersects");
+    ParseGeoPoint geoPoint = (ParseGeoPoint) map.get("$point");
+    assertEquals(geoPoint, point);
+  }
+
+  @Test
   public void testWhereWithinRadians() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     ParseGeoPoint point = new ParseGeoPoint(10, 10);
@@ -620,6 +643,18 @@ public class ParseQueryTest {
 
     verifyCondition(query, "key", "$nearSphere", point);
     verifyCondition(query, "key", "$maxDistance", 100.0 / ParseGeoPoint.EARTH_MEAN_RADIUS_KM);
+  }
+
+  @Test
+  public void testClear() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    query.whereEqualTo("key", "value");
+    query.whereEqualTo("otherKey", "otherValue");
+    verifyCondition(query, "key", "value");
+    verifyCondition(query, "otherKey", "otherValue");
+    query.clear("key");
+    verifyCondition(query, "key", null);
+    verifyCondition(query, "otherKey", "otherValue"); // still.
   }
 
   @Test
@@ -743,6 +778,13 @@ public class ParseQueryTest {
     assertEquals(5, query.getSkip());
   }
 
+  private static void verifyCondition(ParseQuery query, String key, Object value) {
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    assertEquals(value, queryConstraints.get(key));
+  }
+
   private static void verifyCondition(
       ParseQuery query, String key, String conditionKey, Object value) {
     // We generate a state to verify the content of the builder
@@ -781,7 +823,7 @@ public class ParseQueryTest {
       assertEquals(map.get(constraintKey), values.get(constraintKey));
     }
   }
-  
+
   //endregion
 
   /**

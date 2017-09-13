@@ -23,6 +23,7 @@ import java.util.Set;
   /* package */ final static String KEY_DEVICE_TYPE = "deviceType";
   /* package */ final static String KEY_EXPIRATION_TIME = "expiration_time";
   /* package */ final static String KEY_EXPIRATION_INTERVAL = "expiration_interval";
+  /* package */ final static String KEY_PUSH_TIME = "push_time";
   /* package */ final static String KEY_DATA = "data";
 
   public ParseRESTPushCommand(
@@ -35,7 +36,7 @@ import java.util.Set;
 
   public static ParseRESTPushCommand sendPushCommand(ParseQuery.State<ParseInstallation> query,
   Set<String> targetChannels, String targetDeviceType, Long expirationTime,
-      Long expirationInterval, JSONObject payload, String sessionToken) {
+      Long expirationInterval, Long pushTime, JSONObject payload, String sessionToken) {
     JSONObject parameters = new JSONObject();
     try {
       if (targetChannels != null) {
@@ -63,9 +64,14 @@ import java.util.Set;
         parameters.put(KEY_EXPIRATION_INTERVAL, expirationInterval);
       }
 
+      if (pushTime != null) {
+        parameters.put(KEY_PUSH_TIME, pushTime);
+      }
+
       if (payload != null) {
         parameters.put(KEY_DATA, payload);
       }
+
     } catch (JSONException e) {
       throw new RuntimeException(e);
     }

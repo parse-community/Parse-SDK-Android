@@ -18,6 +18,7 @@ package com.parse;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -95,6 +96,9 @@ import android.widget.RemoteViews;
           }
         }
       }
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        postJellyBeanBuilder.setChannelId(b.mNotificationChannelId);
+      }
       return postJellyBeanBuilder.build();
     }
   }
@@ -124,6 +128,7 @@ import android.widget.RemoteViews;
     Bitmap mLargeIcon;
     int mPriority;
     Style mStyle;
+    String mNotificationChannelId;
 
     Notification mNotification = new Notification();
 
@@ -185,6 +190,14 @@ import android.widget.RemoteViews;
      */
     public Builder setContentTitle(CharSequence title) {
       mContentTitle = limitCharSequenceLength(title);
+      return this;
+    }
+
+    /**
+     * Set the notification channel of the notification, in a standard notification.
+     */
+    public Builder setNotificationChannel(String notificationChannelId) {
+      mNotificationChannelId = notificationChannelId;
       return this;
     }
 

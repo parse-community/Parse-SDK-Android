@@ -25,7 +25,7 @@ import android.util.SparseArray;
   /*
    * Same as Context.startService, but logs an error if starting the service fails.
    */
-  public static boolean runIntentInService(
+  private static boolean runIntentInService(
       Context context, Intent intent, Class<? extends Service> clazz) {
     boolean startedService = false;
     

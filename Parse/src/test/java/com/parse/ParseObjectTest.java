@@ -365,6 +365,29 @@ public class ParseObjectTest {
   }
 
   @Test
+  public void testGetParsePolygon() throws Exception {
+    ParseObject object = new ParseObject("Test");
+    List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+    points.add(new ParseGeoPoint(0,0));
+    points.add(new ParseGeoPoint(0,1));
+    points.add(new ParseGeoPoint(1,1));
+    points.add(new ParseGeoPoint(1,0));
+
+    ParsePolygon polygon = new ParsePolygon(points);
+    object.put("key", polygon);
+
+    assertEquals(polygon, object.getParsePolygon("key"));
+  }
+
+  @Test
+  public void testGetParsePolygonWithWrongValue() throws Exception {
+    ParseObject object = new ParseObject("Test");
+    object.put("key", 1);
+
+    assertNull(object.getParsePolygon("key"));
+  }
+
+  @Test
   public void testGetACL() throws Exception {
     ParseObject object = new ParseObject("Test");
     ParseACL acl = new ParseACL();
@@ -491,7 +514,7 @@ public class ParseObjectTest {
 
     assertEquals(0, object.getLong("key"));
   }
-  
+
   //endregion
 
   //region testParcelable

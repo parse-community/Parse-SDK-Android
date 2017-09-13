@@ -33,7 +33,7 @@ import bolts.Task;
   public static ParseRESTUserCommand signUpUserCommand(JSONObject parameters, String sessionToken,
       boolean revocableSession) {
     return new ParseRESTUserCommand(
-        "classes/_User", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
+        "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
   }
 
   public static ParseRESTUserCommand logInUserCommand(String username, String password,

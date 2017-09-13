@@ -1,6 +1,7 @@
 branches:
   only:
     - master
+    - /^\d+\.\d+\.\d+$/ # regex
 
 language: android
 sudo: false
@@ -12,16 +13,15 @@ android:
   components:
     - tools
     - platform-tools
-    - build-tools-25.0.2
-    - android-25
-    - doc-25
-    - extra-android-m2repository
+    - build-tools-26.0.1
+    - android-26
+    - doc-26
 
 before_install:
     - pip install --user codecov
 
 script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport --info
+  - ./gradlew clean testDebugUnitTest jacocoTestReport
 
 after_success:
   - ./gradlew coveralls

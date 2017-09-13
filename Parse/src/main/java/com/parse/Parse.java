@@ -259,7 +259,7 @@ public class Parse {
     Parse.offlineStore = offlineStore;
   }
 
-  static boolean isLocalDatastoreEnabled() {
+  public static boolean isLocalDatastoreEnabled() {
     return isLocalDatastoreEnabled;
   }
 
@@ -413,7 +413,7 @@ public class Parse {
 
     // May need to update GCM registration ID if app version has changed.
     // This also primes current installation.
-    GcmRegistrar.getInstance().registerAsync().continueWithTask(new Continuation<Void, Task<Void>>() {
+    PushService.initialize().continueWithTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         // Prime current user in the background
@@ -427,10 +427,6 @@ public class Parse {
         return null;
       }
     }, Task.BACKGROUND_EXECUTOR);
-
-    if (ManifestInfo.getPushType() == PushType.PPNS) {
-      PushService.startServiceIfRequired(applicationContext);
-    }
 
     dispatchOnParseInitialized();
 

@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -185,6 +186,34 @@ public class ParseDecoderTest extends ResetPluginsParseTest {
     final double DELTA = 0.00001;
     assertEquals(-20, parseGeoPoint.getLongitude(), DELTA);
     assertEquals(30, parseGeoPoint.getLatitude(), DELTA);
+  }
+
+  @Test
+  public void testPolygonWithoutCoordinates() throws JSONException {
+    JSONObject json = new JSONObject();
+    json.put("__type", "Polygon");
+
+    thrown.expect(RuntimeException.class);
+    ParseDecoder.get().decode(json);
+  }
+
+  @Test
+  public void testPolygon() throws JSONException {
+    List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+    points.add(new ParseGeoPoint(0,0));
+    points.add(new ParseGeoPoint(0,1));
+    points.add(new ParseGeoPoint(1,1));
+    points.add(new ParseGeoPoint(1,0));
+
+    ParsePolygon polygon = new ParsePolygon(points);
+
+    JSONObject json = new JSONObject();
+    json.put("__type", "Polygon");
+    json.put("coordinates", polygon.coordinatesToJSONArray());
+
+    ParsePolygon parsePolygon = (ParsePolygon) ParseDecoder.get().decode(json);
+    assertNotNull(parsePolygon);
+    assertEquals(polygon.getCoordinates(), parsePolygon.getCoordinates());
   }
 
   @Test

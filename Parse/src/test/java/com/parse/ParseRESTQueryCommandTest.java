@@ -56,8 +56,8 @@ public class ParseRESTQueryCommandTest {
 
     Map<String, String> encoded = ParseRESTQueryCommand.encode(state, false);
 
-    assertEquals("orderKey", encoded.get("order"));
-    JSONObject conditionJson = new JSONObject(encoded.get("where"));
+    assertEquals("orderKey", encoded.get(ParseRESTQueryCommand.KEY_ORDER));
+    JSONObject conditionJson = new JSONObject(encoded.get(ParseRESTQueryCommand.KEY_WHERE));
     JSONArray conditionWhereJsonArray = new JSONArray()
         .put("inValue")
         .put("inValueAgain");
@@ -65,27 +65,28 @@ public class ParseRESTQueryCommandTest {
         conditionWhereJsonArray,
         conditionJson.getJSONObject("inKey").getJSONArray("$in"),
         JSONCompareMode.NON_EXTENSIBLE);
-    assertTrue(encoded.get("keys").contains("selectedKey"));
-    assertTrue(encoded.get("keys").contains("selectedKeyAgain"));
-    assertEquals("includeKey", encoded.get("include"));
-    assertEquals("5", encoded.get("limit"));
-    assertEquals("6", encoded.get("skip"));
+    assertTrue(encoded.get(ParseRESTQueryCommand.KEY_KEYS).contains("selectedKey"));
+    assertTrue(encoded.get(ParseRESTQueryCommand.KEY_KEYS).contains("selectedKeyAgain"));
+    assertEquals("includeKey", encoded.get(ParseRESTQueryCommand.KEY_INCLUDE));
+    assertEquals("5", encoded.get(ParseRESTQueryCommand.KEY_LIMIT));
+    assertEquals("6", encoded.get(ParseRESTQueryCommand.KEY_SKIP));
     assertEquals("extraKey", encoded.get("redirectClassNameForKey"));
-    assertEquals("1", encoded.get("trace"));
+    assertEquals("1", encoded.get(ParseRESTQueryCommand.KEY_TRACE));
   }
 
   @Test
   public void testEncodeWithCount() throws Exception {
     ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-        .setLimit(5)
         .setSkip(6)
+        .setLimit(3)
         .build();
 
     Map<String, String> encoded = ParseRESTQueryCommand.encode(state, true);
 
-    assertFalse(encoded.containsKey("limit"));
-    assertFalse(encoded.containsKey("skip"));
-    assertEquals("1", encoded.get("count"));
+    // Limit should not be stripped out from count queries
+    assertTrue(encoded.containsKey(ParseRESTQueryCommand.KEY_LIMIT));
+    assertFalse(encoded.containsKey(ParseRESTQueryCommand.KEY_SKIP));
+    assertEquals("1", encoded.get(ParseRESTQueryCommand.KEY_COUNT));
   }
 
   //endregion

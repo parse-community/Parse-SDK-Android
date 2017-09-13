@@ -39,6 +39,21 @@ public class ParseGeoPointTest {
   }
 
   @Test
+  public void testEquals() {
+    ParseGeoPoint pointA = new ParseGeoPoint(30d, 50d);
+    ParseGeoPoint pointB = new ParseGeoPoint(30d, 50d);
+    ParseGeoPoint pointC = new ParseGeoPoint(45d, 45d);
+
+    assertTrue(pointA.equals(pointB));
+    assertTrue(pointA.equals(pointA));
+    assertTrue(pointB.equals(pointA));
+
+    assertFalse(pointA.equals(null));
+    assertFalse(pointA.equals(true));
+    assertFalse(pointA.equals(pointC));
+  }
+
+  @Test
   public void testParcelable() {
     ParseGeoPoint point = new ParseGeoPoint(30d, 50d);
     Parcel parcel = Parcel.obtain();

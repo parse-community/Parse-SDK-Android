@@ -8,8 +8,11 @@
  */
 package com.parse;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +25,8 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -65,8 +70,10 @@ import java.util.Random;
  * {@link #onPushOpen(Context, Intent)}, or {@link #onPushDismiss(Context, Intent)}.
  * To make minor changes to the appearance of a notification, override
  * {@link #getSmallIconId(Context, Intent)} or {@link #getLargeIcon(Context, Intent)}. To completely
- * change the Notification generated, override {@link #getNotification(Context, Intent)}. To change
- * the Activity launched when a user opens a Notification, override
+ * change the Notification generated, override {@link #getNotification(Context, Intent)}. To
+ * change the NotificationChannel generated, override {@link #getNotificationChannel(Context, Intent)}. To
+ * change how the NotificationChannel is created, override {@link #createNotificationChannel(Context, NotificationChannel)}.
+ * To change the Activity launched when a user opens a Notification, override
  * {@link #getActivity(Context, Intent)}.
  */
 // Hack note: Javadoc smashes the last two paragraphs together without the <p> tags.
@@ -95,6 +102,47 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
 
   protected static final int SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT = 38;
+
+  private static final List<String> REQUIRED_ACTIONS = Arrays.asList(
+      ACTION_PUSH_RECEIVE, ACTION_PUSH_OPEN, ACTION_PUSH_DELETE);
+
+  /**
+   * Called at startup at the moment of parsing the manifest, to see
+   * if it was correctly set-up.
+   */
+  static boolean isSupported() {
+    int actions = 0;
+    for (String action : REQUIRED_ACTIONS) {
+      if (ManifestInfo.hasIntentReceiver(action)) actions++;
+    }
+
+    if (actions < REQUIRED_ACTIONS.size()) {
+      if (actions > 0) {
+        throw new IllegalStateException(
+            "The Parse Push BroadcastReceiver must implement a filter for all of " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
+                ParsePushBroadcastReceiver.ACTION_PUSH_DELETE);
+      } else {
+        PLog.e(TAG, "Push is currently disabled. Parse SDK requires your app to " +
+            "have a BroadcastReceiver that handles " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE + ", " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_OPEN + ", and " +
+            ParsePushBroadcastReceiver.ACTION_PUSH_DELETE + ". You can do this by adding " +
+            "these lines to your AndroidManifest.xml:\n\n" +
+            " <receiver android:name=\"com.parse.ParsePushBroadcastReceiver\"\n" +
+            "   android:exported=false>\n" +
+            "  <intent-filter>\n" +
+            "     <action android:name=\"com.parse.push.intent.RECEIVE\" />\n" +
+            "     <action android:name=\"com.parse.push.intent.OPEN\" />\n" +
+            "     <action android:name=\"com.parse.push.intent.DELETE\" />\n" +
+            "   </intent-filter>\n" +
+            " </receiver>");
+      }
+      return false;
+    }
+    return true;
+  }
 
   /**
    * Delegates the generic {@code onReceive} event to a notification lifecycle event.
@@ -261,6 +309,37 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
   }
 
   /**
+   * Retrieves the channel to be used in a {@link Notification} if API >= 26, if not null. The default returns a new channel
+   * with id "parse_push", name "Push notifications" and default importance.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param intent
+   *      An {@code Intent} containing the channel and data of the current push notification.
+   * @return
+   *      The notification channel
+   */
+  @TargetApi(Build.VERSION_CODES.O)
+  protected NotificationChannel getNotificationChannel(Context context, Intent intent) {
+    return new NotificationChannel("parse_push", "Push notifications", NotificationManager.IMPORTANCE_DEFAULT);
+  }
+
+  /**
+   * Creates the notification channel with the NotificationManager. Channel is not recreated
+   * if the channel properties are unchanged.
+   *
+   * @param context
+   *      The {@code Context} in which the receiver is running.
+   * @param notificationChannel
+   *      The {@code NotificationChannel} to be created.
+   */
+  @TargetApi(Build.VERSION_CODES.O)
+  protected void createNotificationChannel(Context context, NotificationChannel notificationChannel) {
+    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    nm.createNotificationChannel(notificationChannel);
+  }
+
+  /**
    * Retrieves the small icon to be used in a {@link Notification}. The default implementation uses
    * the icon specified by {@code com.parse.push.notification_icon} {@code meta-data} in your
    * {@code AndroidManifest.xml} with a fallback to the launcher icon for this package. To conform
@@ -364,6 +443,8 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     PendingIntent pDeleteIntent = PendingIntent.getBroadcast(context, deleteIntentRequestCode,
         deleteIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+
+
     // The purpose of setDefaults(Notification.DEFAULT_ALL) is to inherit notification properties
     // from system defaults
     NotificationCompat.Builder parseBuilder = new NotificationCompat.Builder(context);
@@ -376,6 +457,13 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         .setDeleteIntent(pDeleteIntent)
         .setAutoCancel(true)
         .setDefaults(Notification.DEFAULT_ALL);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationChannel notificationChannel = getNotificationChannel(context, intent);
+      createNotificationChannel(context, notificationChannel);
+      parseBuilder.setNotificationChannel(notificationChannel.getId());
+    }
+
     if (alert != null
         && alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
       parseBuilder.setStyle(new NotificationCompat.Builder.BigTextStyle().bigText(alert));
