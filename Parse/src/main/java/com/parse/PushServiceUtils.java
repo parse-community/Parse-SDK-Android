@@ -8,17 +8,10 @@
  */
 package com.parse;
 
-import android.annotation.TargetApi;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.PowerManager;
 import android.support.annotation.NonNull;
-import android.util.SparseArray;
 
 import bolts.Task;
 
@@ -29,7 +22,7 @@ import bolts.Task;
  * Android O introduces limitations over Context.startService. If the app is currently considered
  * in background, the call will result in a crash. The only reliable solutions are either using
  * Context.startServiceInForeground, which does not fit our case, or move to the JobScheduler
- * engine, which is what we do here for Oreo, launching {@link PushService26}.
+ * engine, which is what we do here for Oreo, launching {@link PushServiceApi26}.
  *
  * Pre-oreo, we just launch {@link PushService}.
  *
@@ -50,7 +43,7 @@ abstract class PushServiceUtils {
    */
   public static boolean runService(Context context, @NonNull Intent intent) {
     if (USE_JOBS) {
-      return PushService26.run(context, intent);
+      return PushServiceApi26.run(context, intent);
     } else {
       return PushService.run(context, intent);
     }
@@ -59,7 +52,7 @@ abstract class PushServiceUtils {
   // Checks the manifest file.
   static boolean isSupported() {
     if (USE_JOBS) {
-      return PushService26.isSupported();
+      return PushServiceApi26.isSupported();
     } else {
       return PushService.isSupported();
     }

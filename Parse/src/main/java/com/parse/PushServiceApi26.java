@@ -34,8 +34,8 @@ import java.util.concurrent.Executors;
  * This is already set-up in our own manifest.
  */
 @TargetApi(Build.VERSION_CODES.O)
-public final class PushService26 extends JobService {
-  private static final String TAG = "com.parse.PushService26";
+public final class PushServiceApi26 extends JobService {
+  private static final String TAG = PushServiceApi26.class.getSimpleName();
   private static final String INTENT_KEY = "intent";
   private static final int JOB_SERVICE_ID = 999;
 

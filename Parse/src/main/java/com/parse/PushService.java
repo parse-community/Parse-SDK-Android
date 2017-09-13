@@ -82,7 +82,7 @@ import java.util.concurrent.Executors;
  * launch the app's launcher activity. To customize this behavior override
  * {@link ParsePushBroadcastReceiver#onPushOpen(Context, Intent)}.
  *
- * Starting with Android O, this is replaced by {@link PushService26}.
+ * Starting with Android O, this is replaced by {@link PushServiceApi26}.
  */
 public final class PushService extends Service {
   private static final String TAG = "com.parse.PushService";
