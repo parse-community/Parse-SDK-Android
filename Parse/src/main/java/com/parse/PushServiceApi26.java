@@ -44,7 +44,7 @@ public final class PushServiceApi26 extends JobService {
     // Execute in the next second.
     Bundle extra = new Bundle(1);
     extra.putParcelable(INTENT_KEY, intent);
-    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, new ComponentName(context, PushService.class))
+    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, new ComponentName(context, PushServiceApi26.class))
         .setMinimumLatency(1L)
         .setOverrideDeadline(1000L)
         .setRequiresCharging(false)
