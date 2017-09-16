@@ -180,7 +180,7 @@ import java.util.List;
       return PushType.NONE;
     }
 
-    if (!PushService.isSupported()) {
+    if (!PushServiceUtils.isSupported()) {
       return PushType.NONE;
     }
 
