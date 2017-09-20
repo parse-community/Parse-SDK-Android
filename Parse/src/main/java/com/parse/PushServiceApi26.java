@@ -25,6 +25,7 @@ import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +45,8 @@ public final class PushServiceApi26 extends JobService {
     // Execute in the next second.
     Bundle extra = new Bundle(1);
     extra.putParcelable(INTENT_KEY, intent);
-    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, new ComponentName(context, PushServiceApi26.class))
+    ComponentName component = new ComponentName(context, PushServiceApi26.class);
+    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, component)
         .setMinimumLatency(1L)
         .setOverrideDeadline(1000L)
         .setRequiresCharging(false)
@@ -77,17 +79,20 @@ public final class PushServiceApi26 extends JobService {
       return false;
     }
 
-    setUp();
     final Bundle params = jobParameters.getTransientExtras();
     final Intent intent = params.getParcelable(INTENT_KEY);
-    executor.execute(new Runnable() {
+    jobsCount++;
+    getExecutor().execute(new Runnable() {
       @Override
       public void run() {
         try {
-          handler.handlePush(intent);
+          getHandler().handlePush(intent);
         } finally {
           jobFinished(jobParameters, false);
-          tearDown();
+          jobsCount--;
+          if (jobsCount == 0) {
+            tearDown();
+          }
         }
       }
     });
@@ -100,21 +105,19 @@ public final class PushServiceApi26 extends JobService {
     return true;
   }
 
-  private void setUp() {
-    if (executor == null || handler == null) {
-      executor = Executors.newSingleThreadExecutor();
-      handler = PushServiceUtils.createPushHandler();
-      jobsCount = 0;
-    }
-    jobsCount++;
+  private Executor getExecutor() {
+    if (executor == null) executor = Executors.newSingleThreadExecutor();
+    return executor;
+  }
+
+  private PushHandler getHandler() {
+    if (handler == null) handler = PushServiceUtils.createPushHandler();
+    return handler;
   }
 
   private void tearDown() {
-    jobsCount--;
-    if (jobsCount == 0) {
-      executor.shutdown();
-      executor = null;
-      handler = null;
-    }
+    if (executor != null) executor.shutdown();
+    executor = null;
+    handler = null;
   }
 }
