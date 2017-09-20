@@ -58,17 +58,11 @@ public final class PushServiceApi26 extends JobService {
   // We delegate the intent to a PushHandler running in a streamlined executor.
   private ExecutorService executor;
   private PushHandler handler;
+  private int jobsCount;
 
   // Our manifest file is OK.
   static boolean isSupported() {
     return true;
-  }
-
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    executor = Executors.newSingleThreadExecutor();
-    handler = PushServiceUtils.createPushHandler();
   }
 
   @Override
@@ -83,6 +77,7 @@ public final class PushServiceApi26 extends JobService {
       return false;
     }
 
+    setUp();
     final Bundle params = jobParameters.getTransientExtras();
     final Intent intent = params.getParcelable(INTENT_KEY);
     executor.execute(new Runnable() {
@@ -92,6 +87,7 @@ public final class PushServiceApi26 extends JobService {
           handler.handlePush(intent);
         } finally {
           jobFinished(jobParameters, false);
+          tearDown();
         }
       }
     });
@@ -104,13 +100,21 @@ public final class PushServiceApi26 extends JobService {
     return true;
   }
 
-  @Override
-  public void onDestroy() {
-    if (executor != null) {
+  private void setUp() {
+    if (executor == null || handler == null) {
+      executor = Executors.newSingleThreadExecutor();
+      handler = PushServiceUtils.createPushHandler();
+      jobsCount = 0;
+    }
+    jobsCount++;
+  }
+
+  private void tearDown() {
+    jobsCount--;
+    if (jobsCount == 0) {
       executor.shutdown();
       executor = null;
       handler = null;
     }
-    super.onDestroy();
   }
 }
