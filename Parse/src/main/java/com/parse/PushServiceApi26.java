@@ -25,6 +25,7 @@ import android.util.SparseArray;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +45,8 @@ public final class PushServiceApi26 extends JobService {
     // Execute in the next second.
     Bundle extra = new Bundle(1);
     extra.putParcelable(INTENT_KEY, intent);
-    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, new ComponentName(context, PushServiceApi26.class))
+    ComponentName component = new ComponentName(context, PushServiceApi26.class);
+    int did = scheduler.schedule(new JobInfo.Builder(JOB_SERVICE_ID, component)
         .setMinimumLatency(1L)
         .setOverrideDeadline(1000L)
         .setRequiresCharging(false)
@@ -58,17 +60,11 @@ public final class PushServiceApi26 extends JobService {
   // We delegate the intent to a PushHandler running in a streamlined executor.
   private ExecutorService executor;
   private PushHandler handler;
+  private int jobsCount;
 
   // Our manifest file is OK.
   static boolean isSupported() {
     return true;
-  }
-
-  @Override
-  public void onCreate() {
-    super.onCreate();
-    executor = Executors.newSingleThreadExecutor();
-    handler = PushServiceUtils.createPushHandler();
   }
 
   @Override
@@ -85,13 +81,18 @@ public final class PushServiceApi26 extends JobService {
 
     final Bundle params = jobParameters.getTransientExtras();
     final Intent intent = params.getParcelable(INTENT_KEY);
-    executor.execute(new Runnable() {
+    jobsCount++;
+    getExecutor().execute(new Runnable() {
       @Override
       public void run() {
         try {
-          handler.handlePush(intent);
+          getHandler().handlePush(intent);
         } finally {
           jobFinished(jobParameters, false);
+          jobsCount--;
+          if (jobsCount == 0) {
+            tearDown();
+          }
         }
       }
     });
@@ -104,13 +105,19 @@ public final class PushServiceApi26 extends JobService {
     return true;
   }
 
-  @Override
-  public void onDestroy() {
-    if (executor != null) {
-      executor.shutdown();
-      executor = null;
-      handler = null;
-    }
-    super.onDestroy();
+  private Executor getExecutor() {
+    if (executor == null) executor = Executors.newSingleThreadExecutor();
+    return executor;
+  }
+
+  private PushHandler getHandler() {
+    if (handler == null) handler = PushServiceUtils.createPushHandler();
+    return handler;
+  }
+
+  private void tearDown() {
+    if (executor != null) executor.shutdown();
+    executor = null;
+    handler = null;
   }
 }
