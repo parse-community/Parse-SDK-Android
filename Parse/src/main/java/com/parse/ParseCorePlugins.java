@@ -127,7 +127,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
   public ParseCurrentUserController getCurrentUserController() {
     if (currentUserController.get() == null) {
-      File file = new File(Parse.getParseDir(), FILENAME_CURRENT_USER);
+      File file = new File(Parse.getParseCacheDir(), FILENAME_CURRENT_USER);
       FileObjectStore<ParseUser> fileStore =
           new FileObjectStore<>(ParseUser.class, file, ParseUserCurrentCoder.get());
       ParseObjectStore<ParseUser> store = Parse.isLocalDatastoreEnabled()
@@ -325,7 +325,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
   public LocalIdManager getLocalIdManager() {
     if (localIdManager.get() == null) {
-      LocalIdManager manager = new LocalIdManager(Parse.getParseDir());
+      LocalIdManager manager = new LocalIdManager(Parse.getParseCacheDir());
       localIdManager.compareAndSet(null, manager);
     }
     return localIdManager.get();

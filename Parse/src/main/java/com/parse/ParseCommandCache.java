@@ -53,7 +53,7 @@ import bolts.TaskCompletionSource;
 
   private static File getCacheDir() {
     // Construct the path to the cache directory.
-    File cacheDir = new File(Parse.getParseDir(), "CommandCache");
+    File cacheDir = new File(Parse.getParseCacheDir(), "CommandCache");
     cacheDir.mkdirs();
 
     return cacheDir;
