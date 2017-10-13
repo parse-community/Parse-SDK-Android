@@ -413,7 +413,7 @@ public class Parse {
 
     // May need to update GCM registration ID if app version has changed.
     // This also primes current installation.
-    PushService.initialize().continueWithTask(new Continuation<Void, Task<Void>>() {
+    PushServiceUtils.initialize().continueWithTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         // Prime current user in the background
