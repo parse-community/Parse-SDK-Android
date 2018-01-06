@@ -487,8 +487,13 @@ public class ParseUser extends ParseObject {
   }
 
   @Override
-  /* package */ Task<Void> saveAsync(String sessionToken, Task<Void> toAwait) {
-    return saveAsync(sessionToken, isLazy(), toAwait);
+  /* package */ Task<Void> saveAsync(final String sessionToken, Task<Void> toAwait) {
+    return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
+        @Override
+        public Task<Void> then(Task<Void> task) throws Exception {
+            return saveAsync(sessionToken, isLazy(), task);
+        }
+    });
   }
 
   /* package for tests */ Task<Void> saveAsync(String sessionToken, boolean isLazy, Task<Void> toAwait) {
