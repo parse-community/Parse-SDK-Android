@@ -480,6 +480,14 @@ public class ParseQuery<T extends ParseObject> {
         return addCondition(key, "$geoIntersects", dictionary);
       }
 
+      public Builder<T> whereText(String key, String value) {
+        Map<String, String> termDictionary = new HashMap<>();
+        Map<String, Map<String, String>> searchDictionary = new HashMap<>();
+        termDictionary.put("$term", value);
+        searchDictionary.put("$search", termDictionary);
+        return addCondition(key, "$text", searchDictionary);
+      }
+
       public Builder<T> addCondition(String key, String condition,
           Collection<? extends Object> value) {
         return addConditionInternal(key, condition, Collections.unmodifiableCollection(value));
@@ -1680,6 +1688,23 @@ public class ParseQuery<T extends ParseObject> {
    */
   public ParseQuery<T> whereContainsAll(String key, Collection<?> values) {
     builder.addCondition(key, "$all", values);
+    return this;
+  }
+
+    /**
+   * Adds a constraint for finding string values that contain a provided
+   * string using Full Text Search
+   *
+   * Requires Parse-Server@2.5.0
+   *
+   * @param key
+   *          The key to be constrained.
+   * @param text
+   *          String to be searched
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> whereFullText(String key, String text) {
+    builder.whereText(key, text);
     return this;
   }
 

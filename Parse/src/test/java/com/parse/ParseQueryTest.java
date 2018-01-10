@@ -364,6 +364,22 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testWhereFullText() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    String text = "TestString";
+    query.whereFullText("key", text);
+
+    // We generate a state to verify the content of the builder
+    ParseQuery.State state = query.getBuilder().build();
+    ParseQuery.QueryConstraints queryConstraints = state.constraints();
+    ParseQuery.KeyConstraints keyConstraints = (ParseQuery.KeyConstraints) queryConstraints.get("key");
+    Map searchDictionary = (Map) keyConstraints.get("$text");
+    Map termDictionary = (Map) searchDictionary.get("$search");
+    String value = (String) termDictionary.get("$term");
+    assertEquals(value, text);
+  }
+
+  @Test
   public void testWhereContainsAll() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     List<String> values = Arrays.asList("value", "valueAgain");
