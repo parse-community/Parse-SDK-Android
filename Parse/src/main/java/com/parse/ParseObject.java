@@ -547,6 +547,49 @@ public class ParseObject implements Parcelable {
   /**
    * Creates a reference to an existing {@code ParseObject} for use in creating associations between
    * {@code ParseObject}s. Calling {@link #isDataAvailable()} on this object will return
+   * {@code false} until {@link #fetchIfNeeded()} or {@link #refresh()} has been called. No network
+   * request will be made.
+   *
+   * @param className
+   *          The object's class.
+   * @param objectId
+   *          The object id for the referenced object.
+   * @return A {@code ParseObject} without data.
+   */
+  public static ParseObject createWithoutDataStayEmpty(String className, String objectId) {
+    try {
+      if (objectId == null) {
+        isCreatingPointerForObjectId.set(NEW_OFFLINE_OBJECT_ID_PLACEHOLDER);
+      } else {
+        isCreatingPointerForObjectId.set(objectId);
+      }
+
+      ParseObject object = null;
+
+      if (object == null) {
+        object = create(className);
+        if (object.hasChanges()) {
+          throw new IllegalStateException(
+                  "A ParseObject subclass default constructor must not make changes "
+                          + "to the object that cause it to be dirty."
+          );
+        }
+      }
+
+      return object;
+
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to create instance of subclass.", e);
+    } finally {
+      isCreatingPointerForObjectId.set(null);
+    }
+  }
+
+  /**
+   * Creates a reference to an existing {@code ParseObject} for use in creating associations between
+   * {@code ParseObject}s. Calling {@link #isDataAvailable()} on this object will return
    * {@code false} until  {@link #fetchIfNeeded()} or {@link #refresh()} has been called. No network
    * request will be made.
    *
