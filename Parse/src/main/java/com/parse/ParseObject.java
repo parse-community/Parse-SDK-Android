@@ -605,6 +605,23 @@ public class ParseObject implements Parcelable {
   }
 
   /**
+   * Creates a reference to an existing {@code ParseObject} for use in creating associations between
+   * {@code ParseObject}s. Calling {@link #isDataAvailable()} on this object will return
+   * {@code false} until  {@link #fetchIfNeeded()} or {@link #refresh()} has been called. No network
+   * request will be made.
+   *
+   * @param subclass
+   *          The {@code ParseObject} subclass to create.
+   * @param objectId
+   *          The object id for the referenced object.
+   * @return A {@code ParseObject} without data.
+   */
+  @SuppressWarnings({"unused", "unchecked"})
+  public static <T extends ParseObject> T createWithoutDataStayEmpty(Class<T> subclass, String objectId) {
+    return (T) createWithoutDataStayEmpty(getSubclassingController().getClassName(subclass), objectId);
+  }
+
+  /**
    * Registers a custom subclass type with the Parse SDK, enabling strong-typing of those
    * {@code ParseObject}s whenever they appear. Subclasses must specify the {@link ParseClassName}
    * annotation and have a default constructor.
