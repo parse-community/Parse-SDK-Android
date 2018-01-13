@@ -19,6 +19,7 @@ android:
 
 before_install:
     - pip install --user codecov
+    - yes | sdkmanager "platforms;android-27"
 
 script:
   - ./gradlew clean testDebugUnitTest jacocoTestReport
