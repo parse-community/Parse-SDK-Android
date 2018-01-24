@@ -8,7 +8,7 @@
  */
 package com.parse;
 
-import android.os.Build;
+import android.support.annotation.NonNull;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
@@ -31,12 +31,12 @@ import bolts.TaskCompletionSource;
  * ParseRequest takes an arbitrary HttpUriRequest and retries it a number of times with
  * exponential backoff.
  */
-/** package */ abstract class ParseRequest<Response> {
+abstract class ParseRequest<Response> {
 
   private static final ThreadFactory sThreadFactory = new ThreadFactory() {
     private final AtomicInteger mCount = new AtomicInteger(1);
 
-    public Thread newThread(Runnable r) {
+    public Thread newThread(@NonNull Runnable r) {
       return new Thread(r, "ParseRequest.NETWORK_EXECUTOR-thread-" + mCount.getAndIncrement());
     }
   };
@@ -56,9 +56,7 @@ import bolts.TaskCompletionSource;
       ThreadFactory threadFactory) {
     ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maxPoolSize,
         keepAliveTime, timeUnit, workQueue, threadFactory);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-      executor.allowCoreThreadTimeOut(true);
-    }
+    executor.allowCoreThreadTimeOut(true);
     return executor;
   }
 
