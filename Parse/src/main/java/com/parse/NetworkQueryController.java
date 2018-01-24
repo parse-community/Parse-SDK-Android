@@ -32,14 +32,14 @@ import bolts.Task;
   public <T extends ParseObject> Task<List<T>> findAsync(
       ParseQuery.State<T> state, ParseUser user, Task<Void> cancellationToken) {
     String sessionToken = user != null ? user.getSessionToken() : null;
-    return findAsync(state, sessionToken, true, cancellationToken);
+    return findAsync(state, sessionToken, cancellationToken);
   }
 
   @Override
   public <T extends ParseObject> Task<Integer> countAsync(
       ParseQuery.State<T> state, ParseUser user, Task<Void> cancellationToken) {
     String sessionToken = user != null ? user.getSessionToken() : null;
-    return countAsync(state, sessionToken, true, cancellationToken);
+    return countAsync(state, sessionToken, cancellationToken);
   }
 
   /**
@@ -50,14 +50,10 @@ import bolts.Task;
   /* package */ <T extends ParseObject> Task<List<T>> findAsync(
       final ParseQuery.State<T> state,
       String sessionToken,
-      boolean shouldRetry,
       Task<Void> ct) {
     final long queryStart = System.nanoTime();
 
     final ParseRESTCommand command = ParseRESTQueryCommand.findCommand(state, sessionToken);
-    if (shouldRetry) {
-      command.enableRetrying();
-    }
 
     final long querySent = System.nanoTime();
     return command.executeAsync(restClient, ct).onSuccess(new Continuation<JSONObject, List<T>>() {
@@ -94,12 +90,8 @@ import bolts.Task;
   /* package */ <T extends ParseObject> Task<Integer> countAsync(
       final ParseQuery.State<T> state,
       String sessionToken,
-      boolean shouldRetry,
       Task<Void> ct) {
     final ParseRESTCommand command = ParseRESTQueryCommand.countCommand(state, sessionToken);
-    if (shouldRetry) {
-      command.enableRetrying();
-    }
 
     return command.executeAsync(restClient, ct).onSuccessTask(new Continuation<JSONObject, Task<JSONObject>>() {
       @Override

@@ -90,10 +90,6 @@ abstract class ParseRequest<Response> {
     this.url = url;
   }
 
-  public void setMaxRetries(int max) {
-    maxRetries = max;
-  }
-
   protected ParseHttpBody newBody(ProgressCallback uploadProgressCallback) {
     // do nothing
     return null;
