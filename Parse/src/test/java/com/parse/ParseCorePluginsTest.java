@@ -32,7 +32,7 @@ public class ParseCorePluginsTest extends ResetPluginsParseTest {
     Parse.Configuration configuration = new Parse.Configuration.Builder(null)
             .applicationId("1234")
             .build();
-    ParsePlugins.initialize(configuration);
+    ParsePlugins.initialize(null, configuration);
   }
 
   @Test

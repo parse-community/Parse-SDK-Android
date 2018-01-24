@@ -369,7 +369,7 @@ public class Parse {
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
-    ParsePlugins.Android.initialize(configuration.context, configuration);
+    ParsePlugins.initialize(configuration.context, configuration);
 
     try {
       ParseRESTCommand.server = new URL(configuration.server);
@@ -459,7 +459,7 @@ public class Parse {
 
   static Context getApplicationContext() {
     checkContext();
-    return ParsePlugins.Android.get().applicationContext();
+    return ParsePlugins.get().applicationContext();
   }
 
   /**
@@ -580,7 +580,7 @@ public class Parse {
    * processing any commands already stored in the on-disk queue.
    */
   static ParseEventuallyQueue getEventuallyQueue() {
-    Context context = ParsePlugins.Android.get().applicationContext();
+    Context context = ParsePlugins.get().applicationContext();
     return getEventuallyQueue(context);
   }
 
@@ -621,7 +621,7 @@ public class Parse {
   }
 
   static void checkContext() {
-    if (ParsePlugins.Android.get().applicationContext() == null) {
+    if (ParsePlugins.get().applicationContext() == null) {
       throw new RuntimeException("applicationContext is null. "
               + "You must call Parse.initialize(Context)"
               + " before using the Parse library.");
