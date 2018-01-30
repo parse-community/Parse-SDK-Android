@@ -21,7 +21,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   ```groovy
   dependencies {
-    implementation 'com.parse:parse-android:1.16.4'
+    implementation 'com.parse:parse-android:1.16.5'
   }
   ```
 
@@ -32,7 +32,7 @@ For more information about Parse and its features, see [the website][parseplatfo
   If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release][releases]. Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
   
   ```
-  ./gradlew clean jarRelease
+  ./gradlew clean build
   ```
   Output file can be found in `Parse/build/outputs/` with extension .aar
   

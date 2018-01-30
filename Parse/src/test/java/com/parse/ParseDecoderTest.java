@@ -74,6 +74,12 @@ public class ParseDecoderTest extends ResetPluginsParseTest {
   }
 
   @Test
+  public void testNull() {
+    Object object = ParseDecoder.get().decode(JSONObject.NULL);
+    assertNull(object);
+  }
+
+  @Test
   public void testParseFieldOperations() throws JSONException {
     JSONObject json = new JSONObject();
     json.put("__op", "Increment");
