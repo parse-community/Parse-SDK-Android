@@ -5,7 +5,7 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.parse'
-version = '1.16.6-SNAPSHOT'
+version = '1.16.6'
 
 ext {
     projDescription = 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
@@ -244,7 +244,6 @@ bintray {
 
 // Create the publication with the pom configuration:
 apply plugin: 'maven-publish'
-
 publishing {
     publications {
         MyPublication(MavenPublication) {
@@ -264,7 +263,7 @@ publishing {
                 def dependenciesNode = asNode().appendNode('dependencies')
 
                 //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
+                configurations.implementation.allDependencies.each {
                     def dependencyNode = dependenciesNode.appendNode('dependency')
                     dependencyNode.appendNode('groupId', it.group)
                     dependencyNode.appendNode('artifactId', it.name)
