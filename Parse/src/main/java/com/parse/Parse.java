@@ -36,7 +36,7 @@ import okhttp3.OkHttpClient;
 public class Parse {
   private static final String TAG = "com.parse.Parse";
 
-  private static final int DEFAULT_MAX_RETRIES = 4;
+  private static final int DEFAULT_MAX_RETRIES = ParseRequest.DEFAULT_MAX_RETRIES;
 
   /**
    * Represents an opaque configuration for the {@code Parse} SDK configuration.
