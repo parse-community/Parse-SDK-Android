@@ -76,7 +76,14 @@ abstract class ParseRequest<Response> {
     return defaultInitialRetryDelay;
   }
 
-  private int maxRetries = DEFAULT_MAX_RETRIES;
+  private static int maxRetries() {
+    //typically happens just within tests
+    if (ParsePlugins.get() == null) {
+      return DEFAULT_MAX_RETRIES;
+    } else {
+      return ParsePlugins.get().configuration().maxRetries;
+    }
+  }
 
   /* package */ ParseHttpRequest.Method method;
   /* package */ String url;
@@ -221,7 +228,7 @@ abstract class ParseRequest<Response> {
             return task;
           }
 
-          if (attemptsMade < maxRetries) {
+          if (attemptsMade < maxRetries()) {
             PLog.i("com.parse.ParseRequest", "Request failed. Waiting " + delay
                 + " milliseconds before attempt #" + (attemptsMade + 1));
 

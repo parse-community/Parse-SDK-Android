@@ -82,6 +82,10 @@ class ParsePlugins {
         return configuration.clientKey;
     }
 
+    Parse.Configuration configuration() {
+        return configuration;
+    }
+
     Context applicationContext() {
         return applicationContext;
     }
