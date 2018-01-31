@@ -25,7 +25,6 @@ buildscript {
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -51,7 +50,7 @@ android {
 }
 
 ext {
-    okhttpVersion = '3.9.0'
+    okhttpVersion = '3.9.1'
 }
 
 dependencies {
