@@ -38,20 +38,6 @@ class ParseHttpClient {
     return new ParseHttpClient(builder);
   }
 
-  private static final String MAX_CONNECTIONS_PROPERTY_NAME = "http.maxConnections";
-  private static final String KEEP_ALIVE_PROPERTY_NAME = "http.keepAlive";
-
-  static void setMaxConnections(int maxConnections) {
-    if (maxConnections <= 0) {
-      throw new IllegalArgumentException("Max connections should be large than 0");
-    }
-    System.setProperty(MAX_CONNECTIONS_PROPERTY_NAME, String.valueOf(maxConnections));
-  }
-
-  static void setKeepAlive(boolean isKeepAlive) {
-    System.setProperty(KEEP_ALIVE_PROPERTY_NAME, String.valueOf(isKeepAlive));
-  }
-
   private OkHttpClient okHttpClient;
   private boolean hasExecuted;
 

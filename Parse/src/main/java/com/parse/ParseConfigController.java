@@ -29,7 +29,6 @@ import bolts.Task;
 
   public Task<ParseConfig> getAsync(String sessionToken) {
     final ParseRESTCommand command = ParseRESTConfigCommand.fetchConfigCommand(sessionToken);
-    command.enableRetrying();
     return command.executeAsync(restClient).onSuccessTask(new Continuation<JSONObject, Task<ParseConfig>>() {
       @Override
       public Task<ParseConfig> then(Task<JSONObject> task) throws Exception {

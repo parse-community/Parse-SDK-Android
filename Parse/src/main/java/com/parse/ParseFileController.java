@@ -98,7 +98,6 @@ import bolts.Task;
         .contentType(state.mimeType())
         .sessionToken(sessionToken)
         .build();
-    command.enableRetrying();
 
     return command.executeAsync(
         restClient,
@@ -145,7 +144,6 @@ import bolts.Task;
         .contentType(state.mimeType())
         .sessionToken(sessionToken)
         .build();
-    command.enableRetrying();
 
     return command.executeAsync(
         restClient,

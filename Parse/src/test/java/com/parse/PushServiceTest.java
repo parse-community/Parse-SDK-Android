@@ -1,11 +1,7 @@
 package com.parse;
 
 
-import android.content.Context;
 import android.content.Intent;
-
-import com.google.protobuf.Service;
-import com.ibm.icu.impl.IllegalIcuArgumentException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,16 +11,11 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 import org.robolectric.android.controller.ServiceController;
 import org.robolectric.annotation.Config;
 
 import bolts.Task;
 import bolts.TaskCompletionSource;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -32,7 +23,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 
 @RunWith(RobolectricTestRunner.class)
@@ -56,7 +46,7 @@ public class PushServiceTest extends ResetPluginsParseTest {
     service.setPushHandler(handler);
 
     Parse.Configuration.Builder builder = new Parse.Configuration.Builder(service);
-    ParsePlugins.Android.initialize(service, builder.build());
+    ParsePlugins.initialize(service, builder.build());
   }
 
   @After
