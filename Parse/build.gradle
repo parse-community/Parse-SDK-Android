@@ -249,7 +249,7 @@ publishing {
             groupId group
             // We have to specify it here because otherwise Bintray's plugin will assume the artifact's name is Parse
             artifactId artifact
-            artifacts = [androidSourcesJar, bundleRelease]
+            artifacts = [androidSourcesJar, javadocJarRelease, bundleRelease]
             version version
             pom.withXml {
                 def root = asNode()
