@@ -33,8 +33,8 @@ import bolts.Task;
     final String sessionToken = user != null ? user.getSessionToken() : null;
     CommandDelegate<List<T>> callbacks = new CommandDelegate<List<T>>() {
       @Override
-      public Task<List<T>> runOnNetworkAsync(boolean retry) {
-        return networkController.findAsync(state, sessionToken, retry, cancellationToken);
+      public Task<List<T>> runOnNetworkAsync() {
+        return networkController.findAsync(state, sessionToken, cancellationToken);
       }
 
       @Override
@@ -53,8 +53,8 @@ import bolts.Task;
     final String sessionToken = user != null ? user.getSessionToken() : null;
     CommandDelegate<Integer> callbacks = new CommandDelegate<Integer>() {
       @Override
-      public Task<Integer> runOnNetworkAsync(boolean retry) {
-        return networkController.countAsync(state, sessionToken, retry, cancellationToken);
+      public Task<Integer> runOnNetworkAsync() {
+        return networkController.countAsync(state, sessionToken, cancellationToken);
       }
 
       @Override
@@ -124,7 +124,7 @@ import bolts.Task;
     switch (policy) {
       case IGNORE_CACHE:
       case NETWORK_ONLY:
-        return c.runOnNetworkAsync(true);
+        return c.runOnNetworkAsync();
       case CACHE_ONLY:
         return c.runFromCacheAsync();
       case CACHE_ELSE_NETWORK:
@@ -133,13 +133,13 @@ import bolts.Task;
           @Override
           public Task<TResult> then(Task<TResult> task) throws Exception {
             if (task.getError() instanceof ParseException) {
-              return c.runOnNetworkAsync(true);
+              return c.runOnNetworkAsync();
             }
             return task;
           }
         });
       case NETWORK_ELSE_CACHE:
-        return c.runOnNetworkAsync(false).continueWithTask(new Continuation<TResult, Task<TResult>>() {
+        return c.runOnNetworkAsync().continueWithTask(new Continuation<TResult, Task<TResult>>() {
           @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
           @Override
           public Task<TResult> then(Task<TResult> task) throws Exception {
@@ -167,7 +167,7 @@ import bolts.Task;
    */
   private interface CommandDelegate<T> {
     // Fetches data from the network.
-    Task<T> runOnNetworkAsync(boolean retry);
+    Task<T> runOnNetworkAsync();
 
     // Fetches data from the cache.
     Task<T> runFromCacheAsync();

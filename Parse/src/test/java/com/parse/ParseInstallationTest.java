@@ -390,7 +390,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
     // Mock App Name
     RuntimeEnvironment.application.getApplicationInfo().name = "parseTest";
-    ParsePlugins.Android plugins = mock(ParsePlugins.Android.class);
+    ParsePlugins plugins = mock(ParsePlugins.class);
     // Mock installationId
     InstallationId installationId = mock(InstallationId.class);
     when(installationId.get()).thenReturn("installationId");

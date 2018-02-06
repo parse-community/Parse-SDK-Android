@@ -186,11 +186,6 @@ import bolts.Task;
     return new ParseRESTCommand(httpPath, httpMethod, jsonParameters, localId, sessionToken);
   }
 
-  // TODO(grantland): But we don't disable retries by default...
-  /* package */ void enableRetrying() {
-    setMaxRetries(DEFAULT_MAX_RETRIES);
-  }
-
   private static String createUrl(String httpPath) {
     // We send all parameters for GET/HEAD/DELETE requests in a post body,
     // so no need to worry about query parameters here.

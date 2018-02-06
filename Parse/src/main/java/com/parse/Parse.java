@@ -36,6 +36,8 @@ import okhttp3.OkHttpClient;
 public class Parse {
   private static final String TAG = "com.parse.Parse";
 
+  private static final int DEFAULT_MAX_RETRIES = ParseRequest.DEFAULT_MAX_RETRIES;
+
   /**
    * Represents an opaque configuration for the {@code Parse} SDK configuration.
    */
@@ -50,6 +52,7 @@ public class Parse {
       private String server;
       private boolean localDataStoreEnabled;
       private OkHttpClient.Builder clientBuilder;
+      private int maxRetries = DEFAULT_MAX_RETRIES;
 
       /**
        * Initialize a bulider with a given context.
@@ -180,6 +183,18 @@ public class Parse {
       }
 
       /**
+       * Set the max number of times to retry Parse operations before deeming them a failure
+       * <p>
+       *
+       * @param maxRetries The maximum number of times to retry. <=0 to never retry commands
+       * @return The same builder, for easy chaining.
+       */
+      public Builder maxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+        return this;
+      }
+
+      /**
        * Construct this builder into a concrete {@code Configuration} instance.
        *
        * @return A constructed {@code Configuration} object.
@@ -195,6 +210,7 @@ public class Parse {
     final String server;
     final boolean localDataStoreEnabled;
     final OkHttpClient.Builder clientBuilder;
+    final int maxRetries;
 
 
     private Configuration(Builder builder) {
@@ -204,6 +220,7 @@ public class Parse {
       this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
       this.clientBuilder = builder.clientBuilder;
+      this.maxRetries = builder.maxRetries;
     }
   }
 
@@ -369,18 +386,13 @@ public class Parse {
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
-    ParsePlugins.Android.initialize(configuration.context, configuration);
+    ParsePlugins.initialize(configuration.context, configuration);
 
     try {
       ParseRESTCommand.server = new URL(configuration.server);
     } catch (MalformedURLException ex) {
       throw new RuntimeException(ex);
     }
-
-    Context applicationContext = configuration.context.getApplicationContext();
-
-    ParseHttpClient.setKeepAlive(true);
-    ParseHttpClient.setMaxConnections(20);
 
     ParseObject.registerParseSubclasses();
 
@@ -459,7 +471,7 @@ public class Parse {
 
   static Context getApplicationContext() {
     checkContext();
-    return ParsePlugins.Android.get().applicationContext();
+    return ParsePlugins.get().applicationContext();
   }
 
   /**
@@ -580,7 +592,7 @@ public class Parse {
    * processing any commands already stored in the on-disk queue.
    */
   static ParseEventuallyQueue getEventuallyQueue() {
-    Context context = ParsePlugins.Android.get().applicationContext();
+    Context context = ParsePlugins.get().applicationContext();
     return getEventuallyQueue(context);
   }
 
@@ -621,7 +633,7 @@ public class Parse {
   }
 
   static void checkContext() {
-    if (ParsePlugins.Android.get().applicationContext() == null) {
+    if (ParsePlugins.get().applicationContext() == null) {
       throw new RuntimeException("applicationContext is null. "
               + "You must call Parse.initialize(Context)"
               + " before using the Parse library.");
