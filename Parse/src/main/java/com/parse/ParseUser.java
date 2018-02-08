@@ -1294,6 +1294,7 @@ public class ParseUser extends ParseObject {
         public Task<Void> then(Task<Void> task) throws Exception {
           synchronized (mutex) {
             if (task.isFaulted() || task.isCancelled()) {
+              removeAuthData(authType);
               restoreAnonymity(oldAnonymousData);
               return task;
             }

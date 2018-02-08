@@ -699,13 +699,13 @@ public class ParseUserTest extends ResetPluginsParseTest {
         partialMockUser.linkWithInBackground(authType, authData);
     linkTask.waitForCompletion();
 
-    // Make sure new authData is added
-    assertSame(authData, partialMockUser.getAuthData().get(authType));
     // Make sure we save the user
     verify(partialMockUser, times(1))
         .saveAsync(eq("sessionTokenAgain"), eq(false), Matchers.<Task<Void>>any());
     // Make sure old authData is restored
     assertSame(anonymousAuthData, partialMockUser.getAuthData().get(ParseAnonymousUtils.AUTH_TYPE));
+    // Make sure failed new authData is cleared
+    assertNull(partialMockUser.getAuthData().get("facebook"));
     // Verify exception
     assertSame(saveException, linkTask.getError());
   }
