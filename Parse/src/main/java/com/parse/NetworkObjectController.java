@@ -33,7 +33,6 @@ import bolts.Task;
         state.objectId(),
         state.className(),
         sessionToken);
-    command.enableRetrying();
 
     return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
       @Override
@@ -64,7 +63,6 @@ import bolts.Task;
         state,
         objectJSON,
         sessionToken);
-    command.enableRetrying();
     return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
       @Override
       public ParseObject.State then(Task<JSONObject> task) throws Exception {
@@ -124,7 +122,6 @@ import bolts.Task;
   public Task<Void> deleteAsync(ParseObject.State state, String sessionToken) {
     ParseRESTObjectCommand command = ParseRESTObjectCommand.deleteObjectCommand(
         state, sessionToken);
-    command.enableRetrying();
 
     return command.executeAsync(client).makeVoid();
   }
@@ -139,7 +136,6 @@ import bolts.Task;
       ParseObject.State state = states.get(i);
       ParseRESTObjectCommand command = ParseRESTObjectCommand.deleteObjectCommand(
           state, sessionToken);
-      command.enableRetrying();
       commands.add(command);
     }
 

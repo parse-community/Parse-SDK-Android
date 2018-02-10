@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.annotation.TargetApi;
-import android.app.Service;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
@@ -19,12 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.os.PowerManager;
-import android.util.SparseArray;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,7 +63,7 @@ public final class PushServiceApi26 extends JobService {
 
   @Override
   public boolean onStartJob(final JobParameters jobParameters) {
-    if (ParsePlugins.Android.get() == null) {
+    if (ParsePlugins.get() == null) {
       PLog.e(TAG, "The Parse push service cannot start because Parse.initialize "
           + "has not yet been called. If you call Parse.initialize from "
           + "an Activity's onCreate, that call should instead be in the "

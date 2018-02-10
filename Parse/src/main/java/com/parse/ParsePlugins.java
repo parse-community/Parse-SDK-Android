@@ -28,10 +28,8 @@ class ParsePlugins {
     private static final Object LOCK = new Object();
     private static ParsePlugins instance;
 
-    // TODO(grantland): Move towards a Config/Builder parameter pattern to allow other configurations
-    // such as path (disabled for Android), etc.
-    static void initialize(Parse.Configuration configuration) {
-        ParsePlugins.set(new ParsePlugins(configuration));
+    static void initialize(Context context, Parse.Configuration configuration) {
+        ParsePlugins.set(new ParsePlugins(context, configuration));
     }
 
     static void set(ParsePlugins plugins) {
@@ -58,6 +56,8 @@ class ParsePlugins {
     final Object lock = new Object();
     private final Parse.Configuration configuration;
 
+    private Context applicationContext;
+
     private InstallationId installationId;
 
     File parseDir;
@@ -67,7 +67,10 @@ class ParsePlugins {
     ParseHttpClient restClient;
     ParseHttpClient fileClient;
 
-    private ParsePlugins(Parse.Configuration configuration) {
+    private ParsePlugins(Context context, Parse.Configuration configuration) {
+        if (context != null) {
+            applicationContext = context.getApplicationContext();
+        }
         this.configuration = configuration;
     }
 
@@ -77,6 +80,14 @@ class ParsePlugins {
 
     String clientKey() {
         return configuration.clientKey;
+    }
+
+    Parse.Configuration configuration() {
+        return configuration;
+    }
+
+    Context applicationContext() {
+        return applicationContext;
     }
 
     ParseHttpClient fileClient() {
@@ -129,9 +140,20 @@ class ParsePlugins {
         }
     }
 
-    // TODO(grantland): Pass through some system values.
     String userAgent() {
-        return "Parse Java SDK";
+        String packageVersion = "unknown";
+        try {
+            String packageName = applicationContext.getPackageName();
+            int versionCode = applicationContext
+                    .getPackageManager()
+                    .getPackageInfo(packageName, 0)
+                    .versionCode;
+            packageVersion = packageName + "/" + versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // Should never happen.
+        }
+        return "Parse Android SDK " + ParseObject.VERSION_NAME + " (" + packageVersion +
+                ") API Level " + Build.VERSION.SDK_INT;
     }
 
     InstallationId installationId() {
@@ -146,84 +168,29 @@ class ParsePlugins {
 
     @Deprecated
     File getParseDir() {
-        throw new IllegalStateException("Stub");
+        synchronized (lock) {
+            if (parseDir == null) {
+                parseDir = applicationContext.getDir("Parse", Context.MODE_PRIVATE);
+            }
+            return createFileDir(parseDir);
+        }
     }
 
     File getCacheDir() {
-        throw new IllegalStateException("Stub");
+        synchronized (lock) {
+            if (cacheDir == null) {
+                cacheDir = new File(applicationContext.getCacheDir(), "com.parse");
+            }
+            return createFileDir(cacheDir);
+        }
     }
 
     File getFilesDir() {
-        throw new IllegalStateException("Stub");
-    }
-
-    static class Android extends ParsePlugins {
-
-        static void initialize(Context context, Parse.Configuration configuration) {
-            ParsePlugins.set(new Android(context, configuration));
-        }
-
-        static ParsePlugins.Android get() {
-            return (ParsePlugins.Android) ParsePlugins.get();
-        }
-
-        private final Context applicationContext;
-
-        private Android(Context context, Parse.Configuration configuration) {
-            super(configuration);
-            applicationContext = context.getApplicationContext();
-        }
-
-        Context applicationContext() {
-            return applicationContext;
-        }
-
-        @Override
-        String userAgent() {
-            String packageVersion = "unknown";
-            try {
-                String packageName = applicationContext.getPackageName();
-                int versionCode = applicationContext
-                        .getPackageManager()
-                        .getPackageInfo(packageName, 0)
-                        .versionCode;
-                packageVersion = packageName + "/" + versionCode;
-            } catch (PackageManager.NameNotFoundException e) {
-                // Should never happen.
+        synchronized (lock) {
+            if (filesDir == null) {
+                filesDir = new File(applicationContext.getFilesDir(), "com.parse");
             }
-            return "Parse Android SDK " + ParseObject.VERSION_NAME + " (" + packageVersion +
-                    ") API Level " + Build.VERSION.SDK_INT;
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        File getParseDir() {
-            synchronized (lock) {
-                if (parseDir == null) {
-                    parseDir = applicationContext.getDir("Parse", Context.MODE_PRIVATE);
-                }
-                return createFileDir(parseDir);
-            }
-        }
-
-        @Override
-        File getCacheDir() {
-            synchronized (lock) {
-                if (cacheDir == null) {
-                    cacheDir = new File(applicationContext.getCacheDir(), "com.parse");
-                }
-                return createFileDir(cacheDir);
-            }
-        }
-
-        @Override
-        File getFilesDir() {
-            synchronized (lock) {
-                if (filesDir == null) {
-                    filesDir = new File(applicationContext.getFilesDir(), "com.parse");
-                }
-                return createFileDir(filesDir);
-            }
+            return createFileDir(filesDir);
         }
     }
 

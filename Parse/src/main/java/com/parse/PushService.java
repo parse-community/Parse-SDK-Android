@@ -211,7 +211,7 @@ public final class PushService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    if (ParsePlugins.Android.get() == null) {
+    if (ParsePlugins.get() == null) {
       PLog.e(TAG, "The Parse push service cannot start because Parse.initialize "
           + "has not yet been called. If you call Parse.initialize from "
           + "an Activity's onCreate, that call should instead be in the "

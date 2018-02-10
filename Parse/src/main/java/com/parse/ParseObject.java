@@ -1404,7 +1404,6 @@ public class ParseObject implements Parcelable {
           state,
           objectJSON,
           sessionToken);
-    command.enableRetrying();
     return command;
   }
 
@@ -1940,7 +1939,6 @@ public class ParseObject implements Parcelable {
       // See [1]
       command = ParseRESTObjectCommand.deleteObjectCommand(
           getState(), sessionToken);
-      command.enableRetrying();
       command.setLocalId(localId);
 
       runEventuallyTask = Parse.getEventuallyQueue().enqueueEventuallyAsync(command, ParseObject.this);
