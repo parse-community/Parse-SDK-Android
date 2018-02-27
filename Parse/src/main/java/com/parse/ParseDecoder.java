@@ -71,6 +71,10 @@ import org.json.JSONObject;
       return convertJSONArrayToList((JSONArray) object);
     }
 
+    if (object == JSONObject.NULL) {
+      return null;
+    }
+
     if (!(object instanceof JSONObject)) {
       return object;
     }

@@ -1,18 +1,17 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
         jcenter()
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
 plugins {
     id "com.jfrog.artifactory" version "4.4.18"
     id "com.jfrog.bintray" version "1.7.3"
-    id 'com.github.ben-manes.versions' version '0.15.0'
+    id 'com.github.ben-manes.versions' version '0.17.0'
 }
 
 allprojects {
@@ -23,11 +22,11 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 26
-    buildToolsVersion = "26.0.1"
+    compileSdkVersion = 27
+    buildToolsVersion = "27.0.0"
 
-    supportLibVersion = '26.0.1'
+    supportLibVersion = '27.0.1'
 
     minSdkVersion = 14
-    targetSdkVersion = 26
+    targetSdkVersion = 27
 }
