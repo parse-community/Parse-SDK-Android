@@ -21,7 +21,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   ```groovy
   dependencies {
-    implementation 'com.parse:parse-android:1.16.5'
+    implementation 'com.parse:parse-android:1.16.7'
   }
   ```
 
