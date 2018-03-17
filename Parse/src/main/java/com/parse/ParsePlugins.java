@@ -128,6 +128,9 @@ class ParsePlugins {
                         if (configuration.clientKey != null) {
                             headersBuilder.set(ParseRESTCommand.HEADER_CLIENT_KEY, configuration.clientKey);
                         }
+                        if (configuration.masterKey != null) {
+                            headersBuilder.set(ParseRESTCommand.HEADER_MASTER_KEY, configuration.masterKey);
+                        }
                         request = request.newBuilder()
                                 .headers(headersBuilder.build())
                                 .build();

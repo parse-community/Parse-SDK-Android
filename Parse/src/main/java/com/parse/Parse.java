@@ -49,6 +49,7 @@ public class Parse {
       private Context context;
       private String applicationId;
       private String clientKey;
+      private String masterKey;
       private String server;
       private boolean localDataStoreEnabled;
       private OkHttpClient.Builder clientBuilder;
@@ -103,6 +104,7 @@ public class Parse {
             server(metaData.getString(PARSE_SERVER_URL));
             applicationId = metaData.getString(PARSE_APPLICATION_ID);
             clientKey = metaData.getString(PARSE_CLIENT_KEY);
+            masterKey = metaData.getString(PARSE_MASTER_KEY);
           }
         }
       }
@@ -132,6 +134,20 @@ public class Parse {
        */
       public Builder clientKey(String clientKey) {
         this.clientKey = clientKey;
+        return this;
+      }
+
+      /**
+       * Set the master key to be used by Parse.
+       * <p>
+       * This method is only required if you intend to use a different {@code masterKey} than
+       * is defined by {@code com.parse.MASTER_KEY} in your {@code AndroidManifest.xml}.
+       *
+       * @param masterKey The master key to set.
+       * @return The same builder, for easy chaining.
+       */
+      public Builder masterKey(String masterKey) {
+        this.masterKey = masterKey;
         return this;
       }
 
@@ -207,6 +223,7 @@ public class Parse {
     final Context context;
     final String applicationId;
     final String clientKey;
+    final String masterKey;
     final String server;
     final boolean localDataStoreEnabled;
     final OkHttpClient.Builder clientBuilder;
@@ -217,6 +234,7 @@ public class Parse {
       this.context = builder.context;
       this.applicationId = builder.applicationId;
       this.clientKey = builder.clientKey;
+      this.masterKey = builder.masterKey;
       this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
       this.clientBuilder = builder.clientBuilder;
@@ -227,6 +245,8 @@ public class Parse {
   private static final String PARSE_SERVER_URL = "com.parse.SERVER_URL";
   private static final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
   private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
+  private static final String PARSE_MASTER_KEY = "com.parse.MASTER_KEY";
+
 
   private static final Object MUTEX = new Object();
   static ParseEventuallyQueue eventuallyQueue = null;

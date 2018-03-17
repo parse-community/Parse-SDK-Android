@@ -33,21 +33,25 @@ public class ParseClientConfigurationTest {
   private final String serverUrl = "http://example.com/parse";
   private final String appId = "MyAppId";
   private final String clientKey = "MyClientKey";
+  private final String masterKey = "MyMasterKey";
   private final String PARSE_SERVER_URL = "com.parse.SERVER_URL";
   private final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
   private final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
+  private final String PARSE_MASTER_KEY = "com.parse.MASTER_KEY";
 
   @Test
   public void testBuilder() {
     Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
     builder.applicationId("foo");
     builder.clientKey("bar");
+    builder.masterKey("baz");
     builder.enableLocalDataStore();
     Parse.Configuration configuration = builder.build();
 
     assertNull(configuration.context);
     assertEquals(configuration.applicationId, "foo");
     assertEquals(configuration.clientKey, "bar");
+    assertEquals(configuration.masterKey, "baz");
     assertEquals(configuration.localDataStoreEnabled, true);
   }
 
@@ -73,12 +77,14 @@ public class ParseClientConfigurationTest {
     when(metaData.getString(PARSE_SERVER_URL)).thenReturn(serverUrl);
     when(metaData.getString(PARSE_APPLICATION_ID)).thenReturn(appId);
     when(metaData.getString(PARSE_CLIENT_KEY)).thenReturn(clientKey);
+    when(metaData.getString(PARSE_MASTER_KEY)).thenReturn(masterKey);
 
     Parse.Configuration.Builder builder = new Parse.Configuration.Builder(RuntimeEnvironment.application);
     Parse.Configuration config = builder.build();
     assertEquals(serverUrl + "/", config.server);
     assertEquals(appId, config.applicationId);
     assertEquals(clientKey, config.clientKey);
+    assertEquals(masterKey, config.masterKey);
 
     verifyMockMetaData(metaData);
   }
