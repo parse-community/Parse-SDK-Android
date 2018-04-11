@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    implementation project(':Parse')
+    compileOnly project(':Parse')
     api 'com.google.firebase:firebase-messaging:12.0.1'
     api 'com.firebase:firebase-jobdispatcher:0.8.5'
 }
