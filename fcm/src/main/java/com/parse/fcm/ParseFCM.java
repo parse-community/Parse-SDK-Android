@@ -8,27 +8,18 @@
  */
 package com.parse.fcm;
 
-import android.support.annotation.CallSuper;
+import android.content.Context;
 
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.RetryStrategy;
-import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.parse.ParseInstallation;
 
-/**
- * Assures the {@link ParseInstallation#getDeviceToken()} stays up to date. If you need to do custom things with the token, make sure you extend this
- * class and call super.
- */
-public class ParseFirebaseInstanceIDService extends FirebaseInstanceIdService {
+public class ParseFCM {
 
-    @CallSuper
-    @Override
-    public void onTokenRefresh() {
-        super.onTokenRefresh();
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
+    public static void scheduleTokenUpload(Context context) {
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context.getApplicationContext()));
         Job job = dispatcher.newJobBuilder()
                 .setRecurring(false)
                 .setReplaceCurrent(true)

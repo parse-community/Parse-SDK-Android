@@ -23,7 +23,8 @@ android {
 }
 
 dependencies {
-    compileOnly project(':Parse')
+    //TODO figure out how to make this local
+    api 'com.parse:parse-android:1.16.7'
     api 'com.google.firebase:firebase-messaging:12.0.1'
     api 'com.firebase:firebase-jobdispatcher:0.8.5'
 }
