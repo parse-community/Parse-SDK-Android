@@ -11,7 +11,7 @@ package com.parse;
 /**
  * shhh don't talk about this
  */
-public class ParseFCMParseAccess {
+public class InternalParseFCMParseAccess {
 
     private static final String TAG = "ParseFCM";
 
