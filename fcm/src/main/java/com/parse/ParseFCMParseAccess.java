@@ -13,6 +13,16 @@ package com.parse;
  */
 public class ParseFCMParseAccess {
 
+    private static final String TAG = "ParseFCM";
+
+    public static void logVerbose(String message) {
+        PLog.v(TAG, message);
+    }
+
+    public static void logError(String message, Throwable tr) {
+        PLog.e(TAG, message, tr);
+    }
+
     public static void setToken(ParseInstallation installation, String token) {
         installation.setDeviceToken(token);
         //Yes, we are actually FCM, but its the same for our purposes
