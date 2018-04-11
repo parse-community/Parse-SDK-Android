@@ -32,6 +32,7 @@ public class ParseFirebaseJobService extends JobService {
                 @Override
                 public void done(ParseException e) {
                     if (e == null) {
+                        ParseFCMParseAccess.logVerbose("FCM token saved to installation");
                         jobFinished(job, false);
                     } else {
                         ParseFCMParseAccess.logError("FCM token upload failed", e);
