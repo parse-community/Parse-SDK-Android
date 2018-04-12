@@ -12,6 +12,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.RetryStrategy;
 import com.parse.ManifestInfo;
 import com.parse.PLog;
 
@@ -23,6 +28,31 @@ public class ParseGCM {
     private static final String SENDER_ID_EXTRA = "com.parse.push.gcm_sender_id";
 
     static final String TAG = "ParseGCM";
+
+    /**
+     * Register your app to start receiving GCM pushes
+     *
+     * @param context context
+     */
+    public static void register(Context context) {
+        //kicks off the background job
+        PLog.v(TAG, "Scheduling job to register Parse GCM");
+        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context.getApplicationContext()));
+        Job job = dispatcher.newJobBuilder()
+                .setRecurring(false)
+                .setReplaceCurrent(true)
+                // retry with exponential backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setConstraints(
+                        // only run on a network
+                        Constraint.ON_ANY_NETWORK
+                )
+                .setService(ParseGCMJobService.class) // the JobService that will be called
+                .setTag("initialize")        // uniquely identifies the job
+                .build();
+
+        dispatcher.mustSchedule(job);
+    }
 
     @Nullable
     static String gcmSenderFromManifest(Context context) {
@@ -70,7 +100,7 @@ public class ParseGCM {
             return null;
         }
 
-        String senderID = (String)senderIDExtra;
+        String senderID = (String) senderIDExtra;
         if (!senderID.startsWith("id:")) {
             return null;
         }
