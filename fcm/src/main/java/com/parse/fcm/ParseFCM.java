@@ -18,6 +18,12 @@ import com.firebase.jobdispatcher.RetryStrategy;
 
 public class ParseFCM {
 
+    static final String TAG = "ParseFCM";
+
+    /**
+     * You can call this manually if you are overriding the {@link com.google.firebase.iid.FirebaseInstanceIdService}
+     * @param context context
+     */
     public static void scheduleTokenUpload(Context context) {
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context.getApplicationContext()));
         Job job = dispatcher.newJobBuilder()

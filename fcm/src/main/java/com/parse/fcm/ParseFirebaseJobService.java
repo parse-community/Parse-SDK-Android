@@ -11,7 +11,7 @@ package com.parse.fcm;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.parse.InternalParseFCMParseAccess;
+import com.parse.PLog;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.SaveCallback;
@@ -23,19 +23,21 @@ public class ParseFirebaseJobService extends JobService {
 
     @Override
     public boolean onStartJob(final JobParameters job) {
-        InternalParseFCMParseAccess.logVerbose("Updating FCM token");
+        PLog.v(ParseFCM.TAG, "Updating FCM token");
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         String token = FirebaseInstanceId.getInstance().getToken();
         if (installation != null && token != null) {
-            InternalParseFCMParseAccess.setToken(installation, token);
+            installation.setDeviceToken(token);
+            //even though this is FCM, calling it gcm will work on the backend
+            installation.setPushType("gcm");
             installation.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e == null) {
-                        InternalParseFCMParseAccess.logVerbose("FCM token saved to installation");
+                        PLog.v(ParseFCM.TAG, "FCM token saved to installation");
                         jobFinished(job, false);
                     } else {
-                        InternalParseFCMParseAccess.logError("FCM token upload failed", e);
+                        PLog.e(ParseFCM.TAG, "FCM token upload failed", e);
                         jobFinished(job, true);
                     }
                 }

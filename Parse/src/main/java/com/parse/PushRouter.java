@@ -29,7 +29,7 @@ import java.io.IOException;
  *    registration id for a client (which can result in duplicate pushes while both the old and
  *    new registration id are still valid).
  */
-/** package */ class PushRouter {
+public class PushRouter {
   private static final String TAG = "com.parse.ParsePushRouter";
   private static final String LEGACY_STATE_LOCATION = "pushState";
   private static final String STATE_LOCATION = "push";

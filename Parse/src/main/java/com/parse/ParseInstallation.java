@@ -291,11 +291,11 @@ public class ParseInstallation extends ParseObject {
     }
   }
 
-  /* package */ PushType getPushType() {
-    return PushType.fromString(super.getString(KEY_PUSH_TYPE));
+  public String getPushType() {
+    return super.getString(KEY_PUSH_TYPE);
   }
 
-  /* package */ void setPushType(PushType pushType) {
+  public void setPushType(String pushType) {
     if (pushType != null) {
       performPut(KEY_PUSH_TYPE, pushType.toString());
     }
@@ -305,11 +305,11 @@ public class ParseInstallation extends ParseObject {
     performRemove(KEY_PUSH_TYPE);
   }
 
-  /* package */ String getDeviceToken() {
+  public String getDeviceToken() {
     return super.getString(KEY_DEVICE_TOKEN);
   }
 
-  /* package */ void setDeviceToken(String deviceToken) {
+  public void setDeviceToken(String deviceToken) {
     if (deviceToken != null && deviceToken.length() > 0) {
       performPut(KEY_DEVICE_TOKEN, deviceToken);
     }

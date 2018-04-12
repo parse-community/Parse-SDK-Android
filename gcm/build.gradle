@@ -1,13 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion 27
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion 14
+        targetSdkVersion 27
         versionCode 1
-        versionName project.version
+        versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    api 'com.google.firebase:firebase-messaging:12.0.1'
     api 'com.firebase:firebase-jobdispatcher:0.8.5'
+    api "com.google.android.gms:play-services-gcm:12.0.1"
     compileOnly project(':Parse')
 }
