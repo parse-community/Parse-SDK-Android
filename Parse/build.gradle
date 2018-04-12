@@ -157,6 +157,11 @@ signing {
     sign configurations.archives
 }
 
+//task androidTest(type: File) {
+//    Grgit.clone(dir: rootProject.file("docs"), uri: 'git://github.com/addisonElliott/Parse-SDK-Android.git', refToCheckout:'gh-pages')
+//    javadocRelease()
+//}
+
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.sourceFiles

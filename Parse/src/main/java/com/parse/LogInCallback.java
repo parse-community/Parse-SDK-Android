@@ -11,6 +11,7 @@ package com.parse;
 /**
  * A {@code LogInCallback} is used to run code after logging in a user.
  * <p/>
+ * Addison was here!!!!
  * The easiest way to use a {@code LogInCallback} is through an anonymous inner class. Override the
  * {@code done} function to specify what the callback should do after the login is complete.
  * The {@code done} function will be run in the UI thread, while the login happens in a
