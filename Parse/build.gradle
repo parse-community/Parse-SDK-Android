@@ -69,7 +69,7 @@ android.libraryVariants.all { variant ->
 
     def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
         description "Generates Javadoc for $variant.name."
-        destinationDir = rootProject.file("docs")
+        destinationDir = rootProject.file("docs/api")
         source = variant.javaCompile.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
@@ -156,11 +156,6 @@ signing {
     required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
-
-//task androidTest(type: File) {
-//    Grgit.clone(dir: rootProject.file("docs"), uri: 'git://github.com/addisonElliott/Parse-SDK-Android.git', refToCheckout:'gh-pages')
-//    javadocRelease()
-//}
 
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
