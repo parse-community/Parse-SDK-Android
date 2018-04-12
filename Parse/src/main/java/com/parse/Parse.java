@@ -423,15 +423,7 @@ public class Parse {
               "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
     }
 
-    // May need to update GCM registration ID if app version has changed.
-    // This also primes current installation.
-    PushServiceUtils.initialize().continueWithTask(new Continuation<Void, Task<Void>>() {
-      @Override
-      public Task<Void> then(Task<Void> task) throws Exception {
-        // Prime current user in the background
-        return ParseUser.getCurrentUserAsync().makeVoid();
-      }
-    }).continueWith(new Continuation<Void, Void>() {
+    ParseUser.getCurrentUserAsync().makeVoid().continueWith(new Continuation<Void, Void>() {
       @Override
       public Void then(Task<Void> task) throws Exception {
         // Prime config in the background
@@ -469,7 +461,7 @@ public class Parse {
     return ParsePlugins.get() != null;
   }
 
-  static Context getApplicationContext() {
+  public static Context getApplicationContext() {
     checkContext();
     return ParsePlugins.get().applicationContext();
   }
@@ -511,7 +503,7 @@ public class Parse {
     return ParsePlugins.get().getCacheDir();
   }
 
-  static File getParseCacheDir(String subDir) {
+  public static File getParseCacheDir(String subDir) {
     synchronized (MUTEX) {
       File dir = new File(getParseCacheDir(), subDir);
       if (!dir.exists()) {

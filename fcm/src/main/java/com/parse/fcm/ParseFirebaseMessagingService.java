@@ -1,37 +1,35 @@
 package com.parse.fcm;
 
-import android.content.Intent;
-import android.os.Bundle;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.parse.InternalParseFCMParseAccess;
-import com.parse.ParsePushBroadcastReceiver;
+import com.parse.PLog;
+import com.parse.PushRouter;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ParseFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        InternalParseFCMParseAccess.logVerbose("onMessageReceived");
-        //example of json data:
-        //{"alert":"this is to everyone","sound":"default","title":"Everyone","content-available":1}
+        PLog.v(ParseFCM.TAG, "onMessageReceived");
+
+        String pushId = remoteMessage.getData().get("push_id");
+        String timestamp = remoteMessage.getData().get("time");
+        String dataString = remoteMessage.getData().get("data");
         String channel = remoteMessage.getData().get("channel");
-        String data = remoteMessage.getData().get("data");
-        Bundle extras = new Bundle();
-        extras.putString(ParsePushBroadcastReceiver.KEY_PUSH_CHANNEL, channel);
-        if (data == null) {
-            extras.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, "{}");
-        } else {
-            extras.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, data);
+
+        JSONObject data = null;
+        if (dataString != null) {
+            try {
+                data = new JSONObject(dataString);
+            } catch (JSONException e) {
+                PLog.e(ParseFCM.TAG, "Ignoring push because of JSON exception while processing: " + dataString, e);
+                return;
+            }
         }
 
-        Intent intent = new Intent(ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE);
-        intent.putExtras(extras);
-
-        // Set the package name to keep this intent within the given package.
-        intent.setPackage(getApplicationContext().getPackageName());
-        getApplicationContext().sendBroadcast(intent);
-
+        PushRouter.getInstance().handlePush(pushId, timestamp, channel, data);
     }
 }
