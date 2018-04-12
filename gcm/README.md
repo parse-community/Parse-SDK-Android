@@ -15,7 +15,15 @@ dependencies {
     implementation "com.google.android.gms:play-services-gcm:latest.version.here"
 }
 ```
-You will then need to register some things in your manifest, specifically:
+You will then need to register some things in your manifest, firstly, the GCM sender ID:
+```xml
+<meta-data
+    android:name="com.parse.push.gcm_sender_id"
+    android:value="id:YOUR_SENDER_ID_HERE" />
+```
+The sender ID should be all numbers. Make sure you are keeping the `id:` in the front
+
+Next:
 ```xml
 <receiver
     android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -60,7 +68,20 @@ After these services are registered in the Manifest, you then need to register y
     </intent-filter>
 </receiver>
 ```
-And from there, you should be good to go.
+After all this, you will need to register GCM in your `Application.onCreate()` like so:
+```java
+@Override
+public void onCreate() {
+    super.onCreate();
+    Parse.Configuration configuration = new Parse.Configuration.Builder(this)
+            //...
+            .build();
+    Parse.initialize(configuration);
+    ParseGCM.register(this);
+}
+```
+
+After this, you are all set.
 
 ## Custom Notifications
 If you need to customize the notification that is sent out from a push, you can do so easily by extending `ParsePushBroadcastReceiver` with your own class and registering it instead in the Manifest.

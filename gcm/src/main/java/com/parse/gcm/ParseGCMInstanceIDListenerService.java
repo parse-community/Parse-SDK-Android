@@ -16,20 +16,6 @@ public class ParseGCMInstanceIDListenerService extends InstanceIDListenerService
     public void onTokenRefresh() {
         super.onTokenRefresh();
 
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getApplicationContext()));
-        Job job = dispatcher.newJobBuilder()
-                .setRecurring(false)
-                .setReplaceCurrent(true)
-                // retry with exponential backoff
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .setConstraints(
-                        // only run on a network
-                        Constraint.ON_ANY_NETWORK
-                )
-                .setService(ParseGCMJobService.class) // the JobService that will be called
-                .setTag("initialize")        // uniquely identifies the job
-                .build();
-
-        dispatcher.mustSchedule(job);
+        ParseGCM.register(getApplicationContext());
     }
 }
