@@ -12,6 +12,7 @@ plugins {
     id "com.jfrog.artifactory" version "4.4.18"
     id "com.jfrog.bintray" version "1.7.3"
     id 'com.github.ben-manes.versions' version '0.17.0'
+    id 'digital.wup.android-maven-publish' version '3.2.0' // tweak depending on Gradle version
 }
 
 allprojects {
