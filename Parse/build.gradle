@@ -69,10 +69,11 @@ android.libraryVariants.all { variant ->
 
     def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
         description "Generates Javadoc for $variant.name."
-        source = variant.javaCompile.source
+        source = variant.javaCompiler.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
-
+        doFirst {
+            classpath = files(variant.javaCompiler.classpath.files) + files(ext.androidJar)
+        }
         options.docletpath = [rootProject.file("./gradle/ExcludeDoclet.jar")]
         options.doclet = "me.grantland.doclet.ExcludeDoclet"
 
