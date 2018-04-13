@@ -13,9 +13,6 @@ before_install:
     - mkdir "$ANDROID_HOME/licenses" || true
     - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
 
-script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport
-
 after_success:
   - ./gradlew coveralls
   - codecov
@@ -26,10 +23,22 @@ cache:
     - $HOME/.gradle
     - $HOME/.m2/repository
 
-deploy:
-  provider: script
-  script: ./gradlew bintrayUpload
-  skip_cleanup: true
-  on:
-    branch: master
-    tags: true
+jobs:
+  include:
+    - stage: test
+      script: ./gradlew clean testDebugUnitTest jacocoTestReport
+    - stage: release
+      script: ./gradlew javadocRelease
+      deploy:
+        - provider: pages
+          skip_cleanup: true
+          github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+          local_dir: docs/
+          on:
+            all_branches: true
+        - provider: script
+          script: ./gradlew bintrayUpload
+          skip_cleanup: true
+          on:
+            branch: master
+            tags: true

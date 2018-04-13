@@ -69,6 +69,7 @@ android.libraryVariants.all { variant ->
 
     def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
         description "Generates Javadoc for $variant.name."
+        destinationDir = rootProject.file("docs/api")
         source = variant.javaCompiler.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         doFirst {
