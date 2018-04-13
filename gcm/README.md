@@ -14,8 +14,6 @@ Add dependency to the application level `build.gradle` file.
 dependencies {
     implementation 'com.parse:parse-android:latest.version.here'
     implementation 'com.parse:parse-android-gcm:latest.version.here'
-
-    implementation "com.google.android.gms:play-services-gcm:latest.version.here"
 }
 ```
 You will then need to register some things in your manifest, firstly, the GCM sender ID:
@@ -34,7 +32,7 @@ Next:
     android:permission="com.google.android.c2dm.permission.SEND" >
     <intent-filter>
         <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-        <category android:name="com.your.package.name.here" />
+        <category android:name="${packageName}" />
     </intent-filter>
 </receiver>
 ```

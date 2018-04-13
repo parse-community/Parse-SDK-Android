@@ -29,6 +29,8 @@ public class ParseGCM {
 
     static final String TAG = "ParseGCM";
 
+    private static final String JOB_TAG_REGISTER = "register";
+
     /**
      * Register your app to start receiving GCM pushes
      *
@@ -48,7 +50,7 @@ public class ParseGCM {
                         Constraint.ON_ANY_NETWORK
                 )
                 .setService(ParseGCMJobService.class) // the JobService that will be called
-                .setTag("initialize")        // uniquely identifies the job
+                .setTag(JOB_TAG_REGISTER)        // uniquely identifies the job
                 .build();
 
         dispatcher.mustSchedule(job);

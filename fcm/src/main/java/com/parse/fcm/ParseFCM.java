@@ -20,6 +20,8 @@ public class ParseFCM {
 
     static final String TAG = "ParseFCM";
 
+    private static final String JOB_TAG_UPLOAD_TOKEN = "upload-token";
+
     /**
      * You can call this manually if you are overriding the {@link com.google.firebase.iid.FirebaseInstanceIdService}
      * @param context context
@@ -36,7 +38,7 @@ public class ParseFCM {
                         Constraint.ON_ANY_NETWORK
                 )
                 .setService(ParseFirebaseJobService.class) // the JobService that will be called
-                .setTag("upload-token")        // uniquely identifies the job
+                .setTag(JOB_TAG_UPLOAD_TOKEN)        // uniquely identifies the job
                 .build();
 
         dispatcher.mustSchedule(job);
