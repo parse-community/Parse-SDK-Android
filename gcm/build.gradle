@@ -1,5 +1,15 @@
 apply plugin: 'com.android.library'
 
+version = rootProject.ext.commonLibVersion
+group = 'com.parse'
+
+ext {
+    projDescription = 'Parse Android GCM support.'
+    artifact = 'parse-gcm-android'
+    projName = 'Parse-Android'
+    gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -13,6 +23,14 @@ android {
 
     }
 
+    packagingOptions {
+        exclude '**/BuildConfig.class'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -23,7 +41,7 @@ android {
 }
 
 dependencies {
-    api "com.google.android.gms:play-services-gcm:12.0.1"
-    api 'com.firebase:firebase-jobdispatcher:0.8.5'
+    api "com.google.android.gms:play-services-gcm:$googleLibVersion"
+    api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
     implementation project(':Parse')
 }
