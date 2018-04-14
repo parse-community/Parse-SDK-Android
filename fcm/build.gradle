@@ -45,3 +45,5 @@ dependencies {
     api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
     implementation project(':Parse')
 }
+
+apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
