@@ -1,8 +1,6 @@
 # Parse SDK for Android
 
 [![Maven Central][maven-svg]][maven-link]
-[![Dependencies][dependencies-svg]][dependencies-link]
-[![References][references-svg]][references-link]
 [![License][license-svg]][license-link]
 
 [![Build Status][build-status-svg]][build-status-link]
@@ -132,12 +130,6 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  
  [maven-svg]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android/badge.svg?style=flat
  [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
- 
- [dependencies-svg]: https://www.versioneye.com/java/com.parse:parse-android/badge.svg?style=flat-square
- [dependencies-link]: https://www.versioneye.com/java/com.parse:parse-android
- 
- [references-svg]: https://www.versioneye.com/java/com.parse:parse-android/reference_badge.svg?style=flat-square
- [references-link]: https://www.versioneye.com/java/com.parse:parse-android/references
  
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE
