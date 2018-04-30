@@ -23,6 +23,6 @@ public class ParseFirebaseInstanceIdService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         super.onTokenRefresh();
-        ParseFCM.scheduleTokenUpload(getApplicationContext());
+        ParseFCM.register(getApplicationContext());
     }
 }

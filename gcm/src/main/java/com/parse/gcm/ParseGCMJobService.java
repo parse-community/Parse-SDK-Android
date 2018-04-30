@@ -8,8 +8,14 @@
  */
 package com.parse.gcm;
 
+import android.os.Bundle;
+
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
+import com.firebase.jobdispatcher.RetryStrategy;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.parse.PLog;
@@ -24,6 +30,27 @@ import bolts.Task;
  */
 public class ParseGCMJobService extends JobService {
 
+    private static final String JOB_TAG_REGISTER = "register";
+    private static final String KEY_GCM_SENDER_ID = "gcm_sender_id";
+
+    static Job createJob(FirebaseJobDispatcher dispatcher, String gcmSenderId) {
+        Bundle extras = new Bundle();
+        extras.putString(KEY_GCM_SENDER_ID, gcmSenderId);
+        return dispatcher.newJobBuilder()
+                .setExtras(extras)
+                .setRecurring(false)
+                .setReplaceCurrent(true)
+                // retry with exponential backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setConstraints(
+                        // only run on a network
+                        Constraint.ON_ANY_NETWORK
+                )
+                .setService(ParseGCMJobService.class) // the JobService that will be called
+                .setTag(JOB_TAG_REGISTER)        // uniquely identifies the job
+                .build();
+    }
+
     @Override
     public boolean onStartJob(final JobParameters job) {
         PLog.v(ParseGCM.TAG, "Updating GCM token");
@@ -33,7 +60,7 @@ public class ParseGCMJobService extends JobService {
             public Void call() throws Exception {
                 try {
                     InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
-                    String senderId = ParseGCM.gcmSenderFromManifest(getApplicationContext());
+                    String senderId = job.getExtras().getString(KEY_GCM_SENDER_ID);
                     String token = instanceID.getToken(senderId,
                             GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
                     ParseInstallation installation = ParseInstallation.getCurrentInstallation();

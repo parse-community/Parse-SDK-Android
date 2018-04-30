@@ -36,28 +36,9 @@ For more information about Parse and its features, see [the website][parseplatfo
   
   You can link to your project to your AAR file as you please.
     
- ### Setup
-- **Option 1:** Setup in the Manifest
-
-  You may define `com.parse.SERVER_URL` and `com.parse.APPLICATION_ID` meta-data in your `AndroidManifest.xml`:
-
-  ```xml
-  <application ...>
-    <meta-data
-      android:name="com.parse.SERVER_URL"
-      android:value="@string/parse_server_url" />
-    <meta-data
-      android:name="com.parse.APPLICATION_ID"
-      android:value="@string/parse_app_id" />
-    ...
-  </application>
-  ```
-  
-- **Option 2:** Setup in the Application
-  
-  Initialize Parse in a custom class that extends `Application`:
-  
-  ```java
+### Setup
+Initialize Parse in a custom class that extends `Application`:
+```java
   import com.parse.Parse;
   import android.app.Application;
 
@@ -67,22 +48,23 @@ For more information about Parse and its features, see [the website][parseplatfo
       super.onCreate();
       Parse.initialize(new Parse.Configuration.Builder(this)
         .applicationId("YOUR_APP_ID")
+        .clientKey("YOUR_CLIENT_KEY")
         .server("http://localhost:1337/parse/")
         .build()
       );
     }
   }
-  ```
+```
   
- For either option, the custom `Application` class must be registered in `AndroidManifest.xml`:
+The custom `Application` class must be registered in `AndroidManifest.xml`:
  
- ```xml
- <application
-   android:name=".App"
-   ...>
-   ...
- </application>
- ```
+```xml
+<application
+    android:name=".App"
+    ...>
+    ...
+</application>
+```
 
 ## Usage
 Everything can done through the supplied gradle wrapper:
