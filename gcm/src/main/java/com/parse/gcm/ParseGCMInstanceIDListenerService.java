@@ -1,10 +1,5 @@
 package com.parse.gcm;
 
-import com.firebase.jobdispatcher.Constraint;
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.RetryStrategy;
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
@@ -15,7 +10,6 @@ public class ParseGCMInstanceIDListenerService extends InstanceIDListenerService
     @Override
     public void onTokenRefresh() {
         super.onTokenRefresh();
-
         ParseGCM.register(getApplicationContext());
     }
 }

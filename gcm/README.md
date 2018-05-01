@@ -16,7 +16,15 @@ dependencies {
     implementation 'com.parse:parse-android-gcm:latest.version.here'
 }
 ```
-You will then need to register some things in your manifest, firstly:
+You will then need to register some things in your manifest, firstly, the GCM sender ID:
+```xml
+<meta-data
+    android:name="com.parse.push.gcm_sender_id"
+    android:value="id:YOUR_SENDER_ID_HERE" />
+```
+The sender ID should be all numbers. Make sure you are keeping the `id:` in the front.
+
+Next you will register the GcmReceiver:
 ```xml
 <receiver
     android:name="com.google.android.gms.gcm.GcmReceiver"
