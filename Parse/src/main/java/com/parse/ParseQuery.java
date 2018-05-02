@@ -1888,7 +1888,7 @@ public class ParseQuery<T extends ParseObject> {
    *
    * @param key
    *          The key to be constrained.
-   * @param value
+   * @param points
    *          List<ParseGeoPoint> or ParsePolygon
    * @return this, so you can chain this call.
    */
