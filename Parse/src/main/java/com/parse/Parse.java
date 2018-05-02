@@ -11,7 +11,7 @@ package com.parse;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -59,59 +59,15 @@ public class Parse {
        * <p>
        * This context will then be passed through to the rest of the Parse SDK for use during
        * initialization.
-       * <p>
-       * <p/>
-       * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
-       * {@code meta-data} in your {@code AndroidManifest.xml}:
-       * <pre>
-       * &lt;manifest ...&gt;
-       *
-       * ...
-       *
-       *   &lt;application ...&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.SERVER_URL"
-       *       android:value="@string/parse_server_url" /&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.APPLICATION_ID"
-       *       android:value="@string/parse_app_id" /&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.CLIENT_KEY"
-       *       android:value="@string/parse_client_key" /&gt;
-       *
-       *       ...
-       *
-       *   &lt;/application&gt;
-       * &lt;/manifest&gt;
-       * </pre>
-       * <p/>
-       * <p>
-       * This will cause the values for {@code server}, {@code applicationId} and {@code clientKey} to be set to
-       * those defined in your manifest.
        *
        * @param context The active {@link Context} for your application. Cannot be null.
        */
-      public Builder(Context context) {
+      public Builder(@NonNull Context context) {
         this.context = context;
-
-        // Yes, our public API states we cannot be null. But for unit tests, it's easier just to
-        // support null here.
-        if (context != null) {
-          Context applicationContext = context.getApplicationContext();
-          Bundle metaData = ManifestInfo.getApplicationMetadata(applicationContext);
-          if (metaData != null) {
-            server(metaData.getString(PARSE_SERVER_URL));
-            applicationId = metaData.getString(PARSE_APPLICATION_ID);
-            clientKey = metaData.getString(PARSE_CLIENT_KEY);
-          }
-        }
       }
 
       /**
        * Set the application id to be used by Parse.
-       * <p>
-       * This method is only required if you intend to use a different {@code applicationId} than
-       * is defined by {@code com.parse.APPLICATION_ID} in your {@code AndroidManifest.xml}.
        *
        * @param applicationId The application id to set.
        * @return The same builder, for easy chaining.
@@ -123,9 +79,6 @@ public class Parse {
 
       /**
        * Set the client key to be used by Parse.
-       * <p>
-       * This method is only required if you intend to use a different {@code clientKey} than
-       * is defined by {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
        *
        * @param clientKey The client key to set.
        * @return The same builder, for easy chaining.
@@ -224,10 +177,6 @@ public class Parse {
     }
   }
 
-  private static final String PARSE_SERVER_URL = "com.parse.SERVER_URL";
-  private static final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
-  private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
-
   private static final Object MUTEX = new Object();
   static ParseEventuallyQueue eventuallyQueue = null;
 
@@ -239,7 +188,7 @@ public class Parse {
   /**
    * Enable pinning in your application. This must be called before your application can use
    * pinning. You must invoke {@code enableLocalDatastore(Context)} before
-   * {@link #initialize(Context)} :
+   * {@link #initialize(Configuration)}:
    * <p/>
    * <pre>
    * public class MyApplication extends Application {
@@ -284,74 +233,6 @@ public class Parse {
 
   /**
    * Authenticates this client as belonging to your application.
-   * <p/>
-   * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
-   * {@code meta-data} in your {@code AndroidManifest.xml}:
-   * <pre>
-   * &lt;manifest ...&gt;
-   *
-   * ...
-   *
-   *   &lt;application ...&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.SERVER_URL"
-   *       android:value="@string/parse_server_url" /&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.APPLICATION_ID"
-   *       android:value="@string/parse_app_id" /&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.CLIENT_KEY"
-   *       android:value="@string/parse_client_key" /&gt;
-   *
-   *       ...
-   *
-   *   &lt;/application&gt;
-   * &lt;/manifest&gt;
-   * </pre>
-   * <p/>
-   * This must be called before your application can use the Parse library.
-   * The recommended way is to put a call to {@code Parse.initialize}
-   * in your {@code Application}'s {@code onCreate} method:
-   * <p/>
-   * <pre>
-   * public class MyApplication extends Application {
-   *   public void onCreate() {
-   *     Parse.initialize(this);
-   *   }
-   * }
-   * </pre>
-   *
-   * @param context The active {@link Context} for your application.
-   */
-  public static void initialize(Context context) {
-    Configuration.Builder builder = new Configuration.Builder(context);
-    if (builder.server == null) {
-      throw new RuntimeException("ServerUrl not defined. " +
-              "You must provide ServerUrl in AndroidManifest.xml.\n" +
-              "<meta-data\n" +
-              "    android:name=\"com.parse.SERVER_URL\"\n" +
-              "    android:value=\"<Your Server Url>\" />");
-    }
-    if (builder.applicationId == null) {
-      throw new RuntimeException("ApplicationId not defined. " +
-              "You must provide ApplicationId in AndroidManifest.xml.\n" +
-              "<meta-data\n" +
-              "    android:name=\"com.parse.APPLICATION_ID\"\n" +
-              "    android:value=\"<Your Application Id>\" />");
-    }
-    initialize(builder
-            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-            .build()
-    );
-  }
-
-  /**
-   * Authenticates this client as belonging to your application.
-   * <p/>
-   * This method is only required if you intend to use a different {@code applicationId} or
-   * {@code clientKey} than is defined by {@code com.parse.APPLICATION_ID} or
-   * {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
-   * <p/>
    * This must be called before your
    * application can use the Parse library. The recommended way is to put a call to
    * {@code Parse.initialize} in your {@code Application}'s {@code onCreate} method:
@@ -359,24 +240,13 @@ public class Parse {
    * <pre>
    * public class MyApplication extends Application {
    *   public void onCreate() {
-   *     Parse.initialize(this, &quot;your application id&quot;, &quot;your client key&quot;);
+   *     Parse.initialize(configuration);
    *   }
    * }
    * </pre>
    *
-   * @param context       The active {@link Context} for your application.
-   * @param applicationId The application id provided in the Parse dashboard.
-   * @param clientKey     The client key provided in the Parse dashboard.
+   * @param configuration The configuration for your application.
    */
-  public static void initialize(Context context, String applicationId, String clientKey) {
-    initialize(new Configuration.Builder(context)
-            .applicationId(applicationId)
-            .clientKey(clientKey)
-            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-            .build()
-    );
-  }
-
   public static void initialize(Configuration configuration) {
     if (isInitialized()) {
       PLog.w(TAG, "Parse is already initialized");

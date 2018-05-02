@@ -22,9 +22,9 @@ You will then need to register some things in your manifest, firstly, the GCM se
     android:name="com.parse.push.gcm_sender_id"
     android:value="id:YOUR_SENDER_ID_HERE" />
 ```
-The sender ID should be all numbers. Make sure you are keeping the `id:` in the front
+The sender ID should be all numbers. Make sure you are keeping the `id:` in the front.
 
-Next:
+Next you will register the GcmReceiver:
 ```xml
 <receiver
     android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -69,7 +69,7 @@ After these services are registered in the Manifest, you then need to register y
     </intent-filter>
 </receiver>
 ```
-After all this, you will need to register GCM in your `Application.onCreate()` like so:
+After all this, you will need to register for GCM in your `Application.onCreate()`, like so:
 ```java
 @Override
 public void onCreate() {
@@ -78,9 +78,10 @@ public void onCreate() {
             //...
             .build();
     Parse.initialize(configuration);
-    ParseGCM.register(this);
+    ParseGCM.register(this, gcmSenderId);
 }
 ```
+The sender ID should be all numbers. It is obtained via the Firebase console.
 
 After this, you are all set.
 

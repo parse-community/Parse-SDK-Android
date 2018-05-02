@@ -56,7 +56,7 @@ After these services are registered in the Manifest, you then need to register y
 If you need to customize the notification that is sent out from a push, you can do so easily by extending `ParsePushBroadcastReceiver` with your own class and registering it instead in the Manifest.
 
 ## Instance ID Service
-If you need to store the FCM token elsewhere outside of Parse, you can create your own implementation of the `FirebaseInstanceIdService`, just make sure you are either extending `ParseFirebaseInstanceIdService` or are calling `ParseFCM.scheduleTokenUpload(getApplicationContext());` in the `onTokenRefresh` method.
+If you need to store the FCM token elsewhere outside of Parse, you can create your own implementation of the `FirebaseInstanceIdService`, just make sure you are either extending `ParseFirebaseInstanceIdService` or are calling `ParseFCM.register(getApplicationContext());` in the `onTokenRefresh` method.
 
 ## License
     Copyright (c) 2015-present, Parse, LLC.

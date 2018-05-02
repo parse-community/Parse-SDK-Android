@@ -8,8 +8,12 @@
  */
 package com.parse.fcm;
 
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
+import com.firebase.jobdispatcher.RetryStrategy;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.parse.PLog;
 import com.parse.ParseException;
@@ -20,6 +24,23 @@ import com.parse.SaveCallback;
  * Handles saving the FCM token to the {@link ParseInstallation} in the background
  */
 public class ParseFirebaseJobService extends JobService {
+
+    private static final String JOB_TAG_UPLOAD_TOKEN = "upload-token";
+
+    static Job createJob(FirebaseJobDispatcher dispatcher) {
+        return dispatcher.newJobBuilder()
+                .setRecurring(false)
+                .setReplaceCurrent(true)
+                // retry with exponential backoff
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
+                .setConstraints(
+                        // only run on a network
+                        Constraint.ON_ANY_NETWORK
+                )
+                .setService(ParseFirebaseJobService.class) // the JobService that will be called
+                .setTag(JOB_TAG_UPLOAD_TOKEN)        // uniquely identifies the job
+                .build();
+    }
 
     @Override
     public boolean onStartJob(final JobParameters job) {
