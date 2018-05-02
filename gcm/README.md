@@ -77,7 +77,7 @@ public void onCreate() {
             //...
             .build();
     Parse.initialize(configuration);
-    ParseGCM.register(this, gcmSenderId);
+    ParseGCM.register(this);
 }
 ```
 The sender ID should be all numbers. It is obtained via the Firebase console.
