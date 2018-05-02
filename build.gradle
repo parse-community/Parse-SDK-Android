@@ -28,8 +28,8 @@ ext {
 
     commonLibVersion = "1.17.0-SNAPSHOT"
 
-    supportLibVersion = '27.1.0'
-    googleLibVersion = '12.0.1'
+    supportLibVersion = '27.1.1'
+    googleLibVersion = '15.0.0'
     firebaseJobdispatcherVersion = '0.8.5'
 
     minSdkVersion = 14
