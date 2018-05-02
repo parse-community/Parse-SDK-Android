@@ -12,7 +12,6 @@ Add dependency to the application level `build.gradle` file.
 
 ```groovy
 dependencies {
-    implementation 'com.parse:parse-android:latest.version.here'
     implementation 'com.parse:parse-android-gcm:latest.version.here'
 }
 ```
