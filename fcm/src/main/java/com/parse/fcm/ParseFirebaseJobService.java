@@ -44,7 +44,7 @@ public class ParseFirebaseJobService extends JobService {
 
     @Override
     public boolean onStartJob(final JobParameters job) {
-        PLog.v(ParseFCM.TAG, "Updating FCM token");
+        PLog.d(ParseFCM.TAG, "Updating FCM token");
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         String token = FirebaseInstanceId.getInstance().getToken();
         if (installation != null && token != null) {
@@ -55,7 +55,7 @@ public class ParseFirebaseJobService extends JobService {
                 @Override
                 public void done(ParseException e) {
                     if (e == null) {
-                        PLog.v(ParseFCM.TAG, "FCM token saved to installation");
+                        PLog.d(ParseFCM.TAG, "FCM token saved to installation");
                         jobFinished(job, false);
                     } else {
                         PLog.e(ParseFCM.TAG, "FCM token upload failed", e);

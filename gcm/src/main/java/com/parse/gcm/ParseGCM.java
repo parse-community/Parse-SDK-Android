@@ -35,7 +35,7 @@ public class ParseGCM {
      */
     public static void register(@NonNull Context context) {
         //kicks off the background job
-        PLog.v(TAG, "Scheduling job to register Parse GCM");
+        PLog.d(TAG, "Scheduling job to register Parse GCM");
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context.getApplicationContext()));
         Job job = ParseGCMJobService.createJob(dispatcher, gcmSenderFromManifest(context));
         dispatcher.mustSchedule(job);
