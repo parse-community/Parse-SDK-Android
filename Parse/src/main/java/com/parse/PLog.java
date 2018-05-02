@@ -60,7 +60,7 @@ public class PLog {
     log(Log.VERBOSE, tag, message, tr);
   }
 
-  public static void v(String tag, String message) {
+  static void v(String tag, String message) {
     v(tag, message, null);
   }
 
@@ -68,7 +68,7 @@ public class PLog {
     log(Log.DEBUG, tag, message, tr);
   }
 
-  /* package */ static void d(String tag, String message) {
+  /* package */ public static void d(String tag, String message) {
     d(tag, message, null);
   }
 
