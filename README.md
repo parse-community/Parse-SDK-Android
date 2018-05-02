@@ -19,9 +19,10 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   ```groovy
   dependencies {
-    implementation 'com.parse:parse-android:1.16.7'
+    implementation 'com.parse:parse-android:latest.version.here'
   }
   ```
+  where `latest.version.here` is replaced with this latest version: [![Maven Central][maven-svg]][maven-link]
 
   Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
 
