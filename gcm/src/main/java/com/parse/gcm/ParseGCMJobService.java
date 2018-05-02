@@ -53,7 +53,7 @@ public class ParseGCMJobService extends JobService {
 
     @Override
     public boolean onStartJob(final JobParameters job) {
-        PLog.v(ParseGCM.TAG, "Updating GCM token");
+        PLog.d(ParseGCM.TAG, "Updating GCM token");
 
         Task.callInBackground(new Callable<Void>() {
             @Override
@@ -68,7 +68,7 @@ public class ParseGCMJobService extends JobService {
                     //even though this is FCM, calling it gcm will work on the backend
                     installation.setPushType("gcm");
                     installation.save();
-                    PLog.v(ParseGCM.TAG, "GCM registration success");
+                    PLog.d(ParseGCM.TAG, "GCM registration success");
                 } catch (Exception e) {
                     PLog.e(ParseGCM.TAG, "GCM registration failed", e);
                     jobFinished(job, true);

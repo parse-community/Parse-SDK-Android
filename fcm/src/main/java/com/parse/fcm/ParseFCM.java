@@ -13,6 +13,7 @@ import android.content.Context;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
+import com.parse.PLog;
 
 public class ParseFCM {
 
@@ -24,6 +25,8 @@ public class ParseFCM {
      * @param context context
      */
     public static void register(Context context) {
+        //kicks off the background job
+        PLog.d(TAG, "Scheduling job to register Parse FCM");
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(context.getApplicationContext()));
         Job job = ParseFirebaseJobService.createJob(dispatcher);
         dispatcher.mustSchedule(job);

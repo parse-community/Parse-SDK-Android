@@ -13,7 +13,7 @@ public class ParseFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        PLog.v(ParseFCM.TAG, "onMessageReceived");
+        PLog.d(ParseFCM.TAG, "onMessageReceived");
 
         String pushId = remoteMessage.getData().get("push_id");
         String timestamp = remoteMessage.getData().get("time");
