@@ -33,7 +33,7 @@ android {
 dependencies {
     api "com.google.firebase:firebase-messaging:$googleLibVersion"
     api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
-    implementation project(':Parse')
+    implementation project(':parse')
 }
 
 apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.0.0/gradle-android-javadocs.gradle'

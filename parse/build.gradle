@@ -1,16 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
 
-group = 'com.parse'
-version = rootProject.ext.commonLibVersion
-
-ext {
-    projDescription = 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
-    artifact = 'parse-android'
-    projName = 'Parse-Android'
-    gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
-}
-
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -94,4 +84,4 @@ coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacoco
 
 //endregion
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.0.0/gradle-android-javadocs.gradle'
