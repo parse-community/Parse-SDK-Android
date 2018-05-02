@@ -8,6 +8,10 @@ import com.parse.PushRouter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * Receives the FCM push and passes it to the {@link PushRouter}. Override if you want to bypass
+ * Parse push and do more custom things
+ */
 public class ParseFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override

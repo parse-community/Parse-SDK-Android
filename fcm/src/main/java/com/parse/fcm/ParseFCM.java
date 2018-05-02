@@ -15,6 +15,9 @@ import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.parse.PLog;
 
+/**
+ * Allows for Parse FCM registration.
+ */
 public class ParseFCM {
 
     static final String TAG = "ParseFCM";
