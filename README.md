@@ -1,6 +1,6 @@
 # Parse SDK for Android
 
-[![Maven Central][maven-svg]][maven-link]
+[![Bintray][bintray-svg]][bintray-link]
 [![License][license-svg]][license-link]
 
 [![Build Status][build-status-svg]][build-status-link]
@@ -23,8 +23,6 @@ For more information about Parse and its features, see [the website][parseplatfo
   }
   ```
 
-  Snapshots of the development version are available in [jFrog's `snapshots` repository][snap].
-
 - **Option 2:** Compiling for yourself into AAR file
 
   If you want to manually compile the SDK, begin by cloning the repository locally or retrieving the source code for a particular [release][releases]. Open the project in Android Studio and run the following commands in the Terminal of Android Studio:
@@ -35,7 +33,8 @@ For more information about Parse and its features, see [the website][parseplatfo
   Output file can be found in `Parse/build/outputs/` with extension .aar
   
   You can link to your project to your AAR file as you please.
-    
+
+
 ### Setup
 Initialize Parse in a custom class that extends `Application`:
 ```java
@@ -81,6 +80,28 @@ Results can be found in `Parse/build/reports/`
 ```
 Results can be found in `Parse/build/reports/`
 
+## Snapshots
+
+Snapshots of the development version can be obtained by using [Jitpack][jitpack-snapshot-link]:
+
+Add the Maven link in your root `build.gradle` file:
+
+  ```groovy
+  allprojects {
+    repositories {
+      maven { url 'https://jitpack.io' }
+    }
+  }					      
+  ```
+ 
+Add the dependency to your `app/build.gradle`:
+
+  ```groovy
+  dependencies {
+    implementation 'com.github.parse-community:Parse-SDK-Android:master-SNAPSHOT'
+  }
+  ```
+    
 ## How Do I Contribute?
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines][contributing].
 
@@ -110,9 +131,11 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
  [latest]: https://search.maven.org/remote_content?g=com.parse&a=parse-android&v=LATEST
  [snap]: https://oss.jfrog.org/artifactory/oss-snapshot-local/com/parse/parse-android/
  
- [maven-svg]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android/badge.svg?style=flat
- [maven-link]: https://maven-badges.herokuapp.com/maven-central/com.parse/parse-android
- 
+ [bintray-svg]: https://api.bintray.com/packages/parse/maven/com.parse:parse-android/images/download.svg
+ [bintray-link]: https://bintray.com/parse/maven/com.parse:parse-android
+
+ [jitpack-snapshot-link]: https://jitpack.io/#parse-community/Parse-SDK-Android/master-SNAPSHOT
+
  [license-svg]: https://img.shields.io/badge/license-BSD-lightgrey.svg
  [license-link]: https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE
 
