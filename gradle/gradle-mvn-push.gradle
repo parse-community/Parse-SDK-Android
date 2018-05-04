@@ -154,22 +154,3 @@ publishing {
 }
 
 // End of Bintray plugin
-
-apply plugin: "com.jfrog.artifactory"
-
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local' // The Artifactory repository key to publish to
-
-            username = System.getenv('BINTRAY_USER')
-            password = System.getenv('BINTRAY_API_KEY')
-            maven = true
-        }
-        defaults {
-            publishArtifacts = true
-            publications('mavenAar')
-        }
-    }
-}
