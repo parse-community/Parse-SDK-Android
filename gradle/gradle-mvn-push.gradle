@@ -35,7 +35,6 @@ android.libraryVariants.all { variant ->
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-def isSnapshot = version.endsWith('-SNAPSHOT')
 def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
 def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
 
@@ -62,35 +61,6 @@ def pomConfig = {
     }
 }
 
-
-uploadArchives {
-    repositories.mavenDeployer {
-        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-            authentication(userName: ossrhUsername, password: ossrhPassword)
-        }
-
-        snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-            authentication(userName: ossrhUsername, password: ossrhPassword)
-        }
-
-        def basePom = {
-            name projName
-            artifactId = artifact
-            packaging 'aar'
-            description projDescription
-            url gitLink
-        }
-
-        pom.project basePom << pomConfig
-    }
-}
-
-signing {
-    required { !isSnapshot && gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
 
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
