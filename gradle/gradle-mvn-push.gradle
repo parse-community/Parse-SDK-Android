@@ -38,29 +38,6 @@ apply plugin: 'signing'
 def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
 def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
 
-def pomConfig = {
-    licenses {
-        license {
-            name 'BSD License'
-            url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
-            distribution 'repo'
-        }
-    }
-
-    scm {
-        connection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
-        developerConnection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
-        url gitLink
-    }
-
-    developers {
-        developer {
-            id 'parse'
-            name 'Parse'
-        }
-    }
-}
-
 
 task androidSourcesJar(type: Jar) {
     classifier = 'sources'
@@ -70,8 +47,6 @@ task androidSourcesJar(type: Jar) {
 artifacts {
     archives androidSourcesJar
 }
-
-//endregion
 
 // Requires apply plugin: 'com.jfrog.bintray'
 
@@ -108,6 +83,29 @@ bintray {
 // Create the publication with the pom configuration:
 apply plugin: 'digital.wup.android-maven-publish'
 
+def pomConfig = {
+    licenses {
+        license {
+            name 'BSD License'
+            url 'https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE'
+            distribution 'repo'
+        }
+    }
+
+    scm {
+        connection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
+        developerConnection 'scm:git@github.com:parse-community/Parse-SDK-Android.git'
+        url gitLink
+    }
+
+    developers {
+        developer {
+            id 'parse'
+            name 'Parse'
+        }
+    }
+}
+
 publishing {
     publications {
         mavenAar(MavenPublication) {
@@ -117,7 +115,13 @@ publishing {
             artifactId artifact
             artifacts = [androidSourcesJar, javadocJarRelease, bundleRelease]
             version version
-
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', projDescription)
+                root.appendNode('name', projName)
+                root.appendNode('url', gitLink)
+                root.children().last() + pomConfig
+            }
         }
 
     }
