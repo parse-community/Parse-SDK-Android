@@ -20,7 +20,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   ```groovy
   ext {
-    parseVersion = "1.17.0"
+    parseVersion = "1.17.1"
   }
   ```
 
