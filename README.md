@@ -65,7 +65,7 @@ For more information about Parse and its features, see [the website][parseplatfo
       ```
 
   - [ ] Downloaded and added [google-services.json](https://support.google.com/firebase/answer/7015592) to your `app/` dir from your Firebase app.
-  - [ ] Added `ParseFirebaseInstanceIdService` and `ParseFirebaseMessagingService` to your `AndroidManifest.xml` file (see [docs](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/README.md)
+  - [ ] Added `ParseFirebaseInstanceIdService` and `ParseFirebaseMessagingService` to your `AndroidManifest.xml` file (see [docs](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/README.md))
   - [ ] Removed `GcmBroadcastReceiver`, `PushService`, `com.parse.push.gcm_sender_id` if upgrading from GCM.
 
   Assuming these major steps are done, adding the `parse-fcm-android` package will automatically instantiate a [ParseFirebaseJobService](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/src/main/java/com/parse/fcm/ParseFirebaseJobService.java) that will register for a FCM token when the app starts.   See the setup instructions below to verify that FCM registration works.
