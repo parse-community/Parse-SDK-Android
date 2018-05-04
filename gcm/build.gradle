@@ -41,7 +41,8 @@ android {
 }
 
 dependencies {
-    api "com.google.android.gms:play-services-gcm:$googleLibVersionGCM"
+    // last version for GCM to be supported
+    api "com.google.android.gms:play-services-gcm:12.0.1"
     api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
     implementation project(':Parse')
 }
