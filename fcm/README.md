@@ -52,6 +52,12 @@ After these services are registered in the Manifest, you then need to register y
 </receiver>
 ```
 
+After this, you are all set. Adding the `parse-fcm-android` package will include a [ParseFirebaseJobService](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/src/main/java/com/parse/fcm/ParseFirebaseJobService.java) in the `AndroidManifest.xml` file that will register for a FCM token when the app starts.  You should see `ParseFCM: FCM registration success` messages assuming you have enabled logging:
+
+```java
+Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
+```
+
 ## Custom Notifications
 If you need to customize the notification that is sent out from a push, you can do so easily by extending `ParsePushBroadcastReceiver` with your own class and registering it instead in the Manifest.
 
