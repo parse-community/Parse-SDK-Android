@@ -43,6 +43,7 @@ ext {
 
 dependencies {
     api "com.android.support:support-annotations:$supportLibVersion"
+    api "com.android.support:support-compat:$supportLibVersion"
     api 'com.parse.bolts:bolts-tasks:1.4.0'
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
