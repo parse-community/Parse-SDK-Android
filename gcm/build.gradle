@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-    api "com.google.android.gms:play-services-gcm:$googleLibVersion"
+    api "com.google.android.gms:play-services-gcm:$googleLibVersionGCM"
     api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
     implementation project(':Parse')
 }

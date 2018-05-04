@@ -68,21 +68,12 @@ After these services are registered in the Manifest, you then need to register y
     </intent-filter>
 </receiver>
 ```
-After all this, you will need to register for GCM in your `Application.onCreate()`, like so:
-```java
-@Override
-public void onCreate() {
-    super.onCreate();
-    Parse.Configuration configuration = new Parse.Configuration.Builder(this)
-            //...
-            .build();
-    Parse.initialize(configuration);
-    ParseGCM.register(this);
-}
-```
-The sender ID should be all numbers. It is obtained via the Firebase console.
 
-After this, you are all set.
+After this, you are all set. Adding the `parse-gcm-android` package will include a [ParseGCMJobService](https://github.com/parse-community/Parse-SDK-Android/blob/master/gcm/src/main/java/com/parse/gcm/ParseGCMJobService.java) in the `AndroidManifest.xml` file that will register for a GCM token when the app starts.  You should see `ParseGCM: GCM registration success` messages assuming you have enabled logging:
+
+```java
+Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
+```
 
 ## Custom Notifications
 If you need to customize the notification that is sent out from a push, you can do so easily by extending `ParsePushBroadcastReceiver` with your own class and registering it instead in the Manifest.
