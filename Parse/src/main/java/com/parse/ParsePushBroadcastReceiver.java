@@ -70,7 +70,7 @@ import java.util.Random;
  * {@link #onPushOpen(Context, Intent)}, or {@link #onPushDismiss(Context, Intent)}.
  * To make minor changes to the appearance of a notification, override
  * {@link #getSmallIconId(Context, Intent)} or {@link #getLargeIcon(Context, Intent)}. To completely
- * change the Notification generated, override {@link #getNotificationBuilder(Context, Intent)}. To
+ * change the Notification generated, override {@link #getNotification(Context, Intent)}. To
  * change the NotificationChannel generated, override {@link #getNotificationChannel(Context, Intent)}. To
  * change how the NotificationChannel is created, override {@link #createNotificationChannel(Context, NotificationChannel)}.
  * To change the Activity launched when a user opens a Notification, override
@@ -212,7 +212,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
       context.sendBroadcast(broadcastIntent);
     }
 
-    Notification notification = getNotificationBuilder(context, intent).build();
+    Notification notification = getNotification(context, intent);
 
     if (notification != null) {
       ParseNotificationManager.getInstance().showNotification(context, notification);
@@ -392,7 +392,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     }
   }
   /**
-   * Creates a {@link NotificationCompat.Builder} with reasonable defaults. If "alert" and "title" are
+   * Creates a {@link Notification} with reasonable defaults. If "alert" and "title" are
    * both missing from data, then returns {@code null}. If the text in the notification is longer
    * than 38 characters long, the style of the notification will be set to
    * {@link android.app.Notification.BigTextStyle}.
@@ -409,7 +409,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
    *
    * @see ParsePushBroadcastReceiver#onPushReceive(Context, Intent)
    */
-  protected NotificationCompat.Builder getNotificationBuilder(Context context, Intent intent) {
+  protected Notification getNotification(Context context, Intent intent) {
     JSONObject pushData = getPushData(intent);
     if (pushData == null || (!pushData.has("alert") && !pushData.has("title"))) {
       return null;
@@ -468,6 +468,6 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         && alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
       parseBuilder.setStyle(new NotificationCompat.Builder.BigTextStyle().bigText(alert));
     }
-    return parseBuilder;
+    return parseBuilder.build();
   }
 }
