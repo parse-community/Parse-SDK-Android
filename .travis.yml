@@ -16,7 +16,6 @@ before_install:
 after_success:
   - ./gradlew coveralls
   - codecov
-  - ./scripts/publish_snapshot.sh
 
 cache:
   directories:
