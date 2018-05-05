@@ -32,6 +32,7 @@ public class ParseGCMJobService extends JobService {
 
     private static final String JOB_TAG_REGISTER = "register";
     private static final String KEY_GCM_SENDER_ID = "gcm_sender_id";
+    private static final String PUSH_TYPE = "gcm";
 
     static Job createJob(FirebaseJobDispatcher dispatcher, String gcmSenderId) {
         Bundle extras = new Bundle();
@@ -66,7 +67,7 @@ public class ParseGCMJobService extends JobService {
                     ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                     installation.setDeviceToken(token);
                     //even though this is FCM, calling it gcm will work on the backend
-                    installation.setPushType("gcm");
+                    installation.setPushType(PUSH_TYPE);
                     installation.save();
                     PLog.d(ParseGCM.TAG, "GCM registration success");
                 } catch (Exception e) {
