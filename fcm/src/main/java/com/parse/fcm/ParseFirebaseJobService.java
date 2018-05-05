@@ -26,6 +26,7 @@ import com.parse.SaveCallback;
 public class ParseFirebaseJobService extends JobService {
 
     private static final String JOB_TAG_UPLOAD_TOKEN = "upload-token";
+    private static final String PUSH_TYPE = "fcm";
 
     static Job createJob(FirebaseJobDispatcher dispatcher) {
         return dispatcher.newJobBuilder()
@@ -50,7 +51,7 @@ public class ParseFirebaseJobService extends JobService {
         if (installation != null && token != null) {
             installation.setDeviceToken(token);
             //even though this is FCM, calling it gcm will work on the backend
-            installation.setPushType("gcm");
+            installation.setPushType(PUSH_TYPE);
             installation.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
