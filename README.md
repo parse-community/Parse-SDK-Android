@@ -70,7 +70,7 @@ For more information about Parse and its features, see [the website][parseplatfo
 
   Assuming these major steps are done, adding the `parse-fcm-android` package will automatically instantiate a [ParseFirebaseJobService](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/src/main/java/com/parse/fcm/ParseFirebaseJobService.java) that will register for a FCM token when the app starts.   See the setup instructions below to verify that FCM registration works.
 
-  One additional change you should make on the Parse server side [configuration](http://docs.parseplatform.org/parse-server/guide/#2-configure-parse-server) is to add an `fcm` key that matches your existing `android` senderId and apiKey.  This will ensure full compatibility of FCM should the Firebase [HTTP v1](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages) in the future.
+  One additional change you should make on the Parse server side [configuration](http://docs.parseplatform.org/parse-server/guide/#2-configure-parse-server) is to add an `fcm` key that matches your existing `android` senderId and apiKey.  This will ensure full compatibility of FCM should the Firebase [HTTP v1](https://firebase.google.com/docs/reference/fcm/rest/v1/projects.messages) be added in the future.
 
   ```javascript
   push: {
