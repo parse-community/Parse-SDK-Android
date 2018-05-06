@@ -25,19 +25,17 @@ You will then need to register some things in your manifest, specifically:
     </intent-filter>
 </service>
 ```
-where `MyFirebaseInstanceIdService` is your own custom class which extends `ParseFirebaseInstanceIdService`.
 
 Additional, you will register:
 
 ```xml
 <service
-    android:name=".MyFirebaseMessagingService">
+    android:name="com.parse.fcm.ParseFirebaseMessagingService"
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT"/>
     </intent-filter>
 </service>
 ```
-where `MyFirebaseMessagingService` extends `ParseFirebaseMessagingService`
 
 After these services are registered in the Manifest, you then need to register your push broadcast receiver:
 ```xml
