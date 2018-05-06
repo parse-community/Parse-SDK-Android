@@ -26,7 +26,7 @@ import com.parse.SaveCallback;
 public class ParseFirebaseJobService extends JobService {
 
     private static final String JOB_TAG_UPLOAD_TOKEN = "upload-token";
-    private static final String PUSH_TYPE = "fcm";
+    private static final String PUSH_TYPE = "gcm"; // Backwards compatability with Parse servers
 
     static Job createJob(FirebaseJobDispatcher dispatcher) {
         return dispatcher.newJobBuilder()
