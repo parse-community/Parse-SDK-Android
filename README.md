@@ -75,11 +75,9 @@ For more information about Parse and its features, see [the website][parseplatfo
   ```javascript
   push: {
     android: {
-      senderId: '', // The Sender ID
       apiKey: '' // The Server API Key
     },
     fcm: {
-      senderId: '', // The Sender ID
       apiKey: '' // The Server API Key
     },
   }
