@@ -14,7 +14,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import bolts.Task;
 
-/** package */ abstract class ParseSQLiteOpenHelper {
+abstract class ParseSQLiteOpenHelper {
 
   private final SQLiteOpenHelper helper;
 

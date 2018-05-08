@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class NetworkSessionController implements ParseSessionController {
+class NetworkSessionController implements ParseSessionController {
 
   private final ParseHttpClient client;
   private final ParseObjectCoder coder;

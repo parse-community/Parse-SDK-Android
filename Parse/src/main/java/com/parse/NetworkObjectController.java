@@ -16,7 +16,7 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class NetworkObjectController implements ParseObjectController {
+class NetworkObjectController implements ParseObjectController {
 
   private ParseHttpClient client;
   private ParseObjectCoder coder;

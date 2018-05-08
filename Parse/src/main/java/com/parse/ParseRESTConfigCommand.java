@@ -13,7 +13,7 @@ import com.parse.http.ParseHttpRequest;
 import java.util.HashMap;
 import java.util.Map;
 
-/** package */ class ParseRESTConfigCommand extends ParseRESTCommand {
+class ParseRESTConfigCommand extends ParseRESTCommand {
 
   public ParseRESTConfigCommand(
       String httpPath,

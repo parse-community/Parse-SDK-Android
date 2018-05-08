@@ -16,7 +16,7 @@ import java.util.Iterator;
 /**
  * Handles encoding/decoding ParseObjects to/from REST JSON.
  */
-/** package */ class ParseObjectCoder {
+class ParseObjectCoder {
 
   private static final String KEY_OBJECT_ID = "objectId";
   private static final String KEY_CLASS_NAME = "className";

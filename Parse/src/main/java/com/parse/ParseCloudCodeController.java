@@ -15,7 +15,7 @@ import java.util.Map;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class ParseCloudCodeController {
+class ParseCloudCodeController {
 
   /* package for test */ final ParseHttpClient restClient;
 

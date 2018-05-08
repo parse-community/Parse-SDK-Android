@@ -35,7 +35,7 @@ import bolts.TaskCompletionSource;
  *   {@link ParseObject#taskQueue}.
  * - All rules apply on start from reboot.
  */
-/** package */ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
+class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
   private static final String TAG = "ParsePinningEventuallyQueue";
 
   /**

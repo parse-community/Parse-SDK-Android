@@ -10,7 +10,7 @@ package com.parse;
 
 import java.lang.ref.WeakReference;
 
-/** package */ class ParseDefaultACLController {
+class ParseDefaultACLController {
 
   /* package for tests */ ParseACL defaultACL;
   /* package for tests */ boolean defaultACLUsesCurrentUser;

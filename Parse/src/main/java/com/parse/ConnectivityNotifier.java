@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** package */ class ConnectivityNotifier extends BroadcastReceiver {
+class ConnectivityNotifier extends BroadcastReceiver {
   private static final String TAG = "com.parse.ConnectivityNotifier";
   public interface ConnectivityListener {
     void networkConnectivityStatusChanged(Context context, Intent intent);

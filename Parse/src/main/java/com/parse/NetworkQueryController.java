@@ -18,7 +18,7 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class NetworkQueryController extends AbstractQueryController {
+class NetworkQueryController extends AbstractQueryController {
 
   private static final String TAG = "NetworkQueryController";
 

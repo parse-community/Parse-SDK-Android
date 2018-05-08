@@ -14,7 +14,7 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class ParsePushChannelsController {
+class ParsePushChannelsController {
 
   private static ParseCurrentInstallationController getCurrentInstallationController() {
     return ParseCorePlugins.getInstance().getCurrentInstallationController();

@@ -16,7 +16,7 @@ import org.json.JSONObject;
 /**
  * An operation where a field is deleted from the object.
  */
-/** package */ class ParseDeleteOperation implements ParseFieldOperation {
+class ParseDeleteOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "Delete";
 
   private static final ParseDeleteOperation defaultInstance = new ParseDeleteOperation();

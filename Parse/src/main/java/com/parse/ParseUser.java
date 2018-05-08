@@ -64,9 +64,9 @@ public class ParseUser extends ParseObject {
     return ParseCorePlugins.getInstance().getAuthenticationManager();
   }
 
-  /** package */ static class State extends ParseObject.State {
+  static class State extends ParseObject.State {
 
-    /** package */ static class Builder extends Init<Builder> {
+    static class Builder extends Init<Builder> {
 
       private boolean isNew;
 

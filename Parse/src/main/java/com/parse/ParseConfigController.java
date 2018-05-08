@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class ParseConfigController {
+class ParseConfigController {
 
   private ParseCurrentConfigController currentConfigController;
   private final ParseHttpClient restClient;

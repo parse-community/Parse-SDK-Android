@@ -14,7 +14,7 @@ package com.parse;
 
 import android.os.Parcel;
 
-/** package */ class ParseSetOperation implements ParseFieldOperation {
+class ParseSetOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "Set";
 
   private final Object value;

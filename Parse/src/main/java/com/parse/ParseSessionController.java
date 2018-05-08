@@ -10,7 +10,7 @@ package com.parse;
 
 import bolts.Task;
 
-/** package */ interface ParseSessionController {
+interface ParseSessionController {
 
   Task<ParseObject.State> getSessionAsync(String sessionToken);
 

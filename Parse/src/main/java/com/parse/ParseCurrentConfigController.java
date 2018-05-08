@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 
 import bolts.Task;
 
-/** package */ class ParseCurrentConfigController {
+class ParseCurrentConfigController {
 
   private final Object currentConfigMutex = new Object();
   /* package for test */ ParseConfig currentConfig;

@@ -28,7 +28,7 @@ import android.util.SparseIntArray;
 /**
  * A utility class for building and showing notifications.
  */
-/** package */ class ParseNotificationManager {
+class ParseNotificationManager {
   public static final String TAG = "com.parse.ParseNotificationManager";
   
   public static class Singleton {

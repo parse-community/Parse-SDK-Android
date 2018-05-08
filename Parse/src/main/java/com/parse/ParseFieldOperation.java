@@ -27,7 +27,7 @@ import org.json.JSONObject;
  * setting, deleting, or incrementing a value are all different kinds of ParseFieldOperations.
  * ParseFieldOperations themselves can be considered to be immutable.
  */
-/** package */ interface ParseFieldOperation {
+interface ParseFieldOperation {
   /**
    * Converts the ParseFieldOperation to a data structure (typically a JSONObject) that can be
    * converted to JSON and sent to Parse as part of a save operation.

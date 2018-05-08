@@ -21,7 +21,7 @@ import org.json.JSONObject;
 /**
  * An operation where a ParseRelation's value is modified.
  */
-/** package */ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperation {
+class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperation {
   /* package */ final static String OP_NAME_ADD = "AddRelation";
   /* package */ final static String OP_NAME_REMOVE = "RemoveRelation";
   /* package */ final static String OP_NAME_BATCH = "Batch";

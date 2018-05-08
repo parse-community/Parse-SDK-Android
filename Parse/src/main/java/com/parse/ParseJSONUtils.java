@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Static utility methods pertaining to {@link JSONObject} and {@link JSONArray} instances.
  */
-/** package */ class ParseJSONUtils {
+class ParseJSONUtils {
 
   /**
    * Creates a copy of {@code copyFrom}, excluding the keys from {@code excludes}.

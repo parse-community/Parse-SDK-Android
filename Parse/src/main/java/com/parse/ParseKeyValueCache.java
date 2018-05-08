@@ -24,7 +24,7 @@ import java.util.Date;
 /**
  * Used for ParseQuery caching.
  */
-/** package */ class ParseKeyValueCache {
+class ParseKeyValueCache {
 
   private static final String TAG = "ParseKeyValueCache";
   private static final String DIR_NAME = "ParseKeyValueCache";

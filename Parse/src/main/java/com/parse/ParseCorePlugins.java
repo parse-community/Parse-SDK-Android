@@ -11,7 +11,7 @@ package com.parse;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** package */ class ParseCorePlugins {
+class ParseCorePlugins {
 
   private static final ParseCorePlugins INSTANCE = new ParseCorePlugins();
   public static ParseCorePlugins getInstance() {
