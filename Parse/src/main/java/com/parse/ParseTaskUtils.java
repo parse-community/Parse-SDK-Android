@@ -15,7 +15,7 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-/** package */ class ParseTaskUtils {
+class ParseTaskUtils {
 
   /**
    * Converts a task execution into a synchronous action.

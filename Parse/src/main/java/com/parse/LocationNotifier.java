@@ -32,7 +32,7 @@ import bolts.TaskCompletionSource;
  * LocationManager to fire or for the timer to run out; instead, we build a local LocationListener,
  * then call the onLocationChanged() method manually.
  */
-/** package */ class LocationNotifier {
+class LocationNotifier {
   private static Location fakeLocation = null;
 
   /**

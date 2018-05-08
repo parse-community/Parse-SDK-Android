@@ -14,7 +14,7 @@ import org.json.JSONObject;
  * Encodes {@link ParseObjects} as pointers. If the object does not have an objectId, throws an
  * exception.
  */
-/** package */ class PointerEncoder extends PointerOrLocalIdEncoder {
+class PointerEncoder extends PointerOrLocalIdEncoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.

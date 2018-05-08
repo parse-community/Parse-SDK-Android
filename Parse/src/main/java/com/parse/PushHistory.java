@@ -20,7 +20,7 @@ import java.util.PriorityQueue;
  * received messages, as well as keep track of a last received timestamp that is included in PPNS
  * handshakes.
  */
-/** package */ class PushHistory {
+class PushHistory {
   private static final String TAG = "com.parse.PushHistory";
   
   private static class Entry implements Comparable<Entry> {

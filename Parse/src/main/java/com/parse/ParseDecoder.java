@@ -26,7 +26,7 @@ import org.json.JSONObject;
  *
  * @see com.parse.ParseEncoder
  */
-/** package */ class ParseDecoder {
+class ParseDecoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.

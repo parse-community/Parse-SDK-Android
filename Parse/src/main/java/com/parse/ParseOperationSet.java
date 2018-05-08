@@ -22,7 +22,7 @@ import java.util.UUID;
  * For example, all of the data for a single call to save() will be packaged here. It is assumed
  * that the ParseObject that owns the operations handles thread-safety.
  */
-/** package */ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
+class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
   private static final long serialVersionUID = 1L;
 
   private static final String REST_KEY_IS_SAVE_EVENTUALLY = "__isSaveEventually";

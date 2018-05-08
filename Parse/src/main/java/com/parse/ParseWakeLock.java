@@ -15,7 +15,7 @@ import android.os.PowerManager;
  * Utility class that wraps a PowerManager.WakeLock and logs an error if the app doesn't have 
  * permissions to acquire wake locks.
  */
-/** package */ class ParseWakeLock {
+class ParseWakeLock {
   private static final String TAG = "com.parse.ParseWakeLock";
   
   private static volatile boolean hasWakeLockPermission = true;

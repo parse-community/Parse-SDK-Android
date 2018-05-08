@@ -19,7 +19,7 @@ import java.util.Map;
 
 import bolts.Task;
 
-/** package */ class ParseRESTUserCommand extends ParseRESTCommand {
+class ParseRESTUserCommand extends ParseRESTCommand {
 
   private static final String HEADER_REVOCABLE_SESSION = "X-Parse-Revocable-Session";
   private static final String HEADER_TRUE = "1";

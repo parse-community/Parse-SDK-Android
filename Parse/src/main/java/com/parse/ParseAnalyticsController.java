@@ -14,7 +14,7 @@ import java.util.Map;
 
 import bolts.Task;
 
-/** package */ class ParseAnalyticsController {
+class ParseAnalyticsController {
 
   /* package for test */ ParseEventuallyQueue eventuallyQueue;
 

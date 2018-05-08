@@ -17,7 +17,7 @@ import com.parse.http.ParseHttpRequest;
 
 import java.io.File;
 
-/** package */ class ParseRESTFileCommand extends ParseRESTCommand {
+class ParseRESTFileCommand extends ParseRESTCommand {
 
   public static class Builder extends Init<Builder> {
 

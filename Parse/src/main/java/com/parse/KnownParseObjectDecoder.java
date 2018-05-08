@@ -14,7 +14,7 @@ import java.util.Map;
  * A subclass of <code>ParseDecoder</code> which can keep <code>ParseObject</code> that
  * has been fetched instead of creating a new instance.
  */
-/** package */ class KnownParseObjectDecoder extends ParseDecoder {
+class KnownParseObjectDecoder extends ParseDecoder {
   private Map<String, ParseObject> fetchedObjects;
 
   public KnownParseObjectDecoder(Map<String, ParseObject> fetchedObjects) {

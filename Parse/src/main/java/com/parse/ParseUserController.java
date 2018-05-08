@@ -12,7 +12,7 @@ import java.util.Map;
 
 import bolts.Task;
 
-/** package */ interface ParseUserController {
+interface ParseUserController {
 
   Task<ParseUser.State> signUpAsync(
       ParseObject.State state,

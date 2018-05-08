@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/** package */ class ParseCountingFileHttpBody extends ParseFileHttpBody {
+class ParseCountingFileHttpBody extends ParseFileHttpBody {
 
   private static final int DEFAULT_CHUNK_SIZE = 4096;
   private static final int EOF = -1;

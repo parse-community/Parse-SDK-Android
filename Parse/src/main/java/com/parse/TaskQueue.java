@@ -18,7 +18,7 @@ import bolts.Task;
 /**
  * A helper class for enqueueing tasks
  */
-/** package */ class TaskQueue {
+class TaskQueue {
   /**
    * We only need to keep the tail of the queue. Cancelled tasks will just complete
    * normally/immediately when their turn arrives.

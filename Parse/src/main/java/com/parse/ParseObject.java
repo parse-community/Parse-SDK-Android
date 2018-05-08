@@ -91,7 +91,7 @@ public class ParseObject implements Parcelable {
     return ParseCorePlugins.getInstance().getSubclassingController();
   }
 
-  /** package */ static class State {
+  static class State {
 
     public static Init<?> newBuilder(String className) {
       if ("_User".equals(className)) {
@@ -108,7 +108,7 @@ public class ParseObject implements Parcelable {
       return new State(source, className, decoder);
     }
 
-    /** package */ static abstract class Init<T extends Init> {
+    static abstract class Init<T extends Init> {
 
       private final String className;
       private String objectId;

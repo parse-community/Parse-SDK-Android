@@ -37,7 +37,7 @@ import bolts.TaskCompletionSource;
  * class, because multiple instances would be running separate threads trying to read and execute
  * the same commands.
  */
-/** package */ class ParseCommandCache extends ParseEventuallyQueue {
+class ParseCommandCache extends ParseEventuallyQueue {
   private static final String TAG = "com.parse.ParseCommandCache";
 
   private static int filenameCounter = 0; // Appended to temp file names so we know their creation

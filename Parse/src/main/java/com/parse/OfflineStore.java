@@ -33,7 +33,7 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-/** package */ class OfflineStore {
+class OfflineStore {
 
   /**
    * SQLite has a max of 999 SQL variables in a single statement.

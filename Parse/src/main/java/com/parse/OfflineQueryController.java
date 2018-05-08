@@ -13,7 +13,7 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class OfflineQueryController extends AbstractQueryController {
+class OfflineQueryController extends AbstractQueryController {
 
   private final OfflineStore offlineStore;
   private final ParseQueryController networkController;

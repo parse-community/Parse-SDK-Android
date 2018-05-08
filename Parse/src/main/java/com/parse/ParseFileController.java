@@ -21,7 +21,7 @@ import bolts.Continuation;
 import bolts.Task;
 
 // TODO(grantland): Create ParseFileController interface
-/** package */ class ParseFileController {
+class ParseFileController {
 
   private final Object lock = new Object();
   private final ParseHttpClient restClient;

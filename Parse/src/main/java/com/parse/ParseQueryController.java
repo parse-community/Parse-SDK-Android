@@ -15,7 +15,7 @@ import bolts.Task;
 /**
  * A {@code ParseQueryController} defines how a {@link ParseQuery} is executed.
  */
-/** package */ interface ParseQueryController {
+interface ParseQueryController {
 
   /**
    * Executor for {@code find} queries.

@@ -19,7 +19,7 @@ import org.json.JSONObject;
  * Manages a set of local ids and possible mappings to global Parse objectIds. This class is
  * thread-safe.
  */
-/** package */ class LocalIdManager {
+class LocalIdManager {
 
   /**
    * Internal class representing all the information we know about a local id.

@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class CacheQueryController extends AbstractQueryController {
+class CacheQueryController extends AbstractQueryController {
 
   private final NetworkQueryController networkController;
 

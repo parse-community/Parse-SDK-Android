@@ -16,7 +16,7 @@ import org.json.JSONObject;
 /**
  * An operation that increases a numeric field's value by a given amount.
  */
-/** package */ class ParseIncrementOperation implements ParseFieldOperation {
+class ParseIncrementOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "Increment";
 
   private final Number amount;

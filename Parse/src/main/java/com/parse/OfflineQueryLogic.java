@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class OfflineQueryLogic {
+class OfflineQueryLogic {
   /**
    * A query is converted into a complex hierarchy of ConstraintMatchers that evaluate whether a
    * ParseObject matches each part of the query. This is done because some parts of the query (such

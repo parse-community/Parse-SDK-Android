@@ -31,7 +31,7 @@ import java.util.List;
  * @author Louis Wasserman
  * @since 2.0
  */
-/** package */ class Lists {
+class Lists {
 
   /**
    * Returns consecutive sublists of a list, each of the same size (the final list may be smaller).

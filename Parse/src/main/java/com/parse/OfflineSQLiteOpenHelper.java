@@ -19,7 +19,7 @@ import android.database.sqlite.SQLiteDatabase;
  * transactions yet, but when we do, they will be part of this class. For convenience, this class
  * also wraps database methods with methods that run them on a background thread and return a task.
  */
-/** package */ class OfflineSQLiteOpenHelper extends ParseSQLiteOpenHelper {
+class OfflineSQLiteOpenHelper extends ParseSQLiteOpenHelper {
 
   /**
    * The table that stores all ParseObjects.

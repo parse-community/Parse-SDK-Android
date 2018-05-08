@@ -11,7 +11,7 @@ package com.parse;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class CachedCurrentInstallationController
+class CachedCurrentInstallationController
     implements ParseCurrentInstallationController {
 
   /* package */ static final String TAG = "com.parse.CachedCurrentInstallationController";

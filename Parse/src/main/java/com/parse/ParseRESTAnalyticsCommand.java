@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import java.util.Date;
 import java.util.Map;
 
-/** package */ class ParseRESTAnalyticsCommand extends ParseRESTCommand {
+class ParseRESTAnalyticsCommand extends ParseRESTCommand {
 
   /**
    * The set of predefined events

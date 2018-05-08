@@ -26,7 +26,7 @@ import java.io.OutputStream;
 /**
  * General IO stream manipulation utilities.
  */
-/** package */ class ParseIOUtils {
+class ParseIOUtils {
 
   private static final int EOF = -1;
 

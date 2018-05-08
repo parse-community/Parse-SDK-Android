@@ -22,7 +22,7 @@ import bolts.Task;
  * Request returns a byte array of the response and provides a callback the progress of the data
  * read from the network.
  */
-/** package */ class ParseFileRequest extends ParseRequest<Void> {
+class ParseFileRequest extends ParseRequest<Void> {
 
   // The temp file is used to save the ParseFile content when we fetch it from server
   private final File tempFile;

@@ -14,7 +14,7 @@ import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONObject;
 
-/** package */ class ParseRESTObjectCommand extends ParseRESTCommand {
+class ParseRESTObjectCommand extends ParseRESTCommand {
 
   public ParseRESTObjectCommand(
       String httpPath,

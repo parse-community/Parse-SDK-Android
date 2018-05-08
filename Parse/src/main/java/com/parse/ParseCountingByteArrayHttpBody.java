@@ -16,7 +16,7 @@ import bolts.Task;
 
 import static java.lang.Math.min;
 
-/** package */ class ParseCountingByteArrayHttpBody extends ParseByteArrayHttpBody {
+class ParseCountingByteArrayHttpBody extends ParseByteArrayHttpBody {
   private static final int DEFAULT_CHUNK_SIZE = 4096;
   private final ProgressCallback progressCallback;
 

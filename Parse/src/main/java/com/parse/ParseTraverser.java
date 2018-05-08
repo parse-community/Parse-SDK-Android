@@ -21,7 +21,7 @@ import java.util.Map;
  * Subclass ParseTraverser to make an function to be run recursively on every object pointed to on
  * the given object.
  */
-/** package */ abstract class ParseTraverser {
+abstract class ParseTraverser {
   // Whether to recurse into ParseObjects that are seen.
   private boolean traverseParseObjects;
 

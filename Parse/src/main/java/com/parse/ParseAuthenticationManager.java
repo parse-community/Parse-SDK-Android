@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class ParseAuthenticationManager {
+class ParseAuthenticationManager {
 
   private final Object lock = new Object();
   private final Map<String, AuthenticationCallback> callbacks = new HashMap<>();

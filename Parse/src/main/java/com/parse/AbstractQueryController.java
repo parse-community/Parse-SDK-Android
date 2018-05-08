@@ -17,7 +17,7 @@ import bolts.Task;
  * {@code AbstractParseQueryController} is an abstract implementation of
  * {@link ParseQueryController}, which implements {@link ParseQueryController#getFirstAsync}.
  */
-/** package */ abstract class AbstractQueryController implements ParseQueryController {
+abstract class AbstractQueryController implements ParseQueryController {
 
   @Override
   public <T extends ParseObject> Task<T> getFirstAsync(ParseQuery.State<T> state, ParseUser user,

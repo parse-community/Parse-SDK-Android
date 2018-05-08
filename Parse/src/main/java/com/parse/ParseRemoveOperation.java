@@ -23,7 +23,7 @@ import org.json.JSONObject;
 /**
  * An operation that removes every instance of an element from an array field.
  */
-/** package */ class ParseRemoveOperation implements ParseFieldOperation {
+class ParseRemoveOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "Remove";
 
   protected final HashSet<Object> objects = new HashSet<>();

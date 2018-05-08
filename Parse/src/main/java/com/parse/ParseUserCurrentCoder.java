@@ -20,7 +20,7 @@ import static com.parse.ParseUser.State;
  * Handles encoding/decoding ParseUser to/from /2 format JSON. /2 format json is only used for
  * persisting current ParseUser and ParseInstallation to disk when LDS is not enabled.
  */
-/** package */ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
+class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
 
   private static final String KEY_AUTH_DATA = "auth_data";
   private static final String KEY_SESSION_TOKEN = "session_token";

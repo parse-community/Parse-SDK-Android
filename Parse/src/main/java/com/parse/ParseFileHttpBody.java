@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/** package */ class ParseFileHttpBody extends ParseHttpBody {
+class ParseFileHttpBody extends ParseHttpBody {
 
   /* package */ final File file;
 
