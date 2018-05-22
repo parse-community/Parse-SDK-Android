@@ -17,7 +17,7 @@ import java.util.SimpleTimeZone;
 /**
  * Used to parse legacy created_at and updated_at from disk. It is only precise to the second.
  */
-/** package */ class ParseImpreciseDateFormat {
+class ParseImpreciseDateFormat {
   private static final String TAG = "ParseDateFormat";
 
   private static final ParseImpreciseDateFormat INSTANCE = new ParseImpreciseDateFormat();

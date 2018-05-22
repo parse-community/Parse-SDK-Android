@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/** package */ class ParseMulticastDelegate<T> {
+class ParseMulticastDelegate<T> {
   private final List<ParseCallback2<T, ParseException>> callbacks;
 
   public ParseMulticastDelegate() {

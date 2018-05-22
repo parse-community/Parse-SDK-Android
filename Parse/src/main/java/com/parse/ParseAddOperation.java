@@ -21,7 +21,7 @@ import org.json.JSONObject;
 /**
  * An operation that adds a new element to an array field.
  */
-/** package */ class ParseAddOperation implements ParseFieldOperation {
+class ParseAddOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "Add";
 
   protected final ArrayList<Object> objects = new ArrayList<>();

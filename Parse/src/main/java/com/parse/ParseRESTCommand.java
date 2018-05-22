@@ -31,7 +31,7 @@ import bolts.Task;
 /**
  * A helper object to send requests to the server.
  */
-/** package */ class ParseRESTCommand extends ParseRequest<JSONObject> {
+class ParseRESTCommand extends ParseRequest<JSONObject> {
 
   /* package */ static final String HEADER_APPLICATION_ID = "X-Parse-Application-Id";
   /* package */ static final String HEADER_CLIENT_KEY = "X-Parse-Client-Key";
@@ -186,11 +186,6 @@ import bolts.Task;
     return new ParseRESTCommand(httpPath, httpMethod, jsonParameters, localId, sessionToken);
   }
 
-  // TODO(grantland): But we don't disable retries by default...
-  /* package */ void enableRetrying() {
-    setMaxRetries(DEFAULT_MAX_RETRIES);
-  }
-
   private static String createUrl(String httpPath) {
     // We send all parameters for GET/HEAD/DELETE requests in a post body,
     // so no need to worry about query parameters here.
@@ -340,7 +335,7 @@ import bolts.Task;
 
   // Encodes the object to JSON, but ensures that JSONObjects
   // and nested JSONObjects are encoded with keys in alphabetical order.
-  /** package */ static String toDeterministicString(Object o) throws JSONException {
+  static String toDeterministicString(Object o) throws JSONException {
     JSONStringer stringer = new JSONStringer();
     addToStringer(stringer, o);
     return stringer.toString();

@@ -36,7 +36,7 @@ import bolts.Task;
  *    The user that instantiated the operation
  */
 @ParseClassName("_EventuallyPin")
-/** package */ class EventuallyPin extends ParseObject {
+class EventuallyPin extends ParseObject {
 
   public static final String PIN_NAME = "_eventuallyPin";
 

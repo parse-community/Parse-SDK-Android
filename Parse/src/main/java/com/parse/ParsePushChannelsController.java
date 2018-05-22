@@ -14,15 +14,13 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class ParsePushChannelsController {
-  private static final String TAG = "com.parse.ParsePushChannelsController";
+class ParsePushChannelsController {
 
   private static ParseCurrentInstallationController getCurrentInstallationController() {
     return ParseCorePlugins.getInstance().getCurrentInstallationController();
   }
 
   public Task<Void> subscribeInBackground(final String channel) {
-    checkManifestAndLogErrorIfNecessary();
     if (channel == null) {
       throw new IllegalArgumentException("Can't subscribe to null channel.");
     }
@@ -44,7 +42,6 @@ import bolts.Task;
   }
 
   public Task<Void> unsubscribeInBackground(final String channel) {
-    checkManifestAndLogErrorIfNecessary();
     if (channel == null) {
       throw new IllegalArgumentException("Can't unsubscribe from null channel.");
     }
@@ -62,14 +59,5 @@ import bolts.Task;
         }
       }
     });
-  }
-
-  private static boolean loggedManifestError = false;
-  private static void checkManifestAndLogErrorIfNecessary() {
-    if (!loggedManifestError && ManifestInfo.getPushType() == PushType.NONE) {
-      loggedManifestError = true;
-      PLog.e(TAG, "Tried to subscribe or unsubscribe from a channel, but push is not enabled " +
-          "correctly. " + ManifestInfo.getPushDisabledMessage());
-    }
   }
 }

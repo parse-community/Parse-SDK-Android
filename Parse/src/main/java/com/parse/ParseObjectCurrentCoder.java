@@ -19,7 +19,7 @@ import java.util.Iterator;
  * Handles encoding/decoding ParseObjects to/from /2 format JSON. /2 format json is only used for
  * persisting current ParseObject(currentInstallation, currentUser) to disk when LDS is not enabled.
  */
-/** package */ class ParseObjectCurrentCoder extends ParseObjectCoder {
+class ParseObjectCurrentCoder extends ParseObjectCoder {
 
   /*
   /2 format JSON Keys

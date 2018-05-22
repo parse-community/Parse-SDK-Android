@@ -11,7 +11,7 @@ package com.parse;
 import java.util.List;
 
 @ParseClassName("_Pin")
-/** package */ class ParsePin extends ParseObject {
+class ParsePin extends ParseObject {
 
   /* package */ static final String KEY_NAME = "_name";
   private static final String KEY_OBJECTS = "_objects";

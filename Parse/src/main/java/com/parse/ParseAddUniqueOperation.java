@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * An operation that adds a new element to an array field, only if it wasn't already present.
  */
-/** package */ class ParseAddUniqueOperation implements ParseFieldOperation {
+class ParseAddUniqueOperation implements ParseFieldOperation {
   /* package */ final static String OP_NAME = "AddUnique";
 
   protected final LinkedHashSet<Object> objects = new LinkedHashSet<>();

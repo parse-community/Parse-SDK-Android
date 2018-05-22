@@ -10,7 +10,7 @@ package com.parse;
 
 import bolts.Task;
 
-/** package */ interface ParseCurrentUserController
+interface ParseCurrentUserController
     extends ParseObjectCurrentController<ParseUser> {
 
   /**

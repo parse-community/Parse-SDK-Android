@@ -4,40 +4,40 @@ branches:
     - /^\d+\.\d+\.\d+$/ # regex
 
 language: android
-sudo: false
 
 jdk:
   - oraclejdk8
 
-android:
-  components:
-    - tools
-    - platform-tools
-    - build-tools-27.0.0
-    - android-27
-    - doc-27
-
 before_install:
     - pip install --user codecov
-    - yes | sdkmanager "platforms;android-27"
-
-script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport
+    - mkdir "$ANDROID_HOME/licenses" || true
+    - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
 
 after_success:
   - ./gradlew coveralls
   - codecov
-  - ./scripts/publish_snapshot.sh
 
 cache:
   directories:
     - $HOME/.gradle
     - $HOME/.m2/repository
 
-deploy:
-  provider: script
-  script: ./gradlew bintrayUpload
-  skip_cleanup: true
-  on:
-    branch: master
-    tags: true
+jobs:
+  include:
+    - stage: test
+      script: ./gradlew clean testDebugUnitTest jacocoTestReport
+    - stage: release
+      script: ./gradlew javadocRelease
+      deploy:
+        - provider: pages
+          skip_cleanup: true
+          github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+          local_dir: docs/
+          on:
+            all_branches: true
+        - provider: script
+          script: ./gradlew bintrayUpload
+          skip_cleanup: true
+          on:
+            branch: master
+            tags: true

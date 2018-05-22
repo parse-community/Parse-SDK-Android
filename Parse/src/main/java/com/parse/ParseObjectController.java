@@ -14,7 +14,7 @@ import java.util.List;
 
 import bolts.Task;
 
-/** package */ interface ParseObjectController {
+interface ParseObjectController {
 
   Task<ParseObject.State> fetchAsync(
       ParseObject.State state, String sessionToken, ParseDecoder decoder);

@@ -11,7 +11,7 @@ package com.parse;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -36,6 +36,8 @@ import okhttp3.OkHttpClient;
 public class Parse {
   private static final String TAG = "com.parse.Parse";
 
+  private static final int DEFAULT_MAX_RETRIES = ParseRequest.DEFAULT_MAX_RETRIES;
+
   /**
    * Represents an opaque configuration for the {@code Parse} SDK configuration.
    */
@@ -50,65 +52,22 @@ public class Parse {
       private String server;
       private boolean localDataStoreEnabled;
       private OkHttpClient.Builder clientBuilder;
+      private int maxRetries = DEFAULT_MAX_RETRIES;
 
       /**
        * Initialize a bulider with a given context.
        * <p>
        * This context will then be passed through to the rest of the Parse SDK for use during
        * initialization.
-       * <p>
-       * <p/>
-       * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
-       * {@code meta-data} in your {@code AndroidManifest.xml}:
-       * <pre>
-       * &lt;manifest ...&gt;
-       *
-       * ...
-       *
-       *   &lt;application ...&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.SERVER_URL"
-       *       android:value="@string/parse_server_url" /&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.APPLICATION_ID"
-       *       android:value="@string/parse_app_id" /&gt;
-       *     &lt;meta-data
-       *       android:name="com.parse.CLIENT_KEY"
-       *       android:value="@string/parse_client_key" /&gt;
-       *
-       *       ...
-       *
-       *   &lt;/application&gt;
-       * &lt;/manifest&gt;
-       * </pre>
-       * <p/>
-       * <p>
-       * This will cause the values for {@code server}, {@code applicationId} and {@code clientKey} to be set to
-       * those defined in your manifest.
        *
        * @param context The active {@link Context} for your application. Cannot be null.
        */
-      public Builder(Context context) {
+      public Builder(@NonNull Context context) {
         this.context = context;
-
-        // Yes, our public API states we cannot be null. But for unit tests, it's easier just to
-        // support null here.
-        if (context != null) {
-          Context applicationContext = context.getApplicationContext();
-          Bundle metaData = ManifestInfo.getApplicationMetadata(applicationContext);
-          if (metaData != null) {
-            server(metaData.getString(PARSE_SERVER_URL));
-            applicationId = metaData.getString(PARSE_APPLICATION_ID);
-            clientKey = metaData.getString(PARSE_CLIENT_KEY);
-          }
-        }
       }
 
       /**
        * Set the application id to be used by Parse.
-       * <p>
-       * This method is only required if you intend to use a different {@code applicationId} than
-       * is defined by {@code com.parse.APPLICATION_ID} in your {@code AndroidManifest.xml}.
        *
        * @param applicationId The application id to set.
        * @return The same builder, for easy chaining.
@@ -120,9 +79,6 @@ public class Parse {
 
       /**
        * Set the client key to be used by Parse.
-       * <p>
-       * This method is only required if you intend to use a different {@code clientKey} than
-       * is defined by {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
        *
        * @param clientKey The client key to set.
        * @return The same builder, for easy chaining.
@@ -180,6 +136,18 @@ public class Parse {
       }
 
       /**
+       * Set the max number of times to retry Parse operations before deeming them a failure
+       * <p>
+       *
+       * @param maxRetries The maximum number of times to retry. <=0 to never retry commands
+       * @return The same builder, for easy chaining.
+       */
+      public Builder maxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+        return this;
+      }
+
+      /**
        * Construct this builder into a concrete {@code Configuration} instance.
        *
        * @return A constructed {@code Configuration} object.
@@ -195,6 +163,7 @@ public class Parse {
     final String server;
     final boolean localDataStoreEnabled;
     final OkHttpClient.Builder clientBuilder;
+    final int maxRetries;
 
 
     private Configuration(Builder builder) {
@@ -204,12 +173,9 @@ public class Parse {
       this.server = builder.server;
       this.localDataStoreEnabled = builder.localDataStoreEnabled;
       this.clientBuilder = builder.clientBuilder;
+      this.maxRetries = builder.maxRetries;
     }
   }
-
-  private static final String PARSE_SERVER_URL = "com.parse.SERVER_URL";
-  private static final String PARSE_APPLICATION_ID = "com.parse.APPLICATION_ID";
-  private static final String PARSE_CLIENT_KEY = "com.parse.CLIENT_KEY";
 
   private static final Object MUTEX = new Object();
   static ParseEventuallyQueue eventuallyQueue = null;
@@ -222,7 +188,7 @@ public class Parse {
   /**
    * Enable pinning in your application. This must be called before your application can use
    * pinning. You must invoke {@code enableLocalDatastore(Context)} before
-   * {@link #initialize(Context)} :
+   * {@link #initialize(Configuration)}:
    * <p/>
    * <pre>
    * public class MyApplication extends Application {
@@ -267,74 +233,6 @@ public class Parse {
 
   /**
    * Authenticates this client as belonging to your application.
-   * <p/>
-   * You may define {@code com.parse.SERVER_URL}, {@code com.parse.APPLICATION_ID} and (optional) {@code com.parse.CLIENT_KEY}
-   * {@code meta-data} in your {@code AndroidManifest.xml}:
-   * <pre>
-   * &lt;manifest ...&gt;
-   *
-   * ...
-   *
-   *   &lt;application ...&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.SERVER_URL"
-   *       android:value="@string/parse_server_url" /&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.APPLICATION_ID"
-   *       android:value="@string/parse_app_id" /&gt;
-   *     &lt;meta-data
-   *       android:name="com.parse.CLIENT_KEY"
-   *       android:value="@string/parse_client_key" /&gt;
-   *
-   *       ...
-   *
-   *   &lt;/application&gt;
-   * &lt;/manifest&gt;
-   * </pre>
-   * <p/>
-   * This must be called before your application can use the Parse library.
-   * The recommended way is to put a call to {@code Parse.initialize}
-   * in your {@code Application}'s {@code onCreate} method:
-   * <p/>
-   * <pre>
-   * public class MyApplication extends Application {
-   *   public void onCreate() {
-   *     Parse.initialize(this);
-   *   }
-   * }
-   * </pre>
-   *
-   * @param context The active {@link Context} for your application.
-   */
-  public static void initialize(Context context) {
-    Configuration.Builder builder = new Configuration.Builder(context);
-    if (builder.server == null) {
-      throw new RuntimeException("ServerUrl not defined. " +
-              "You must provide ServerUrl in AndroidManifest.xml.\n" +
-              "<meta-data\n" +
-              "    android:name=\"com.parse.SERVER_URL\"\n" +
-              "    android:value=\"<Your Server Url>\" />");
-    }
-    if (builder.applicationId == null) {
-      throw new RuntimeException("ApplicationId not defined. " +
-              "You must provide ApplicationId in AndroidManifest.xml.\n" +
-              "<meta-data\n" +
-              "    android:name=\"com.parse.APPLICATION_ID\"\n" +
-              "    android:value=\"<Your Application Id>\" />");
-    }
-    initialize(builder
-            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-            .build()
-    );
-  }
-
-  /**
-   * Authenticates this client as belonging to your application.
-   * <p/>
-   * This method is only required if you intend to use a different {@code applicationId} or
-   * {@code clientKey} than is defined by {@code com.parse.APPLICATION_ID} or
-   * {@code com.parse.CLIENT_KEY} in your {@code AndroidManifest.xml}.
-   * <p/>
    * This must be called before your
    * application can use the Parse library. The recommended way is to put a call to
    * {@code Parse.initialize} in your {@code Application}'s {@code onCreate} method:
@@ -342,24 +240,13 @@ public class Parse {
    * <pre>
    * public class MyApplication extends Application {
    *   public void onCreate() {
-   *     Parse.initialize(this, &quot;your application id&quot;, &quot;your client key&quot;);
+   *     Parse.initialize(configuration);
    *   }
    * }
    * </pre>
    *
-   * @param context       The active {@link Context} for your application.
-   * @param applicationId The application id provided in the Parse dashboard.
-   * @param clientKey     The client key provided in the Parse dashboard.
+   * @param configuration The configuration for your application.
    */
-  public static void initialize(Context context, String applicationId, String clientKey) {
-    initialize(new Configuration.Builder(context)
-            .applicationId(applicationId)
-            .clientKey(clientKey)
-            .setLocalDatastoreEnabled(isLocalDatastoreEnabled)
-            .build()
-    );
-  }
-
   public static void initialize(Configuration configuration) {
     if (isInitialized()) {
       PLog.w(TAG, "Parse is already initialized");
@@ -369,18 +256,13 @@ public class Parse {
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
-    ParsePlugins.Android.initialize(configuration.context, configuration);
+    ParsePlugins.initialize(configuration.context, configuration);
 
     try {
       ParseRESTCommand.server = new URL(configuration.server);
     } catch (MalformedURLException ex) {
       throw new RuntimeException(ex);
     }
-
-    Context applicationContext = configuration.context.getApplicationContext();
-
-    ParseHttpClient.setKeepAlive(true);
-    ParseHttpClient.setMaxConnections(20);
 
     ParseObject.registerParseSubclasses();
 
@@ -411,15 +293,7 @@ public class Parse {
               "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
     }
 
-    // May need to update GCM registration ID if app version has changed.
-    // This also primes current installation.
-    PushServiceUtils.initialize().continueWithTask(new Continuation<Void, Task<Void>>() {
-      @Override
-      public Task<Void> then(Task<Void> task) throws Exception {
-        // Prime current user in the background
-        return ParseUser.getCurrentUserAsync().makeVoid();
-      }
-    }).continueWith(new Continuation<Void, Void>() {
+    ParseUser.getCurrentUserAsync().makeVoid().continueWith(new Continuation<Void, Void>() {
       @Override
       public Void then(Task<Void> task) throws Exception {
         // Prime config in the background
@@ -457,9 +331,9 @@ public class Parse {
     return ParsePlugins.get() != null;
   }
 
-  static Context getApplicationContext() {
+  public static Context getApplicationContext() {
     checkContext();
-    return ParsePlugins.Android.get().applicationContext();
+    return ParsePlugins.get().applicationContext();
   }
 
   /**
@@ -499,7 +373,7 @@ public class Parse {
     return ParsePlugins.get().getCacheDir();
   }
 
-  static File getParseCacheDir(String subDir) {
+  public static File getParseCacheDir(String subDir) {
     synchronized (MUTEX) {
       File dir = new File(getParseCacheDir(), subDir);
       if (!dir.exists()) {
@@ -580,7 +454,7 @@ public class Parse {
    * processing any commands already stored in the on-disk queue.
    */
   static ParseEventuallyQueue getEventuallyQueue() {
-    Context context = ParsePlugins.Android.get().applicationContext();
+    Context context = ParsePlugins.get().applicationContext();
     return getEventuallyQueue(context);
   }
 
@@ -621,7 +495,7 @@ public class Parse {
   }
 
   static void checkContext() {
-    if (ParsePlugins.Android.get().applicationContext() == null) {
+    if (ParsePlugins.get().applicationContext() == null) {
       throw new RuntimeException("applicationContext is null. "
               + "You must call Parse.initialize(Context)"
               + " before using the Parse library.");

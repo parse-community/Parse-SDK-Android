@@ -31,31 +31,14 @@ import java.util.List;
  * A utility class for retrieving app metadata such as the app name, default icon, whether or not
  * the app declares the correct permissions for push, etc.
  */
-/** package */ class ManifestInfo {
+public class ManifestInfo {
   private static final String TAG = "com.parse.ManifestInfo";
 
   private static final Object lock = new Object();
-  private static long lastModified = -1;
   /* package */ static int versionCode = -1;
   /* package */ static String versionName = null;
   private static int iconId = 0;
   private static String displayName = null;
-  private static PushType pushType;
-
-  /**
-   * Returns the last time this application's APK was modified on disk. This is a proxy for both
-   * version changes and if the APK has been restored from backup onto a different device.
-   */
-  public static long getLastModified() {
-    synchronized (lock) {
-      if (lastModified == -1) {
-        File apkPath = new File(getContext().getApplicationInfo().sourceDir);
-        lastModified = apkPath.lastModified();
-      }
-    }
-    
-    return lastModified;
-  }
   
   /**
    * Returns the version code for this app, as specified by the android:versionCode attribute in the
@@ -152,68 +135,6 @@ import java.util.List;
     }
     return list;
   }
-
-  // Should only be used for tests.
-  static void setPushType(PushType newPushType) {
-    synchronized (lock) {
-      pushType = newPushType;
-    }
-  }
-  
-  /**
-   * Inspects the app's manifest and returns whether the manifest contains required declarations to
-   * be able to use GCM for push.
-   */
-  public static PushType getPushType() {
-    synchronized (lock) {
-      if (pushType == null) {
-        pushType = findPushType();
-        PLog.v(TAG, "Using " + pushType + " for push.");
-      }
-    }
-    return pushType;
-  }
-
-
-  private static PushType findPushType() {
-    if (!ParsePushBroadcastReceiver.isSupported()) {
-      return PushType.NONE;
-    }
-
-    if (!PushServiceUtils.isSupported()) {
-      return PushType.NONE;
-    }
-
-    // Ordered by preference.
-    PushType[] types = PushType.types();
-    for (PushType type : types) {
-      PushHandler handler = PushHandler.Factory.create(type);
-      PushHandler.SupportLevel level = handler.isSupported();
-      String message = handler.getWarningMessage(level);
-      switch (level) {
-        case MISSING_REQUIRED_DECLARATIONS: // Can't use. notify.
-          if (message != null) PLog.e(TAG, message);
-          break;
-        case MISSING_OPTIONAL_DECLARATIONS: // Using anyway.
-          if (message != null) PLog.w(TAG, message);
-          return type;
-        case SUPPORTED:
-          return type;
-      }
-    }
-    return PushType.NONE;
-  }
-
-  /*
-   * Returns a message that can be written to the system log if an app expects push to be enabled,
-   * but push isn't actually enabled because the manifest is misconfigured.
-   */
-  static String getPushDisabledMessage() {
-    return "Push is not configured for this app because the app manifest is missing required " +
-        "declarations. To configure GCM, please add the following declarations to your app manifest: " +
-        GcmPushHandler.getWarningMessage();
-  }
-
   
   private static Context getContext() {
     return Parse.getApplicationContext();
@@ -240,115 +161,5 @@ import java.util.List;
       return info.metaData;
     }
     return null;
-  }
-
-  private static PackageInfo getPackageInfo(String name) {
-    PackageInfo info = null;
-
-    try {
-      info = getPackageManager().getPackageInfo(name, 0);
-    } catch (NameNotFoundException e) {
-      // do nothing
-    }
-
-    return info;
-  }
-
-  static ServiceInfo getServiceInfo(Class<? extends Service> clazz) {
-    ServiceInfo info = null;
-    try {
-      info = getPackageManager().getServiceInfo(new ComponentName(getContext(), clazz), 0);
-    } catch (NameNotFoundException e) {
-      // do nothing
-    }
-
-    return info;
-  }
-
-  private static ActivityInfo getReceiverInfo(Class<? extends BroadcastReceiver> clazz) {
-    ActivityInfo info = null;
-    try {
-      info = getPackageManager().getReceiverInfo(new ComponentName(getContext(), clazz), 0);
-    } catch (NameNotFoundException e) {
-      // do nothing
-    }
-    
-    return info;
-  }
-
-  /**
-   * Returns {@code true} if this package has requested all of the listed permissions.
-   * <p />
-   * <strong>Note:</strong> This package might have requested all the permissions, but may not
-   * be granted all of them.
-   */
-  static boolean hasRequestedPermissions(Context context, String... permissions) {
-    String packageName = context.getPackageName();
-    try {
-      PackageInfo pi = context.getPackageManager().getPackageInfo(
-          packageName, PackageManager.GET_PERMISSIONS);
-      if (pi.requestedPermissions == null) {
-        return false;
-      }
-      return Arrays.asList(pi.requestedPermissions).containsAll(Arrays.asList(permissions));
-    } catch (NameNotFoundException e) {
-      PLog.e(TAG, "Couldn't find info about own package", e);
-      return false;
-    }
-  }
-
-  /**
-   * Returns {@code true} if this package has been granted all of the listed permissions.
-   * <p />
-   * <strong>Note:</strong> This package might have requested all the permissions, but may not
-   * be granted all of them.
-   */
-  static boolean hasGrantedPermissions(Context context, String... permissions) {
-    String packageName = context.getPackageName();
-    PackageManager packageManager = context.getPackageManager();
-    for (String permission : permissions) {
-      if (packageManager.checkPermission(permission, packageName) != PackageManager.PERMISSION_GRANTED) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-
-  private static boolean checkResolveInfo(Class<? extends BroadcastReceiver> clazz, List<ResolveInfo> infoList, String permission) {
-    for (ResolveInfo info : infoList) {
-      if (info.activityInfo != null) {
-        final Class resolveInfoClass;
-        try {
-          resolveInfoClass = Class.forName(info.activityInfo.name);
-        } catch (ClassNotFoundException e) {
-          break;
-        }
-        if (clazz.isAssignableFrom(resolveInfoClass) && (permission == null || permission.equals(info.activityInfo.permission))) {
-            return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  static boolean checkReceiver(Class<? extends BroadcastReceiver> clazz, String permission, Intent[] intents) {
-    for (Intent intent : intents) {
-      List<ResolveInfo> receivers = getPackageManager().queryBroadcastReceivers(intent, 0);
-      if (receivers.isEmpty()) {
-        return false;
-      }
-
-      if (!checkResolveInfo(clazz, receivers, permission)) {
-        return false;
-      }
-    }
-    
-    return true;
-  }
-
-  static boolean isGooglePlayServicesAvailable() {
-    return getPackageInfo("com.google.android.gsf") != null;
   }
 }

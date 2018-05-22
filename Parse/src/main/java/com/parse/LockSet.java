@@ -15,7 +15,7 @@ import java.util.TreeSet;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 
-/** package */ class LockSet {
+class LockSet {
   private static final WeakHashMap<Lock, Long> stableIds = new WeakHashMap<>();
   private static long nextStableId = 0L;
 

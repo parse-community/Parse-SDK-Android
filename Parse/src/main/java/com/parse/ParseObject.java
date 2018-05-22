@@ -11,6 +11,8 @@ package com.parse;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -91,7 +93,7 @@ public class ParseObject implements Parcelable {
     return ParseCorePlugins.getInstance().getSubclassingController();
   }
 
-  /** package */ static class State {
+  static class State {
 
     public static Init<?> newBuilder(String className) {
       if ("_User".equals(className)) {
@@ -108,7 +110,7 @@ public class ParseObject implements Parcelable {
       return new State(source, className, decoder);
     }
 
-    /** package */ static abstract class Init<T extends Init> {
+    static abstract class Init<T extends Init> {
 
       private final String className;
       private String objectId;
@@ -127,7 +129,7 @@ public class ParseObject implements Parcelable {
         objectId = state.objectId();
         createdAt = state.createdAt();
         updatedAt = state.updatedAt();
-        availableKeys = state.availableKeys();
+        availableKeys = Collections.synchronizedSet(state.availableKeys());
         for (String key : state.keySet()) {
           serverData.put(key, state.get(key));
           availableKeys.add(key);
@@ -273,7 +275,7 @@ public class ParseObject implements Parcelable {
           : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
-      availableKeys = new HashSet<>(builder.availableKeys);
+      availableKeys = Collections.synchronizedSet(builder.availableKeys);
     }
 
     /* package */ State(Parcel parcel, String clazz, ParseParcelDecoder decoder) {
@@ -1344,7 +1346,6 @@ public class ParseObject implements Parcelable {
           state,
           objectJSON,
           sessionToken);
-    command.enableRetrying();
     return command;
   }
 
@@ -1880,7 +1881,6 @@ public class ParseObject implements Parcelable {
       // See [1]
       command = ParseRESTObjectCommand.deleteObjectCommand(
           getState(), sessionToken);
-      command.enableRetrying();
       command.setLocalId(localId);
 
       runEventuallyTask = Parse.getEventuallyQueue().enqueueEventuallyAsync(command, ParseObject.this);
@@ -3170,6 +3170,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link String}.
    */
+  @Nullable
   public String getString(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3188,6 +3189,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@code byte[]}.
    */
+  @Nullable
   public byte[] getBytes(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3207,6 +3209,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link Number}.
    */
+  @Nullable
   public Number getNumber(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3225,6 +3228,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONArray}.
    */
+  @Nullable
   public JSONArray getJSONArray(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3249,6 +3253,7 @@ public class ParseObject implements Parcelable {
    * @return {@code null} if there is no such key or if the value can't be converted to a
    *          {@link List}.
    */
+  @Nullable
   public <T> List<T> getList(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
@@ -3269,6 +3274,7 @@ public class ParseObject implements Parcelable {
    * @return {@code null} if there is no such key or if the value can't be converted to a
    *          {@link Map}.
    */
+  @Nullable
   public <V> Map<String, V> getMap(String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
@@ -3288,6 +3294,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONObject}.
    */
+  @Nullable
   public JSONObject getJSONObject(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3375,6 +3382,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link Date}.
    */
+  @Nullable
   public Date getDate(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3396,6 +3404,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@code ParseObject}.
    */
+  @Nullable
   public ParseObject getParseObject(String key) {
     Object value = get(key);
     if (!(value instanceof ParseObject)) {
@@ -3414,6 +3423,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if the value is not a {@link ParseUser}.
    */
+  @Nullable
   public ParseUser getParseUser(String key) {
     Object value = get(key);
     if (!(value instanceof ParseUser)) {
@@ -3431,6 +3441,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link ParseFile}.
    */
+  @Nullable
   public ParseFile getParseFile(String key) {
     Object value = get(key);
     if (!(value instanceof ParseFile)) {
@@ -3446,6 +3457,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for
    * @return {@code null} if there is no such key or if it is not a {@link ParseGeoPoint}.
    */
+  @Nullable
   public ParseGeoPoint getParseGeoPoint(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3464,6 +3476,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for
    * @return {@code null} if there is no such key or if it is not a {@link ParsePolygon}.
    */
+  @Nullable
   public ParsePolygon getParsePolygon(String key) {
     synchronized (mutex) {
       checkGetAccess(key);
@@ -3478,6 +3491,7 @@ public class ParseObject implements Parcelable {
   /**
    * Access the {@link ParseACL} governing this object.
    */
+  @Nullable
   public ParseACL getACL() {
     return getACL(true);
   }
@@ -3542,6 +3556,7 @@ public class ParseObject implements Parcelable {
    * @return the ParseRelation object if the relation already exists for the key or can be created
    *         for this key.
    */
+  @NonNull
   public <T extends ParseObject> ParseRelation<T> getRelation(String key) {
     synchronized (mutex) {
       // All the sanity checking is done when add or remove is called on the relation.
@@ -3575,6 +3590,7 @@ public class ParseObject implements Parcelable {
    *          The key to access the value for.
    * @return {@code null} if there is no such key.
    */
+  @Nullable
   public Object get(String key) {
     synchronized (mutex) {
       if (key.equals(KEY_ACL)) {

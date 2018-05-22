@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @see com.parse.ParseDecoder
  */
-/** package */ abstract class ParseEncoder {
+abstract class ParseEncoder {
 
   /* package */ static boolean isValidType(Object value) {
     return value instanceof String

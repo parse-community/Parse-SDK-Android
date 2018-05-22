@@ -21,7 +21,7 @@ import bolts.Continuation;
 import bolts.Task;
 
 // TODO(grantland): Create ParseFileController interface
-/** package */ class ParseFileController {
+class ParseFileController {
 
   private final Object lock = new Object();
   private final ParseHttpClient restClient;
@@ -98,7 +98,6 @@ import bolts.Task;
         .contentType(state.mimeType())
         .sessionToken(sessionToken)
         .build();
-    command.enableRetrying();
 
     return command.executeAsync(
         restClient,
@@ -145,7 +144,6 @@ import bolts.Task;
         .contentType(state.mimeType())
         .sessionToken(sessionToken)
         .build();
-    command.enableRetrying();
 
     return command.executeAsync(
         restClient,

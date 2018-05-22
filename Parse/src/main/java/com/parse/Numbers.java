@@ -11,7 +11,7 @@ package com.parse;
 /**
  * Static utility methods pertaining to {@link Number} instances.
  */
-/** package */ class Numbers {
+class Numbers {
 
   /**
    * Add two {@link Number} instances.

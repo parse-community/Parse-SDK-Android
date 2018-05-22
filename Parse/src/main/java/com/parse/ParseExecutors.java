@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import bolts.Task;
 
-/** package */ class ParseExecutors {
+class ParseExecutors {
 
   private static ScheduledExecutorService scheduledExecutor;
   private static final Object SCHEDULED_EXECUTOR_LOCK = new Object();

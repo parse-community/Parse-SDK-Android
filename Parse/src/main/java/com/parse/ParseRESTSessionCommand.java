@@ -12,7 +12,7 @@ import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONObject;
 
-/** package */ class ParseRESTSessionCommand extends ParseRESTCommand {
+class ParseRESTSessionCommand extends ParseRESTCommand {
 
   public static ParseRESTSessionCommand getCurrentSessionCommand(String sessionToken) {
     return new ParseRESTSessionCommand(

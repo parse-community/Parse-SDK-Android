@@ -12,7 +12,7 @@ package com.parse;
  * A {@code ParseCallback} is used to do something after a background task completes. End users will
  * use a specific subclass of {@code ParseCallback}.
  */
-/** package */ interface ParseCallback2<T1, T2 extends Throwable> {
+interface ParseCallback2<T1, T2 extends Throwable> {
   /**
    * {@code done(t1, t2)} must be overridden when you are doing a background operation. It is called
    * when the background operation completes.

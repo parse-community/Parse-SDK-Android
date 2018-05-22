@@ -14,7 +14,7 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
+class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
   private static ParseObjectSubclassingController getSubclassingController() {
     return ParseCorePlugins.getInstance().getSubclassingController();

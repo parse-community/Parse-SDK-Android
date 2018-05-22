@@ -10,7 +10,7 @@ package com.parse;
 
 import bolts.Task;
 
-/** package */ interface ParseObjectStore<T extends ParseObject> {
+interface ParseObjectStore<T extends ParseObject> {
 
   Task<T> getAsync();
 

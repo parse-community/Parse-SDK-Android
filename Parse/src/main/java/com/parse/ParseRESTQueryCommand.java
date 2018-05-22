@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** package */ class ParseRESTQueryCommand extends ParseRESTCommand {
+class ParseRESTQueryCommand extends ParseRESTCommand {
 
   /* package */ final static String KEY_ORDER = "order";
   /* package */ final static String KEY_WHERE = "where";

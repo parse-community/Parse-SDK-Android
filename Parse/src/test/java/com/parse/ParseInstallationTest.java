@@ -286,32 +286,6 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
   // TODO(mengyan): Add other testUpdateBeforeSave cases to cover all branches
 
   @Test
-  public void testPushType() throws Exception {
-    ParseInstallation installation = new ParseInstallation();
-    installation.setPushType(PushType.GCM);
-
-    assertEquals(PushType.GCM, installation.getPushType());
-
-    installation.removePushType();
-
-    assertNull(installation.getPushType());
-    // Make sure we add the pushType to operationSetQueue instead of serverData
-    assertEquals(1, installation.operationSetQueue.getLast().size());
-  }
-
-  @Test
-  public void testPushTypeWithNullPushType() throws Exception {
-    ParseInstallation installation = new ParseInstallation();
-    installation.setPushType(PushType.GCM);
-
-    assertEquals(PushType.GCM, installation.getPushType());
-
-    installation.setPushType(null);
-
-    assertEquals(PushType.GCM, installation.getPushType());
-  }
-
-  @Test
   public void testDeviceToken() throws Exception {
     ParseInstallation installation = new ParseInstallation();
     installation.setDeviceToken("deviceToken");
@@ -390,7 +364,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
     // Mock App Name
     RuntimeEnvironment.application.getApplicationInfo().name = "parseTest";
-    ParsePlugins.Android plugins = mock(ParsePlugins.Android.class);
+    ParsePlugins plugins = mock(ParsePlugins.class);
     // Mock installationId
     InstallationId installationId = mock(InstallationId.class);
     when(installationId.get()).thenReturn("installationId");

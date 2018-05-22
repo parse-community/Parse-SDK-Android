@@ -73,7 +73,7 @@ public class NetworkQueryControllerTest {
     when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
 
     NetworkQueryController controller = new NetworkQueryController(restClient);
-    Task<List<ParseObject>> findTask = controller.findAsync(mockState, "sessionToken", true, null);
+    Task<List<ParseObject>> findTask = controller.findAsync(mockState, "sessionToken", null);
     ParseTaskUtils.wait(findTask);
     List<ParseObject> objects = findTask.getResult();
 
@@ -103,7 +103,7 @@ public class NetworkQueryControllerTest {
 
     NetworkQueryController controller = new NetworkQueryController(restClient);
 
-    Task<Integer> countTask = controller.countAsync(mockState, "sessionToken", true, null);
+    Task<Integer> countTask = controller.countAsync(mockState, "sessionToken", null);
     ParseTaskUtils.wait(countTask);
     int count = countTask.getResult();
 

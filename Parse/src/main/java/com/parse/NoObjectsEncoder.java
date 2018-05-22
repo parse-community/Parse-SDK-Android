@@ -13,7 +13,7 @@ import org.json.JSONObject;
 /**
  * Throws an exception if someone attemps to encode a {@code ParseObject}.
  */
-/** package */ class NoObjectsEncoder extends ParseEncoder {
+class NoObjectsEncoder extends ParseEncoder {
 
   // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
   // default instance.

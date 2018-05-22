@@ -16,7 +16,7 @@ import org.json.JSONObject;
 
 import java.util.Set;
 
-/** package */ class ParseRESTPushCommand extends ParseRESTCommand {
+class ParseRESTPushCommand extends ParseRESTCommand {
 
   /* package */ final static String KEY_CHANNELS = "channels";
   /* package */ final static String KEY_WHERE = "where";

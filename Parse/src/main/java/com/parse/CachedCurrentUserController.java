@@ -14,7 +14,7 @@ import java.util.Map;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class CachedCurrentUserController implements ParseCurrentUserController {
+class CachedCurrentUserController implements ParseCurrentUserController {
 
   /**
    * Lock used to synchronize current user modifications and access.

@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 
 import bolts.Task;
 
-/** package */ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
+class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
   private static ParseObjectSubclassingController getSubclassingController() {
     return ParseCorePlugins.getInstance().getSubclassingController();

@@ -10,7 +10,10 @@ package com.parse;
 
 import android.util.Log;
 
-/** package */ class PLog {
+/**
+ * Parse Logger
+ */
+public class PLog {
   public static final int LOG_LEVEL_NONE = Integer.MAX_VALUE;
 
   private static int logLevel = Integer.MAX_VALUE;
@@ -57,7 +60,7 @@ import android.util.Log;
     log(Log.VERBOSE, tag, message, tr);
   }
 
-  /* package */ static void v(String tag, String message) {
+  static void v(String tag, String message) {
     v(tag, message, null);
   }
 
@@ -65,7 +68,7 @@ import android.util.Log;
     log(Log.DEBUG, tag, message, tr);
   }
 
-  /* package */ static void d(String tag, String message) {
+  /* package */ public static void d(String tag, String message) {
     d(tag, message, null);
   }
 
@@ -73,7 +76,7 @@ import android.util.Log;
     log(Log.INFO, tag, message, tr);
   }
 
-  /* package */ static void i(String tag, String message) {
+  public static void i(String tag, String message) {
     i(tag, message, null);
   }
 
@@ -85,11 +88,11 @@ import android.util.Log;
     w(tag, message, null);
   }
 
-  /* package */ static void e(String tag, String message, Throwable tr) {
+  public static void e(String tag, String message, Throwable tr) {
     log(Log.ERROR, tag, message, tr);
   }
 
-  /* package */ static void e(String tag, String message) {
+  public static void e(String tag, String message) {
     e(tag, message, null);
   }
 }

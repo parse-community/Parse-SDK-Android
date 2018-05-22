@@ -10,7 +10,7 @@ package com.parse;
 
 import bolts.Task;
 
-/** package */ class ParsePushController {
+class ParsePushController {
 
   /* package for test */ final static String DEVICE_TYPE_IOS = "ios";
   /* package for test */ final static String DEVICE_TYPE_ANDROID = "android";

@@ -15,7 +15,7 @@ import java.util.Map;
 import bolts.Continuation;
 import bolts.Task;
 
-/** package */ class NetworkUserController implements ParseUserController {
+class NetworkUserController implements ParseUserController {
 
   private static final int STATUS_CODE_CREATED = 201;
 

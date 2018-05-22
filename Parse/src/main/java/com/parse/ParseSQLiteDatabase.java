@@ -20,7 +20,7 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-/** package */ class ParseSQLiteDatabase {
+class ParseSQLiteDatabase {
 
   /**
    * Database connections are locked to the thread that they are created in when using transactions.

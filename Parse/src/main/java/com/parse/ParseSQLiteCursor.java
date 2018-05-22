@@ -30,7 +30,7 @@ import bolts.Task;
  *
  * https://github.com/android/platform_frameworks_base/commit/6f37f83a4802a0d411395f3abc5f24a2cfec025d
  */
-/** package */ class ParseSQLiteCursor implements Cursor {
+class ParseSQLiteCursor implements Cursor {
 
   public static Cursor create(Cursor cursor, Executor executor) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {

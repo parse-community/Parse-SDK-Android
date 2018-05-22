@@ -32,7 +32,7 @@ import java.nio.charset.Charset;
 /**
  * General file manipulation utilities.
  */
-/** package */ class ParseFileUtils {
+public class ParseFileUtils {
 
   /**
    * The number of bytes in a kilobyte.
