@@ -20,8 +20,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -757,6 +759,80 @@ public class ParseObjectTest {
     assertFalse(other.isDeleting);
     assertTrue(other.isDeleted);
     Parse.setLocalDatastore(null);
+  }
+
+  //endregion
+
+  //region testFailingDelete
+
+  @Test
+  public void testFailingDelete() throws Exception {
+
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+
+    Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
+            .build();
+    ParsePlugins plugins = mock(ParsePlugins.class);
+    when(plugins.configuration()).thenReturn(configuration);
+    when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+    ParsePlugins.set(plugins);
+
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("code", 141);
+    mockResponse.put("error", "Delete is not allowed");
+    ParseHttpClient restClient =
+            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
+    when(plugins.restClient()).thenReturn(restClient);
+
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.objectId()).thenReturn("test_id");
+    when(state.keySet()).thenReturn(Collections.singleton("key"));
+    when(state.get("key")).thenReturn("data");
+    ParseObject object = ParseObject.from(state);
+
+    thrown.expect(ParseException.class);
+    thrown.expectMessage("Delete is not allowed");
+
+    object.delete();
+  }
+
+  //endregion
+
+  //region testFailingSave
+
+  @Test
+  public void testFailingSave() throws Exception {
+
+    ParseRESTCommand.server = new URL("https://api.parse.com/1");
+
+    Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
+            .build();
+    ParsePlugins plugins = mock(ParsePlugins.class);
+    when(plugins.configuration()).thenReturn(configuration);
+    when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+    ParsePlugins.set(plugins);
+
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("code", 141);
+    mockResponse.put("error", "Save is not allowed");
+    ParseHttpClient restClient =
+            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
+    when(plugins.restClient()).thenReturn(restClient);
+
+    ParseObject.State state = mock(ParseObject.State.class);
+    when(state.className()).thenReturn("TestObject");
+    when(state.objectId()).thenReturn("test_id");
+    when(state.keySet()).thenReturn(Collections.singleton("key"));
+    when(state.get("key")).thenReturn("data");
+    ParseObject object = ParseObject.from(state);
+
+    object.put("key", "other data");
+
+    thrown.expect(ParseException.class);
+    thrown.expectMessage("Save is not allowed");
+
+    object.save();
   }
 
   //endregion

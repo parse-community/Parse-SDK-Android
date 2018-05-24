@@ -15,7 +15,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
@@ -39,6 +41,9 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class NetworkObjectControllerTest {
+
+  @Rule
+  public ExpectedException thrown= ExpectedException.none();
 
   @Before
   public void setUp() throws MalformedURLException {
@@ -134,6 +139,60 @@ public class NetworkObjectControllerTest {
     NetworkObjectController controller = new NetworkObjectController(restClient);
     // We just need to verify task is finished since sever returns an empty json here
     ParseTaskUtils.wait(controller.deleteAsync(state, "sessionToken"));
+  }
+
+  //endregion
+
+  //region testFailingDeleteAsync
+
+  @Test
+  public void testFailingDeleteAsync() throws Exception {
+    // Make mock response and client
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("code", 141);
+    mockResponse.put("error", "Delete is not allowed");
+    ParseHttpClient restClient =
+            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
+    // Make test state
+    ParseObject.State state = new ParseObject.State.Builder("Test")
+            .objectId("testObjectId")
+            .build();
+
+    NetworkObjectController controller = new NetworkObjectController(restClient);
+
+    thrown.expect(ParseException.class);
+    thrown.expectMessage("Delete is not allowed");
+
+    ParseTaskUtils.wait(controller.deleteAsync(state, "sessionToken"));
+  }
+
+  //endregion
+
+  //region testFailingSaveAsync
+
+  @Test
+  public void testFailingSaveAsync() throws Exception {
+    // Make mock response and client
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("code", 141);
+    mockResponse.put("error", "Save is not allowed");
+    ParseHttpClient restClient =
+            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
+
+    // Make test object
+    ParseObject object = new ParseObject("Test");
+    object.put("key", "value");
+
+    NetworkObjectController controller = new NetworkObjectController(restClient);
+
+    thrown.expect(ParseException.class);
+    thrown.expectMessage("Save is not allowed");
+
+    ParseTaskUtils.wait(controller.saveAsync(
+            object.getState(),
+            object.startSave(),
+            "sessionToken",
+            ParseDecoder.get()));
   }
 
   //endregion
