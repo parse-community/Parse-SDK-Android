@@ -10,11 +10,9 @@ package com.parse;
 
 import android.Manifest;
 import android.os.Parcel;
-import android.util.Log;
 
 import org.json.JSONObject;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
