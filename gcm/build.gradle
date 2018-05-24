@@ -5,7 +5,7 @@ group = 'com.parse'
 
 ext {
     projDescription = 'Parse Android GCM support.'
-    artifact = 'parse-gcm-android'
+    artifact = 'parse-android-gcm'
     projName = 'Parse-Android'
     gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
 }
