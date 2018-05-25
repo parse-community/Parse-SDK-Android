@@ -5,7 +5,7 @@ group = 'com.parse'
 
 ext {
     projDescription = 'Parse Android FCM support.'
-    artifact = 'parse-fcm-android'
+    artifact = 'parse-android-fcm'
     projName = 'Parse-Android'
     gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
 }
