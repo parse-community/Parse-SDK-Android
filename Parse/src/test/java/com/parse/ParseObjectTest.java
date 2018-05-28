@@ -66,6 +66,7 @@ public class ParseObjectTest {
   @After
   public void tearDown() {
     ParseCorePlugins.getInstance().reset();
+    ParsePlugins.reset();
   }
 
   @Test
