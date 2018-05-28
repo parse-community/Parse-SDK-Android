@@ -807,6 +807,8 @@ public class ParseObjectTest {
 
     ParseRESTCommand.server = new URL("https://api.parse.com/1");
 
+    ParseObject.registerSubclass(ParseUser.class);
+
     Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
             .build();
     ParsePlugins plugins = mock(ParsePlugins.class);
