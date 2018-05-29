@@ -5,7 +5,8 @@ android.libraryVariants.all { variant ->
 
     def javadoc = task("javadoc${variant.name.capitalize()}", type: Javadoc) {
         description "Generates Javadoc for $variant.name."
-        destinationDir = rootProject.file("docs/api")
+        def path = ("$project.name" == "Parse") ? "" : "$project.name"
+        destinationDir = rootProject.file("docs/api/$path")
         source = variant.javaCompiler.source
         ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         doFirst {
