@@ -1557,7 +1557,10 @@ public class ParseUserTest extends ResetPluginsParseTest {
   public void testSaveEventuallyWhenSessionIsInvalid() throws Exception {
 
     ParseRESTCommand.server = new URL("https://api.parse.com/1");
-    Parse.enableLocalDatastore(RuntimeEnvironment.application);
+
+    ParseObject.registerSubclass(EventuallyPin.class);
+    ParseObject.registerSubclass(ParsePin.class);
+    Parse.setLocalDatastore(new OfflineStore(RuntimeEnvironment.application));
 
     Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
             .build();
@@ -1579,8 +1582,6 @@ public class ParseUserTest extends ResetPluginsParseTest {
     when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(user));
     when(currentUserController.getAsync()).thenReturn(Task.forResult(user));
     ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-
-    //Parse.getEventuallyQueue().clear();
 
     user.put("field", "data");
 
