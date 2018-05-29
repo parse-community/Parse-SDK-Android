@@ -13,7 +13,7 @@ Add dependency to the application level `build.gradle` file.
 ```groovy
 dependencies {
     implementation 'com.parse:parse-android:latest.version.here'
-    implementation 'com.parse:parse-android-gcm:latest.version.here'
+    implementation 'com.parse:parse-gcm-android:latest.version.here'
 }
 ```
 You will then need to register some things in your manifest, firstly, the GCM sender ID:
