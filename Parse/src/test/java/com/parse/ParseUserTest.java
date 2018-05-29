@@ -1609,9 +1609,8 @@ public class ParseUserTest extends ResetPluginsParseTest {
     mockResponse = new JSONObject();
     mockResponse.put("error", "invalid session token");
     mockResponse.put("code", 209);
-    restClient =
-            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
-    when(plugins.restClient()).thenReturn(restClient);
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 400, "Bad Request");
 
     final CountDownLatch saveEventuallyCountDown = new CountDownLatch(1);
     user.saveEventually().continueWith(new Continuation<Void, Void>() {
@@ -1631,9 +1630,8 @@ public class ParseUserTest extends ResetPluginsParseTest {
 
     mockResponse = new JSONObject();
     mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date()));
-    restClient =
-            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
-    when(plugins.restClient()).thenReturn(restClient);
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 200, "OK");
 
     final CountDownLatch saveCountDown2 = new CountDownLatch(1);
     user.saveInBackground().continueWith(new Continuation<Void, Void>() {

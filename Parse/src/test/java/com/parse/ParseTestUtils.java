@@ -41,14 +41,20 @@ final class ParseTestUtils {
 
   public static ParseHttpClient mockParseHttpClientWithResponse(
       JSONObject content, int statusCode, String reasonPhrase) throws IOException {
+    ParseHttpClient client = mock(ParseHttpClient.class);
+    updateMockParseHttpClientWithResponse(client, content, statusCode, reasonPhrase);
+    return client;
+  }
+
+  public static ParseHttpClient updateMockParseHttpClientWithResponse(
+          ParseHttpClient client, JSONObject content, int statusCode, String reasonPhrase) throws IOException {
     byte[] contentBytes = content.toString().getBytes();
     ParseHttpResponse response = new ParseHttpResponse.Builder()
-        .setContent(new ByteArrayInputStream(contentBytes))
-        .setStatusCode(statusCode)
-        .setTotalSize(contentBytes.length)
-        .setContentType("application/json")
-        .build();
-    ParseHttpClient client = mock(ParseHttpClient.class);
+            .setContent(new ByteArrayInputStream(contentBytes))
+            .setStatusCode(statusCode)
+            .setTotalSize(contentBytes.length)
+            .setContentType("application/json")
+            .build();
     when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
     return client;
   }
