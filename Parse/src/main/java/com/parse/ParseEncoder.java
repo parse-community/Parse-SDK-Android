@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * A {@code ParseEncoder} can be used to transform objects such as {@link ParseObjects} into JSON
@@ -42,8 +41,6 @@ abstract class ParseEncoder {
         || value instanceof ParseFile
         || value instanceof ParseGeoPoint
         || value instanceof ParsePolygon
-        || value instanceof ParseRelation
-        || value instanceof Pattern
         || value instanceof ParseRelation;
   }
 
