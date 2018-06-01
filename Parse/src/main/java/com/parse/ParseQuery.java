@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1673,10 +1675,6 @@ public class ParseQuery<T extends ParseObject> {
   }
 
   /**
-   * Add a constraint to the query that requires a particular key's value match another
-   * {@code ParseQuery}.
-   * <p/>
-   * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
    * Add a constraint to the query that requires a particular key's value to contain every one of
    * the provided list of values.
    *
@@ -1706,6 +1704,27 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> whereFullText(String key, String text) {
     builder.whereText(key, text);
     return this;
+  }
+
+  /**
+   * Add a constraint to the query that requires a particular key's value to contain each one of
+   * the provided list of strings entirely or just starting with given strings.
+   *
+   * @param key
+   *          The key to check. This key's value must be an array.
+   * @param values
+   *          The values that will match entirely or starting with them.
+   * @return this, so you can chain this call.
+   */
+  public ParseQuery<T> whereContainsAllStartsWith(String key, Collection<String> values) {
+    ArrayList<KeyConstraints> startsWithConstraints = new ArrayList<>();
+    for (String value : values) {
+      KeyConstraints keyConstraints = new KeyConstraints();
+      keyConstraints.put("$regex", buildStartsWithRegex(value));
+      startsWithConstraints.add(keyConstraints);
+    }
+
+    return whereContainsAll(key, startsWithConstraints);
   }
 
   /**
@@ -1988,7 +2007,7 @@ public class ParseQuery<T extends ParseObject> {
    * @return this, so you can chain this call.
    */
   public ParseQuery<T> whereStartsWith(String key, String prefix) {
-    String regex = "^" + Pattern.quote(prefix);
+    String regex = buildStartsWithRegex(prefix);
     whereMatches(key, regex);
     return this;
   }
@@ -2191,5 +2210,16 @@ public class ParseQuery<T extends ParseObject> {
   public ParseQuery<T> setTrace(boolean shouldTrace) {
     builder.setTracingEnabled(shouldTrace);
     return this;
+  }
+
+  /**
+   * Helper method to convert a string to regex for start word matching.
+   *
+   * @param prefix String to use as prefix in regex.
+   * @return The string converted as regex for start word matching.
+   */
+  @NonNull
+  private String buildStartsWithRegex(String prefix) {
+    return "^" + Pattern.quote(prefix);
   }
 }

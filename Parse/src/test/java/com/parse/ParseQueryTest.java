@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -390,6 +392,25 @@ public class ParseQueryTest {
   }
 
   @Test
+  public void testWhereContainsAllStartingWith() throws Exception {
+    ParseQuery<ParseObject> query = new ParseQuery<>("Test");
+    String value = "value";
+    String valueAgain = "valueAgain";
+    List<String> values = Arrays.asList(value, valueAgain);
+
+    ParseQuery.KeyConstraints valueConverted = new ParseQuery.KeyConstraints();
+    valueConverted.put("$regex", buildStartsWithPattern(value));
+    ParseQuery.KeyConstraints valueAgainConverted = new ParseQuery.KeyConstraints();
+    valueAgainConverted.put("$regex", buildStartsWithPattern(valueAgain));
+    List<ParseQuery.KeyConstraints> valuesConverted =
+        Arrays.asList(valueConverted, valueAgainConverted);
+
+    query.whereContainsAllStartsWith("key", values);
+
+    verifyCondition(query, "key", "$all", valuesConverted);
+  }
+
+  @Test
   public void testWhereNotContainedIn() throws Exception {
     ParseQuery<ParseObject> query = new ParseQuery<>("Test");
     List<String> values = Arrays.asList("value", "valueAgain");
@@ -425,7 +446,7 @@ public class ParseQueryTest {
     String value = "prefix";
     query.whereStartsWith("key", value);
 
-    verifyCondition(query, "key", "$regex", "^" + Pattern.quote(value));
+    verifyCondition(query, "key", "$regex", buildStartsWithPattern(value));
   }
 
   @Test
@@ -818,7 +839,7 @@ public class ParseQueryTest {
       assertEquals(map.get(constraintKey), values.get(constraintKey));
     }
   }
-
+  
   //endregion
 
   /**
@@ -903,5 +924,10 @@ public class ParseQueryTest {
         }
       })).cast();
     }
+  }
+
+  @NonNull
+  private String buildStartsWithPattern(String value) {
+    return "^" + Pattern.quote(value);
   }
 }
