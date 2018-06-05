@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -23,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import bolts.Task;
 
@@ -418,6 +421,112 @@ public class OfflineQueryLogicTest {
     object.put("foo", "bar");
     assertFalse(matches(logic, query, object));
   }
+
+  @Test
+  public void testMatchesAllStartingWith() throws Exception {
+    ParseObject object = new ParseObject("TestObject");
+    object.put("foo", Arrays.asList("foo", "bar"));
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar")))
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("fo"),
+                buildStartsWithRegexKeyConstraint("b")))
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar"),
+                buildStartsWithRegexKeyConstraint("qux")))
+        .build();
+    assertFalse(matches(logic, query, object));
+
+    // Non-existant key
+    object = new ParseObject("TestObject");
+    assertFalse(matches(logic, query, object));
+    object.put("foo", JSONObject.NULL);
+    assertFalse(matches(logic, query, object));
+
+    thrown.expect(IllegalArgumentException.class);
+    object.put("foo", "bar");
+    assertFalse(matches(logic, query, object));
+  }
+
+  @Test
+  public void testMatchesAllStartingWithParameters() throws Exception {
+    ParseObject object = new ParseObject("TestObject");
+    object.put("foo", Arrays.asList("foo", "bar"));
+
+    ParseQuery.State<ParseObject> query;
+    OfflineQueryLogic logic = new OfflineQueryLogic(null);
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("foo"),
+                buildStartsWithRegexKeyConstraint("bar")))
+        .build();
+    assertTrue(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("fo"),
+                buildStartsWithRegex("ba"),
+                "b"))
+        .build();
+    thrown.expect(IllegalArgumentException.class);
+    assertFalse(matches(logic, query, object));
+
+    query = new ParseQuery.State.Builder<>("TestObject")
+        .addCondition("foo", "$all",
+            Arrays.asList(
+                buildStartsWithRegexKeyConstraint("fo"),
+                "b"))
+        .build();
+    thrown.expect(IllegalArgumentException.class);
+    assertFalse(matches(logic, query, object));
+  }
+
+  /**
+   * Helper method to convert a string to a key constraint to match strings that starts with given
+   * string.
+   *
+   * @param prefix String to use as prefix in regex.
+   * @return The key constraint for word matching at the beginning of a string.
+   */
+  @NonNull
+  private ParseQuery.KeyConstraints buildStartsWithRegexKeyConstraint(String prefix) {
+    ParseQuery.KeyConstraints constraint = new ParseQuery.KeyConstraints();
+    constraint.put("$regex", buildStartsWithRegex(prefix));
+    return constraint;
+  }
+
+  /**
+   * Helper method to convert a string to regex for start word matching.
+   *
+   * @param prefix String to use as prefix in regex.
+   * @return The string converted as regex for start word matching.
+   */
+  @NonNull
+  private String buildStartsWithRegex(String prefix) {
+    return "^" + Pattern.quote(prefix);
+  }
+
 
   @Test
   public void testMatchesNearSphere() throws Exception {
