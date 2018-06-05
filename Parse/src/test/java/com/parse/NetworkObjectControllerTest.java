@@ -43,7 +43,7 @@ import static org.mockito.Mockito.when;
 public class NetworkObjectControllerTest {
 
   @Rule
-  public ExpectedException thrown= ExpectedException.none();
+  public ExpectedException thrown = ExpectedException.none();
 
   @Before
   public void setUp() throws MalformedURLException {
