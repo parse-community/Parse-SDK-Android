@@ -2175,6 +2175,9 @@ public class ParseObject implements Parcelable {
       @Override
       public Void then(Task<Void> task) throws Exception {
         isDeleting = false;
+        if (task.isFaulted()) {
+          throw task.getError();
+        }
         return null;
       }
     });
