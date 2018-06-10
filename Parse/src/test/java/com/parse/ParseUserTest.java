@@ -1555,41 +1555,35 @@ public class ParseUserTest extends ResetPluginsParseTest {
 
   @Test
   public void testSaveEventuallyWhenSessionIsInvalid() throws Exception {
-
-    ParseRESTCommand.server = new URL("https://api.parse.com/1");
-
-    ParseObject.registerSubclass(EventuallyPin.class);
-    ParseObject.registerSubclass(ParsePin.class);
-    Parse.setLocalDatastore(new OfflineStore(RuntimeEnvironment.application));
-
-    Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
+    Shadows.shadowOf(RuntimeEnvironment.application)
+            .grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE);
+    Parse.Configuration configuration =
+            new Parse.Configuration.Builder(RuntimeEnvironment.application)
+            .applicationId(BuildConfig.APPLICATION_ID)
+            .server("https://api.parse.com/1")
+            .enableLocalDataStore()
             .build();
-    ParsePlugins plugins = mock(ParsePlugins.class);
-    when(plugins.configuration()).thenReturn(configuration);
-    when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
-    ParsePlugins.set(plugins);
+    ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("objectId", "objectId");
+    mockResponse.put("email", "email@parse.com");
+    mockResponse.put("username", "username");
+    mockResponse.put("sessionToken", "r:sessionToken");
+    mockResponse.put("createdAt", ParseDateFormat.getInstance().format(new Date(1000)));
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(2000)));
+    ParseHttpClient restClient = ParseTestUtils.mockParseHttpClientWithResponse(
+            mockResponse,200, "OK");
+    when(plugins.restClient())
+            .thenReturn(restClient);
+    Parse.initialize(configuration, plugins);
 
-    ShadowApplication application = Shadows.shadowOf(RuntimeEnvironment.application);
-    application.grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE);
-
-    ParseUser.State userState = new ParseUser.State.Builder()
-            .objectId("test")
-            .sessionToken("r:sessionToken")
-            .build();
-    ParseUser user = ParseObject.from(userState);
-
-    ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-    when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(user));
-    when(currentUserController.getAsync()).thenReturn(Task.forResult(user));
-    ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-
+    ParseUser user = ParseUser.logIn("username", "password");
     user.put("field", "data");
 
-    JSONObject mockResponse = new JSONObject();
-    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date()));
-    ParseHttpClient restClient =
-            ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
-    when(plugins.restClient()).thenReturn(restClient);
+    mockResponse = new JSONObject();
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(3000)));
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 200, "OK");
 
     final CountDownLatch saveCountDown1 = new CountDownLatch(1);
     final Capture<Exception> exceptionCapture = new Capture<>();
@@ -1626,10 +1620,16 @@ public class ParseUserTest extends ResetPluginsParseTest {
     assertEquals(ParseException.INVALID_SESSION_TOKEN, ((ParseException)exceptionCapture.get()).getCode());
     assertEquals("invalid session token", exceptionCapture.get().getMessage());
 
+    // Simulate reboot
+    Parse.destroy();
+    Parse.initialize(configuration, plugins);
+
+    user = ParseUser.getCurrentUser();
+    assertEquals("other data", user.get("field"));
     user.put("field", "another data");
 
     mockResponse = new JSONObject();
-    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date()));
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(4000)));
     ParseTestUtils.updateMockParseHttpClientWithResponse(
             restClient, mockResponse, 200, "OK");
 
@@ -1644,6 +1644,10 @@ public class ParseUserTest extends ResetPluginsParseTest {
     });
     assertTrue(saveCountDown2.await(5, TimeUnit.SECONDS));
     assertNull(exceptionCapture.get());
+
+    ParseCorePlugins.getInstance().getCurrentUserController().clearFromDisk();
+    ParseCorePlugins.getInstance().getCurrentInstallationController().clearFromDisk();
+    Parse.destroy();
   }
 
   //endregion
