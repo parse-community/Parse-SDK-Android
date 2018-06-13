@@ -146,7 +146,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     ParseInstallation installation = ParseInstallation.getCurrentInstallation();
     assertNotNull(installation);
     installation.put("key", "value");
-    installation.saveAsync(sessionToken, toAwait);
+    ParseTaskUtils.wait(installation.saveAsync(sessionToken, toAwait));
     verify(controller).getAsync();
     verify(objController, times(2)).saveAsync(
         any(ParseObject.State.class),
@@ -187,7 +187,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     assertNotNull(installation);
     installation.setState(state);
     installation.put("key", "value");
-    installation.saveAsync(sessionToken, toAwait);
+    ParseTaskUtils.wait(installation.saveAsync(sessionToken, toAwait));
 
     verify(controller).getAsync();
     verify(objController, times(2)).saveAsync(

@@ -1448,10 +1448,14 @@ public class ParseObject implements Parcelable {
         ParseOperationSet nextOperation = opIterator.next();
         nextOperation.mergeFrom(operationsBeforeSave);
         if (store != null) {
-          task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
+          task = task.continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
             public Task<Void> then(Task<Void> task) throws Exception {
-              return store.updateDataForObjectAsync(ParseObject.this);
+              if (task.isFaulted()) {
+                return Task.forResult(null);
+              } else {
+                return store.updateDataForObjectAsync(ParseObject.this);
+              }
             }
           });
         }
