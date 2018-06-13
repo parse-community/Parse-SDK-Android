@@ -24,9 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
-import org.robolectric.shadows.ShadowApplication;
 
-import java.net.URL;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,9 +75,19 @@ public class ParseUserTest extends ResetPluginsParseTest {
   @After
   public void tearDown() throws Exception {
     super.tearDown();
-    ParseObject.unregisterSubclass(ParseUser.class);
-    ParseObject.unregisterSubclass(ParseSession.class);
-    Parse.disableLocalDatastore();
+    if (ParsePlugins.get() != null) {
+      ParseCurrentInstallationController installationController =
+              ParseCorePlugins.getInstance().getCurrentInstallationController();
+      if (installationController != null) {
+        installationController.clearFromDisk();
+      }
+      ParseCurrentUserController userController =
+              ParseCorePlugins.getInstance().getCurrentUserController();
+      if (userController != null) {
+        userController.clearFromDisk();
+      }
+    }
+    Parse.destroy();
   }
 
   @Test
@@ -1551,10 +1559,10 @@ public class ParseUserTest extends ResetPluginsParseTest {
     user.putAuthData(ParseAnonymousUtils.AUTH_TYPE, anonymousAuthData);
   }
 
-  //region testSaveEventuallyWhenSessionIsInvalid
+  //region testSaveEventuallyWhenServerError
 
   @Test
-  public void testSaveEventuallyWhenSessionIsInvalid() throws Exception {
+  public void testSaveEventuallyWhenServerError() throws Exception {
     Shadows.shadowOf(RuntimeEnvironment.application)
             .grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE);
     Parse.Configuration configuration =
@@ -1578,7 +1586,10 @@ public class ParseUserTest extends ResetPluginsParseTest {
     Parse.initialize(configuration, plugins);
 
     ParseUser user = ParseUser.logIn("username", "password");
+    assertFalse(user.isDirty());
+
     user.put("field", "data");
+    assertTrue(user.isDirty());
 
     mockResponse = new JSONObject();
     mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(3000)));
@@ -1597,12 +1608,14 @@ public class ParseUserTest extends ResetPluginsParseTest {
     });
     assertTrue(saveCountDown1.await(5, TimeUnit.SECONDS));
     assertNull(exceptionCapture.get());
+    assertFalse(user.isDirty());
 
     user.put("field", "other data");
+    assertTrue(user.isDirty());
 
     mockResponse = new JSONObject();
-    mockResponse.put("error", "invalid session token");
-    mockResponse.put("code", 209);
+    mockResponse.put("error", "Save is not allowed");
+    mockResponse.put("code", 141);
     ParseTestUtils.updateMockParseHttpClientWithResponse(
             restClient, mockResponse, 400, "Bad Request");
 
@@ -1617,14 +1630,17 @@ public class ParseUserTest extends ResetPluginsParseTest {
     });
     assertTrue(saveEventuallyCountDown.await(5, TimeUnit.SECONDS));
     assertTrue(exceptionCapture.get() instanceof ParseException);
-    assertEquals(ParseException.INVALID_SESSION_TOKEN, ((ParseException)exceptionCapture.get()).getCode());
-    assertEquals("invalid session token", exceptionCapture.get().getMessage());
+    assertEquals(ParseException.SCRIPT_ERROR, ((ParseException)exceptionCapture.get()).getCode());
+    assertEquals("Save is not allowed", exceptionCapture.get().getMessage());
+    assertTrue(user.isDirty());
 
     // Simulate reboot
     Parse.destroy();
     Parse.initialize(configuration, plugins);
 
     user = ParseUser.getCurrentUser();
+    assertTrue(user.isDirty());
+
     assertEquals("other data", user.get("field"));
     user.put("field", "another data");
 
@@ -1642,12 +1658,10 @@ public class ParseUserTest extends ResetPluginsParseTest {
         return null;
       }
     });
+
     assertTrue(saveCountDown2.await(5, TimeUnit.SECONDS));
     assertNull(exceptionCapture.get());
-
-    ParseCorePlugins.getInstance().getCurrentUserController().clearFromDisk();
-    ParseCorePlugins.getInstance().getCurrentInstallationController().clearFromDisk();
-    Parse.destroy();
+    assertFalse(user.isDirty());
   }
 
   //endregion

@@ -319,6 +319,8 @@ public class Parse {
   }
 
   static void destroy() {
+    ParseObject.unregisterParseSubclasses();
+
     ParseEventuallyQueue queue;
     synchronized (MUTEX) {
       queue = eventuallyQueue;
@@ -330,6 +332,8 @@ public class Parse {
 
     ParseCorePlugins.getInstance().reset();
     ParsePlugins.reset();
+
+    setLocalDatastore(null);
   }
 
   /**
