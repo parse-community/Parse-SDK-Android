@@ -10,7 +10,7 @@ Add dependency to the application level `build.gradle` file.
 ```groovy
 dependencies {
     implementation 'com.parse:parse-android:latest.version.here'
-    implementation 'com.parse:parse-android-fcm:latest.version.here'
+    implementation 'com.parse:parse-fcm-android:latest.version.here'
 }
 ```
 Then, follow Google's docs for [setting up an Firebase app](https://firebase.google.com/docs/android/setup). Although the steps are different for setting up FCM with Parse, it is also a good idea to read over the [Firebase FCM Setup](https://firebase.google.com/docs/cloud-messaging/android/client).
