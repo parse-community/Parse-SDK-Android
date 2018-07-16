@@ -166,7 +166,7 @@ class EventuallyPin extends ParseObject {
 
     // We need pass in a null user because we don't want the query to fetch the current user
     // from LDS.
-    return query.findInBackground().continueWithTask(new Continuation<List<EventuallyPin>, Task<List<EventuallyPin>>>() {
+    return query.findInBackground().onSuccessTask(new Continuation<List<EventuallyPin>, Task<List<EventuallyPin>>>() {
       @Override
       public Task<List<EventuallyPin>> then(Task<List<EventuallyPin>> task) throws Exception {
         final List<EventuallyPin> pins = task.getResult();
