@@ -55,7 +55,7 @@ import bolts.TaskCompletionSource;
  */
 public class ParseObject implements Parcelable {
   private static final String AUTO_CLASS_NAME = "_Automatic";
-  /* package */ static final String VERSION_NAME = BuildConfig.VERSION_NAME;
+  static final String VERSION_NAME = BuildConfig.VERSION_NAME;
   private static final String TAG = "ParseObject";
 
   /*
@@ -75,7 +75,7 @@ public class ParseObject implements Parcelable {
   // Array of keys selected when querying for the object. Helps decoding nested {@code ParseObject}s
   // correctly, and helps constructing the {@code State.availableKeys()} set.
   private static final String KEY_SELECTED_KEYS = "__selectedKeys";
-  /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
+  static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
   // Because Grantland messed up naming this... We'll only try to read from this for backward
   // compat, but I think we can be safe to assume any deleteEventuallys from long ago are obsolete
   // and not check after a while
@@ -102,7 +102,8 @@ public class ParseObject implements Parcelable {
       return new Builder(className);
     }
 
-    /* package */ static State createFromParcel(Parcel source, ParseParcelDecoder decoder) {
+
+    static State createFromParcel(Parcel source, ParseParcelDecoder decoder) {
       String className = source.readString();
       if ("_User".equals(className)) {
         return new ParseUser.State(source, className, decoder);
@@ -118,13 +119,13 @@ public class ParseObject implements Parcelable {
       private long updatedAt = -1;
       private boolean isComplete;
       private Set<String> availableKeys = new HashSet<>();
-      /* package */ Map<String, Object> serverData = new HashMap<>();
+      Map<String, Object> serverData = new HashMap<>();
 
       public Init(String className) {
         this.className = className;
       }
 
-      /* package */ Init(State state) {
+      Init(State state) {
         className = state.className();
         objectId = state.objectId();
         createdAt = state.createdAt();
@@ -137,9 +138,11 @@ public class ParseObject implements Parcelable {
         isComplete = state.isComplete();
       }
 
-      /* package */ abstract T self();
 
-      /* package */ abstract <S extends State> S build();
+      abstract T self();
+
+
+      abstract <S extends State> S build();
 
       public T objectId(String objectId) {
         this.objectId = objectId;
@@ -238,7 +241,7 @@ public class ParseObject implements Parcelable {
       }
     }
 
-    /* package */ static class Builder extends Init<Builder> {
+    static class Builder extends Init<Builder> {
 
       public Builder(String className) {
         super(className);
@@ -249,7 +252,7 @@ public class ParseObject implements Parcelable {
       }
 
       @Override
-      /* package */ Builder self() {
+      Builder self() {
         return this;
       }
 
@@ -266,19 +269,19 @@ public class ParseObject implements Parcelable {
     private final Set<String> availableKeys;
     private final boolean isComplete;
 
-    /* package */ State(Init<?> builder) {
+    State(Init<?> builder) {
       className = builder.className;
       objectId = builder.objectId;
       createdAt = builder.createdAt;
       updatedAt = builder.updatedAt > 0
-          ? builder.updatedAt
-          : createdAt;
+        ? builder.updatedAt
+        : createdAt;
       serverData = Collections.unmodifiableMap(new HashMap<>(builder.serverData));
       isComplete = builder.isComplete;
       availableKeys = Collections.synchronizedSet(builder.availableKeys);
     }
 
-    /* package */ State(Parcel parcel, String clazz, ParseParcelDecoder decoder) {
+    State(Parcel parcel, String clazz, ParseParcelDecoder decoder) {
       className = clazz; // Already read
       objectId = parcel.readByte() == 1 ? parcel.readString() : null;
       createdAt = parcel.readLong();
@@ -361,45 +364,45 @@ public class ParseObject implements Parcelable {
     @Override
     public String toString() {
       return String.format(Locale.US, "%s@%s[" +
-              "className=%s, objectId=%s, createdAt=%d, updatedAt=%d, isComplete=%s, " +
-              "serverData=%s, availableKeys=%s]",
-          getClass().getName(),
-          Integer.toHexString(hashCode()),
-          className,
-          objectId,
-          createdAt,
-          updatedAt,
-          isComplete,
-          serverData,
-          availableKeys);
+          "className=%s, objectId=%s, createdAt=%d, updatedAt=%d, isComplete=%s, " +
+          "serverData=%s, availableKeys=%s]",
+        getClass().getName(),
+        Integer.toHexString(hashCode()),
+        className,
+        objectId,
+        createdAt,
+        updatedAt,
+        isComplete,
+        serverData,
+        availableKeys);
     }
   }
 
-  /* package */ final Object mutex = new Object();
-  /* package */ final TaskQueue taskQueue = new TaskQueue();
+  final Object mutex = new Object();
+  final TaskQueue taskQueue = new TaskQueue();
 
   private State state;
-  /* package */ final LinkedList<ParseOperationSet> operationSetQueue;
+  final LinkedList<ParseOperationSet> operationSetQueue;
 
   // Cached State
   private final Map<String, Object> estimatedData;
 
-  /* package */ String localId;
+  String localId;
   private final ParseMulticastDelegate<ParseObject> saveEvent = new ParseMulticastDelegate<>();
 
-  /* package */ boolean isDeleted;
-  /* package */ boolean isDeleting; // Since delete ops are queued, we don't need a counter.
+  boolean isDeleted;
+  boolean isDeleting; // Since delete ops are queued, we don't need a counter.
   //TODO (grantland): Derive this off the EventuallyPins as opposed to +/- count.
-  /* package */ int isDeletingEventually;
+  int isDeletingEventually;
   private boolean ldsEnabledWhenParceling;
 
   private static final ThreadLocal<String> isCreatingPointerForObjectId =
-      new ThreadLocal<String>() {
-        @Override
-        protected String initialValue() {
-          return null;
-        }
-      };
+    new ThreadLocal<String>() {
+      @Override
+      protected String initialValue() {
+        return null;
+      }
+    };
 
   /*
    * This is used only so that we can pass it to createWithoutData as the objectId to make it create
@@ -407,8 +410,8 @@ public class ParseObject implements Parcelable {
    * store, where you can have an unfetched pointer for an object that can later be fetched from the
    * store.
    */
-  /* package */ private static final String NEW_OFFLINE_OBJECT_ID_PLACEHOLDER =
-      "*** Offline Object ***";
+  private static final String NEW_OFFLINE_OBJECT_ID_PLACEHOLDER =
+    "*** Offline Object ***";
 
   /**
    * The base class constructor to call in subclasses. Uses the class name specified with the
@@ -426,10 +429,9 @@ public class ParseObject implements Parcelable {
    * Class names must be alphanumerical plus underscore, and start with a letter. It is recommended
    * to name classes in <code>PascalCaseLikeThis</code>.
    *
-   * @param theClassName
-   *          The className for this {@code ParseObject}.
+   * @param theClassName The className for this {@code ParseObject}.
    */
-  public ParseObject(String theClassName) {
+  public ParseObject(@NonNull String theClassName) {
     // We use a ThreadLocal rather than passing a parameter so that createWithoutData can do the
     // right thing with subclasses. It's ugly and terrible, but it does provide the development
     // experience we generally want, so... yeah. Sorry to whomever has to deal with this in the
@@ -438,7 +440,7 @@ public class ParseObject implements Parcelable {
 
     if (theClassName == null) {
       throw new IllegalArgumentException(
-          "You must specify a Parse class name when creating a new ParseObject.");
+        "You must specify a Parse class name when creating a new ParseObject.");
     }
     if (AUTO_CLASS_NAME.equals(theClassName)) {
       theClassName = getSubclassingController().getClassName(getClass());
@@ -447,7 +449,7 @@ public class ParseObject implements Parcelable {
     // If this is supposed to be created by a factory but wasn't, throw an exception.
     if (!getSubclassingController().isSubclassValid(theClassName, getClass())) {
       throw new IllegalArgumentException(
-          "You must create this type of ParseObject using ParseObject.create() or the proper subclass.");
+        "You must create this type of ParseObject using ParseObject.create() or the proper subclass.");
     }
 
     operationSetQueue = new LinkedList<>();
@@ -478,11 +480,10 @@ public class ParseObject implements Parcelable {
    * Creates a new {@code ParseObject} based upon a class name. If the class name is a special type
    * (e.g. for {@code ParseUser}), then the appropriate type of {@code ParseObject} is returned.
    *
-   * @param className
-   *          The class of object to create.
+   * @param className The class of object to create.
    * @return A new {@code ParseObject} for the given class name.
    */
-  public static ParseObject create(String className) {
+  public static ParseObject create(@NonNull String className) {
     return getSubclassingController().newInstance(className);
   }
 
@@ -491,12 +492,11 @@ public class ParseObject implements Parcelable {
    * created based upon the {@link ParseClassName} of the given subclass type. For example, calling
    * create(ParseUser.class) may create an instance of a custom subclass of {@code ParseUser}.
    *
-   * @param subclass
-   *          The class of object to create.
+   * @param subclass The class of object to create.
    * @return A new {@code ParseObject} based upon the class name of the given subclass type.
    */
   @SuppressWarnings("unchecked")
-  public static <T extends ParseObject> T create(Class<T> subclass) {
+  public static <T extends ParseObject> T create(@NonNull Class<T> subclass) {
     return (T) create(getSubclassingController().getClassName(subclass));
   }
 
@@ -506,13 +506,11 @@ public class ParseObject implements Parcelable {
    * {@code false} until {@link #fetchIfNeeded()} or {@link #refresh()} has been called. No network
    * request will be made.
    *
-   * @param className
-   *          The object's class.
-   * @param objectId
-   *          The object id for the referenced object.
+   * @param className The object's class.
+   * @param objectId The object id for the referenced object.
    * @return A {@code ParseObject} without data.
    */
-  public static ParseObject createWithoutData(String className, String objectId) {
+  public static ParseObject createWithoutData(@NonNull String className, @NonNull String objectId) {
     OfflineStore store = Parse.getLocalDatastore();
     try {
       if (objectId == null) {
@@ -529,8 +527,8 @@ public class ParseObject implements Parcelable {
         object = create(className);
         if (object.hasChanges()) {
           throw new IllegalStateException(
-              "A ParseObject subclass default constructor must not make changes "
-                  + "to the object that cause it to be dirty."
+            "A ParseObject subclass default constructor must not make changes "
+              + "to the object that cause it to be dirty."
           );
         }
       }
@@ -552,14 +550,12 @@ public class ParseObject implements Parcelable {
    * {@code false} until  {@link #fetchIfNeeded()} or {@link #refresh()} has been called. No network
    * request will be made.
    *
-   * @param subclass
-   *          The {@code ParseObject} subclass to create.
-   * @param objectId
-   *          The object id for the referenced object.
+   * @param subclass The {@code ParseObject} subclass to create.
+   * @param objectId The object id for the referenced object.
    * @return A {@code ParseObject} without data.
    */
   @SuppressWarnings({"unused", "unchecked"})
-  public static <T extends ParseObject> T createWithoutData(Class<T> subclass, String objectId) {
+  public static <T extends ParseObject> T createWithoutData(@NonNull Class<T> subclass, @NonNull String objectId) {
     return (T) createWithoutData(getSubclassingController().getClassName(subclass), objectId);
   }
 
@@ -568,14 +564,14 @@ public class ParseObject implements Parcelable {
    * {@code ParseObject}s whenever they appear. Subclasses must specify the {@link ParseClassName}
    * annotation and have a default constructor.
    *
-   * @param subclass
-   *          The subclass type to register.
+   * @param subclass The subclass type to register.
    */
-  public static void registerSubclass(Class<? extends ParseObject> subclass) {
+  public static void registerSubclass(@NonNull Class<? extends ParseObject> subclass) {
     getSubclassingController().registerSubclass(subclass);
   }
 
-  /* package for tests */ static void unregisterSubclass(Class<? extends ParseObject> subclass) {
+  /* package for tests */
+  static void unregisterSubclass(Class<? extends ParseObject> subclass) {
     getSubclassingController().unregisterSubclass(subclass);
   }
 
@@ -583,7 +579,7 @@ public class ParseObject implements Parcelable {
    * Adds a task to the queue for all of the given objects.
    */
   static <T> Task<T> enqueueForAll(final List<? extends ParseObject> objects,
-      Continuation<Void, Task<T>> taskStart) {
+    Continuation<Void, Task<T>> taskStart) {
     // The task that will be complete when all of the child queues indicate they're ready to start.
     final TaskCompletionSource<Void> readyToStart = new TaskCompletionSource<>();
 
@@ -641,11 +637,11 @@ public class ParseObject implements Parcelable {
   /**
    * Converts a {@code ParseObject.State} to a {@code ParseObject}.
    *
-   * @param state
-   *          The {@code ParseObject.State} to convert from.
+   * @param state The {@code ParseObject.State} to convert from.
    * @return A {@code ParseObject} instance.
    */
-  /* package */ static <T extends ParseObject> T from(ParseObject.State state) {
+
+  static <T extends ParseObject> T from(ParseObject.State state) {
     @SuppressWarnings("unchecked")
     T object = (T) ParseObject.createWithoutData(state.className(), state.objectId());
     synchronized (object.mutex) {
@@ -662,19 +658,17 @@ public class ParseObject implements Parcelable {
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   * @param json
-   *          The object's data.
-   * @param defaultClassName
-   *          The className of the object, if none is in the JSON.
-   * @param decoder
-   *          Delegate for knowing how to decode the values in the JSON.
-   * @param selectedKeys
-   *          Set of keys selected when quering for this object. If none, the object is assumed to
-   *          be complete, i.e. this is all the data for the object on the server.
+   *
+   * @param json The object's data.
+   * @param defaultClassName The className of the object, if none is in the JSON.
+   * @param decoder Delegate for knowing how to decode the values in the JSON.
+   * @param selectedKeys Set of keys selected when quering for this object. If none, the object is assumed to
+   * be complete, i.e. this is all the data for the object on the server.
    */
-  /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-                                                          ParseDecoder decoder,
-                                                          Set<String> selectedKeys) {
+
+  static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
+    ParseDecoder decoder,
+    Set<String> selectedKeys) {
     if (selectedKeys != null && !selectedKeys.isEmpty()) {
       JSONArray keys = new JSONArray(selectedKeys);
       try {
@@ -688,16 +682,15 @@ public class ParseObject implements Parcelable {
 
   /**
    * Creates a new {@code ParseObject} based on data from the Parse server.
-   * @param json
-   *          The object's data. It is assumed to be complete, unless the JSON has the
-   *          {@link #KEY_SELECTED_KEYS} key.
-   * @param defaultClassName
-   *          The className of the object, if none is in the JSON.
-   * @param decoder
-   *          Delegate for knowing how to decode the values in the JSON.
+   *
+   * @param json The object's data. It is assumed to be complete, unless the JSON has the
+   * {@link #KEY_SELECTED_KEYS} key.
+   * @param defaultClassName The className of the object, if none is in the JSON.
+   * @param decoder Delegate for knowing how to decode the values in the JSON.
    */
-  /* package */ static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
-                                                          ParseDecoder decoder) {
+
+  static <T extends ParseObject> T fromJSON(JSONObject json, String defaultClassName,
+    ParseDecoder decoder) {
     String className = json.optString(KEY_CLASS_NAME, defaultClassName);
     if (className == null) {
       return null;
@@ -713,7 +706,7 @@ public class ParseObject implements Parcelable {
 
   /**
    * Method used by parse server webhooks implementation to convert raw JSON to Parse Object
-   *
+   * <p>
    * Method is used by parse server webhooks implementation to create a
    * new {@code ParseObject} from the incoming json payload. The method is different from
    * {@link #fromJSON(JSONObject, String, ParseDecoder, Set)} ()} in that it calls
@@ -722,13 +715,12 @@ public class ParseObject implements Parcelable {
    * JSON may not represent the actual server data. Also it handles
    * {@link ParseFieldOperations} separately.
    *
-   * @param json
-   *          The object's data.
-   * @param decoder
-   *          Delegate for knowing how to decode the values in the JSON.
+   * @param json The object's data.
+   * @param decoder Delegate for knowing how to decode the values in the JSON.
    */
-  /* package */ static <T extends ParseObject> T fromJSONPayload(
-      JSONObject json, ParseDecoder decoder) {
+
+  static <T extends ParseObject> T fromJSONPayload(
+    JSONObject json, ParseDecoder decoder) {
     String className = json.optString(KEY_CLASS_NAME);
     if (className == null || ParseTextUtils.isEmpty(className)) {
       return null;
@@ -742,11 +734,11 @@ public class ParseObject implements Parcelable {
 
   //region Getter/Setter helper methods
 
-  /* package */ State.Init<?> newStateBuilder(String className) {
+  State.Init<?> newStateBuilder(String className) {
     return new State.Builder(className);
   }
 
-  /* package */ State getState() {
+  State getState() {
     synchronized (mutex) {
       return state;
     }
@@ -757,7 +749,7 @@ public class ParseObject implements Parcelable {
    *
    * @param newState The new state.
    */
-  /* package */ void setState(State newState) {
+  void setState(State newState) {
     synchronized (mutex) {
       setState(newState, true);
     }
@@ -794,11 +786,12 @@ public class ParseObject implements Parcelable {
    *
    * @return The last time this object was updated on the server.
    */
+  @Nullable
   public Date getUpdatedAt() {
     long updatedAt = getState().updatedAt();
     return updatedAt > 0
-        ? new Date(updatedAt)
-        : null;
+      ? new Date(updatedAt)
+      : null;
   }
 
   /**
@@ -808,11 +801,12 @@ public class ParseObject implements Parcelable {
    *
    * @return The first time this object was saved on the server.
    */
+  @Nullable
   public Date getCreatedAt() {
     long createdAt = getState().createdAt();
     return createdAt > 0
-        ? new Date(createdAt)
-        : null;
+      ? new Date(createdAt)
+      : null;
   }
 
   //endregion
@@ -831,7 +825,7 @@ public class ParseObject implements Parcelable {
    * Copies all of the operations that have been performed on another object since its last save
    * onto this one.
    */
-  /* package */ void copyChangesFrom(ParseObject other) {
+  void copyChangesFrom(ParseObject other) {
     synchronized (mutex) {
       ParseOperationSet operations = other.operationSetQueue.getFirst();
       for (String key : operations.keySet()) {
@@ -840,7 +834,7 @@ public class ParseObject implements Parcelable {
     }
   }
 
-  /* package */ void mergeFromObject(ParseObject other) {
+  void mergeFromObject(ParseObject other) {
     synchronized (mutex) {
       // If they point to the same instance, we don't need to merge.
       if (this == other) {
@@ -864,7 +858,7 @@ public class ParseObject implements Parcelable {
    *
    * @param key The {@code key} to revert changes for.
    */
-  public void revert(String key) {
+  public void revert(@NonNull String key) {
     synchronized (mutex) {
       if (isDirty(key)) {
         currentOperations().remove(key);
@@ -914,7 +908,7 @@ public class ParseObject implements Parcelable {
 
   /**
    * Helper method called by {@link #fromJSONPayload(JSONObject, ParseDecoder)}
-   *
+   * <p>
    * The method helps webhooks implementation to build Parse object from raw JSON payload.
    * It is different from {@link #mergeFromServer(State, JSONObject, ParseDecoder, boolean)}
    * as the method saves the key value pairs (other than className, objectId, updatedAt and
@@ -924,7 +918,7 @@ public class ParseObject implements Parcelable {
    * @param json : JSON object to be converted to Parse object
    * @param decoder : Decoder to be used for Decoding JSON
    */
-  /* package */ void build(JSONObject json, ParseDecoder decoder) {
+  void build(JSONObject json, ParseDecoder decoder) {
     try {
       State.Builder builder = new State.Builder(state)
         .isComplete(true);
@@ -957,9 +951,8 @@ public class ParseObject implements Parcelable {
         Object value = json.get(key);
         Object decodedObject = decoder.decode(value);
         if (decodedObject instanceof ParseFieldOperation) {
-          performOperation(key, (ParseFieldOperation)decodedObject);
-        }
-        else {
+          performOperation(key, (ParseFieldOperation) decodedObject);
+        } else {
           put(key, decodedObject);
         }
       }
@@ -977,8 +970,8 @@ public class ParseObject implements Parcelable {
    *
    * @see #toJSONObjectForSaving(State, ParseOperationSet, ParseEncoder)
    */
-  /* package */ State mergeFromServer(
-      State state, JSONObject json, ParseDecoder decoder, boolean completeData) {
+  State mergeFromServer(
+    State state, JSONObject json, ParseDecoder decoder, boolean completeData) {
     try {
       // If server data is complete, consider this object to be fetched.
       State.Init<?> builder = state.newBuilder();
@@ -1022,7 +1015,8 @@ public class ParseObject implements Parcelable {
             for (int i = 0; i < safeKeys.length(); i++) {
               // Don't add nested keys.
               String safeKey = safeKeys.getString(i);
-              if (safeKey.contains(".")) safeKey = safeKey.split("\\.")[0];
+              if (safeKey.contains("."))
+                safeKey = safeKey.split("\\.")[0];
               set.add(safeKey);
             }
             builder.availableKeys(set);
@@ -1037,7 +1031,8 @@ public class ParseObject implements Parcelable {
           JSONArray nestedKeys = new JSONArray();
           for (int i = 0; i < selectedKeys.length(); i++) {
             String nestedKey = selectedKeys.getString(i);
-            if (nestedKey.startsWith(key + ".")) nestedKeys.put(nestedKey.substring(key.length() + 1));
+            if (nestedKey.startsWith(key + "."))
+              nestedKeys.put(nestedKey.substring(key.length() + 1));
           }
           if (nestedKeys.length() > 0) {
             ((JSONObject) value).put(KEY_SELECTED_KEYS, nestedKeys);
@@ -1060,7 +1055,7 @@ public class ParseObject implements Parcelable {
    *
    * @see #mergeREST(State, org.json.JSONObject, ParseDecoder)
    */
-  /* package */ JSONObject toRest(ParseEncoder encoder) {
+  JSONObject toRest(ParseEncoder encoder) {
     State state;
     List<ParseOperationSet> operationSetQueueCopy;
     synchronized (mutex) {
@@ -1080,50 +1075,50 @@ public class ParseObject implements Parcelable {
     return toRest(state, operationSetQueueCopy, encoder);
   }
 
-  /* package */ JSONObject toRest(
-      State state, List<ParseOperationSet> operationSetQueue, ParseEncoder objectEncoder) {
-      // Public data goes in dataJSON; special fields go in objectJSON.
-      JSONObject json = new JSONObject();
+  JSONObject toRest(
+    State state, List<ParseOperationSet> operationSetQueue, ParseEncoder objectEncoder) {
+    // Public data goes in dataJSON; special fields go in objectJSON.
+    JSONObject json = new JSONObject();
 
-      try {
-        // REST JSON (State)
-        json.put(KEY_CLASS_NAME, state.className());
-        if (state.objectId() != null) {
-          json.put(KEY_OBJECT_ID, state.objectId());
-        }
-        if (state.createdAt() > 0) {
-          json.put(KEY_CREATED_AT,
-              ParseDateFormat.getInstance().format(new Date(state.createdAt())));
-        }
-        if (state.updatedAt() > 0) {
-          json.put(KEY_UPDATED_AT,
-              ParseDateFormat.getInstance().format(new Date(state.updatedAt())));
-        }
-        for (String key : state.keySet()) {
-          Object value = state.get(key);
-          json.put(key, objectEncoder.encode(value));
-        }
-
-        // Internal JSON
-        //TODO(klimt): We'll need to rip all this stuff out and put it somewhere else if we start
-        // using the REST api and want to send data to Parse.
-        json.put(KEY_COMPLETE, state.isComplete());
-        json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
-        JSONArray availableKeys = new JSONArray(state.availableKeys());
-        json.put(KEY_SELECTED_KEYS, availableKeys);
-
-        // Operation Set Queue
-        JSONArray operations = new JSONArray();
-        for (ParseOperationSet operationSet : operationSetQueue) {
-          operations.put(operationSet.toRest(objectEncoder));
-        }
-        json.put(KEY_OPERATIONS, operations);
-
-      } catch (JSONException e) {
-        throw new RuntimeException("could not serialize object to JSON");
+    try {
+      // REST JSON (State)
+      json.put(KEY_CLASS_NAME, state.className());
+      if (state.objectId() != null) {
+        json.put(KEY_OBJECT_ID, state.objectId());
+      }
+      if (state.createdAt() > 0) {
+        json.put(KEY_CREATED_AT,
+          ParseDateFormat.getInstance().format(new Date(state.createdAt())));
+      }
+      if (state.updatedAt() > 0) {
+        json.put(KEY_UPDATED_AT,
+          ParseDateFormat.getInstance().format(new Date(state.updatedAt())));
+      }
+      for (String key : state.keySet()) {
+        Object value = state.get(key);
+        json.put(key, objectEncoder.encode(value));
       }
 
-      return json;
+      // Internal JSON
+      //TODO(klimt): We'll need to rip all this stuff out and put it somewhere else if we start
+      // using the REST api and want to send data to Parse.
+      json.put(KEY_COMPLETE, state.isComplete());
+      json.put(KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
+      JSONArray availableKeys = new JSONArray(state.availableKeys());
+      json.put(KEY_SELECTED_KEYS, availableKeys);
+
+      // Operation Set Queue
+      JSONArray operations = new JSONArray();
+      for (ParseOperationSet operationSet : operationSetQueue) {
+        operations.put(operationSet.toRest(objectEncoder));
+      }
+      json.put(KEY_OPERATIONS, operations);
+
+    } catch (JSONException e) {
+      throw new RuntimeException("could not serialize object to JSON");
+    }
+
+    return json;
   }
 
   /**
@@ -1131,15 +1126,15 @@ public class ParseObject implements Parcelable {
    *
    * @see #toRest(ParseEncoder)
    */
-  /* package */ void mergeREST(State state, JSONObject json, ParseDecoder decoder) {
+  void mergeREST(State state, JSONObject json, ParseDecoder decoder) {
     ArrayList<ParseOperationSet> saveEventuallyOperationSets = new ArrayList<>();
 
     synchronized (mutex) {
       try {
         boolean isComplete = json.getBoolean(KEY_COMPLETE);
         isDeletingEventually = ParseJSONUtils.getInt(json, Arrays.asList(
-            KEY_IS_DELETING_EVENTUALLY,
-            KEY_IS_DELETING_EVENTUALLY_OLD
+          KEY_IS_DELETING_EVENTUALLY,
+          KEY_IS_DELETING_EVENTUALLY_OLD
         ));
         JSONArray operations = json.getJSONArray(KEY_OPERATIONS);
         {
@@ -1191,8 +1186,8 @@ public class ParseObject implements Parcelable {
         if (mergeServerData) {
           // Clean up internal json keys
           JSONObject mergeJSON = ParseJSONUtils.create(json, Arrays.asList(
-              KEY_COMPLETE, KEY_IS_DELETING_EVENTUALLY, KEY_IS_DELETING_EVENTUALLY_OLD,
-              KEY_OPERATIONS
+            KEY_COMPLETE, KEY_IS_DELETING_EVENTUALLY, KEY_IS_DELETING_EVENTUALLY_OLD,
+            KEY_OPERATIONS
           ));
           State newState = mergeFromServer(state, mergeJSON, decoder, isComplete);
           setState(newState);
@@ -1231,7 +1226,7 @@ public class ParseObject implements Parcelable {
     return this.isDirty(true);
   }
 
-  /* package */ boolean isDirty(boolean considerChildren) {
+  boolean isDirty(boolean considerChildren) {
     synchronized (mutex) {
       return (isDeleted || getObjectId() == null || hasChanges() || (considerChildren && hasDirtyChildren()));
     }
@@ -1247,7 +1242,7 @@ public class ParseObject implements Parcelable {
    * Returns {@code true} if this {@code ParseObject} has operations in operationSetQueue that
    * haven't been completed yet, {@code false} if there are no operations in the operationSetQueue.
    */
-  /* package */ boolean hasOutstandingOperations() {
+  boolean hasOutstandingOperations() {
     synchronized (mutex) {
       // > 1 since 1 is for unsaved changes.
       return operationSetQueue.size() > 1;
@@ -1257,8 +1252,7 @@ public class ParseObject implements Parcelable {
   /**
    * Whether a value associated with a key has been added/updated/removed and not saved yet.
    *
-   * @param key
-   *          The key to check for
+   * @param key The key to check for
    * @return Whether this key has been altered and not saved yet.
    */
   public boolean isDirty(String key) {
@@ -1274,6 +1268,7 @@ public class ParseObject implements Parcelable {
    *
    * @return The object id.
    */
+  @Nullable
   public String getObjectId() {
     synchronized (mutex) {
       return state.objectId();
@@ -1302,12 +1297,12 @@ public class ParseObject implements Parcelable {
    * Returns the localId, which is used internally for serializing relations to objects that don't
    * yet have an objectId.
    */
-  /* package */ String getOrCreateLocalId() {
+  String getOrCreateLocalId() {
     synchronized (mutex) {
       if (localId == null) {
         if (state.objectId() != null) {
           throw new IllegalStateException(
-              "Attempted to get a localId for an object with an objectId.");
+            "Attempted to get a localId for an object with an objectId.");
         }
         localId = getLocalIdManager().createLocalId();
       }
@@ -1332,8 +1327,8 @@ public class ParseObject implements Parcelable {
   }
 
   private ParseRESTObjectCommand currentSaveEventuallyCommand(
-      ParseOperationSet operations, ParseEncoder objectEncoder, String sessionToken)
-      throws ParseException {
+    ParseOperationSet operations, ParseEncoder objectEncoder, String sessionToken)
+    throws ParseException {
     State state = getState();
 
     /*
@@ -1343,29 +1338,29 @@ public class ParseObject implements Parcelable {
     JSONObject objectJSON = toJSONObjectForSaving(state, operations, objectEncoder);
 
     ParseRESTObjectCommand command = ParseRESTObjectCommand.saveObjectCommand(
-          state,
-          objectJSON,
-          sessionToken);
+      state,
+      objectJSON,
+      sessionToken);
     return command;
   }
 
   /**
    * Converts a {@code ParseObject} to a JSON representation for saving to Parse.
-   *
+   * <p>
    * <pre>
    * {
    *   data: { // objectId plus any ParseFieldOperations },
    *   classname: class name for the object
    * }
    * </pre>
-   *
+   * <p>
    * updatedAt and createdAt are not included. only dirty keys are represented in the data.
    *
    * @see #mergeFromServer(State state, org.json.JSONObject, ParseDecoder, boolean)
    */
   // Currently only used by saveEventually
-  /* package */ <T extends State> JSONObject toJSONObjectForSaving(
-      T state, ParseOperationSet operations, ParseEncoder objectEncoder) {
+  <T extends State> JSONObject toJSONObjectForSaving(
+    T state, ParseOperationSet operations, ParseEncoder objectEncoder) {
     JSONObject objectJSON = new JSONObject();
 
     try {
@@ -1389,13 +1384,13 @@ public class ParseObject implements Parcelable {
 
   /**
    * Handles the result of {@code save}.
-   *
+   * <p>
    * Should be called on success or failure.
    */
   // TODO(grantland): Remove once we convert saveEventually and ParseUser.signUp/resolveLaziness
   // to controllers
-  /* package */ Task<Void> handleSaveResultAsync(
-      final JSONObject result, final ParseOperationSet operationsBeforeSave) {
+  Task<Void> handleSaveResultAsync(
+    final JSONObject result, final ParseOperationSet operationsBeforeSave) {
     ParseObject.State newState = null;
 
     if (result != null) { // Success
@@ -1403,8 +1398,8 @@ public class ParseObject implements Parcelable {
         final Map<String, ParseObject> fetchedObjects = collectFetchedObjects();
         ParseDecoder decoder = new KnownParseObjectDecoder(fetchedObjects);
         newState = ParseObjectCoder.get().decode(getState().newBuilder().clear(), result, decoder)
-            .isComplete(false)
-            .build();
+          .isComplete(false)
+          .build();
       }
     }
 
@@ -1413,11 +1408,11 @@ public class ParseObject implements Parcelable {
 
   /**
    * Handles the result of {@code save}.
-   *
+   * <p>
    * Should be called on success or failure.
    */
-  /* package */ Task<Void> handleSaveResultAsync(
-      final ParseObject.State result, final ParseOperationSet operationsBeforeSave) {
+  Task<Void> handleSaveResultAsync(
+    final ParseObject.State result, final ParseOperationSet operationsBeforeSave) {
     Task<Void> task = Task.forResult(null);
 
     final boolean success = result != null;
@@ -1425,7 +1420,7 @@ public class ParseObject implements Parcelable {
       // Find operationsBeforeSave in the queue so that we can remove it and move to the next
       // operation set.
       ListIterator<ParseOperationSet> opIterator =
-          operationSetQueue.listIterator(operationSetQueue.indexOf(operationsBeforeSave));
+        operationSetQueue.listIterator(operationSetQueue.indexOf(operationsBeforeSave));
       opIterator.next();
       opIterator.remove();
 
@@ -1463,9 +1458,9 @@ public class ParseObject implements Parcelable {
           } else {
             // Result is incomplete, so we'll need to apply it to the current state
             newState = getState().newBuilder()
-                .apply(operationsBeforeSave)
-                .apply(result)
-                .build();
+              .apply(operationsBeforeSave)
+              .apply(result)
+              .build();
           }
           setState(newState);
         }
@@ -1493,7 +1488,7 @@ public class ParseObject implements Parcelable {
     return task;
   }
 
-  /* package */ ParseOperationSet startSave() {
+  ParseOperationSet startSave() {
     synchronized (mutex) {
       ParseOperationSet currentOperations = currentOperations();
       operationSetQueue.addLast(new ParseOperationSet());
@@ -1501,7 +1496,7 @@ public class ParseObject implements Parcelable {
     }
   }
 
-  /* package */ void validateSave() {
+  void validateSave() {
     // do nothing
   }
 
@@ -1509,8 +1504,7 @@ public class ParseObject implements Parcelable {
    * Saves this object to the server. Typically, you should use {@link #saveInBackground} instead of
    * this, unless you are managing your own threading.
    *
-   * @throws ParseException
-   *           Throws an exception if the server is inaccessible.
+   * @throws ParseException Throws an exception if the server is inaccessible.
    */
   public final void save() throws ParseException {
     ParseTaskUtils.wait(saveInBackground());
@@ -1552,7 +1546,7 @@ public class ParseObject implements Parcelable {
           public String then(Task<Void> task) throws Exception {
             if (acl.hasUnresolvedUser()) {
               throw new IllegalStateException("ACL has an unresolved ParseUser. "
-                  + "Save or sign up before attempting to serialize the ACL.");
+                + "Save or sign up before attempting to serialize the ACL.");
             }
             return user.getSessionToken();
           }
@@ -1567,7 +1561,7 @@ public class ParseObject implements Parcelable {
     });
   }
 
-  /* package */ Task<Void> saveAsync(final String sessionToken) {
+  Task<Void> saveAsync(final String sessionToken) {
     return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> toAwait) throws Exception {
@@ -1576,7 +1570,7 @@ public class ParseObject implements Parcelable {
     });
   }
 
-  /* package */ Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
+  Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
     if (!isDirty()) {
       return Task.forResult(null);
     }
@@ -1601,7 +1595,7 @@ public class ParseObject implements Parcelable {
     }
 
     return task.onSuccessTask(
-        TaskQueue.<Void>waitFor(toAwait)
+      TaskQueue.<Void>waitFor(toAwait)
     ).onSuccessTask(new Continuation<Void, Task<ParseObject.State>>() {
       @Override
       public Task<ParseObject.State> then(Task<Void> task) throws Exception {
@@ -1630,12 +1624,12 @@ public class ParseObject implements Parcelable {
 
   // Currently only used by ParsePinningEventuallyQueue for saveEventually due to the limitation in
   // ParseCommandCache that it can only return JSONObject result.
-  /* package */ Task<JSONObject> saveAsync(
-      ParseHttpClient client,
-      final ParseOperationSet operationSet,
-      String sessionToken) throws ParseException {
+  Task<JSONObject> saveAsync(
+    ParseHttpClient client,
+    final ParseOperationSet operationSet,
+    String sessionToken) throws ParseException {
     final ParseRESTCommand command =
-        currentSaveEventuallyCommand(operationSet, PointerEncoder.get(), sessionToken);
+      currentSaveEventuallyCommand(operationSet, PointerEncoder.get(), sessionToken);
     return command.executeAsync(client);
   }
 
@@ -1643,14 +1637,13 @@ public class ParseObject implements Parcelable {
    * Saves this object to the server in a background thread. This is preferable to using {@link #save()},
    * unless your code is already running from a background thread.
    *
-   * @param callback
-   *          {@code callback.done(e)} is called when the save completes.
+   * @param callback {@code callback.done(e)} is called when the save completes.
    */
   public final void saveInBackground(SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(saveInBackground(), callback);
   }
 
-  /* package */ void validateSaveEventually() throws ParseException {
+  void validateSaveEventually() throws ParseException {
     // do nothing
   }
 
@@ -1667,8 +1660,7 @@ public class ParseObject implements Parcelable {
    * saves to be silently  discarded until the connection can be re-established, and the queued
    * objects can be saved.
    *
-   * @param callback
-   *          - A callback which will be called if the save completes before the app exits.
+   * @param callback - A callback which will be called if the save completes before the app exits.
    */
   public final void saveEventually(SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(saveEventually(), callback);
@@ -1729,7 +1721,7 @@ public class ParseObject implements Parcelable {
       try {
         // See [1]
         command = currentSaveEventuallyCommand(operationSet, PointerOrLocalIdEncoder.get(),
-            sessionToken);
+          sessionToken);
 
         // TODO: Make this logic make sense once we have deepSaveEventually
         command.setLocalId(localId);
@@ -1778,7 +1770,7 @@ public class ParseObject implements Parcelable {
   private Task<Void> enqueueSaveEventuallyOperationAsync(final ParseOperationSet operationSet) {
     if (!operationSet.isSaveEventually()) {
       throw new IllegalStateException(
-          "This should only be used to enqueue saveEventually operation sets");
+        "This should only be used to enqueue saveEventually operation sets");
     }
 
     return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
@@ -1797,13 +1789,13 @@ public class ParseObject implements Parcelable {
 
   /**
    * Handles the result of {@code saveEventually}.
-   *
+   * <p>
    * In addition to normal save handling, this also notifies the saveEventually test helper.
-   *
+   * <p>
    * Should be called on success or failure.
    */
-  /* package */ Task<Void> handleSaveEventuallyResultAsync(
-      JSONObject json, ParseOperationSet operationSet) {
+  Task<Void> handleSaveEventuallyResultAsync(
+    JSONObject json, ParseOperationSet operationSet) {
     final boolean success = json != null;
     Task<Void> handleSaveResultTask = handleSaveResultAsync(json, operationSet);
 
@@ -1812,7 +1804,7 @@ public class ParseObject implements Parcelable {
       public Task<Void> then(Task<Void> task) throws Exception {
         if (success) {
           Parse.getEventuallyQueue()
-              .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_UPDATED);
+            .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_UPDATED);
         }
         return task;
       }
@@ -1824,7 +1816,7 @@ public class ParseObject implements Parcelable {
    * and guaranteed to be thread-safe. Subclasses can override this method to do any custom updates
    * before an object gets saved.
    */
-  /* package */ void updateBeforeSave() {
+  void updateBeforeSave() {
     // do nothing
   }
 
@@ -1841,8 +1833,7 @@ public class ParseObject implements Parcelable {
    * {@link #saveEventually()} will cause old instructions to be silently discarded until the
    * connection can be re-established, and the queued objects can be saved.
    *
-   * @param callback
-   *          - A callback which will be called if the delete completes before the app exits.
+   * @param callback - A callback which will be called if the delete completes before the app exits.
    */
   public final void deleteEventually(DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(deleteEventually(), callback);
@@ -1880,7 +1871,7 @@ public class ParseObject implements Parcelable {
 
       // See [1]
       command = ParseRESTObjectCommand.deleteObjectCommand(
-          getState(), sessionToken);
+        getState(), sessionToken);
       command.setLocalId(localId);
 
       runEventuallyTask = Parse.getEventuallyQueue().enqueueEventuallyAsync(command, ParseObject.this);
@@ -1904,10 +1895,10 @@ public class ParseObject implements Parcelable {
 
   /**
    * Handles the result of {@code deleteEventually}.
-   *
+   * <p>
    * Should only be called on success.
    */
-  /* package */ Task<Void> handleDeleteEventuallyResultAsync() {
+  Task<Void> handleDeleteEventuallyResultAsync() {
     synchronized (mutex) {
       isDeletingEventually -= 1;
     }
@@ -1917,7 +1908,7 @@ public class ParseObject implements Parcelable {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         Parse.getEventuallyQueue()
-            .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_REMOVED);
+          .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_REMOVED);
         return task;
       }
     });
@@ -1925,10 +1916,10 @@ public class ParseObject implements Parcelable {
 
   /**
    * Handles the result of {@code fetch}.
-   *
+   * <p>
    * Should only be called on success.
    */
-  /* package */ Task<Void> handleFetchResultAsync(final ParseObject.State result) {
+  Task<Void> handleFetchResultAsync(final ParseObject.State result) {
     Task<Void> task = Task.forResult(null);
 
     /*
@@ -1947,7 +1938,7 @@ public class ParseObject implements Parcelable {
         public Task<Void> then(Task<Void> task) throws Exception {
           // Catch CACHE_MISS
           if (task.getError() instanceof ParseException
-              && ((ParseException)task.getError()).getCode() == ParseException.CACHE_MISS) {
+            && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
             return null;
           }
           return task;
@@ -1984,7 +1975,7 @@ public class ParseObject implements Parcelable {
         public Task<Void> then(Task<Void> task) throws Exception {
           // Catch CACHE_MISS
           if (task.getError() instanceof ParseException
-              && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
+            && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
             return null;
           }
           return task;
@@ -1999,9 +1990,7 @@ public class ParseObject implements Parcelable {
    * Refreshes this object with the data from the server. Call this whenever you want the state of
    * the object to reflect exactly what is on the server.
    *
-   * @throws ParseException
-   *           Throws an exception if the server is inaccessible.
-   *
+   * @throws ParseException Throws an exception if the server is inaccessible.
    * @deprecated Please use {@link #fetch()} instead.
    */
   @Deprecated
@@ -2013,9 +2002,7 @@ public class ParseObject implements Parcelable {
    * Refreshes this object with the data from the server in a background thread. This is preferable
    * to using refresh(), unless your code is already running from a background thread.
    *
-   * @param callback
-   *          {@code callback.done(object, e)} is called when the refresh completes.
-   *
+   * @param callback {@code callback.done(object, e)} is called when the refresh completes.
    * @deprecated Please use {@link #fetchInBackground(GetCallback)} instead.
    */
   @Deprecated
@@ -2027,17 +2014,16 @@ public class ParseObject implements Parcelable {
    * Fetches this object with the data from the server. Call this whenever you want the state of the
    * object to reflect exactly what is on the server.
    *
-   * @throws ParseException
-   *           Throws an exception if the server is inaccessible.
    * @return The {@code ParseObject} that was fetched.
+   * @throws ParseException Throws an exception if the server is inaccessible.
    */
   public <T extends ParseObject> T fetch() throws ParseException {
     return ParseTaskUtils.wait(this.<T>fetchInBackground());
   }
 
   @SuppressWarnings("unchecked")
-  /* package */ <T extends ParseObject> Task<T> fetchAsync(
-      final String sessionToken, Task<Void> toAwait) {
+  <T extends ParseObject> Task<T> fetchAsync(
+    final String sessionToken, Task<Void> toAwait) {
     return toAwait.onSuccessTask(new Continuation<Void, Task<ParseObject.State>>() {
       @Override
       public Task<ParseObject.State> then(Task<Void> task) throws Exception {
@@ -2089,8 +2075,7 @@ public class ParseObject implements Parcelable {
    * Fetches this object with the data from the server in a background thread. This is preferable to
    * using fetch(), unless your code is already running from a background thread.
    *
-   * @param callback
-   *          {@code callback.done(object, e)} is called when the fetch completes.
+   * @param callback {@code callback.done(object, e)} is called when the fetch completes.
    */
   public final <T extends ParseObject> void fetchInBackground(GetCallback<T> callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(this.<T>fetchInBackground(), callback);
@@ -2129,9 +2114,8 @@ public class ParseObject implements Parcelable {
    * If this {@code ParseObject} has not been fetched (i.e. {@link #isDataAvailable()} returns {@code false}),
    * fetches this object with the data from the server.
    *
-   * @throws ParseException
-   *           Throws an exception if the server is inaccessible.
    * @return The fetched {@code ParseObject}.
+   * @throws ParseException Throws an exception if the server is inaccessible.
    */
   public <T extends ParseObject> T fetchIfNeeded() throws ParseException {
     return ParseTaskUtils.wait(this.<T>fetchIfNeededInBackground());
@@ -2142,15 +2126,14 @@ public class ParseObject implements Parcelable {
    * fetches this object with the data from the server in a background thread. This is preferable to
    * using {@link #fetchIfNeeded()}, unless your code is already running from a background thread.
    *
-   * @param callback
-   *          {@code callback.done(object, e)} is called when the fetch completes.
+   * @param callback {@code callback.done(object, e)} is called when the fetch completes.
    */
   public final <T extends ParseObject> void fetchIfNeededInBackground(GetCallback<T> callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(this.<T>fetchIfNeededInBackground(), callback);
   }
 
   // Validates the delete method
-  /* package */ void validateDelete() {
+  void validateDelete() {
     // do nothing
   }
 
@@ -2185,16 +2168,16 @@ public class ParseObject implements Parcelable {
 
   //TODO (grantland): I'm not sure we want direct access to this. All access to `delete` should
   // enqueue on the taskQueue...
-  /* package */ Task<Void> deleteAsync(String sessionToken) throws ParseException {
+  Task<Void> deleteAsync(String sessionToken) throws ParseException {
     return getObjectController().deleteAsync(getState(), sessionToken);
   }
 
   /**
    * Handles the result of {@code delete}.
-   *
+   * <p>
    * Should only be called on success.
    */
-  /* package */ Task<Void> handleDeleteResultAsync() {
+  Task<Void> handleDeleteResultAsync() {
     Task<Void> task = Task.forResult(null);
 
     synchronized (mutex) {
@@ -2245,8 +2228,7 @@ public class ParseObject implements Parcelable {
   /**
    * Deletes this object on the server. This does not delete or destroy the object locally.
    *
-   * @throws ParseException
-   *           Throws an error if the object does not exist or if the internet fails.
+   * @throws ParseException Throws an error if the object does not exist or if the internet fails.
    */
   public final void delete() throws ParseException {
     ParseTaskUtils.wait(deleteInBackground());
@@ -2256,8 +2238,7 @@ public class ParseObject implements Parcelable {
    * Deletes this object on the server in a background thread. This is preferable to using
    * {@link #delete()}, unless your code is already running from a background thread.
    *
-   * @param callback
-   *          {@code callback.done(e)} is called when the save completes.
+   * @param callback {@code callback.done(e)} is called when the save completes.
    */
   public final void deleteInBackground(DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(deleteInBackground(), callback);
@@ -2267,7 +2248,7 @@ public class ParseObject implements Parcelable {
    * This deletes all of the objects from the given List.
    */
   private static <T extends ParseObject> Task<Void> deleteAllAsync(
-      final List<T> objects, final String sessionToken) {
+    final List<T> objects, final String sessionToken) {
     if (objects.size() == 0) {
       return Task.forResult(null);
     }
@@ -2293,7 +2274,7 @@ public class ParseObject implements Parcelable {
   }
 
   private static <T extends ParseObject> Task<Void> deleteAllAsync(
-      final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
+    final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
     return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
@@ -2331,10 +2312,8 @@ public class ParseObject implements Parcelable {
    * Deletes each object in the provided list. This is faster than deleting each object individually
    * because it batches the requests.
    *
-   * @param objects
-   *          The objects to delete.
-   * @throws ParseException
-   *           Throws an exception if the server returns an error or is inaccessible.
+   * @param objects The objects to delete.
+   * @throws ParseException Throws an exception if the server returns an error or is inaccessible.
    */
   public static <T extends ParseObject> void deleteAll(List<T> objects) throws ParseException {
     ParseTaskUtils.wait(deleteAllInBackground(objects));
@@ -2344,10 +2323,8 @@ public class ParseObject implements Parcelable {
    * Deletes each object in the provided list. This is faster than deleting each object individually
    * because it batches the requests.
    *
-   * @param objects
-   *          The objects to delete.
-   * @param callback
-   *          The callback method to execute when completed.
+   * @param objects The objects to delete.
+   * @param callback The callback method to execute when completed.
    */
   public static <T extends ParseObject> void deleteAllInBackground(List<T> objects, DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(deleteAllInBackground(objects), callback);
@@ -2357,9 +2334,7 @@ public class ParseObject implements Parcelable {
    * Deletes each object in the provided list. This is faster than deleting each object individually
    * because it batches the requests.
    *
-   * @param objects
-   *          The objects to delete.
-   *
+   * @param objects The objects to delete.
    * @return A {@link bolts.Task} that is resolved when deleteAll completes.
    */
   public static <T extends ParseObject> Task<Void> deleteAllInBackground(final List<T> objects) {
@@ -2376,22 +2351,17 @@ public class ParseObject implements Parcelable {
    * Finds all of the objects that are reachable from child, including child itself, and adds them
    * to the given mutable array. It traverses arrays and json objects.
    *
-   * @param node
-   *          An kind object to search for children.
-   * @param dirtyChildren
-   *          The array to collect the {@code ParseObject}s into.
-   * @param dirtyFiles
-   *          The array to collect the {@link ParseFile}s into.
-   * @param alreadySeen
-   *          The set of all objects that have already been seen.
-   * @param alreadySeenNew
-   *          The set of new objects that have already been seen since the last existing object.
+   * @param node An kind object to search for children.
+   * @param dirtyChildren The array to collect the {@code ParseObject}s into.
+   * @param dirtyFiles The array to collect the {@link ParseFile}s into.
+   * @param alreadySeen The set of all objects that have already been seen.
+   * @param alreadySeenNew The set of new objects that have already been seen since the last existing object.
    */
   private static void collectDirtyChildren(Object node,
-      final Collection<ParseObject> dirtyChildren,
-      final Collection<ParseFile> dirtyFiles,
-      final Set<ParseObject> alreadySeen,
-      final Set<ParseObject> alreadySeenNew) {
+    final Collection<ParseObject> dirtyChildren,
+    final Collection<ParseFile> dirtyFiles,
+    final Set<ParseObject> alreadySeen,
+    final Set<ParseObject> alreadySeenNew) {
 
     new ParseTraverser() {
       @Override
@@ -2463,10 +2433,10 @@ public class ParseObject implements Parcelable {
    * parameters.
    */
   private static void collectDirtyChildren(Object node, Collection<ParseObject> dirtyChildren,
-      Collection<ParseFile> dirtyFiles) {
+    Collection<ParseFile> dirtyFiles) {
     collectDirtyChildren(node, dirtyChildren, dirtyFiles,
-        new HashSet<ParseObject>(),
-        new HashSet<ParseObject>());
+      new HashSet<ParseObject>(),
+      new HashSet<ParseObject>());
   }
 
   /**
@@ -2605,7 +2575,7 @@ public class ParseObject implements Parcelable {
   }
 
   private static <T extends ParseObject> Task<Void> saveAllAsync(
-      final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
+    final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
     return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
@@ -2624,7 +2594,7 @@ public class ParseObject implements Parcelable {
           decoders.add(new KnownParseObjectDecoder(fetchedObjects));
         }
         List<Task<ParseObject.State>> batchTasks = getObjectController().saveAllAsync(
-            states, operationsList, sessionToken, decoders);
+          states, operationsList, sessionToken, decoders);
 
         List<Task<Void>> tasks = new ArrayList<>(objectCount);
         for (int i = 0; i < objectCount; i++) {
@@ -2635,17 +2605,18 @@ public class ParseObject implements Parcelable {
             @Override
             public Task<Void> then(final Task<ParseObject.State> batchTask) throws Exception {
               ParseObject.State result = batchTask.getResult(); // will be null on failure
-              return object.handleSaveResultAsync(result, operations).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
-                  if (task.isFaulted() || task.isCancelled()) {
-                    return task;
-                  }
+              return object.handleSaveResultAsync(result, operations)
+                .continueWithTask(new Continuation<Void, Task<Void>>() {
+                  @Override
+                  public Task<Void> then(Task<Void> task) throws Exception {
+                    if (task.isFaulted() || task.isCancelled()) {
+                      return task;
+                    }
 
-                  // We still want to propagate batchTask errors
-                  return batchTask.makeVoid();
-                }
-              });
+                    // We still want to propagate batchTask errors
+                    return batchTask.makeVoid();
+                  }
+                });
             }
           }));
         }
@@ -2658,10 +2629,8 @@ public class ParseObject implements Parcelable {
    * Saves each object in the provided list. This is faster than saving each object individually
    * because it batches the requests.
    *
-   * @param objects
-   *          The objects to save.
-   * @throws ParseException
-   *           Throws an exception if the server returns an error or is inaccessible.
+   * @param objects The objects to save.
+   * @throws ParseException Throws an exception if the server returns an error or is inaccessible.
    */
   public static <T extends ParseObject> void saveAll(List<T> objects) throws ParseException {
     ParseTaskUtils.wait(saveAllInBackground(objects));
@@ -2671,10 +2640,8 @@ public class ParseObject implements Parcelable {
    * Saves each object in the provided list to the server in a background thread. This is preferable
    * to using saveAll, unless your code is already running from a background thread.
    *
-   * @param objects
-   *          The objects to save.
-   * @param callback
-   *          {@code callback.done(e)} is called when the save completes.
+   * @param objects The objects to save.
+   * @param callback {@code callback.done(e)} is called when the save completes.
    */
   public static <T extends ParseObject> void saveAllInBackground(List<T> objects, SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(saveAllInBackground(objects), callback);
@@ -2684,9 +2651,7 @@ public class ParseObject implements Parcelable {
    * Saves each object in the provided list to the server in a background thread. This is preferable
    * to using saveAll, unless your code is already running from a background thread.
    *
-   * @param objects
-   *          The objects to save.
-   *
+   * @param objects The objects to save.
    * @return A {@link bolts.Task} that is resolved when saveAll completes.
    */
   public static <T extends ParseObject> Task<Void> saveAllInBackground(final List<T> objects) {
@@ -2719,7 +2684,7 @@ public class ParseObject implements Parcelable {
               public String then(Task<Void> task) throws Exception {
                 if (acl.hasUnresolvedUser()) {
                   throw new IllegalStateException("ACL has an unresolved ParseUser. "
-                      + "Save or sign up before attempting to serialize the ACL.");
+                    + "Save or sign up before attempting to serialize the ACL.");
                 }
                 return user.getSessionToken();
               }
@@ -2742,45 +2707,39 @@ public class ParseObject implements Parcelable {
   /**
    * Fetches all the objects that don't have data in the provided list in the background.
    *
-   * @param objects
-   *          The list of objects to fetch.
-   *
+   * @param objects The list of objects to fetch.
    * @return A {@link bolts.Task} that is resolved when fetchAllIfNeeded completes.
    */
   public static <T extends ParseObject> Task<List<T>> fetchAllIfNeededInBackground(
-      final List<T> objects) {
+    final List<T> objects) {
     return fetchAllAsync(objects, true);
   }
 
   /**
    * Fetches all the objects that don't have data in the provided list.
    *
-   * @param objects
-   *          The list of objects to fetch.
+   * @param objects The list of objects to fetch.
    * @return The list passed in for convenience.
-   * @throws ParseException
-   *           Throws an exception if the server returns an error or is inaccessible.
+   * @throws ParseException Throws an exception if the server returns an error or is inaccessible.
    */
   public static <T extends ParseObject> List<T> fetchAllIfNeeded(List<T> objects)
-      throws ParseException {
+    throws ParseException {
     return ParseTaskUtils.wait(fetchAllIfNeededInBackground(objects));
   }
 
   /**
    * Fetches all the objects that don't have data in the provided list in the background.
    *
-   * @param objects
-   *          The list of objects to fetch.
-   * @param callback
-   *          {@code callback.done(result, e)} is called when the fetch completes.
+   * @param objects The list of objects to fetch.
+   * @param callback {@code callback.done(result, e)} is called when the fetch completes.
    */
   public static <T extends ParseObject> void fetchAllIfNeededInBackground(final List<T> objects,
-      FindCallback<T> callback) {
+    FindCallback<T> callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(fetchAllIfNeededInBackground(objects), callback);
   }
 
   private static <T extends ParseObject> Task<List<T>> fetchAllAsync(
-      final List<T> objects, final boolean onlyIfNeeded) {
+    final List<T> objects, final boolean onlyIfNeeded) {
     return ParseUser.getCurrentUserAsync().onSuccessTask(new Continuation<ParseUser, Task<List<T>>>() {
       @Override
       public Task<List<T>> then(Task<ParseUser> task) throws Exception {
@@ -2797,12 +2756,12 @@ public class ParseObject implements Parcelable {
 
   /**
    * @param onlyIfNeeded If enabled, will only fetch if the object has an objectId and
-   *                     !isDataAvailable, otherwise it requires objectIds and will fetch regardless
-   *                     of data availability.
+   * !isDataAvailable, otherwise it requires objectIds and will fetch regardless
+   * of data availability.
    */
   // TODO(grantland): Convert to ParseUser.State
   private static <T extends ParseObject> Task<List<T>> fetchAllAsync(
-      final List<T> objects, final ParseUser user, final boolean onlyIfNeeded, Task<Void> toAwait) {
+    final List<T> objects, final ParseUser user, final boolean onlyIfNeeded, Task<Void> toAwait) {
     if (objects.size() == 0) {
       return Task.forResult(objects);
     }
@@ -2832,7 +2791,7 @@ public class ParseObject implements Parcelable {
     }
 
     final ParseQuery<T> query = ParseQuery.<T>getQuery(className)
-        .whereContainedIn(KEY_OBJECT_ID, objectIds);
+      .whereContainedIn(KEY_OBJECT_ID, objectIds);
     return toAwait.continueWithTask(new Continuation<Void, Task<List<T>>>() {
       @Override
       public Task<List<T>> then(Task<Void> task) throws Exception {
@@ -2853,8 +2812,8 @@ public class ParseObject implements Parcelable {
           T newObject = resultMap.get(object.getObjectId());
           if (newObject == null) {
             throw new ParseException(
-                ParseException.OBJECT_NOT_FOUND,
-                "Object id " + object.getObjectId() + " does not exist");
+              ParseException.OBJECT_NOT_FOUND,
+              "Object id " + object.getObjectId() + " does not exist");
           }
           if (!Parse.isLocalDatastoreEnabled()) {
             // We only need to merge if LDS is disabled, since single instance will do the merging
@@ -2870,9 +2829,7 @@ public class ParseObject implements Parcelable {
   /**
    * Fetches all the objects in the provided list in the background.
    *
-   * @param objects
-   *          The list of objects to fetch.
-   *
+   * @param objects The list of objects to fetch.
    * @return A {@link bolts.Task} that is resolved when fetch completes.
    */
   public static <T extends ParseObject> Task<List<T>> fetchAllInBackground(final List<T> objects) {
@@ -2882,11 +2839,9 @@ public class ParseObject implements Parcelable {
   /**
    * Fetches all the objects in the provided list.
    *
-   * @param objects
-   *          The list of objects to fetch.
+   * @param objects The list of objects to fetch.
    * @return The list passed in.
-   * @throws ParseException
-   *           Throws an exception if the server returns an error or is inaccessible.
+   * @throws ParseException Throws an exception if the server returns an error or is inaccessible.
    */
   public static <T extends ParseObject> List<T> fetchAll(List<T> objects) throws ParseException {
     return ParseTaskUtils.wait(fetchAllInBackground(objects));
@@ -2895,13 +2850,11 @@ public class ParseObject implements Parcelable {
   /**
    * Fetches all the objects in the provided list in the background.
    *
-   * @param objects
-   *          The list of objects to fetch.
-   * @param callback
-   *          {@code callback.done(result, e)} is called when the fetch completes.
+   * @param objects The list of objects to fetch.
+   * @param callback {@code callback.done(result, e)} is called when the fetch completes.
    */
   public static <T extends ParseObject> void fetchAllInBackground(List<T> objects,
-      FindCallback<T> callback) {
+    FindCallback<T> callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(fetchAllInBackground(objects), callback);
   }
 
@@ -2945,7 +2898,7 @@ public class ParseObject implements Parcelable {
     }
   }
 
-  /* package */ void markAllFieldsDirty() {
+  void markAllFieldsDirty() {
     synchronized (mutex) {
       for (String key : state.keySet()) {
         performPut(key, state.get(key));
@@ -2957,7 +2910,7 @@ public class ParseObject implements Parcelable {
    * performOperation() is like {@link #put(String, Object)} but instead of just taking a new value,
    * it takes a ParseFieldOperation that modifies the value.
    */
-  /* package */ void performOperation(String key, ParseFieldOperation operation) {
+  void performOperation(String key, ParseFieldOperation operation) {
     synchronized (mutex) {
       Object oldValue = estimatedData.get(key);
       Object newValue = operation.apply(oldValue, key);
@@ -2977,19 +2930,17 @@ public class ParseObject implements Parcelable {
    * Add a key-value pair to this object. It is recommended to name keys in
    * <code>camelCaseLikeThis</code>.
    *
-   * @param key
-   *          Keys must be alphanumerical plus underscore, and start with a letter.
-   * @param value
-   *          Values may be numerical, {@link String}, {@link JSONObject}, {@link JSONArray},
-   *          {@link JSONObject#NULL}, or other {@code ParseObject}s. value may not be {@code null}.
+   * @param key Keys must be alphanumerical plus underscore, and start with a letter.
+   * @param value Values may be numerical, {@link String}, {@link JSONObject}, {@link JSONArray},
+   * {@link JSONObject#NULL}, or other {@code ParseObject}s. value may not be {@code null}.
    */
-  public void put(String key, Object value) {
+  public void put(@NonNull String key, @NonNull Object value) {
     checkKeyIsMutable(key);
 
     performPut(key, value);
   }
 
-  /* package */ void performPut(String key, Object value) {
+  void performPut(String key, Object value) {
     if (key == null) {
       throw new IllegalArgumentException("key may not be null.");
     }
@@ -3016,33 +2967,29 @@ public class ParseObject implements Parcelable {
   /**
    * Whether this object has a particular key. Same as {@link #containsKey(String)}.
    *
-   * @param key
-   *          The key to check for
+   * @param key The key to check for
    * @return Whether this object contains the key
    */
-  public boolean has(String key) {
+  public boolean has(@NonNull String key) {
     return containsKey(key);
   }
 
   /**
    * Atomically increments the given key by 1.
    *
-   * @param key
-   *          The key to increment.
+   * @param key The key to increment.
    */
-  public void increment(String key) {
+  public void increment(@NonNull String key) {
     increment(key, 1);
   }
 
   /**
    * Atomically increments the given key by the given number.
    *
-   * @param key
-   *          The key to increment.
-   * @param amount
-   *          The amount to increment by.
+   * @param key The key to increment.
+   * @param amount The amount to increment by.
    */
-  public void increment(String key, Number amount) {
+  public void increment(@NonNull String key, @NonNull Number amount) {
     ParseIncrementOperation operation = new ParseIncrementOperation(amount);
     performOperation(key, operation);
   }
@@ -3050,12 +2997,10 @@ public class ParseObject implements Parcelable {
   /**
    * Atomically adds an object to the end of the array associated with a given key.
    *
-   * @param key
-   *          The key.
-   * @param value
-   *          The object to add.
+   * @param key The key.
+   * @param value The object to add.
    */
-  public void add(String key, Object value) {
+  public void add(@NonNull String key, @NonNull Object value) {
     this.addAll(key, Arrays.asList(value));
   }
 
@@ -3063,12 +3008,10 @@ public class ParseObject implements Parcelable {
    * Atomically adds the objects contained in a {@code Collection} to the end of the array
    * associated with a given key.
    *
-   * @param key
-   *          The key.
-   * @param values
-   *          The objects to add.
+   * @param key The key.
+   * @param values The objects to add.
    */
-  public void addAll(String key, Collection<?> values) {
+  public void addAll(@NonNull String key, @NonNull Collection<?> values) {
     ParseAddOperation operation = new ParseAddOperation(values);
     performOperation(key, operation);
   }
@@ -3077,12 +3020,10 @@ public class ParseObject implements Parcelable {
    * Atomically adds an object to the array associated with a given key, only if it is not already
    * present in the array. The position of the insert is not guaranteed.
    *
-   * @param key
-   *          The key.
-   * @param value
-   *          The object to add.
+   * @param key The key.
+   * @param value The object to add.
    */
-  public void addUnique(String key, Object value) {
+  public void addUnique(@NonNull String key, @NonNull Object value) {
     this.addAllUnique(key, Arrays.asList(value));
   }
 
@@ -3091,12 +3032,10 @@ public class ParseObject implements Parcelable {
    * given key, only adding elements which are not already present in the array. The position of the
    * insert is not guaranteed.
    *
-   * @param key
-   *          The key.
-   * @param values
-   *          The objects to add.
+   * @param key The key.
+   * @param values The objects to add.
    */
-  public void addAllUnique(String key, Collection<?> values) {
+  public void addAllUnique(@NonNull String key, @NonNull Collection<?> values) {
     ParseAddUniqueOperation operation = new ParseAddUniqueOperation(values);
     performOperation(key, operation);
   }
@@ -3104,16 +3043,15 @@ public class ParseObject implements Parcelable {
   /**
    * Removes a key from this object's data if it exists.
    *
-   * @param key
-   *          The key to remove.
+   * @param key The key to remove.
    */
-  public void remove(String key) {
+  public void remove(@NonNull String key) {
     checkKeyIsMutable(key);
 
     performRemove(key);
   }
 
-  /* package */ void performRemove(String key) {
+  void performRemove(String key) {
     synchronized (mutex) {
       Object object = get(key);
 
@@ -3129,12 +3067,10 @@ public class ParseObject implements Parcelable {
    * is no method removing all instances of a single object. Instead, you can call
    * {@code parseObject.removeAll(key, Arrays.asList(value))}.
    *
-   * @param key
-   *          The key.
-   * @param values
-   *          The objects to remove.
+   * @param key The key.
+   * @param values The objects to remove.
    */
-  public void removeAll(String key, Collection<?> values) {
+  public void removeAll(@NonNull String key, @NonNull Collection<?> values) {
     checkKeyIsMutable(key);
 
     ParseRemoveOperation operation = new ParseRemoveOperation(values);
@@ -3144,22 +3080,21 @@ public class ParseObject implements Parcelable {
   private void checkKeyIsMutable(String key) {
     if (!isKeyMutable(key)) {
       throw new IllegalArgumentException("Cannot modify `" + key
-          + "` property of an " + getClassName() + " object.");
+        + "` property of an " + getClassName() + " object.");
     }
   }
 
-  /* package */ boolean isKeyMutable(String key) {
+  boolean isKeyMutable(String key) {
     return true;
   }
 
   /**
    * Whether this object has a particular key. Same as {@link #has(String)}.
    *
-   * @param key
-   *          The key to check for
+   * @param key The key to check for
    * @return Whether this object contains the key
    */
-  public boolean containsKey(String key) {
+  public boolean containsKey(@NonNull String key) {
     synchronized (mutex) {
       return estimatedData.containsKey(key);
     }
@@ -3169,12 +3104,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link String} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link String}.
    */
   @Nullable
-  public String getString(String key) {
+  public String getString(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3188,12 +3122,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@code byte[]} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@code byte[]}.
    */
   @Nullable
-  public byte[] getBytes(String key) {
+  public byte[] getBytes(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3208,12 +3141,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link Number} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link Number}.
    */
   @Nullable
-  public Number getNumber(String key) {
+  public Number getNumber(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3227,12 +3159,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link JSONArray} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONArray}.
    */
   @Nullable
-  public JSONArray getJSONArray(String key) {
+  public JSONArray getJSONArray(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3251,13 +3182,12 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link List} value.
    *
-   * @param key
-   *          The key to access the value for
+   * @param key The key to access the value for
    * @return {@code null} if there is no such key or if the value can't be converted to a
-   *          {@link List}.
+   * {@link List}.
    */
   @Nullable
-  public <T> List<T> getList(String key) {
+  public <T> List<T> getList(@NonNull String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
       if (!(value instanceof List)) {
@@ -3272,13 +3202,12 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link Map} value
    *
-   * @param key
-   *          The key to access the value for
+   * @param key The key to access the value for
    * @return {@code null} if there is no such key or if the value can't be converted to a
-   *          {@link Map}.
+   * {@link Map}.
    */
   @Nullable
-  public <V> Map<String, V> getMap(String key) {
+  public <V> Map<String, V> getMap(@NonNull String key) {
     synchronized (mutex) {
       Object value = estimatedData.get(key);
       if (!(value instanceof Map)) {
@@ -3293,12 +3222,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link JSONObject} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link JSONObject}.
    */
   @Nullable
-  public JSONObject getJSONObject(String key) {
+  public JSONObject getJSONObject(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3318,11 +3246,10 @@ public class ParseObject implements Parcelable {
   /**
    * Access an {@code int} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code 0} if there is no such key or if it is not a {@code int}.
    */
-  public int getInt(String key) {
+  public int getInt(@NonNull String key) {
     Number number = getNumber(key);
     if (number == null) {
       return 0;
@@ -3333,11 +3260,10 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@code double} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code 0} if there is no such key or if it is not a {@code double}.
    */
-  public double getDouble(String key) {
+  public double getDouble(@NonNull String key) {
     Number number = getNumber(key);
     if (number == null) {
       return 0;
@@ -3348,11 +3274,10 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@code long} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code 0} if there is no such key or if it is not a {@code long}.
    */
-  public long getLong(String key) {
+  public long getLong(@NonNull String key) {
     Number number = getNumber(key);
     if (number == null) {
       return 0;
@@ -3363,11 +3288,10 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@code boolean} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code false} if there is no such key or if it is not a {@code boolean}.
    */
-  public boolean getBoolean(String key) {
+  public boolean getBoolean(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3381,12 +3305,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link Date} value.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link Date}.
    */
   @Nullable
-  public Date getDate(String key) {
+  public Date getDate(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3403,12 +3326,11 @@ public class ParseObject implements Parcelable {
    * {@link #fetchIfNeeded()} or {@link #refresh()}), {@link #isDataAvailable()} will return
    * {@code false}.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@code ParseObject}.
    */
   @Nullable
-  public ParseObject getParseObject(String key) {
+  public ParseObject getParseObject(@NonNull String key) {
     Object value = get(key);
     if (!(value instanceof ParseObject)) {
       return null;
@@ -3422,12 +3344,11 @@ public class ParseObject implements Parcelable {
    * {@link #fetchIfNeeded()} or {@link #refresh()}), {@link #isDataAvailable()} will return
    * {@code false}.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if the value is not a {@link ParseUser}.
    */
   @Nullable
-  public ParseUser getParseUser(String key) {
+  public ParseUser getParseUser(@NonNull String key) {
     Object value = get(key);
     if (!(value instanceof ParseUser)) {
       return null;
@@ -3440,12 +3361,11 @@ public class ParseObject implements Parcelable {
    * {@link ParseFile} has been downloaded (e.g. by calling {@link ParseFile#getData()}),
    * {@link ParseFile#isDataAvailable()} will return {@code false}.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key or if it is not a {@link ParseFile}.
    */
   @Nullable
-  public ParseFile getParseFile(String key) {
+  public ParseFile getParseFile(@NonNull String key) {
     Object value = get(key);
     if (!(value instanceof ParseFile)) {
       return null;
@@ -3456,12 +3376,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link ParseGeoPoint} value.
    *
-   * @param key
-   *          The key to access the value for
+   * @param key The key to access the value for
    * @return {@code null} if there is no such key or if it is not a {@link ParseGeoPoint}.
    */
   @Nullable
-  public ParseGeoPoint getParseGeoPoint(String key) {
+  public ParseGeoPoint getParseGeoPoint(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3475,12 +3394,11 @@ public class ParseObject implements Parcelable {
   /**
    * Access a {@link ParsePolygon} value.
    *
-   * @param key
-   *          The key to access the value for
+   * @param key The key to access the value for
    * @return {@code null} if there is no such key or if it is not a {@link ParsePolygon}.
    */
   @Nullable
-  public ParsePolygon getParsePolygon(String key) {
+  public ParsePolygon getParsePolygon(@NonNull String key) {
     synchronized (mutex) {
       checkGetAccess(key);
       Object value = estimatedData.get(key);
@@ -3529,7 +3447,7 @@ public class ParseObject implements Parcelable {
    * Gets whether the {@code ParseObject} has been fetched.
    *
    * @return {@code true} if the {@code ParseObject} is new or has been fetched or refreshed. {@code false}
-   *         otherwise.
+   * otherwise.
    */
   public boolean isDataAvailable() {
     synchronized (mutex) {
@@ -3542,7 +3460,7 @@ public class ParseObject implements Parcelable {
    * This means the property can be accessed safely.
    *
    * @return {@code true} if the {@code ParseObject} key is new or has been fetched or refreshed. {@code false}
-   *         otherwise.
+   * otherwise.
    */
   public boolean isDataAvailable(String key) {
     synchronized (mutex) {
@@ -3554,10 +3472,9 @@ public class ParseObject implements Parcelable {
   /**
    * Access or create a {@link ParseRelation} value for a key
    *
-   * @param key
-   *          The key to access the relation for.
+   * @param key The key to access the relation for.
    * @return the ParseRelation object if the relation already exists for the key or can be created
-   *         for this key.
+   * for this key.
    */
   @NonNull
   public <T extends ParseObject> ParseRelation<T> getRelation(String key) {
@@ -3589,8 +3506,7 @@ public class ParseObject implements Parcelable {
    * Access a value. In most cases it is more convenient to use a helper function such as
    * {@link #getString(String)} or {@link #getInt(String)}.
    *
-   * @param key
-   *          The key to access the value for.
+   * @param key The key to access the value for.
    * @return {@code null} if there is no such key.
    */
   @Nullable
@@ -3616,25 +3532,25 @@ public class ParseObject implements Parcelable {
   private void checkGetAccess(String key) {
     if (!isDataAvailable(key)) {
       throw new IllegalStateException(
-          "ParseObject has no data for '" + key + "'. Call fetchIfNeeded() to get the data.");
+        "ParseObject has no data for '" + key + "'. Call fetchIfNeeded() to get the data.");
     }
   }
 
   public boolean hasSameId(ParseObject other) {
     synchronized (mutex) {
       return this.getClassName() != null && this.getObjectId() != null
-          && this.getClassName().equals(other.getClassName())
-          && this.getObjectId().equals(other.getObjectId());
+        && this.getClassName().equals(other.getClassName())
+        && this.getObjectId().equals(other.getObjectId());
     }
   }
 
-  /* package */ void registerSaveListener(GetCallback<ParseObject> callback) {
+  void registerSaveListener(GetCallback<ParseObject> callback) {
     synchronized (mutex) {
       saveEvent.subscribe(callback);
     }
   }
 
-  /* package */ void unregisterSaveListener(GetCallback<ParseObject> callback) {
+  void unregisterSaveListener(GetCallback<ParseObject> callback) {
     synchronized (mutex) {
       saveEvent.unsubscribe(callback);
     }
@@ -3662,7 +3578,8 @@ public class ParseObject implements Parcelable {
    * as part of a static initializer because doing this in a static initializer can lead to
    * deadlocks: https://our.intern.facebook.com/intern/tasks/?t=3508472
    */
-  /* package */ static void registerParseSubclasses() {
+
+  static void registerParseSubclasses() {
     registerSubclass(ParseUser.class);
     registerSubclass(ParseRole.class);
     registerSubclass(ParseInstallation.class);
@@ -3672,7 +3589,8 @@ public class ParseObject implements Parcelable {
     registerSubclass(EventuallyPin.class);
   }
 
-  /* package */ static void unregisterParseSubclasses() {
+
+  static void unregisterParseSubclasses() {
     unregisterSubclass(ParseUser.class);
     unregisterSubclass(ParseRole.class);
     unregisterSubclass(ParseInstallation.class);
@@ -3697,17 +3615,13 @@ public class ParseObject implements Parcelable {
    * use {@link ParseQuery#fromLocalDatastore()}, or you can create an unfetched pointer with
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    *
+   * @param name the name
+   * @param objects the objects to be pinned
+   * @param callback the callback
    * @see #unpinAllInBackground(String, java.util.List, DeleteCallback)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects to be pinned
-   * @param callback
-   *          the callback
    */
   public static <T extends ParseObject> void pinAllInBackground(String name,
-      List<T> objects, SaveCallback callback) {
+    List<T> objects, SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(pinAllInBackground(name, objects), callback);
   }
 
@@ -3718,25 +3632,21 @@ public class ParseObject implements Parcelable {
    * use {@link ParseQuery#fromLocalDatastore()}, or you can create an unfetched pointer with
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    *
-   * @see #unpinAllInBackground(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects to be pinned
-   *
+   * @param name the name
+   * @param objects the objects to be pinned
    * @return A {@link bolts.Task} that is resolved when pinning all completes.
+   * @see #unpinAllInBackground(String, java.util.List)
    */
   public static <T extends ParseObject> Task<Void> pinAllInBackground(final String name,
-      final List<T> objects) {
+    final List<T> objects) {
     return pinAllInBackground(name, objects, true);
   }
 
   private static <T extends ParseObject> Task<Void> pinAllInBackground(final String name,
-      final List<T> objects, final boolean includeAllChildren) {
+    final List<T> objects, final boolean includeAllChildren) {
     if (!Parse.isLocalDatastoreEnabled()) {
       throw new IllegalStateException("Method requires Local Datastore. " +
-          "Please refer to `Parse#enableLocalDatastore(Context)`.");
+        "Please refer to `Parse#enableLocalDatastore(Context)`.");
     }
 
     Task<Void> task = Task.forResult(null);
@@ -3769,9 +3679,9 @@ public class ParseObject implements Parcelable {
       @Override
       public Task<Void> then(Task<Void> task) throws Exception {
         return Parse.getLocalDatastore().pinAllObjectsAsync(
-            name != null ? name : DEFAULT_PIN,
-            objects,
-            includeAllChildren);
+          name != null ? name : DEFAULT_PIN,
+          objects,
+          includeAllChildren);
       }
     }).onSuccessTask(new Continuation<Void, Task<Void>>() {
       @Override
@@ -3803,17 +3713,13 @@ public class ParseObject implements Parcelable {
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    * {@link #fetchFromLocalDatastore()} on it.
    *
-   * @see #unpinAll(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects to be pinned
-   *
+   * @param name the name
+   * @param objects the objects to be pinned
    * @throws ParseException
+   * @see #unpinAll(String, java.util.List)
    */
   public static <T extends ParseObject> void pinAll(String name,
-      List<T> objects) throws ParseException {
+    List<T> objects) throws ParseException {
     ParseTaskUtils.wait(pinAllInBackground(name, objects));
   }
 
@@ -3824,16 +3730,13 @@ public class ParseObject implements Parcelable {
    * use {@link ParseQuery#fromLocalDatastore()}, or you can create an unfetched pointer with
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    *
+   * @param objects the objects to be pinned
+   * @param callback the callback
    * @see #unpinAllInBackground(java.util.List, DeleteCallback)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects to be pinned
-   * @param callback
-   *          the callback
    */
   public static <T extends ParseObject> void pinAllInBackground(List<T> objects,
-      SaveCallback callback) {
+    SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(pinAllInBackground(DEFAULT_PIN, objects), callback);
   }
 
@@ -3844,13 +3747,10 @@ public class ParseObject implements Parcelable {
    * use {@link ParseQuery#fromLocalDatastore()}, or you can create an unfetched pointer with
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    *
+   * @param objects the objects to be pinned
+   * @return A {@link bolts.Task} that is resolved when pinning all completes.
    * @see #unpinAllInBackground(java.util.List)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects to be pinned
-   *
-   * @return A {@link bolts.Task} that is resolved when pinning all completes.
    */
   public static <T extends ParseObject> Task<Void> pinAllInBackground(List<T> objects) {
     return pinAllInBackground(DEFAULT_PIN, objects);
@@ -3863,12 +3763,10 @@ public class ParseObject implements Parcelable {
    * use {@link ParseQuery#fromLocalDatastore()}, or you can create an unfetched pointer with
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on it.
    *
+   * @param objects the objects to be pinned
+   * @throws ParseException
    * @see #unpinAll(java.util.List)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects to be pinned
-   * @throws ParseException
    */
   public static <T extends ParseObject> void pinAll(List<T> objects) throws ParseException {
     ParseTaskUtils.wait(pinAllInBackground(DEFAULT_PIN, objects));
@@ -3877,37 +3775,29 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param name the name
+   * @param objects the objects
+   * @param callback the callback
    * @see #pinAllInBackground(String, java.util.List, SaveCallback)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects
-   * @param callback
-   *          the callback
    */
   public static <T extends ParseObject> void unpinAllInBackground(String name, List<T> objects,
-      DeleteCallback callback) {
+    DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinAllInBackground(name, objects), callback);
   }
 
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
-   * @see #pinAllInBackground(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects
-   *
+   * @param name the name
+   * @param objects the objects
    * @return A {@link bolts.Task} that is resolved when unpinning all completes.
+   * @see #pinAllInBackground(String, java.util.List)
    */
   public static <T extends ParseObject> Task<Void> unpinAllInBackground(String name,
-      List<T> objects) {
+    List<T> objects) {
     if (!Parse.isLocalDatastoreEnabled()) {
       throw new IllegalStateException("Method requires Local Datastore. " +
-          "Please refer to `Parse#enableLocalDatastore(Context)`.");
+        "Please refer to `Parse#enableLocalDatastore(Context)`.");
     }
     if (name == null) {
       name = DEFAULT_PIN;
@@ -3918,46 +3808,36 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
-   * @see #pinAll(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   * @param objects
-   *          the objects
-   *
+   * @param name the name
+   * @param objects the objects
    * @throws ParseException
+   * @see #pinAll(String, java.util.List)
    */
   public static <T extends ParseObject> void unpinAll(String name,
-      List<T> objects) throws ParseException {
+    List<T> objects) throws ParseException {
     ParseTaskUtils.wait(unpinAllInBackground(name, objects));
   }
 
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param objects the objects
+   * @param callback the callback
    * @see #pinAllInBackground(java.util.List, SaveCallback)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects
-   * @param callback
-   *          the callback
    */
   public static <T extends ParseObject> void unpinAllInBackground(List<T> objects,
-      DeleteCallback callback) {
+    DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinAllInBackground(DEFAULT_PIN, objects), callback);
   }
 
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param objects the objects
+   * @return A {@link bolts.Task} that is resolved when unpinning all completes.
    * @see #pinAllInBackground(java.util.List)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects
-   *
-   * @return A {@link bolts.Task} that is resolved when unpinning all completes.
    */
   public static <T extends ParseObject> Task<Void> unpinAllInBackground(List<T> objects) {
     return unpinAllInBackground(DEFAULT_PIN, objects);
@@ -3966,13 +3846,10 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param objects the objects
+   * @throws ParseException
    * @see #pinAll(java.util.List)
    * @see #DEFAULT_PIN
-   *
-   * @param objects
-   *          the objects
-   *
-   * @throws ParseException
    */
   public static <T extends ParseObject> void unpinAll(List<T> objects) throws ParseException {
     ParseTaskUtils.wait(unpinAllInBackground(DEFAULT_PIN, objects));
@@ -3981,12 +3858,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param name the name
+   * @param callback the callback
    * @see #pinAll(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   * @param callback
-   *          the callback
    */
   public static void unpinAllInBackground(String name, DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinAllInBackground(name), callback);
@@ -3995,17 +3869,14 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
-   * @see #pinAll(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   *
+   * @param name the name
    * @return A {@link bolts.Task} that is resolved when unpinning all completes.
+   * @see #pinAll(String, java.util.List)
    */
   public static Task<Void> unpinAllInBackground(String name) {
     if (!Parse.isLocalDatastoreEnabled()) {
       throw new IllegalStateException("Method requires Local Datastore. " +
-          "Please refer to `Parse#enableLocalDatastore(Context)`.");
+        "Please refer to `Parse#enableLocalDatastore(Context)`.");
     }
     if (name == null) {
       name = DEFAULT_PIN;
@@ -4016,12 +3887,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
-   * @see #pinAll(String, java.util.List)
-   *
-   * @param name
-   *          the name
-   *
+   * @param name the name
    * @throws ParseException
+   * @see #pinAll(String, java.util.List)
    */
   public static void unpinAll(String name) throws ParseException {
     ParseTaskUtils.wait(unpinAllInBackground(name));
@@ -4030,11 +3898,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @param callback the callback
    * @see #pinAllInBackground(java.util.List, SaveCallback)
    * @see #DEFAULT_PIN
-   *
-   * @param callback
-   *          the callback
    */
   public static void unpinAllInBackground(DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinAllInBackground(), callback);
@@ -4043,10 +3909,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @return A {@link bolts.Task} that is resolved when unpinning all completes.
    * @see #pinAllInBackground(java.util.List, SaveCallback)
    * @see #DEFAULT_PIN
-   *
-   * @return A {@link bolts.Task} that is resolved when unpinning all completes.
    */
   public static Task<Void> unpinAllInBackground() {
     return unpinAllInBackground(DEFAULT_PIN);
@@ -4055,10 +3920,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the objects and every object they point to in the local datastore, recursively.
    *
+   * @throws ParseException
    * @see #pinAll(java.util.List)
    * @see #DEFAULT_PIN
-   *
-   * @throws ParseException
    */
   public static void unpinAll() throws ParseException {
     ParseTaskUtils.wait(unpinAllInBackground());
@@ -4070,10 +3934,10 @@ public class ParseObject implements Parcelable {
    * nothing.
    */
   @SuppressWarnings("unchecked")
-  /* package */ <T extends ParseObject> Task<T> fetchFromLocalDatastoreAsync() {
+  <T extends ParseObject> Task<T> fetchFromLocalDatastoreAsync() {
     if (!Parse.isLocalDatastoreEnabled()) {
       throw new IllegalStateException("Method requires Local Datastore. " +
-          "Please refer to `Parse#enableLocalDatastore(Context)`.");
+        "Please refer to `Parse#enableLocalDatastore(Context)`.");
     }
     return Parse.getLocalDatastore().fetchLocallyAsync((T) this);
   }
@@ -4106,10 +3970,8 @@ public class ParseObject implements Parcelable {
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on
    * it.
    *
+   * @param callback the callback
    * @see #unpinInBackground(String, DeleteCallback)
-   *
-   * @param callback
-   *          the callback
    */
   public void pinInBackground(String name, SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(pinInBackground(name), callback);
@@ -4124,14 +3986,13 @@ public class ParseObject implements Parcelable {
    * it.
    *
    * @return A {@link bolts.Task} that is resolved when pinning completes.
-   *
    * @see #unpinInBackground(String)
    */
   public Task<Void> pinInBackground(String name) {
     return pinAllInBackground(name, Collections.singletonList(this));
   }
 
-  /* package */ Task<Void> pinInBackground(String name, boolean includeAllChildren) {
+  Task<Void> pinInBackground(String name, boolean includeAllChildren) {
     return pinAllInBackground(name, Collections.singletonList(this), includeAllChildren);
   }
 
@@ -4143,9 +4004,8 @@ public class ParseObject implements Parcelable {
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on
    * it.
    *
-   * @see #unpin(String)
-   *
    * @throws ParseException
+   * @see #unpin(String)
    */
   public void pin(String name) throws ParseException {
     ParseTaskUtils.wait(pinInBackground(name));
@@ -4159,11 +4019,9 @@ public class ParseObject implements Parcelable {
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on
    * it.
    *
+   * @param callback the callback
    * @see #unpinInBackground(DeleteCallback)
    * @see #DEFAULT_PIN
-   *
-   * @param callback
-   *          the callback
    */
   public void pinInBackground(SaveCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(pinInBackground(), callback);
@@ -4178,7 +4036,6 @@ public class ParseObject implements Parcelable {
    * it.
    *
    * @return A {@link bolts.Task} that is resolved when pinning completes.
-   *
    * @see #unpinInBackground()
    * @see #DEFAULT_PIN
    */
@@ -4194,10 +4051,9 @@ public class ParseObject implements Parcelable {
    * {@link #createWithoutData(Class, String)} and then call {@link #fetchFromLocalDatastore()} on
    * it.
    *
+   * @throws ParseException
    * @see #unpin()
    * @see #DEFAULT_PIN
-   *
-   * @throws ParseException
    */
   public void pin() throws ParseException {
     ParseTaskUtils.wait(pinInBackground());
@@ -4206,10 +4062,8 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the object and every object it points to in the local datastore, recursively.
    *
+   * @param callback the callback
    * @see #pinInBackground(String, SaveCallback)
-   *
-   * @param callback
-   *          the callback
    */
   public void unpinInBackground(String name, DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinInBackground(name), callback);
@@ -4219,7 +4073,6 @@ public class ParseObject implements Parcelable {
    * Removes the object and every object it points to in the local datastore, recursively.
    *
    * @return A {@link bolts.Task} that is resolved when unpinning completes.
-   *
    * @see #pinInBackground(String)
    */
   public Task<Void> unpinInBackground(String name) {
@@ -4238,11 +4091,9 @@ public class ParseObject implements Parcelable {
   /**
    * Removes the object and every object it points to in the local datastore, recursively.
    *
+   * @param callback the callback
    * @see #pinInBackground(SaveCallback)
    * @see #DEFAULT_PIN
-   *
-   * @param callback
-   *          the callback
    */
   public void unpinInBackground(DeleteCallback callback) {
     ParseTaskUtils.callbackOnMainThreadAsync(unpinInBackground(), callback);
@@ -4252,7 +4103,6 @@ public class ParseObject implements Parcelable {
    * Removes the object and every object it points to in the local datastore, recursively.
    *
    * @return A {@link bolts.Task} that is resolved when unpinning completes.
-   *
    * @see #pinInBackground()
    * @see #DEFAULT_PIN
    */
@@ -4278,10 +4128,10 @@ public class ParseObject implements Parcelable {
 
   @Override
   public void writeToParcel(Parcel dest, int flags) {
-      writeToParcel(dest, new ParseObjectParcelEncoder(this));
+    writeToParcel(dest, new ParseObjectParcelEncoder(this));
   }
 
-  /* package */ void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
+  void writeToParcel(Parcel dest, ParseParcelEncoder encoder) {
     synchronized (mutex) {
       // Developer warnings.
       ldsEnabledWhenParceling = Parse.isLocalDatastoreEnabled();
@@ -4289,28 +4139,30 @@ public class ParseObject implements Parcelable {
       boolean deleting = isDeleting || isDeletingEventually > 0;
       if (saving) {
         Log.w(TAG, "About to parcel a ParseObject while a save / saveEventually operation is " +
-            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
-            "these tasks end. If not, it will act as if these tasks have failed. This means that " +
-            "the subsequent call to save() will update again the same keys, and this is dangerous " +
-            "for certain operations, like increment(). To avoid inconsistencies, wait for operations " +
-            "to end before parceling.");
+          "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+          "these tasks end. If not, it will act as if these tasks have failed. This means that " +
+          "the subsequent call to save() will update again the same keys, and this is dangerous " +
+          "for certain operations, like increment(). To avoid inconsistencies, wait for operations " +
+          "to end before parceling.");
       }
       if (deleting) {
         Log.w(TAG, "About to parcel a ParseObject while a delete / deleteEventually operation is " +
-            "going on. If recovered from LDS, the unparceled object will be internally updated when " +
-            "these tasks end. If not, it will assume it's not deleted, and might incorrectly " +
-            "return false for isDirty(). To avoid inconsistencies, wait for operations to end " +
-            "before parceling.");
+          "going on. If recovered from LDS, the unparceled object will be internally updated when " +
+          "these tasks end. If not, it will assume it's not deleted, and might incorrectly " +
+          "return false for isDirty(). To avoid inconsistencies, wait for operations to end " +
+          "before parceling.");
       }
       // Write className and id first, regardless of state.
       dest.writeString(getClassName());
       String objectId = getObjectId();
       dest.writeByte(objectId != null ? (byte) 1 : 0);
-      if (objectId != null) dest.writeString(objectId);
+      if (objectId != null)
+        dest.writeString(objectId);
       // Write state and other members
       state.writeToParcel(dest, encoder);
       dest.writeByte(localId != null ? (byte) 1 : 0);
-      if (localId != null) dest.writeString(localId);
+      if (localId != null)
+        dest.writeString(localId);
       dest.writeByte(isDeleted ? (byte) 1 : 0);
       // Care about dirty changes and ongoing tasks.
       ParseOperationSet set;
@@ -4347,7 +4199,8 @@ public class ParseObject implements Parcelable {
     }
   };
 
-  /* package */ static ParseObject createFromParcel(Parcel source, ParseParcelDecoder decoder) {
+
+  static ParseObject createFromParcel(Parcel source, ParseParcelDecoder decoder) {
     String className = source.readString();
     String objectId = source.readByte() == 1 ? source.readString() : null;
     // Create empty object (might be the same instance if LDS is enabled)
@@ -4358,8 +4211,10 @@ public class ParseObject implements Parcelable {
     }
     State state = State.createFromParcel(source, decoder);
     object.setState(state);
-    if (source.readByte() == 1) object.localId = source.readString();
-    if (source.readByte() == 1) object.isDeleted = true;
+    if (source.readByte() == 1)
+      object.localId = source.readString();
+    if (source.readByte() == 1)
+      object.isDeleted = true;
     // If object.ldsEnabledWhenParceling is true, we got this from OfflineStore.
     // There is no need to restore operations in that case.
     boolean restoreOperations = !object.ldsEnabledWhenParceling;
@@ -4383,7 +4238,8 @@ public class ParseObject implements Parcelable {
    *
    * @param outState Bundle to host extra values
    */
-  protected void onSaveInstanceState(Bundle outState) {}
+  protected void onSaveInstanceState(Bundle outState) {
+  }
 
   /**
    * Called when unparceling this ParseObject.
@@ -4393,7 +4249,8 @@ public class ParseObject implements Parcelable {
    *
    * @param savedState Bundle to read the values from
    */
-  protected void onRestoreInstanceState(Bundle savedState) {}
+  protected void onRestoreInstanceState(Bundle savedState) {
+  }
 
 }
 
