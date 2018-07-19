@@ -1,15 +1,5 @@
 apply plugin: 'com.android.library'
 
-version = rootProject.ext.commonLibVersion
-group = 'com.parse'
-
-ext {
-    projDescription = 'Parse Android FCM support.'
-    artifact = 'parse-fcm-android'
-    projName = 'Parse-Android'
-    gitLink = 'https://github.com/parse-community/Parse-SDK-Android'
-}
-
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -20,7 +10,6 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     packagingOptions {
@@ -43,7 +32,7 @@ android {
 dependencies {
     api "com.google.firebase:firebase-messaging:15.0.2"
     api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
-    implementation project(':Parse')
+    implementation project(':parse')
 }
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.0.0/gradle-android-javadocs.gradle'

@@ -1,2 +1,1 @@
-include ':Parse', ':fcm', ':gcm'
-
+include ':ignore', ':fcm', ':gcm'
