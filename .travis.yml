@@ -35,9 +35,3 @@ jobs:
           local_dir: docs/
           on:
             all_branches: true
-        - provider: script
-          script: ./gradlew bintrayUpload
-          skip_cleanup: true
-          on:
-            branch: master
-            tags: true
