@@ -17,23 +17,23 @@ import static org.junit.Assert.assertNotNull;
 
 public class PointerEncoderTest {
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  @Test
-  public void testEncodeRelatedObjectWithoutObjectId() {
-    thrown.expect(IllegalStateException.class);
-    thrown.expectMessage("unable to encode an association with an unsaved ParseObject");
+    @Test
+    public void testEncodeRelatedObjectWithoutObjectId() {
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("unable to encode an association with an unsaved ParseObject");
 
-    ParseObject parseObject = new ParseObject("TestObject");
-    JSONObject jsonObject = (JSONObject) PointerEncoder.get().encode(parseObject);
-  }
+        ParseObject parseObject = new ParseObject("TestObject");
+        JSONObject jsonObject = (JSONObject) PointerEncoder.get().encode(parseObject);
+    }
 
-  @Test
-  public void testEncodeRelatedObjectWithObjectId() {
-    ParseObject parseObject = new ParseObject("TestObject");
-    parseObject.setObjectId("1234");
-    JSONObject jsonObject = (JSONObject) PointerEncoder.get().encode(parseObject);
-    assertNotNull(jsonObject);
-  }
+    @Test
+    public void testEncodeRelatedObjectWithObjectId() {
+        ParseObject parseObject = new ParseObject("TestObject");
+        parseObject.setObjectId("1234");
+        JSONObject jsonObject = (JSONObject) PointerEncoder.get().encode(parseObject);
+        assertNotNull(jsonObject);
+    }
 }

@@ -30,79 +30,79 @@ import static org.junit.Assert.assertNotNull;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileUtilsTest {
 
-  private static final String TEST_STRING = "this is a test string";
-  private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
+    private static final String TEST_STRING = "this is a test string";
+    private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @Test
-  public void testReadFileToString() throws Exception {
-    File file = temporaryFolder.newFile("file.txt");
-    BufferedOutputStream out = null;
-    try {
-      out = new BufferedOutputStream(new FileOutputStream(file));
-      out.write(TEST_STRING.getBytes("UTF-8"));
-    } finally {
-      ParseIOUtils.closeQuietly(out);
+    @Test
+    public void testReadFileToString() throws Exception {
+        File file = temporaryFolder.newFile("file.txt");
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            out.write(TEST_STRING.getBytes("UTF-8"));
+        } finally {
+            ParseIOUtils.closeQuietly(out);
+        }
+
+        assertEquals(TEST_STRING, ParseFileUtils.readFileToString(file, "UTF-8"));
     }
 
-    assertEquals(TEST_STRING, ParseFileUtils.readFileToString(file, "UTF-8"));
-  }
+    @Test
+    public void testWriteStringToFile() throws Exception {
+        File file = temporaryFolder.newFile("file.txt");
+        ParseFileUtils.writeStringToFile(file, TEST_STRING, "UTF-8");
 
-  @Test
-  public void testWriteStringToFile() throws Exception {
-    File file = temporaryFolder.newFile("file.txt");
-    ParseFileUtils.writeStringToFile(file, TEST_STRING, "UTF-8");
+        InputStream in = null;
+        String content = null;
+        try {
+            in = new FileInputStream(file);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ParseIOUtils.copy(in, out);
+            content = new String(out.toByteArray(), "UTF-8");
+        } finally {
+            ParseIOUtils.closeQuietly(in);
+        }
 
-    InputStream in = null;
-    String content = null;
-    try {
-      in = new FileInputStream(file);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      ParseIOUtils.copy(in, out);
-      content = new String(out.toByteArray(), "UTF-8");
-    } finally {
-      ParseIOUtils.closeQuietly(in);
+        assertEquals(TEST_STRING, content);
     }
 
-    assertEquals(TEST_STRING, content);
-  }
+    @Test
+    public void testReadFileToJSONObject() throws Exception {
+        File file = temporaryFolder.newFile("file.txt");
+        BufferedOutputStream out = null;
+        try {
+            out = new BufferedOutputStream(new FileOutputStream(file));
+            out.write(TEST_JSON.getBytes("UTF-8"));
+        } finally {
+            ParseIOUtils.closeQuietly(out);
+        }
 
-  @Test
-  public void testReadFileToJSONObject() throws Exception {
-    File file = temporaryFolder.newFile("file.txt");
-    BufferedOutputStream out = null;
-    try {
-      out = new BufferedOutputStream(new FileOutputStream(file));
-      out.write(TEST_JSON.getBytes("UTF-8"));
-    } finally {
-      ParseIOUtils.closeQuietly(out);
+        JSONObject json = ParseFileUtils.readFileToJSONObject(file);
+        assertNotNull(json);
+        assertEquals("bar", json.getString("foo"));
     }
 
-    JSONObject json = ParseFileUtils.readFileToJSONObject(file);
-    assertNotNull(json);
-    assertEquals("bar", json.getString("foo"));
-  }
+    @Test
+    public void testWriteJSONObjectToFile() throws Exception {
+        File file = temporaryFolder.newFile("file.txt");
+        ParseFileUtils.writeJSONObjectToFile(file, new JSONObject(TEST_JSON));
 
-  @Test
-  public void testWriteJSONObjectToFile() throws Exception {
-    File file = temporaryFolder.newFile("file.txt");
-    ParseFileUtils.writeJSONObjectToFile(file, new JSONObject(TEST_JSON));
+        InputStream in = null;
+        String content = null;
+        try {
+            in = new FileInputStream(file);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ParseIOUtils.copy(in, out);
+            content = new String(out.toByteArray());
+        } finally {
+            ParseIOUtils.closeQuietly(in);
+        }
 
-    InputStream in = null;
-    String content = null;
-    try {
-      in = new FileInputStream(file);
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      ParseIOUtils.copy(in, out);
-      content = new String(out.toByteArray());
-    } finally {
-      ParseIOUtils.closeQuietly(in);
+        JSONObject json = new JSONObject(content);
+        assertNotNull(json);
+        assertEquals("bar", json.getString("foo"));
     }
-
-    JSONObject json = new JSONObject(content);
-    assertNotNull(json);
-    assertEquals("bar", json.getString("foo"));
-  }
 }

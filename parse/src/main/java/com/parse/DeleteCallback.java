@@ -33,12 +33,11 @@ package com.parse;
  * </pre>
  */
 public interface DeleteCallback extends ParseCallback1<ParseException> {
-  /**
-   * Override this function with the code you want to run after the delete is complete.
-   * 
-   * @param e
-   *          The exception raised by the delete, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseException e);
+    /**
+     * Override this function with the code you want to run after the delete is complete.
+     *
+     * @param e The exception raised by the delete, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseException e);
 }

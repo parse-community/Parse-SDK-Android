@@ -18,38 +18,38 @@ import static org.junit.Assert.assertEquals;
 
 public class ParseByteArrayHttpBodyTest {
 
-  @Test
-  public void testInitializeWithString() throws IOException {
-    String content = "content";
-    String contentType = "application/json";
-    ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
-    assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(body.getContent()));
-    assertEquals(contentType, body.getContentType());
-    assertEquals(7, body.getContentLength());
-  }
+    @Test
+    public void testInitializeWithString() throws IOException {
+        String content = "content";
+        String contentType = "application/json";
+        ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
+        assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(body.getContent()));
+        assertEquals(contentType, body.getContentType());
+        assertEquals(7, body.getContentLength());
+    }
 
-  @Test
-  public void testInitializeWithByteArray() throws IOException {
-    byte[] content = {1, 1, 1, 1, 1};
-    String contentType = "application/json";
-    ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
-    assertArrayEquals(content, ParseIOUtils.toByteArray(body.getContent()));
-    assertEquals(contentType, body.getContentType());
-    assertEquals(5, body.getContentLength());
-  }
+    @Test
+    public void testInitializeWithByteArray() throws IOException {
+        byte[] content = {1, 1, 1, 1, 1};
+        String contentType = "application/json";
+        ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
+        assertArrayEquals(content, ParseIOUtils.toByteArray(body.getContent()));
+        assertEquals(contentType, body.getContentType());
+        assertEquals(5, body.getContentLength());
+    }
 
-  @Test
-  public void testWriteTo() throws IOException {
-    String content = "content";
-    String contentType = "application/json";
-    ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
+    @Test
+    public void testWriteTo() throws IOException {
+        String content = "content";
+        String contentType = "application/json";
+        ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
 
-    // Check content
-    ByteArrayOutputStream output = new ByteArrayOutputStream();
-    body.writeTo(output);
-    String contentAgain = output.toString();
-    assertEquals(content, contentAgain);
+        // Check content
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        body.writeTo(output);
+        String contentAgain = output.toString();
+        assertEquals(content, contentAgain);
 
-    // No need to check whether content input stream is closed since it is a ByteArrayInputStream
-  }
+        // No need to check whether content input stream is closed since it is a ByteArrayInputStream
+    }
 }

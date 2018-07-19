@@ -18,51 +18,51 @@ import static org.junit.Assert.assertTrue;
 
 public class ParseSessionTest {
 
-  @Before
-  public void setUp() {
-    ParseObject.registerSubclass(ParseSession.class);
-  }
-
-  @After
-  public void tearDown() {
-    ParseObject.unregisterSubclass(ParseSession.class);
-  }
-
-  @Test
-  public void testImmutableKeys() {
-    String[] immutableKeys = {
-        "sessionToken",
-        "createdWith",
-        "restricted",
-        "user",
-        "expiresAt",
-        "installationId"
-    };
-
-    ParseSession session = new ParseSession();
-    session.put("foo", "bar");
-    session.put("USER", "bar");
-    session.put("_user", "bar");
-    session.put("token", "bar");
-
-    for (String immutableKey : immutableKeys) {
-      try {
-        session.put(immutableKey, "blah");
-      } catch (IllegalArgumentException e) {
-        assertTrue(e.getMessage().contains("Cannot modify"));
-      }
-
-      try {
-        session.remove(immutableKey);
-      } catch (IllegalArgumentException e) {
-        assertTrue(e.getMessage().contains("Cannot modify"));
-      }
-
-      try {
-        session.removeAll(immutableKey, Arrays.asList());
-      } catch (IllegalArgumentException e) {
-        assertTrue(e.getMessage().contains("Cannot modify"));
-      }
+    @Before
+    public void setUp() {
+        ParseObject.registerSubclass(ParseSession.class);
     }
-  }
+
+    @After
+    public void tearDown() {
+        ParseObject.unregisterSubclass(ParseSession.class);
+    }
+
+    @Test
+    public void testImmutableKeys() {
+        String[] immutableKeys = {
+                "sessionToken",
+                "createdWith",
+                "restricted",
+                "user",
+                "expiresAt",
+                "installationId"
+        };
+
+        ParseSession session = new ParseSession();
+        session.put("foo", "bar");
+        session.put("USER", "bar");
+        session.put("_user", "bar");
+        session.put("token", "bar");
+
+        for (String immutableKey : immutableKeys) {
+            try {
+                session.put(immutableKey, "blah");
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().contains("Cannot modify"));
+            }
+
+            try {
+                session.remove(immutableKey);
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().contains("Cannot modify"));
+            }
+
+            try {
+                session.removeAll(immutableKey, Arrays.asList());
+            } catch (IllegalArgumentException e) {
+                assertTrue(e.getMessage().contains("Cannot modify"));
+            }
+        }
+    }
 }

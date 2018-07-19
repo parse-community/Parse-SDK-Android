@@ -31,19 +31,16 @@ package com.parse;
  *   }
  * });
  * </pre>
- * 
- * @param <T>
- *          The type of object returned by the Cloud Function.
+ *
+ * @param <T> The type of object returned by the Cloud Function.
  */
 public interface FunctionCallback<T> extends ParseCallback2<T, ParseException> {
-  /**
-   * Override this function with the code you want to run after the cloud function is complete.
-   * 
-   * @param object
-   *          The object that was returned by the cloud function.
-   * @param e
-   *          The exception raised by the cloud call, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(T object, ParseException e);
+    /**
+     * Override this function with the code you want to run after the cloud function is complete.
+     *
+     * @param object The object that was returned by the cloud function.
+     * @param e      The exception raised by the cloud call, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(T object, ParseException e);
 }

@@ -8,30 +8,28 @@
  */
 package com.parse;
 
-import org.json.JSONObject;
-
 import java.util.List;
 
 import bolts.Task;
 
 interface ParseObjectController {
 
-  Task<ParseObject.State> fetchAsync(
-      ParseObject.State state, String sessionToken, ParseDecoder decoder);
+    Task<ParseObject.State> fetchAsync(
+            ParseObject.State state, String sessionToken, ParseDecoder decoder);
 
-  Task<ParseObject.State> saveAsync(
-      ParseObject.State state,
-      ParseOperationSet operations,
-      String sessionToken,
-      ParseDecoder decoder);
+    Task<ParseObject.State> saveAsync(
+            ParseObject.State state,
+            ParseOperationSet operations,
+            String sessionToken,
+            ParseDecoder decoder);
 
-  List<Task<ParseObject.State>> saveAllAsync(
-      List<ParseObject.State> states,
-      List<ParseOperationSet> operationsList,
-      String sessionToken,
-      List<ParseDecoder> decoders);
+    List<Task<ParseObject.State>> saveAllAsync(
+            List<ParseObject.State> states,
+            List<ParseOperationSet> operationsList,
+            String sessionToken,
+            List<ParseDecoder> decoders);
 
-  Task<Void> deleteAsync(ParseObject.State state, String sessionToken);
+    Task<Void> deleteAsync(ParseObject.State state, String sessionToken);
 
-  List<Task<Void>> deleteAllAsync(List<ParseObject.State> states, String sessionToken);
+    List<Task<Void>> deleteAllAsync(List<ParseObject.State> states, String sessionToken);
 }

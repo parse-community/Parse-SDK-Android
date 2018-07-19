@@ -10,15 +10,15 @@ import org.junit.Before;
  */
 class ResetPluginsParseTest {
 
-  @Before
-  public void setUp() throws Exception {
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
-  }
+    @Before
+    public void setUp() throws Exception {
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    ParseCorePlugins.getInstance().reset();
-    ParsePlugins.reset();
-  }
+    @After
+    public void tearDown() throws Exception {
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+    }
 }

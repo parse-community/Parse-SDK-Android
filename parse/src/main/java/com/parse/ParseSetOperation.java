@@ -15,36 +15,36 @@ package com.parse;
 import android.os.Parcel;
 
 class ParseSetOperation implements ParseFieldOperation {
-  /* package */ final static String OP_NAME = "Set";
+    /* package */ final static String OP_NAME = "Set";
 
-  private final Object value;
+    private final Object value;
 
-  public ParseSetOperation(Object newValue) {
-    value = newValue;
-  }
+    public ParseSetOperation(Object newValue) {
+        value = newValue;
+    }
 
-  public Object getValue() {
-    return value;
-  }
+    public Object getValue() {
+        return value;
+    }
 
-  @Override
-  public Object encode(ParseEncoder objectEncoder) {
-    return objectEncoder.encode(value);
-  }
+    @Override
+    public Object encode(ParseEncoder objectEncoder) {
+        return objectEncoder.encode(value);
+    }
 
-  @Override
-  public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
-    dest.writeString(OP_NAME);
-    parcelableEncoder.encode(value, dest);
-  }
+    @Override
+    public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
+        dest.writeString(OP_NAME);
+        parcelableEncoder.encode(value, dest);
+    }
 
-  @Override
-  public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
-    return this;
-  }
+    @Override
+    public ParseFieldOperation mergeWithPrevious(ParseFieldOperation previous) {
+        return this;
+    }
 
-  @Override
-  public Object apply(Object oldValue, String key) {
-    return value;
-  }
+    @Override
+    public Object apply(Object oldValue, String key) {
+        return value;
+    }
 }

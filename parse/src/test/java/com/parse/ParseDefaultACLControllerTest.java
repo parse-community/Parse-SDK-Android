@@ -30,133 +30,133 @@ import static org.mockito.Mockito.when;
 
 public class ParseDefaultACLControllerTest {
 
-  @Before
-  public void setUp() {
-    ParseObject.registerSubclass(ParseRole.class);
-  }
+    @Before
+    public void setUp() {
+        ParseObject.registerSubclass(ParseRole.class);
+    }
 
-  @After
-  public void tearDown() {
-    ParseObject.unregisterSubclass(ParseRole.class);
-    ParseCorePlugins.getInstance().reset();
-  }
+    @After
+    public void tearDown() {
+        ParseObject.unregisterSubclass(ParseRole.class);
+        ParseCorePlugins.getInstance().reset();
+    }
 
-  //region testSetDefaultACL
+    //region testSetDefaultACL
 
-  @Test
-  public void testSetDefaultACLWithACL() {
-    ParseACL acl = mock(ParseACL.class);
-    ParseACL copiedACL = mock(ParseACL.class);
-    when(acl.copy()).thenReturn(copiedACL);
-    ParseDefaultACLController controller = new ParseDefaultACLController();
+    @Test
+    public void testSetDefaultACLWithACL() {
+        ParseACL acl = mock(ParseACL.class);
+        ParseACL copiedACL = mock(ParseACL.class);
+        when(acl.copy()).thenReturn(copiedACL);
+        ParseDefaultACLController controller = new ParseDefaultACLController();
 
-    controller.set(acl, true);
+        controller.set(acl, true);
 
-    assertNull(controller.defaultACLWithCurrentUser);
-    assertNull(controller.lastCurrentUser);
-    assertTrue(controller.defaultACLUsesCurrentUser);
-    verify(copiedACL, times(1)).setShared(true);
-    assertEquals(copiedACL, controller.defaultACL);
-  }
+        assertNull(controller.defaultACLWithCurrentUser);
+        assertNull(controller.lastCurrentUser);
+        assertTrue(controller.defaultACLUsesCurrentUser);
+        verify(copiedACL, times(1)).setShared(true);
+        assertEquals(copiedACL, controller.defaultACL);
+    }
 
-  @Test
-  public void testSetDefaultACLWithNull() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
+    @Test
+    public void testSetDefaultACLWithNull() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
 
-    controller.set(null, true);
+        controller.set(null, true);
 
-    assertNull(controller.defaultACLWithCurrentUser);
-    assertNull(controller.lastCurrentUser);
-    assertNull(controller.defaultACL);
-  }
+        assertNull(controller.defaultACLWithCurrentUser);
+        assertNull(controller.lastCurrentUser);
+        assertNull(controller.defaultACL);
+    }
 
-  //endregion
+    //endregion
 
-  //region testGetDefaultACL
+    //region testGetDefaultACL
 
-  @Test
-  public void testGetDefaultACLWithNoDefaultACL() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
+    @Test
+    public void testGetDefaultACLWithNoDefaultACL() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
 
-    ParseACL defaultACL = controller.get();
+        ParseACL defaultACL = controller.get();
 
-    assertNull(defaultACL);
-  }
+        assertNull(defaultACL);
+    }
 
-  @Test
-  public void testGetDefaultACLWithNoDefaultACLUsesCurrentUser() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
-    ParseACL acl = new ParseACL();
-    controller.defaultACL = acl;
-    controller.defaultACLUsesCurrentUser = false;
+    @Test
+    public void testGetDefaultACLWithNoDefaultACLUsesCurrentUser() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
+        ParseACL acl = new ParseACL();
+        controller.defaultACL = acl;
+        controller.defaultACLUsesCurrentUser = false;
 
-    ParseACL defaultACL = controller.get();
+        ParseACL defaultACL = controller.get();
 
-    assertSame(acl, defaultACL);
-  }
+        assertSame(acl, defaultACL);
+    }
 
-  @Test
-  public void testGetDefaultACLWithNoCurrentUser() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
-    ParseACL acl = new ParseACL();
-    controller.defaultACL = acl;
-    controller.defaultACLUsesCurrentUser = true;
-    // Register currentUser
-    ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-    when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.<ParseUser>forResult(null));
-    ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
+    @Test
+    public void testGetDefaultACLWithNoCurrentUser() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
+        ParseACL acl = new ParseACL();
+        controller.defaultACL = acl;
+        controller.defaultACLUsesCurrentUser = true;
+        // Register currentUser
+        ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
+        when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.<ParseUser>forResult(null));
+        ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
-    ParseACL defaultACL = controller.get();
+        ParseACL defaultACL = controller.get();
 
-    assertSame(acl, defaultACL);
-  }
+        assertSame(acl, defaultACL);
+    }
 
-  @Test
-  public void testGetDefaultACLWithSameCurrentUserAndLastCurrentUser() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
-    ParseACL acl = new ParseACL();
-    controller.defaultACL = acl;
-    controller.defaultACLUsesCurrentUser = true;
-    ParseACL aclAgain = new ParseACL();
-    controller.defaultACLWithCurrentUser = aclAgain;
-    ParseUser currentUser = mock(ParseUser.class);
-    controller.lastCurrentUser = new WeakReference<>(currentUser);
-    // Register currentUser
-    ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-    when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
-    ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
+    @Test
+    public void testGetDefaultACLWithSameCurrentUserAndLastCurrentUser() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
+        ParseACL acl = new ParseACL();
+        controller.defaultACL = acl;
+        controller.defaultACLUsesCurrentUser = true;
+        ParseACL aclAgain = new ParseACL();
+        controller.defaultACLWithCurrentUser = aclAgain;
+        ParseUser currentUser = mock(ParseUser.class);
+        controller.lastCurrentUser = new WeakReference<>(currentUser);
+        // Register currentUser
+        ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
+        when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
+        ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
-    ParseACL defaultACL = controller.get();
+        ParseACL defaultACL = controller.get();
 
-    assertNotSame(acl, defaultACL);
-    assertSame(aclAgain, defaultACL);
-  }
+        assertNotSame(acl, defaultACL);
+        assertSame(aclAgain, defaultACL);
+    }
 
-  @Test
-  public void testGetDefaultACLWithCurrentUserAndLastCurrentUserNotSame() {
-    ParseDefaultACLController controller = new ParseDefaultACLController();
-    ParseACL acl = mock(ParseACL.class);
-    ParseACL copiedACL = mock(ParseACL.class);
-    when(acl.copy()).thenReturn(copiedACL);
-    controller.defaultACL = acl;
-    controller.defaultACLUsesCurrentUser = true;
-    ParseACL aclAgain = new ParseACL();
-    controller.defaultACLWithCurrentUser = aclAgain;
-    // Register currentUser
-    ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-    ParseUser currentUser = mock(ParseUser.class);
-    when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
-    ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
+    @Test
+    public void testGetDefaultACLWithCurrentUserAndLastCurrentUserNotSame() {
+        ParseDefaultACLController controller = new ParseDefaultACLController();
+        ParseACL acl = mock(ParseACL.class);
+        ParseACL copiedACL = mock(ParseACL.class);
+        when(acl.copy()).thenReturn(copiedACL);
+        controller.defaultACL = acl;
+        controller.defaultACLUsesCurrentUser = true;
+        ParseACL aclAgain = new ParseACL();
+        controller.defaultACLWithCurrentUser = aclAgain;
+        // Register currentUser
+        ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
+        ParseUser currentUser = mock(ParseUser.class);
+        when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.forResult(currentUser));
+        ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
-    ParseACL defaultACL = controller.get();
+        ParseACL defaultACL = controller.get();
 
-    verify(copiedACL, times(1)).setShared(true);
-    verify(copiedACL, times(1)).setReadAccess(eq(currentUser), eq(true));
-    verify(copiedACL, times(1)).setWriteAccess(eq(currentUser), eq(true));
-    assertSame(currentUser, controller.lastCurrentUser.get());
-    assertNotSame(acl, defaultACL);
-    assertSame(copiedACL, defaultACL);
-  }
+        verify(copiedACL, times(1)).setShared(true);
+        verify(copiedACL, times(1)).setReadAccess(eq(currentUser), eq(true));
+        verify(copiedACL, times(1)).setWriteAccess(eq(currentUser), eq(true));
+        assertSame(currentUser, controller.lastCurrentUser.get());
+        assertNotSame(acl, defaultACL);
+        assertSame(copiedACL, defaultACL);
+    }
 
-  //endregion
+    //endregion
 }

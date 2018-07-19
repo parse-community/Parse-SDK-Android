@@ -36,13 +36,11 @@ package com.parse;
 // FYI, this does not extend ParseCallback2 since the first param is `int`, which can't be used
 // in a generic.
 public interface CountCallback {
-  /**
-   * Override this function with the code you want to run after the count is complete.
-   * 
-   * @param count
-   *          The number of objects matching the query, or -1 if it failed.
-   * @param e
-   *          The exception raised by the count, or null if it succeeded.
-   */
-  void done(int count, ParseException e);
+    /**
+     * Override this function with the code you want to run after the count is complete.
+     *
+     * @param count The number of objects matching the query, or -1 if it failed.
+     * @param e     The exception raised by the count, or null if it succeeded.
+     */
+    void done(int count, ParseException e);
 }

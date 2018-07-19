@@ -5,5 +5,5 @@ package com.parse;
  */
 public class TestHelper {
 
-  public static final int ROBOLECTRIC_SDK_VERSION = 25;
+    public static final int ROBOLECTRIC_SDK_VERSION = 25;
 }

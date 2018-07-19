@@ -40,150 +40,152 @@ import static org.junit.Assert.assertTrue;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseHttpClientTest {
 
-  // We can not use ParameterizedRobolectricTestRunner right now since Robolectric use
-  // default java classloader when we construct the parameters. However
-  // SSLCertificateSocketFactory is only mocked under Robolectric classloader.
+    // We can not use ParameterizedRobolectricTestRunner right now since Robolectric use
+    // default java classloader when we construct the parameters. However
+    // SSLCertificateSocketFactory is only mocked under Robolectric classloader.
 
-  @Test
-  public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));  }
-
-  @Test
-  public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithResponse(
-        404, "NOT FOUND", "Error", ParseHttpClient.createClient(new OkHttpClient.Builder()));  }
-
-  // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
-  // not do that since in unit test env, URLConnection does not use OKHttp internally, so there is
-  // no transparent ungzip
-
-  @Test
-  public void testParseOkHttpClientExecuteWithGzipResponse() throws Exception {
-    doSingleParseHttpClientExecuteWithGzipResponse(
-        200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));
-  }
-
-  private void doSingleParseHttpClientExecuteWithResponse(int responseCode, String responseStatus,
-      String responseContent, ParseHttpClient client) throws Exception {
-    MockWebServer server = new MockWebServer();
-
-    // Make mock response
-    int responseContentLength = responseContent.length();
-    MockResponse mockResponse = new MockResponse()
-        .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
-        .setBody(responseContent);
-
-    // Start mock server
-    server.enqueue(mockResponse);
-    server.start();
-
-    // Make ParseHttpRequest
-    Map<String, String> requestHeaders = new HashMap<>();
-    requestHeaders.put("User-Agent", "Parse Android SDK");
-
-    String requestUrl = server.url("/").toString();
-    JSONObject json = new JSONObject();
-    json.put("key", "value");
-    String requestContent = json.toString();
-    int requestContentLength = requestContent.length();
-    String requestContentType = "application/json";
-    ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-        .setUrl(requestUrl)
-        .setMethod(ParseHttpRequest.Method.POST)
-        .setBody(new ParseByteArrayHttpBody(requestContent, requestContentType))
-        .setHeaders(requestHeaders)
-        .build();
-
-    // Execute request
-    ParseHttpResponse parseResponse = client.execute(parseRequest);
-
-    RecordedRequest recordedApacheRequest = server.takeRequest();
-
-    // Verify request method
-    assertEquals(ParseHttpRequest.Method.POST.toString(), recordedApacheRequest.getMethod());
-
-    // Verify request headers, since http library automatically adds some headers, we only need to
-    // verify all parseRequest headers are in recordedRequest headers.
-    Headers recordedApacheHeaders = recordedApacheRequest.getHeaders();
-    Set<String> recordedApacheHeadersNames = recordedApacheHeaders.names();
-    for (String name : parseRequest.getAllHeaders().keySet()) {
-      assertTrue(recordedApacheHeadersNames.contains(name));
-      assertEquals(parseRequest.getAllHeaders().get(name), recordedApacheHeaders.get(name));
+    @Test
+    public void testParseOkHttpClientExecuteWithSuccessResponse() throws Exception {
+        doSingleParseHttpClientExecuteWithResponse(
+                200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));
     }
 
-    // Verify request body
-    assertEquals(requestContentLength, recordedApacheRequest.getBodySize());
-    assertArrayEquals(requestContent.getBytes(), recordedApacheRequest.getBody().readByteArray());
-
-    // Verify response status code
-    assertEquals(responseCode, parseResponse.getStatusCode());
-    // Verify response status
-    assertEquals(responseStatus, parseResponse.getReasonPhrase());
-    // Verify all response header entries' keys and values are not null.
-    for (Map.Entry<String, String> entry : parseResponse.getAllHeaders().entrySet()) {
-      assertNotNull(entry.getKey());
-      assertNotNull(entry.getValue());
+    @Test
+    public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
+        doSingleParseHttpClientExecuteWithResponse(
+                404, "NOT FOUND", "Error", ParseHttpClient.createClient(new OkHttpClient.Builder()));
     }
-    // Verify response body
-    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
-    assertArrayEquals(responseContent.getBytes(), content);
-    // Verify response body size
-    assertEquals(responseContentLength, content.length);
 
-    // Shutdown mock server
-    server.shutdown();
-  }
+    // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
+    // not do that since in unit test env, URLConnection does not use OKHttp internally, so there is
+    // no transparent ungzip
 
-  private void doSingleParseHttpClientExecuteWithGzipResponse(
-      int responseCode, String responseStatus, final String responseContent, ParseHttpClient client)
-      throws Exception {
-    MockWebServer server = new MockWebServer();
+    @Test
+    public void testParseOkHttpClientExecuteWithGzipResponse() throws Exception {
+        doSingleParseHttpClientExecuteWithGzipResponse(
+                200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));
+    }
 
-    // Make mock response
-    Buffer buffer = new Buffer();
-    ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-    GZIPOutputStream gzipOut = new GZIPOutputStream(byteOut);
-    gzipOut.write(responseContent.getBytes());
-    gzipOut.close();
-    buffer.write(byteOut.toByteArray());
-    MockResponse mockResponse = new MockResponse()
-        .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
-        .setBody(buffer)
-        .setHeader("Content-Encoding", "gzip");
+    private void doSingleParseHttpClientExecuteWithResponse(int responseCode, String responseStatus,
+                                                            String responseContent, ParseHttpClient client) throws Exception {
+        MockWebServer server = new MockWebServer();
 
-    // Start mock server
-    server.enqueue(mockResponse);
-    server.start();
+        // Make mock response
+        int responseContentLength = responseContent.length();
+        MockResponse mockResponse = new MockResponse()
+                .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
+                .setBody(responseContent);
 
-    // We do not need to add Accept-Encoding header manually, httpClient library should do that.
-    String requestUrl = server.url("/").toString();
-    ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-        .setUrl(requestUrl)
-        .setMethod(ParseHttpRequest.Method.GET)
-        .build();
+        // Start mock server
+        server.enqueue(mockResponse);
+        server.start();
 
-    // Execute request
-    ParseHttpResponse parseResponse = client.execute(parseRequest);
+        // Make ParseHttpRequest
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("User-Agent", "Parse Android SDK");
 
-    RecordedRequest recordedRequest = server.takeRequest();
+        String requestUrl = server.url("/").toString();
+        JSONObject json = new JSONObject();
+        json.put("key", "value");
+        String requestContent = json.toString();
+        int requestContentLength = requestContent.length();
+        String requestContentType = "application/json";
+        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
+                .setUrl(requestUrl)
+                .setMethod(ParseHttpRequest.Method.POST)
+                .setBody(new ParseByteArrayHttpBody(requestContent, requestContentType))
+                .setHeaders(requestHeaders)
+                .build();
 
-    // Verify request method
-    assertEquals(ParseHttpRequest.Method.GET.toString(), recordedRequest.getMethod());
+        // Execute request
+        ParseHttpResponse parseResponse = client.execute(parseRequest);
 
-    // Verify request headers
-    Headers recordedHeaders = recordedRequest.getHeaders();
+        RecordedRequest recordedApacheRequest = server.takeRequest();
 
-    assertEquals("gzip", recordedHeaders.get("Accept-Encoding"));
+        // Verify request method
+        assertEquals(ParseHttpRequest.Method.POST.toString(), recordedApacheRequest.getMethod());
 
-    // Verify we do not have Content-Encoding header
-    assertNull(parseResponse.getHeader("Content-Encoding"));
+        // Verify request headers, since http library automatically adds some headers, we only need to
+        // verify all parseRequest headers are in recordedRequest headers.
+        Headers recordedApacheHeaders = recordedApacheRequest.getHeaders();
+        Set<String> recordedApacheHeadersNames = recordedApacheHeaders.names();
+        for (String name : parseRequest.getAllHeaders().keySet()) {
+            assertTrue(recordedApacheHeadersNames.contains(name));
+            assertEquals(parseRequest.getAllHeaders().get(name), recordedApacheHeaders.get(name));
+        }
 
-    // Verify response body
-    byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
-    assertArrayEquals(responseContent.getBytes(), content);
+        // Verify request body
+        assertEquals(requestContentLength, recordedApacheRequest.getBodySize());
+        assertArrayEquals(requestContent.getBytes(), recordedApacheRequest.getBody().readByteArray());
 
-    // Shutdown mock server
-    server.shutdown();
-  }
+        // Verify response status code
+        assertEquals(responseCode, parseResponse.getStatusCode());
+        // Verify response status
+        assertEquals(responseStatus, parseResponse.getReasonPhrase());
+        // Verify all response header entries' keys and values are not null.
+        for (Map.Entry<String, String> entry : parseResponse.getAllHeaders().entrySet()) {
+            assertNotNull(entry.getKey());
+            assertNotNull(entry.getValue());
+        }
+        // Verify response body
+        byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+        assertArrayEquals(responseContent.getBytes(), content);
+        // Verify response body size
+        assertEquals(responseContentLength, content.length);
+
+        // Shutdown mock server
+        server.shutdown();
+    }
+
+    private void doSingleParseHttpClientExecuteWithGzipResponse(
+            int responseCode, String responseStatus, final String responseContent, ParseHttpClient client)
+            throws Exception {
+        MockWebServer server = new MockWebServer();
+
+        // Make mock response
+        Buffer buffer = new Buffer();
+        ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+        GZIPOutputStream gzipOut = new GZIPOutputStream(byteOut);
+        gzipOut.write(responseContent.getBytes());
+        gzipOut.close();
+        buffer.write(byteOut.toByteArray());
+        MockResponse mockResponse = new MockResponse()
+                .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
+                .setBody(buffer)
+                .setHeader("Content-Encoding", "gzip");
+
+        // Start mock server
+        server.enqueue(mockResponse);
+        server.start();
+
+        // We do not need to add Accept-Encoding header manually, httpClient library should do that.
+        String requestUrl = server.url("/").toString();
+        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
+                .setUrl(requestUrl)
+                .setMethod(ParseHttpRequest.Method.GET)
+                .build();
+
+        // Execute request
+        ParseHttpResponse parseResponse = client.execute(parseRequest);
+
+        RecordedRequest recordedRequest = server.takeRequest();
+
+        // Verify request method
+        assertEquals(ParseHttpRequest.Method.GET.toString(), recordedRequest.getMethod());
+
+        // Verify request headers
+        Headers recordedHeaders = recordedRequest.getHeaders();
+
+        assertEquals("gzip", recordedHeaders.get("Accept-Encoding"));
+
+        // Verify we do not have Content-Encoding header
+        assertNull(parseResponse.getHeader("Content-Encoding"));
+
+        // Verify response body
+        byte[] content = ParseIOUtils.toByteArray(parseResponse.getContent());
+        assertArrayEquals(responseContent.getBytes(), content);
+
+        // Shutdown mock server
+        server.shutdown();
+    }
 }

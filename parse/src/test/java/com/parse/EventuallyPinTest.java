@@ -22,38 +22,38 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class EventuallyPinTest {
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
-  @Before
-  public void setUp() throws Exception {
-    ParseObject.registerSubclass(EventuallyPin.class);
-    ParseObject.registerSubclass(ParsePin.class);
-  }
+    @Before
+    public void setUp() throws Exception {
+        ParseObject.registerSubclass(EventuallyPin.class);
+        ParseObject.registerSubclass(ParsePin.class);
+    }
 
-  @After
-  public void tearDown() throws Exception {
-    ParseObject.unregisterSubclass(EventuallyPin.class);
-    ParseObject.unregisterSubclass(ParsePin.class);
-    Parse.setLocalDatastore(null);
-    ParsePlugins.reset();
-  }
+    @After
+    public void tearDown() throws Exception {
+        ParseObject.unregisterSubclass(EventuallyPin.class);
+        ParseObject.unregisterSubclass(ParsePin.class);
+        Parse.setLocalDatastore(null);
+        ParsePlugins.reset();
+    }
 
-  @Test
-  public void testFailingFindAllPinned() throws Exception {
-    OfflineStore offlineStore = mock(OfflineStore.class);
-    Parse.setLocalDatastore(offlineStore);
-    when(offlineStore.findFromPinAsync(eq(EventuallyPin.PIN_NAME),
-        any(ParseQuery.State.class),
-        any(ParseUser.class)))
-        .thenReturn(Task.forError(new SQLiteException()));
+    @Test
+    public void testFailingFindAllPinned() throws Exception {
+        OfflineStore offlineStore = mock(OfflineStore.class);
+        Parse.setLocalDatastore(offlineStore);
+        when(offlineStore.findFromPinAsync(eq(EventuallyPin.PIN_NAME),
+                any(ParseQuery.State.class),
+                any(ParseUser.class)))
+                .thenReturn(Task.forError(new SQLiteException()));
 
-    ParsePlugins plugins = mock(ParsePlugins.class);
-    ParsePlugins.set(plugins);
-    when(plugins.restClient()).thenReturn(ParseHttpClient.createClient(null));
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        ParsePlugins.set(plugins);
+        when(plugins.restClient()).thenReturn(ParseHttpClient.createClient(null));
 
-    thrown.expect(SQLiteException.class);
+        thrown.expect(SQLiteException.class);
 
-    ParseTaskUtils.wait(EventuallyPin.findAllPinned());
-  }
+        ParseTaskUtils.wait(EventuallyPin.findAllPinned());
+    }
 }

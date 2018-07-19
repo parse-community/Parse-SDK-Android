@@ -17,31 +17,31 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 class ParseByteArrayHttpBody extends ParseHttpBody {
-  /* package */ final byte[] content;
-  /* package */ final InputStream contentInputStream;
+    /* package */ final byte[] content;
+    /* package */ final InputStream contentInputStream;
 
-  public ParseByteArrayHttpBody(String content, String contentType)
-      throws UnsupportedEncodingException {
-    this(content.getBytes("UTF-8"), contentType);
-  }
-
-  public ParseByteArrayHttpBody(byte[] content, String contentType) {
-    super(contentType, content.length);
-    this.content = content;
-    this.contentInputStream = new ByteArrayInputStream(content);
-  }
-
-  @Override
-  public InputStream getContent() {
-    return contentInputStream;
-  }
-
-  @Override
-  public void writeTo(OutputStream out) throws IOException {
-    if (out == null) {
-      throw new IllegalArgumentException("Output stream may not be null");
+    public ParseByteArrayHttpBody(String content, String contentType)
+            throws UnsupportedEncodingException {
+        this(content.getBytes("UTF-8"), contentType);
     }
 
-    out.write(content);
-  }
+    public ParseByteArrayHttpBody(byte[] content, String contentType) {
+        super(contentType, content.length);
+        this.content = content;
+        this.contentInputStream = new ByteArrayInputStream(content);
+    }
+
+    @Override
+    public InputStream getContent() {
+        return contentInputStream;
+    }
+
+    @Override
+    public void writeTo(OutputStream out) throws IOException {
+        if (out == null) {
+            throw new IllegalArgumentException("Output stream may not be null");
+        }
+
+        out.write(content);
+    }
 }

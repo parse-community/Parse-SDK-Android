@@ -20,7 +20,7 @@ package com.parse;
  * For example, this sample code signs up the object {@code myUser} and calls a different
  * function depending on whether the signup succeeded or not.
  * <p>
- * 
+ * <p>
  * <pre>
  * myUser.signUpInBackground(new SignUpCallback() {
  *   public void done(ParseException e) {
@@ -34,12 +34,11 @@ package com.parse;
  * </pre>
  */
 public interface SignUpCallback extends ParseCallback1<ParseException> {
-  /**
-   * Override this function with the code you want to run after the signUp is complete.
-   *
-   * @param e
-   *          The exception raised by the signUp, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseException e);
+    /**
+     * Override this function with the code you want to run after the signUp is complete.
+     *
+     * @param e The exception raised by the signUp, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseException e);
 }

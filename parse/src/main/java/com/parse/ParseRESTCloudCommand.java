@@ -14,18 +14,18 @@ import java.util.Map;
 
 class ParseRESTCloudCommand extends ParseRESTCommand {
 
-  private ParseRESTCloudCommand(
-      String httpPath,
-      ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
-      String sessionToken) {
-    super(httpPath, httpMethod, parameters, sessionToken);
-  }
+    private ParseRESTCloudCommand(
+            String httpPath,
+            ParseHttpRequest.Method httpMethod,
+            Map<String, ?> parameters,
+            String sessionToken) {
+        super(httpPath, httpMethod, parameters, sessionToken);
+    }
 
-  public static ParseRESTCloudCommand callFunctionCommand(String functionName,
-      Map<String, ?> parameters, String sessionToken) {
-    final String httpPath = String.format("functions/%s", functionName);
-    return new ParseRESTCloudCommand(
-        httpPath, ParseHttpRequest.Method.POST, parameters, sessionToken);
-  }
+    public static ParseRESTCloudCommand callFunctionCommand(String functionName,
+                                                            Map<String, ?> parameters, String sessionToken) {
+        final String httpPath = String.format("functions/%s", functionName);
+        return new ParseRESTCloudCommand(
+                httpPath, ParseHttpRequest.Method.POST, parameters, sessionToken);
+    }
 }

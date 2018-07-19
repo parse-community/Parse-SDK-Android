@@ -29,101 +29,101 @@ import static org.junit.Assert.assertTrue;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class NetworkSessionControllerTest {
 
-  @Before
-  public void setUp() throws MalformedURLException {
-    ParseRESTCommand.server = new URL("https://api.parse.com/1");
-  }
+    private static JSONObject generateBasicMockResponse() throws JSONException {
+        JSONObject mockResponse = new JSONObject();
+        mockResponse.put("createdAt", "2015-08-09T22:15:13.460Z");
+        mockResponse.put("objectId", "testObjectId");
+        mockResponse.put("sessionToken", "r:aBnrECraOBEXJSNMdtQJW36Re");
+        mockResponse.put("restricted", "false");
+        JSONObject createWith = new JSONObject();
+        createWith.put("action", "upgrade");
+        mockResponse.put("createdWith", createWith);
+        return mockResponse;
+    }
 
-  @After
-  public void tearDown() {
-    ParseRESTCommand.server = null;
-  }
+    private static void verifyBasicSessionState(JSONObject mockResponse, ParseSession.State state)
+            throws JSONException {
+        assertEquals("_Session", state.className());
+        long createAtLong =
+                ParseDateFormat.getInstance().parse(mockResponse.getString("createdAt")).getTime();
+        assertEquals(createAtLong, state.createdAt());
+        assertEquals(mockResponse.getString("objectId"), state.objectId());
+        assertEquals(mockResponse.getString("sessionToken"), state.get("sessionToken"));
+        assertEquals(mockResponse.getString("restricted"), state.get("restricted"));
+        assertEquals(
+                mockResponse.getJSONObject("createdWith").getString("action"),
+                ((Map<String, String>) state.get("createdWith")).get("action"));
+    }
 
-  //region testGetSessionAsync
+    //region testGetSessionAsync
 
-  @Test
-  public void testGetSessionAsync() throws Exception {
-    // Make mock response and client
-    JSONObject mockResponse = generateBasicMockResponse();
-    mockResponse.put("installationId", "39c8e8a4-6dd0-4c39-ac85-7fd61425083b");
-    ParseHttpClient restClient =
-        ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
+    @Before
+    public void setUp() throws MalformedURLException {
+        ParseRESTCommand.server = new URL("https://api.parse.com/1");
+    }
 
-    NetworkSessionController controller = new NetworkSessionController(restClient);
-    ParseObject.State newState =
-        ParseTaskUtils.wait(controller.getSessionAsync("sessionToken"));
+    //endregion
 
-    // Verify session state
-    verifyBasicSessionState(mockResponse, newState);
-    assertEquals("39c8e8a4-6dd0-4c39-ac85-7fd61425083b", newState.get("installationId"));
+    //region testUpgradeToRevocable
 
-    assertTrue(newState.isComplete());
+    @After
+    public void tearDown() {
+        ParseRESTCommand.server = null;
+    }
 
-  }
+    //endregion
 
-  //endregion
+    //region testRevokeAsync
 
-  //region testUpgradeToRevocable
+    @Test
+    public void testGetSessionAsync() throws Exception {
+        // Make mock response and client
+        JSONObject mockResponse = generateBasicMockResponse();
+        mockResponse.put("installationId", "39c8e8a4-6dd0-4c39-ac85-7fd61425083b");
+        ParseHttpClient restClient =
+                ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
 
-  @Test
-  public void testUpgradeToRevocable() throws Exception {
-    // Make mock response and client
-    JSONObject mockResponse = generateBasicMockResponse();
-    ParseHttpClient restClient =
-        ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
+        NetworkSessionController controller = new NetworkSessionController(restClient);
+        ParseObject.State newState =
+                ParseTaskUtils.wait(controller.getSessionAsync("sessionToken"));
 
-    NetworkSessionController controller = new NetworkSessionController(restClient);
-    ParseObject.State newState =
-        ParseTaskUtils.wait(controller.upgradeToRevocable("sessionToken"));
+        // Verify session state
+        verifyBasicSessionState(mockResponse, newState);
+        assertEquals("39c8e8a4-6dd0-4c39-ac85-7fd61425083b", newState.get("installationId"));
 
-    // Verify session state
-    verifyBasicSessionState(mockResponse, newState);
+        assertTrue(newState.isComplete());
 
-    assertTrue(newState.isComplete());
+    }
 
-  }
+    //endregion
 
-  //endregion
+    @Test
+    public void testUpgradeToRevocable() throws Exception {
+        // Make mock response and client
+        JSONObject mockResponse = generateBasicMockResponse();
+        ParseHttpClient restClient =
+                ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
 
-  //region testRevokeAsync
+        NetworkSessionController controller = new NetworkSessionController(restClient);
+        ParseObject.State newState =
+                ParseTaskUtils.wait(controller.upgradeToRevocable("sessionToken"));
 
-  @Test
-  public void testRevokeAsync() throws Exception {
-    // Make mock response and client
-    JSONObject mockResponse = new JSONObject();
-    ParseHttpClient restClient =
-        ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
+        // Verify session state
+        verifyBasicSessionState(mockResponse, newState);
 
-    NetworkSessionController controller = new NetworkSessionController(restClient);
-    // We just need to verify task is finished since sever returns an empty json here
-    ParseTaskUtils.wait(controller.revokeAsync("sessionToken"));
-  }
+        assertTrue(newState.isComplete());
 
-  //endregion
+    }
 
-  private static JSONObject generateBasicMockResponse() throws JSONException {
-    JSONObject mockResponse = new JSONObject();
-    mockResponse.put("createdAt", "2015-08-09T22:15:13.460Z");
-    mockResponse.put("objectId", "testObjectId");
-    mockResponse.put("sessionToken", "r:aBnrECraOBEXJSNMdtQJW36Re");
-    mockResponse.put("restricted", "false");
-    JSONObject createWith = new JSONObject();
-    createWith.put("action", "upgrade");
-    mockResponse.put("createdWith", createWith);
-    return mockResponse;
-  }
+    @Test
+    public void testRevokeAsync() throws Exception {
+        // Make mock response and client
+        JSONObject mockResponse = new JSONObject();
+        ParseHttpClient restClient =
+                ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
 
-  private static void verifyBasicSessionState(JSONObject mockResponse, ParseSession.State state)
-      throws JSONException {
-    assertEquals("_Session", state.className());
-    long createAtLong =
-        ParseDateFormat.getInstance().parse(mockResponse.getString("createdAt")).getTime();
-    assertEquals(createAtLong, state.createdAt());
-    assertEquals(mockResponse.getString("objectId"), state.objectId());
-    assertEquals(mockResponse.getString("sessionToken"), state.get("sessionToken"));
-    assertEquals(mockResponse.getString("restricted"), state.get("restricted"));
-    assertEquals(
-        mockResponse.getJSONObject("createdWith").getString("action"),
-        ((Map<String, String>)state.get("createdWith")).get("action"));
-  }
+        NetworkSessionController controller = new NetworkSessionController(restClient);
+        // We just need to verify task is finished since sever returns an empty json here
+        ParseTaskUtils.wait(controller.revokeAsync("sessionToken"));
+    }
 }

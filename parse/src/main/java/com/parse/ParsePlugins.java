@@ -27,6 +27,21 @@ public class ParsePlugins {
 
     private static final Object LOCK = new Object();
     private static ParsePlugins instance;
+    final Object lock = new Object();
+    private final Parse.Configuration configuration;
+    File parseDir;
+    File cacheDir;
+    File filesDir;
+    ParseHttpClient restClient;
+    ParseHttpClient fileClient;
+    private Context applicationContext;
+    private InstallationId installationId;
+    private ParsePlugins(Context context, Parse.Configuration configuration) {
+        if (context != null) {
+            applicationContext = context.getApplicationContext();
+        }
+        this.configuration = configuration;
+    }
 
     static void initialize(Context context, Parse.Configuration configuration) {
         ParsePlugins.set(new ParsePlugins(context, configuration));
@@ -53,25 +68,13 @@ public class ParsePlugins {
         }
     }
 
-    final Object lock = new Object();
-    private final Parse.Configuration configuration;
-
-    private Context applicationContext;
-
-    private InstallationId installationId;
-
-    File parseDir;
-    File cacheDir;
-    File filesDir;
-
-    ParseHttpClient restClient;
-    ParseHttpClient fileClient;
-
-    private ParsePlugins(Context context, Parse.Configuration configuration) {
-        if (context != null) {
-            applicationContext = context.getApplicationContext();
+    private static File createFileDir(File file) {
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                return file;
+            }
         }
-        this.configuration = configuration;
+        return file;
     }
 
     public String applicationId() {
@@ -192,14 +195,5 @@ public class ParsePlugins {
             }
             return createFileDir(filesDir);
         }
-    }
-
-    private static File createFileDir(File file) {
-        if (!file.exists()) {
-            if (!file.mkdirs()) {
-                return file;
-            }
-        }
-        return file;
     }
 }

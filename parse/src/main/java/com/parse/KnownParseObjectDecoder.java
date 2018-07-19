@@ -15,22 +15,22 @@ import java.util.Map;
  * has been fetched instead of creating a new instance.
  */
 class KnownParseObjectDecoder extends ParseDecoder {
-  private Map<String, ParseObject> fetchedObjects;
+    private Map<String, ParseObject> fetchedObjects;
 
-  public KnownParseObjectDecoder(Map<String, ParseObject> fetchedObjects) {
-    super();
-    this.fetchedObjects = fetchedObjects;
-  }
-
-  /**
-   * If the object has been fetched, the fetched object will be returned. Otherwise a
-   * new created object will be returned.
-   */
-  @Override
-  protected ParseObject decodePointer(String className, String objectId) {
-    if (fetchedObjects != null && fetchedObjects.containsKey(objectId)) {
-      return fetchedObjects.get(objectId);
+    public KnownParseObjectDecoder(Map<String, ParseObject> fetchedObjects) {
+        super();
+        this.fetchedObjects = fetchedObjects;
     }
-    return super.decodePointer(className, objectId); 
-  }
+
+    /**
+     * If the object has been fetched, the fetched object will be returned. Otherwise a
+     * new created object will be returned.
+     */
+    @Override
+    protected ParseObject decodePointer(String className, String objectId) {
+        if (fetchedObjects != null && fetchedObjects.containsKey(objectId)) {
+            return fetchedObjects.get(objectId);
+        }
+        return super.decodePointer(className, objectId);
+    }
 }

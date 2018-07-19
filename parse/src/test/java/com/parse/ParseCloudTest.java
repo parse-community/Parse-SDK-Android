@@ -42,106 +42,106 @@ import static org.mockito.Mockito.when;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseCloudTest extends ResetPluginsParseTest {
 
-  @Before
-  public void setUp() throws Exception {
-    super.setUp();
-    ParseTestUtils.setTestParseUser();
-  }
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+        ParseTestUtils.setTestParseUser();
+    }
 
-  //region testGetCloudCodeController
+    //region testGetCloudCodeController
 
-  @Test
-  public void testGetCloudCodeController() {
-    ParseCloudCodeController controller = mock(ParseCloudCodeController.class);
-    ParseCorePlugins.getInstance().registerCloudCodeController(controller);
+    @Test
+    public void testGetCloudCodeController() {
+        ParseCloudCodeController controller = mock(ParseCloudCodeController.class);
+        ParseCorePlugins.getInstance().registerCloudCodeController(controller);
 
-    assertSame(controller, ParseCloud.getCloudCodeController());
-  }
+        assertSame(controller, ParseCloud.getCloudCodeController());
+    }
 
-  //endregion
+    //endregion
 
-  //region testCallFunctions
+    //region testCallFunctions
 
-  @Test
-  public void testCallFunctionAsync() throws Exception {
-    ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
-    ParseCorePlugins.getInstance().registerCloudCodeController(controller);
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("key1", Arrays.asList(1, 2, 3));
-    parameters.put("key2", "value1");
+    @Test
+    public void testCallFunctionAsync() throws Exception {
+        ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
+        ParseCorePlugins.getInstance().registerCloudCodeController(controller);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("key1", Arrays.asList(1, 2, 3));
+        parameters.put("key2", "value1");
 
-    Task cloudCodeTask = ParseCloud.callFunctionInBackground("name", parameters);
-    ParseTaskUtils.wait(cloudCodeTask);
+        Task cloudCodeTask = ParseCloud.callFunctionInBackground("name", parameters);
+        ParseTaskUtils.wait(cloudCodeTask);
 
-    verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-        isNull(String.class));
-    assertTrue(cloudCodeTask.isCompleted());
-    assertNull(cloudCodeTask.getError());
-    assertThat(cloudCodeTask.getResult(), instanceOf(String.class));
-    assertEquals("result", cloudCodeTask.getResult());
-  }
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
+                isNull(String.class));
+        assertTrue(cloudCodeTask.isCompleted());
+        assertNull(cloudCodeTask.getError());
+        assertThat(cloudCodeTask.getResult(), instanceOf(String.class));
+        assertEquals("result", cloudCodeTask.getResult());
+    }
 
-  @Test
-  public void testCallFunctionSync() throws Exception {
-    ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
-    ParseCorePlugins.getInstance().registerCloudCodeController(controller);
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("key1", Arrays.asList(1, 2, 3));
-    parameters.put("key2", "value1");
+    @Test
+    public void testCallFunctionSync() throws Exception {
+        ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
+        ParseCorePlugins.getInstance().registerCloudCodeController(controller);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("key1", Arrays.asList(1, 2, 3));
+        parameters.put("key2", "value1");
 
-    Object result = ParseCloud.callFunction("name", parameters);
+        Object result = ParseCloud.callFunction("name", parameters);
 
-    verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-        isNull(String.class));
-    assertThat(result, instanceOf(String.class));
-    assertEquals("result", result);
-  }
-
-  @Test
-  public void testCallFunctionNullCallback() throws Exception {
-    ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
-    ParseCorePlugins.getInstance().registerCloudCodeController(controller);
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("key1", Arrays.asList(1, 2, 3));
-    parameters.put("key2", "value1");
-
-    ParseCloud.callFunctionInBackground("name", parameters, null);
-
-    verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-        isNull(String.class));
-  }
-
-  @Test
-  public void testCallFunctionNormalCallback() throws Exception {
-    ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
-    ParseCorePlugins.getInstance().registerCloudCodeController(controller);
-    Map<String, Object> parameters = new HashMap<>();
-    parameters.put("key1", Arrays.asList(1, 2, 3));
-    parameters.put("key2", "value1");
-
-    final Semaphore done = new Semaphore(0);
-    ParseCloud.callFunctionInBackground("name", parameters, new FunctionCallback<Object>() {
-      @Override
-      public void done(Object result, ParseException e) {
-        assertNull(e);
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
+                isNull(String.class));
         assertThat(result, instanceOf(String.class));
         assertEquals("result", result);
-        done.release();
-      }
-    });
+    }
 
-    // Make sure the callback is called
-    assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-    verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-        isNull(String.class));
-  }
+    @Test
+    public void testCallFunctionNullCallback() throws Exception {
+        ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
+        ParseCorePlugins.getInstance().registerCloudCodeController(controller);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("key1", Arrays.asList(1, 2, 3));
+        parameters.put("key2", "value1");
 
-  //endregion
+        ParseCloud.callFunctionInBackground("name", parameters, null);
 
-  private <T>ParseCloudCodeController mockParseCloudCodeControllerWithResponse(final T result) {
-    ParseCloudCodeController controller = mock(ParseCloudCodeController.class);
-    when(controller.callFunctionInBackground(anyString(), anyMap(), anyString()))
-        .thenReturn(Task.forResult(result));
-    return controller;
-  }
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
+                isNull(String.class));
+    }
+
+    @Test
+    public void testCallFunctionNormalCallback() throws Exception {
+        ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
+        ParseCorePlugins.getInstance().registerCloudCodeController(controller);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("key1", Arrays.asList(1, 2, 3));
+        parameters.put("key2", "value1");
+
+        final Semaphore done = new Semaphore(0);
+        ParseCloud.callFunctionInBackground("name", parameters, new FunctionCallback<Object>() {
+            @Override
+            public void done(Object result, ParseException e) {
+                assertNull(e);
+                assertThat(result, instanceOf(String.class));
+                assertEquals("result", result);
+                done.release();
+            }
+        });
+
+        // Make sure the callback is called
+        assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
+                isNull(String.class));
+    }
+
+    //endregion
+
+    private <T> ParseCloudCodeController mockParseCloudCodeControllerWithResponse(final T result) {
+        ParseCloudCodeController controller = mock(ParseCloudCodeController.class);
+        when(controller.callFunctionInBackground(anyString(), anyMap(), anyString()))
+                .thenReturn(Task.forResult(result));
+        return controller;
+    }
 }

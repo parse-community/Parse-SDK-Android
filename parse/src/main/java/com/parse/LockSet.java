@@ -16,43 +16,43 @@ import java.util.WeakHashMap;
 import java.util.concurrent.locks.Lock;
 
 class LockSet {
-  private static final WeakHashMap<Lock, Long> stableIds = new WeakHashMap<>();
-  private static long nextStableId = 0L;
+    private static final WeakHashMap<Lock, Long> stableIds = new WeakHashMap<>();
+    private static long nextStableId = 0L;
 
-  private final Set<Lock> locks;
+    private final Set<Lock> locks;
 
-  public LockSet(Collection<Lock> locks) {
-    this.locks = new TreeSet<>(new Comparator<Lock>() {
-      @Override
-      public int compare(Lock lhs, Lock rhs) {
-        Long lhsId = getStableId(lhs);
-        Long rhsId = getStableId(rhs);
-        return lhsId.compareTo(rhsId);
-      }
-    });
-    this.locks.addAll(locks);
-  }
-
-  private static Long getStableId(Lock lock) {
-    synchronized (stableIds) {
-      if (stableIds.containsKey(lock)) {
-        return stableIds.get(lock);
-      }
-      long id = nextStableId++;
-      stableIds.put(lock, id);
-      return id;
+    public LockSet(Collection<Lock> locks) {
+        this.locks = new TreeSet<>(new Comparator<Lock>() {
+            @Override
+            public int compare(Lock lhs, Lock rhs) {
+                Long lhsId = getStableId(lhs);
+                Long rhsId = getStableId(rhs);
+                return lhsId.compareTo(rhsId);
+            }
+        });
+        this.locks.addAll(locks);
     }
-  }
 
-  public void lock() {
-    for (Lock l : locks) {
-      l.lock();
+    private static Long getStableId(Lock lock) {
+        synchronized (stableIds) {
+            if (stableIds.containsKey(lock)) {
+                return stableIds.get(lock);
+            }
+            long id = nextStableId++;
+            stableIds.put(lock, id);
+            return id;
+        }
     }
-  }
 
-  public void unlock() {
-    for (Lock l : locks) {
-      l.unlock();
+    public void lock() {
+        for (Lock l : locks) {
+            l.lock();
+        }
     }
-  }
+
+    public void unlock() {
+        for (Lock l : locks) {
+            l.unlock();
+        }
+    }
 }

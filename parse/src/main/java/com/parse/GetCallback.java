@@ -34,14 +34,12 @@ package com.parse;
  * </pre>
  */
 public interface GetCallback<T extends ParseObject> extends ParseCallback2<T, ParseException> {
-  /**
-   * Override this function with the code you want to run after the fetch is complete.
-   * 
-   * @param object
-   *          The object that was retrieved, or {@code null} if it did not succeed.
-   * @param e
-   *          The exception raised by the fetch, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(T object, ParseException e);
+    /**
+     * Override this function with the code you want to run after the fetch is complete.
+     *
+     * @param object The object that was retrieved, or {@code null} if it did not succeed.
+     * @param e      The exception raised by the fetch, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(T object, ParseException e);
 }

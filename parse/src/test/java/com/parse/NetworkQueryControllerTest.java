@@ -27,148 +27,148 @@ import static org.mockito.Mockito.when;
 
 public class NetworkQueryControllerTest {
 
-  @Before
-  public void setUp() throws MalformedURLException {
-    ParseRESTCommand.server = new URL("https://api.parse.com/1");
-  }
+    private static JSONObject generateBasicMockResponse() throws JSONException {
+        JSONObject objectJSON = new JSONObject();
+        String createAtStr = "2015-08-09T22:15:13.460Z";
+        objectJSON.put("createdAt", createAtStr);
+        objectJSON.put("updatedAt", createAtStr);
+        objectJSON.put("objectId", "testObjectId");
+        objectJSON.put("sessionToken", "testSessionToken");
+        objectJSON.put("key", "value");
 
-  @After
-  public void tearDown() {
-    ParseRESTCommand.server = null;
-  }
+        createAtStr = "2015-08-10T22:15:13.460Z";
+        JSONObject objectJSONAgain = new JSONObject();
+        objectJSONAgain.put("createdAt", createAtStr);
+        objectJSONAgain.put("updatedAt", createAtStr);
+        objectJSONAgain.put("objectId", "testObjectIdAgain");
+        objectJSONAgain.put("sessionToken", "testSessionTokenAgain");
+        objectJSONAgain.put("keyAgain", "valueAgain");
 
-  //region testConvertFindResponse
+        JSONArray objectJSONArray = new JSONArray();
+        objectJSONArray.put(objectJSON);
+        objectJSONArray.put(objectJSONAgain);
 
-  @Test
-  public void testConvertFindResponse() throws Exception {
-    // Make mock response
-    JSONObject mockResponse = generateBasicMockResponse();
-    // Make mock state
-    ParseQuery.State mockState = mock(ParseQuery.State.class);
-    when(mockState.className()).thenReturn("Test");
-    when(mockState.selectedKeys()).thenReturn(null);
-    when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
+        JSONObject mockResponse = new JSONObject();
+        mockResponse.put("results", objectJSONArray);
+        return mockResponse;
+    }
 
-    NetworkQueryController controller = new NetworkQueryController(mock(ParseHttpClient.class));
-    List<ParseObject> objects = controller.convertFindResponse(mockState, mockResponse);
+    @Before
+    public void setUp() throws MalformedURLException {
+        ParseRESTCommand.server = new URL("https://api.parse.com/1");
+    }
 
-    verifyBasicParseObjects(mockResponse, objects, "Test");
-  }
+    //region testConvertFindResponse
 
-  //endregion
+    @After
+    public void tearDown() {
+        ParseRESTCommand.server = null;
+    }
 
-  //region testFindAsync
+    //endregion
 
-  @Test
-  public void testFindAsyncWithSessionToken() throws Exception {
-    // Make mock response
-    JSONObject mockResponse = generateBasicMockResponse();
-    mockResponse.put("trace", "serverTrace");
-    ParseHttpClient restClient =
-        ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
-    // Make mock state
-    ParseQuery.State mockState = mock(ParseQuery.State.class);
-    when(mockState.className()).thenReturn("Test");
-    when(mockState.selectedKeys()).thenReturn(null);
-    when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
+    //region testFindAsync
 
-    NetworkQueryController controller = new NetworkQueryController(restClient);
-    Task<List<ParseObject>> findTask = controller.findAsync(mockState, "sessionToken", null);
-    ParseTaskUtils.wait(findTask);
-    List<ParseObject> objects = findTask.getResult();
+    @Test
+    public void testConvertFindResponse() throws Exception {
+        // Make mock response
+        JSONObject mockResponse = generateBasicMockResponse();
+        // Make mock state
+        ParseQuery.State mockState = mock(ParseQuery.State.class);
+        when(mockState.className()).thenReturn("Test");
+        when(mockState.selectedKeys()).thenReturn(null);
+        when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
 
-    verifyBasicParseObjects(mockResponse, objects, "Test");
-    // TODO(mengyan): Verify PLog is called
-  }
+        NetworkQueryController controller = new NetworkQueryController(mock(ParseHttpClient.class));
+        List<ParseObject> objects = controller.convertFindResponse(mockState, mockResponse);
 
-  // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
-  // ParseKeyValueCache
+        verifyBasicParseObjects(mockResponse, objects, "Test");
+    }
 
-  //endregion
+    // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
+    // ParseKeyValueCache
 
-  //region testCountAsync
+    //endregion
 
-  @Test
-  public void testCountAsyncWithSessionToken() throws Exception {
-    // Make mock response and client
-    JSONObject mockResponse = new JSONObject();
-    mockResponse.put("count", 2);
-    ParseHttpClient restClient =
-        ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
-    // Make mock state
-    ParseQuery.State mockState = mock(ParseQuery.State.class);
-    when(mockState.className()).thenReturn("Test");
-    when(mockState.selectedKeys()).thenReturn(null);
-    when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
+    //region testCountAsync
 
-    NetworkQueryController controller = new NetworkQueryController(restClient);
+    @Test
+    public void testFindAsyncWithSessionToken() throws Exception {
+        // Make mock response
+        JSONObject mockResponse = generateBasicMockResponse();
+        mockResponse.put("trace", "serverTrace");
+        ParseHttpClient restClient =
+                ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
+        // Make mock state
+        ParseQuery.State mockState = mock(ParseQuery.State.class);
+        when(mockState.className()).thenReturn("Test");
+        when(mockState.selectedKeys()).thenReturn(null);
+        when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
 
-    Task<Integer> countTask = controller.countAsync(mockState, "sessionToken", null);
-    ParseTaskUtils.wait(countTask);
-    int count = countTask.getResult();
+        NetworkQueryController controller = new NetworkQueryController(restClient);
+        Task<List<ParseObject>> findTask = controller.findAsync(mockState, "sessionToken", null);
+        ParseTaskUtils.wait(findTask);
+        List<ParseObject> objects = findTask.getResult();
 
-    assertEquals(2, count);
-  }
+        verifyBasicParseObjects(mockResponse, objects, "Test");
+        // TODO(mengyan): Verify PLog is called
+    }
 
-  // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
-  // ParseKeyValueCache
+    // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
+    // ParseKeyValueCache
 
-  //endregion
+    //endregion
 
-  private static JSONObject generateBasicMockResponse() throws JSONException {
-    JSONObject objectJSON = new JSONObject();
-    String createAtStr = "2015-08-09T22:15:13.460Z";
-    objectJSON.put("createdAt", createAtStr);
-    objectJSON.put("updatedAt", createAtStr);
-    objectJSON.put("objectId", "testObjectId");
-    objectJSON.put("sessionToken", "testSessionToken");
-    objectJSON.put("key", "value");
+    @Test
+    public void testCountAsyncWithSessionToken() throws Exception {
+        // Make mock response and client
+        JSONObject mockResponse = new JSONObject();
+        mockResponse.put("count", 2);
+        ParseHttpClient restClient =
+                ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
+        // Make mock state
+        ParseQuery.State mockState = mock(ParseQuery.State.class);
+        when(mockState.className()).thenReturn("Test");
+        when(mockState.selectedKeys()).thenReturn(null);
+        when(mockState.constraints()).thenReturn(new ParseQuery.QueryConstraints());
 
-    createAtStr = "2015-08-10T22:15:13.460Z";
-    JSONObject objectJSONAgain = new JSONObject();
-    objectJSONAgain.put("createdAt", createAtStr);
-    objectJSONAgain.put("updatedAt", createAtStr);
-    objectJSONAgain.put("objectId", "testObjectIdAgain");
-    objectJSONAgain.put("sessionToken", "testSessionTokenAgain");
-    objectJSONAgain.put("keyAgain", "valueAgain");
+        NetworkQueryController controller = new NetworkQueryController(restClient);
 
-    JSONArray objectJSONArray = new JSONArray();
-    objectJSONArray.put(objectJSON);
-    objectJSONArray.put(objectJSONAgain);
+        Task<Integer> countTask = controller.countAsync(mockState, "sessionToken", null);
+        ParseTaskUtils.wait(countTask);
+        int count = countTask.getResult();
 
-    JSONObject mockResponse = new JSONObject();
-    mockResponse.put("results", objectJSONArray);
-    return mockResponse;
-  }
+        assertEquals(2, count);
+    }
 
-  private void verifyBasicParseObjects(
-      JSONObject mockResponse, List<ParseObject> objects, String className) throws JSONException {
-    JSONArray objectsJSON = mockResponse.getJSONArray("results");
-    assertEquals(objectsJSON.length(), objects.size());
+    private void verifyBasicParseObjects(
+            JSONObject mockResponse, List<ParseObject> objects, String className) throws JSONException {
+        JSONArray objectsJSON = mockResponse.getJSONArray("results");
+        assertEquals(objectsJSON.length(), objects.size());
 
-    ParseObject object = objects.get(0);
-    JSONObject objectJSON = objectsJSON.getJSONObject(0);
-    assertEquals(className, object.getClassName());
-    long dateLong =
-        ParseDateFormat.getInstance().parse(objectJSON.getString("createdAt")).getTime();
-    assertEquals(dateLong, object.getState().createdAt());
-    dateLong = ParseDateFormat.getInstance().parse(objectJSON.getString("updatedAt")).getTime();
-    assertEquals(dateLong, object.getState().updatedAt());
-    assertEquals(objectJSON.getString("objectId"), object.getObjectId());
-    assertEquals(objectJSON.getString("sessionToken"), object.get("sessionToken"));
-    assertEquals(objectJSON.getString("key"), object.getString("key"));
+        ParseObject object = objects.get(0);
+        JSONObject objectJSON = objectsJSON.getJSONObject(0);
+        assertEquals(className, object.getClassName());
+        long dateLong =
+                ParseDateFormat.getInstance().parse(objectJSON.getString("createdAt")).getTime();
+        assertEquals(dateLong, object.getState().createdAt());
+        dateLong = ParseDateFormat.getInstance().parse(objectJSON.getString("updatedAt")).getTime();
+        assertEquals(dateLong, object.getState().updatedAt());
+        assertEquals(objectJSON.getString("objectId"), object.getObjectId());
+        assertEquals(objectJSON.getString("sessionToken"), object.get("sessionToken"));
+        assertEquals(objectJSON.getString("key"), object.getString("key"));
 
-    ParseObject objectAgain = objects.get(1);
-    assertEquals(className, objectAgain.getClassName());
-    JSONObject objectAgainJSON = objectsJSON.getJSONObject(1);
-    dateLong =
-        ParseDateFormat.getInstance().parse(objectAgainJSON.getString("createdAt")).getTime();
-    assertEquals(dateLong, objectAgain.getState().createdAt());
-    dateLong =
-        ParseDateFormat.getInstance().parse(objectAgainJSON.getString("updatedAt")).getTime();
-    assertEquals(dateLong, objectAgain.getState().updatedAt());
-    assertEquals(objectAgainJSON.getString("objectId"), objectAgain.getObjectId());
-    assertEquals(objectAgainJSON.getString("sessionToken"), objectAgain.get("sessionToken"));
-    assertEquals(objectAgainJSON.getString("keyAgain"), objectAgain.getString("keyAgain"));
-  }
+        ParseObject objectAgain = objects.get(1);
+        assertEquals(className, objectAgain.getClassName());
+        JSONObject objectAgainJSON = objectsJSON.getJSONObject(1);
+        dateLong =
+                ParseDateFormat.getInstance().parse(objectAgainJSON.getString("createdAt")).getTime();
+        assertEquals(dateLong, objectAgain.getState().createdAt());
+        dateLong =
+                ParseDateFormat.getInstance().parse(objectAgainJSON.getString("updatedAt")).getTime();
+        assertEquals(dateLong, objectAgain.getState().updatedAt());
+        assertEquals(objectAgainJSON.getString("objectId"), objectAgain.getObjectId());
+        assertEquals(objectAgainJSON.getString("sessionToken"), objectAgain.get("sessionToken"));
+        assertEquals(objectAgainJSON.getString("keyAgain"), objectAgain.getString("keyAgain"));
+    }
 }

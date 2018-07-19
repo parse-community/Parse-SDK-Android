@@ -13,26 +13,27 @@ import java.util.Set;
  */
 /* package */ class ParseObjectParcelEncoder extends ParseParcelEncoder {
 
-  private Set<String> ids = new HashSet<>();
+    private Set<String> ids = new HashSet<>();
 
-  public ParseObjectParcelEncoder() {}
-
-  public ParseObjectParcelEncoder(ParseObject root) {
-    ids.add(getObjectOrLocalId(root));
-  }
-
-  @Override
-  protected void encodeParseObject(ParseObject object, Parcel dest) {
-    String id = getObjectOrLocalId(object);
-    if (ids.contains(id)) {
-      encodePointer(object.getClassName(), id, dest);
-    } else {
-      ids.add(id);
-      super.encodeParseObject(object, dest);
+    public ParseObjectParcelEncoder() {
     }
-  }
 
-  private String getObjectOrLocalId(ParseObject object) {
-    return object.getObjectId() != null ? object.getObjectId() : object.getOrCreateLocalId();
-  }
+    public ParseObjectParcelEncoder(ParseObject root) {
+        ids.add(getObjectOrLocalId(root));
+    }
+
+    @Override
+    protected void encodeParseObject(ParseObject object, Parcel dest) {
+        String id = getObjectOrLocalId(object);
+        if (ids.contains(id)) {
+            encodePointer(object.getClassName(), id, dest);
+        } else {
+            ids.add(id);
+            super.encodeParseObject(object, dest);
+        }
+    }
+
+    private String getObjectOrLocalId(ParseObject object) {
+        return object.getObjectId() != null ? object.getObjectId() : object.getOrCreateLocalId();
+    }
 }

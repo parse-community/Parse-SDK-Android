@@ -18,39 +18,38 @@ import java.util.SimpleTimeZone;
  * This is the currently used date format. It is precise to the millisecond.
  */
 /* package */ class ParseDateFormat {
-  private static final String TAG = "ParseDateFormat";
+    private static final String TAG = "ParseDateFormat";
 
-  private static final ParseDateFormat INSTANCE = new ParseDateFormat();
-  public static ParseDateFormat getInstance() {
-    return INSTANCE;
-  }
+    private static final ParseDateFormat INSTANCE = new ParseDateFormat();
+    // SimpleDateFormat isn't inherently thread-safe
+    private final Object lock = new Object();
+    private final DateFormat dateFormat;
 
-  // SimpleDateFormat isn't inherently thread-safe
-  private final Object lock = new Object();
-
-  private final DateFormat dateFormat;
-
-  private ParseDateFormat() {
-    DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
-    format.setTimeZone(new SimpleTimeZone(0, "GMT"));
-    dateFormat = format;
-  }
-
-  /* package */ Date parse(String dateString) {
-    synchronized (lock) {
-      try {
-        return dateFormat.parse(dateString);
-      } catch (java.text.ParseException e) {
-        // Should never happen
-        PLog.e(TAG, "could not parse date: " + dateString, e);
-        return null;
-      }
+    private ParseDateFormat() {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        format.setTimeZone(new SimpleTimeZone(0, "GMT"));
+        dateFormat = format;
     }
-  }
 
-  /* package */ String format(Date date) {
-    synchronized (lock) {
-      return dateFormat.format(date);
+    public static ParseDateFormat getInstance() {
+        return INSTANCE;
     }
-  }
+
+    /* package */ Date parse(String dateString) {
+        synchronized (lock) {
+            try {
+                return dateFormat.parse(dateString);
+            } catch (java.text.ParseException e) {
+                // Should never happen
+                PLog.e(TAG, "could not parse date: " + dateString, e);
+                return null;
+            }
+        }
+    }
+
+    /* package */ String format(Date date) {
+        synchronized (lock) {
+            return dateFormat.format(date);
+        }
+    }
 }
