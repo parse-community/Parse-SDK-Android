@@ -28,8 +28,6 @@ task clean(type: Delete) {
 ext {
     compileSdkVersion = 27
 
-    commonLibVersion = "1.17.4-SNAPSHOT"
-
     supportLibVersion = '27.1.1'
 
     firebaseJobdispatcherVersion = '0.8.5'
