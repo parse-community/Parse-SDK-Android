@@ -299,7 +299,7 @@ public class ParseQuery<T extends ParseObject> {
     }
   }
 
-  /* package */ static class State<T extends ParseObject> {
+  public static class State<T extends ParseObject> {
 
     /* package */ static class Builder<T extends ParseObject> {
 
@@ -954,11 +954,11 @@ public class ParseQuery<T extends ParseObject> {
     user = query.user;
   }
 
-  /* package */ ParseQuery(State.Builder<T> builder) {
+  ParseQuery(State.Builder<T> builder) {
     this.builder = builder;
   }
 
-  /* package */ State.Builder<T> getBuilder() {
+  public State.Builder<T> getBuilder() {
     return builder;
   }
 

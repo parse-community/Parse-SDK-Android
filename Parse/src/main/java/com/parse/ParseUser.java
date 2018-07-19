@@ -933,7 +933,7 @@ public class ParseUser extends ParseObject {
   }
 
   //TODO (grantland): Make it really async and publicize in v2
-  /* package */ static Task<String> getCurrentSessionTokenAsync() {
+  public static Task<String> getCurrentSessionTokenAsync() {
     return getCurrentUserController().getCurrentSessionTokenAsync();
   }
 

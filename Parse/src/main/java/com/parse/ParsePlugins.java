@@ -21,7 +21,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-class ParsePlugins {
+public class ParsePlugins {
 
     private static final String INSTALLATION_ID_LOCATION = "installationId";
 
@@ -41,7 +41,7 @@ class ParsePlugins {
         }
     }
 
-    static ParsePlugins get() {
+    public static ParsePlugins get() {
         synchronized (LOCK) {
             return instance;
         }
@@ -74,11 +74,11 @@ class ParsePlugins {
         this.configuration = configuration;
     }
 
-    String applicationId() {
+    public String applicationId() {
         return configuration.applicationId;
     }
 
-    String clientKey() {
+    public String clientKey() {
         return configuration.clientKey;
     }
 
