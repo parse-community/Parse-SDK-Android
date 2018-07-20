@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import android.Manifest;
 import android.os.Parcel;
 
 import org.json.JSONObject;
@@ -20,14 +21,20 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import bolts.Capture;
+import bolts.Continuation;
 import bolts.Task;
 
 import static org.junit.Assert.assertEquals;
@@ -68,9 +75,19 @@ public class ParseUserTest extends ResetPluginsParseTest {
   @After
   public void tearDown() throws Exception {
     super.tearDown();
-    ParseObject.unregisterSubclass(ParseUser.class);
-    ParseObject.unregisterSubclass(ParseSession.class);
-    Parse.disableLocalDatastore();
+    if (ParsePlugins.get() != null) {
+      ParseCurrentInstallationController installationController =
+              ParseCorePlugins.getInstance().getCurrentInstallationController();
+      if (installationController != null) {
+        installationController.clearFromDisk();
+      }
+      ParseCurrentUserController userController =
+              ParseCorePlugins.getInstance().getCurrentUserController();
+      if (userController != null) {
+        userController.clearFromDisk();
+      }
+    }
+    Parse.destroy();
   }
 
   @Test
@@ -1541,4 +1558,111 @@ public class ParseUserTest extends ResetPluginsParseTest {
     anonymousAuthData.put("anonymousToken", "anonymousTest");
     user.putAuthData(ParseAnonymousUtils.AUTH_TYPE, anonymousAuthData);
   }
+
+  //region testSaveEventuallyWhenServerError
+
+  @Test
+  public void testSaveEventuallyWhenServerError() throws Exception {
+    Shadows.shadowOf(RuntimeEnvironment.application)
+            .grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE);
+    Parse.Configuration configuration =
+            new Parse.Configuration.Builder(RuntimeEnvironment.application)
+            .applicationId(BuildConfig.APPLICATION_ID)
+            .server("https://api.parse.com/1")
+            .enableLocalDataStore()
+            .build();
+    ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+    JSONObject mockResponse = new JSONObject();
+    mockResponse.put("objectId", "objectId");
+    mockResponse.put("email", "email@parse.com");
+    mockResponse.put("username", "username");
+    mockResponse.put("sessionToken", "r:sessionToken");
+    mockResponse.put("createdAt", ParseDateFormat.getInstance().format(new Date(1000)));
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(2000)));
+    ParseHttpClient restClient = ParseTestUtils.mockParseHttpClientWithResponse(
+            mockResponse,200, "OK");
+    when(plugins.restClient())
+            .thenReturn(restClient);
+    Parse.initialize(configuration, plugins);
+
+    ParseUser user = ParseUser.logIn("username", "password");
+    assertFalse(user.isDirty());
+
+    user.put("field", "data");
+    assertTrue(user.isDirty());
+
+    mockResponse = new JSONObject();
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(3000)));
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 200, "OK");
+
+    final CountDownLatch saveCountDown1 = new CountDownLatch(1);
+    final Capture<Exception> exceptionCapture = new Capture<>();
+    user.saveInBackground().continueWith(new Continuation<Void, Void>() {
+      @Override
+      public Void then(Task<Void> task) throws Exception {
+        exceptionCapture.set(task.getError());
+        saveCountDown1.countDown();
+        return null;
+      }
+    });
+    assertTrue(saveCountDown1.await(5, TimeUnit.SECONDS));
+    assertNull(exceptionCapture.get());
+    assertFalse(user.isDirty());
+
+    user.put("field", "other data");
+    assertTrue(user.isDirty());
+
+    mockResponse = new JSONObject();
+    mockResponse.put("error", "Save is not allowed");
+    mockResponse.put("code", 141);
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 400, "Bad Request");
+
+    final CountDownLatch saveEventuallyCountDown = new CountDownLatch(1);
+    user.saveEventually().continueWith(new Continuation<Void, Void>() {
+      @Override
+      public Void then(Task<Void> task) throws Exception {
+        exceptionCapture.set(task.getError());
+        saveEventuallyCountDown.countDown();
+        return null;
+      }
+    });
+    assertTrue(saveEventuallyCountDown.await(5, TimeUnit.SECONDS));
+    assertTrue(exceptionCapture.get() instanceof ParseException);
+    assertEquals(ParseException.SCRIPT_ERROR, ((ParseException)exceptionCapture.get()).getCode());
+    assertEquals("Save is not allowed", exceptionCapture.get().getMessage());
+    assertTrue(user.isDirty());
+
+    // Simulate reboot
+    Parse.destroy();
+    Parse.initialize(configuration, plugins);
+
+    user = ParseUser.getCurrentUser();
+    assertTrue(user.isDirty());
+
+    assertEquals("other data", user.get("field"));
+    user.put("field", "another data");
+
+    mockResponse = new JSONObject();
+    mockResponse.put("updatedAt", ParseDateFormat.getInstance().format(new Date(4000)));
+    ParseTestUtils.updateMockParseHttpClientWithResponse(
+            restClient, mockResponse, 200, "OK");
+
+    final CountDownLatch saveCountDown2 = new CountDownLatch(1);
+    user.saveInBackground().continueWith(new Continuation<Void, Void>() {
+      @Override
+      public Void then(Task<Void> task) throws Exception {
+        exceptionCapture.set(task.getError());
+        saveCountDown2.countDown();
+        return null;
+      }
+    });
+
+    assertTrue(saveCountDown2.await(5, TimeUnit.SECONDS));
+    assertNull(exceptionCapture.get());
+    assertFalse(user.isDirty());
+  }
+
+  //endregion
 }

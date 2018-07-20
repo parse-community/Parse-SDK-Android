@@ -1420,6 +1420,20 @@ public class ParseObject implements Parcelable {
       final ParseObject.State result, final ParseOperationSet operationsBeforeSave) {
     Task<Void> task = Task.forResult(null);
 
+    /*
+     * If this object is in the offline store, then we need to make sure that we pull in any dirty
+     * changes it may have before merging the server data into it.
+     */
+    final OfflineStore store = Parse.getLocalDatastore();
+    if (store != null) {
+      task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
+        @Override
+        public Task<Void> then(Task<Void> task) throws Exception {
+          return store.fetchLocallyAsync(ParseObject.this).makeVoid();
+        }
+      });
+    }
+
     final boolean success = result != null;
     synchronized (mutex) {
       // Find operationsBeforeSave in the queue so that we can remove it and move to the next
@@ -1433,22 +1447,20 @@ public class ParseObject implements Parcelable {
         // Merge the data from the failed save into the next save.
         ParseOperationSet nextOperation = opIterator.next();
         nextOperation.mergeFrom(operationsBeforeSave);
+        if (store != null) {
+          task = task.continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<Void> task) throws Exception {
+              if (task.isFaulted()) {
+                return Task.forResult(null);
+              } else {
+                return store.updateDataForObjectAsync(ParseObject.this);
+              }
+            }
+          });
+        }
         return task;
       }
-    }
-
-    /*
-     * If this object is in the offline store, then we need to make sure that we pull in any dirty
-     * changes it may have before merging the server data into it.
-     */
-    final OfflineStore store = Parse.getLocalDatastore();
-    if (store != null) {
-      task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-        @Override
-        public Task<Void> then(Task<Void> task) throws Exception {
-          return store.fetchLocallyAsync(ParseObject.this).makeVoid();
-        }
-      });
     }
 
     // fetchLocallyAsync will return an error if this object isn't in the LDS yet and that's ok

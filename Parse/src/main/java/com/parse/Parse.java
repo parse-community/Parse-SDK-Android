@@ -248,6 +248,10 @@ public class Parse {
    * @param configuration The configuration for your application.
    */
   public static void initialize(Configuration configuration) {
+    initialize(configuration, null);
+  }
+
+  static void initialize(Configuration configuration, ParsePlugins parsePlugins) {
     if (isInitialized()) {
       PLog.w(TAG, "Parse is already initialized");
       return;
@@ -256,7 +260,11 @@ public class Parse {
     // isLocalDataStoreEnabled() to perform additional behavior.
     isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
 
-    ParsePlugins.initialize(configuration.context, configuration);
+    if (parsePlugins == null) {
+      ParsePlugins.initialize(configuration.context, configuration);
+    } else {
+      ParsePlugins.set(parsePlugins);
+    }
 
     try {
       ParseRESTCommand.server = new URL(configuration.server);
@@ -311,6 +319,8 @@ public class Parse {
   }
 
   static void destroy() {
+    ParseObject.unregisterParseSubclasses();
+
     ParseEventuallyQueue queue;
     synchronized (MUTEX) {
       queue = eventuallyQueue;
@@ -322,6 +332,8 @@ public class Parse {
 
     ParseCorePlugins.getInstance().reset();
     ParsePlugins.reset();
+
+    setLocalDatastore(null);
   }
 
   /**
