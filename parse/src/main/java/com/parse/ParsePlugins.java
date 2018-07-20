@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.os.Build;
 
 import java.io.File;
@@ -116,7 +115,6 @@ public class ParsePlugins {
                         Request request = chain.request();
                         Headers.Builder headersBuilder = request.headers().newBuilder()
                                 .set(ParseRESTCommand.HEADER_APPLICATION_ID, configuration.applicationId)
-                                .set(ParseRESTCommand.HEADER_CLIENT_VERSION, Parse.externalVersionName())
                                 .set(ParseRESTCommand.HEADER_APP_BUILD_VERSION,
                                         String.valueOf(ManifestInfo.getVersionCode()))
                                 .set(ParseRESTCommand.HEADER_APP_DISPLAY_VERSION,
@@ -144,19 +142,7 @@ public class ParsePlugins {
     }
 
     String userAgent() {
-        String packageVersion = "unknown";
-        try {
-            String packageName = applicationContext.getPackageName();
-            int versionCode = applicationContext
-                    .getPackageManager()
-                    .getPackageInfo(packageName, 0)
-                    .versionCode;
-            packageVersion = packageName + "/" + versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // Should never happen.
-        }
-        return "Parse Android SDK " + ParseObject.VERSION_NAME + " (" + packageVersion +
-                ") API Level " + Build.VERSION.SDK_INT;
+        return "Parse Android SDK API Level " + Build.VERSION.SDK_INT;
     }
 
     InstallationId installationId() {

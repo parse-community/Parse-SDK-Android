@@ -61,7 +61,6 @@ public class ParseObject implements Parcelable {
      * @see #unpin()
      */
     public static final String DEFAULT_PIN = "_default";
-    /* package */ static final String VERSION_NAME = BuildConfig.VERSION_NAME;
     /* package */ static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
     private static final String AUTO_CLASS_NAME = "_Automatic";
     private static final String TAG = "ParseObject";

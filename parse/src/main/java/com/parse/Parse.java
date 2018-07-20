@@ -491,10 +491,6 @@ public class Parse {
         PLog.setLogLevel(logLevel);
     }
 
-    static String externalVersionName() {
-        return "a" + ParseObject.VERSION_NAME;
-    }
-
     //endregion
 
     interface ParseCallbacks {

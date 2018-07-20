@@ -35,7 +35,6 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
 
     /* package */ static final String HEADER_APPLICATION_ID = "X-Parse-Application-Id";
     /* package */ static final String HEADER_CLIENT_KEY = "X-Parse-Client-Key";
-    /* package */ static final String HEADER_CLIENT_VERSION = "X-Parse-Client-Version";
     /* package */ static final String HEADER_APP_BUILD_VERSION = "X-Parse-App-Build-Version";
     /* package */ static final String HEADER_APP_DISPLAY_VERSION = "X-Parse-App-Display-Version";
     /* package */ static final String HEADER_OS_VERSION = "X-Parse-OS-Version";

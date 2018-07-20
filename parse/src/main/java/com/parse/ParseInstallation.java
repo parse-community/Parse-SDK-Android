@@ -224,10 +224,6 @@ public class ParseInstallation extends ParseObject {
             } catch (PackageManager.NameNotFoundException e) {
                 PLog.w(TAG, "Cannot load package info; will not be saved to installation");
             }
-
-            if (!VERSION_NAME.equals(get(KEY_PARSE_VERSION))) {
-                performPut(KEY_PARSE_VERSION, VERSION_NAME);
-            }
         }
     }
 
