@@ -299,9 +299,12 @@ public class ParseQuery<T extends ParseObject> {
     }
   }
 
-  /* package */ static class State<T extends ParseObject> {
+  /**
+   * Used by Parse LiveQuery
+   */
+  public static class State<T extends ParseObject> {
 
-    /* package */ static class Builder<T extends ParseObject> {
+    public static class Builder<T extends ParseObject> {
 
       // TODO(grantland): Convert mutable parameter to immutable t6941155
       public static <T extends ParseObject> Builder<T> or(List<Builder<T>> builders) {
@@ -954,11 +957,11 @@ public class ParseQuery<T extends ParseObject> {
     user = query.user;
   }
 
-  /* package */ ParseQuery(State.Builder<T> builder) {
+  public ParseQuery(State.Builder<T> builder) {
     this.builder = builder;
   }
 
-  /* package */ State.Builder<T> getBuilder() {
+  public State.Builder<T> getBuilder() {
     return builder;
   }
 

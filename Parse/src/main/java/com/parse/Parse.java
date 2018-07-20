@@ -493,7 +493,10 @@ public class Parse {
     }
   }
 
-  static void checkInit() {
+  /**
+   * Used by Parse LiveQuery
+   */
+  public static void checkInit() {
     if (ParsePlugins.get() == null) {
       throw new RuntimeException("You must call Parse.initialize(Context)"
               + " before using the Parse library.");

@@ -927,7 +927,7 @@ public class ParseUser extends ParseObject {
   }
 
   //TODO (grantland): Make it throw ParseException and call #getCurrenSessionTokenInBackground()
-  /* package */ static String getCurrentSessionToken() {
+  public static String getCurrentSessionToken() {
     ParseUser current = ParseUser.getCurrentUser();
     return current != null ? current.getSessionToken() : null;
   }
