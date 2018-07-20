@@ -35,14 +35,12 @@ package com.parse;
  * </pre>
  */
 public interface LocationCallback extends ParseCallback2<ParseGeoPoint, ParseException> {
-  /**
-   * Override this function with the code you want to run after the location fetch is complete.
-   * 
-   * @param geoPoint
-   *          The {@link ParseGeoPoint} returned by the location fetch.
-   * @param e
-   *          The exception raised by the location fetch, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseGeoPoint geoPoint, ParseException e);
+    /**
+     * Override this function with the code you want to run after the location fetch is complete.
+     *
+     * @param geoPoint The {@link ParseGeoPoint} returned by the location fetch.
+     * @param e        The exception raised by the location fetch, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseGeoPoint geoPoint, ParseException e);
 }

@@ -10,40 +10,39 @@ package com.parse;
 
 import java.util.List;
 
-import bolts.Continuation;
 import bolts.Task;
 
 class OfflineQueryController extends AbstractQueryController {
 
-  private final OfflineStore offlineStore;
-  private final ParseQueryController networkController;
+    private final OfflineStore offlineStore;
+    private final ParseQueryController networkController;
 
-  public OfflineQueryController(OfflineStore store, ParseQueryController network) {
-    offlineStore = store;
-    networkController = network;
-  }
-
-  @Override
-  public <T extends ParseObject> Task<List<T>> findAsync(
-      ParseQuery.State<T> state,
-      ParseUser user,
-      Task<Void> cancellationToken) {
-    if (state.isFromLocalDatastore()) {
-      return offlineStore.findFromPinAsync(state.pinName(), state, user);
-    } else {
-      return networkController.findAsync(state, user, cancellationToken);
+    public OfflineQueryController(OfflineStore store, ParseQueryController network) {
+        offlineStore = store;
+        networkController = network;
     }
-  }
 
-  @Override
-  public <T extends ParseObject> Task<Integer> countAsync(
-      ParseQuery.State<T> state,
-      ParseUser user,
-      Task<Void> cancellationToken) {
-    if (state.isFromLocalDatastore()) {
-      return offlineStore.countFromPinAsync(state.pinName(), state, user);
-    } else {
-      return networkController.countAsync(state, user, cancellationToken);
+    @Override
+    public <T extends ParseObject> Task<List<T>> findAsync(
+            ParseQuery.State<T> state,
+            ParseUser user,
+            Task<Void> cancellationToken) {
+        if (state.isFromLocalDatastore()) {
+            return offlineStore.findFromPinAsync(state.pinName(), state, user);
+        } else {
+            return networkController.findAsync(state, user, cancellationToken);
+        }
     }
-  }
+
+    @Override
+    public <T extends ParseObject> Task<Integer> countAsync(
+            ParseQuery.State<T> state,
+            ParseUser user,
+            Task<Void> cancellationToken) {
+        if (state.isFromLocalDatastore()) {
+            return offlineStore.countFromPinAsync(state.pinName(), state, user);
+        } else {
+            return networkController.countAsync(state, user, cancellationToken);
+        }
+    }
 }

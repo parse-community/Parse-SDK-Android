@@ -19,144 +19,144 @@ import static org.junit.Assert.assertThat;
 
 public class ParseRoleTest {
 
-  @Before
-  public void setUp() {
-    ParseObject.registerSubclass(ParseRole.class);
-  }
+    @Before
+    public void setUp() {
+        ParseObject.registerSubclass(ParseRole.class);
+    }
 
-  @After
-  public void tearDown() {
-    ParseObject.unregisterSubclass(ParseRole.class);
-  }
+    @After
+    public void tearDown() {
+        ParseObject.unregisterSubclass(ParseRole.class);
+    }
 
-  //region testConstructor
+    //region testConstructor
 
-  @Test
-  public void testConstructorWithName() {
-    ParseRole role = new ParseRole("Test");
+    @Test
+    public void testConstructorWithName() {
+        ParseRole role = new ParseRole("Test");
 
-    assertEquals("Test", role.getName());
-  }
+        assertEquals("Test", role.getName());
+    }
 
-  @Test
-  public void testConstructorWithNameAndACL() {
-    ParseACL acl = new ParseACL();
+    @Test
+    public void testConstructorWithNameAndACL() {
+        ParseACL acl = new ParseACL();
 
-    ParseRole role = new ParseRole("Test", acl);
+        ParseRole role = new ParseRole("Test", acl);
 
-    assertEquals("Test", role.getName());
-    assertSame(acl, role.getACL());
-  }
+        assertEquals("Test", role.getName());
+        assertSame(acl, role.getACL());
+    }
 
-  //endregion
+    //endregion
 
-  //region testSetName
+    //region testSetName
 
-  @Test
-  public void testSetName() {
-    ParseRole role = new ParseRole();
+    @Test
+    public void testSetName() {
+        ParseRole role = new ParseRole();
 
-    role.setName("Test");
+        role.setName("Test");
 
-    assertEquals("Test", role.getName());
-  }
+        assertEquals("Test", role.getName());
+    }
 
-  //endregion
+    //endregion
 
-  //region testGetUsers
+    //region testGetUsers
 
-  @Test
-  public void testGetUsers() {
-    ParseRole role = new ParseRole("Test");
+    @Test
+    public void testGetUsers() {
+        ParseRole role = new ParseRole("Test");
 
-    assertThat(role.getUsers(), instanceOf(ParseRelation.class));
-    assertSame(role.getUsers(), role.getRelation("users"));
-  }
+        assertThat(role.getUsers(), instanceOf(ParseRelation.class));
+        assertSame(role.getUsers(), role.getRelation("users"));
+    }
 
-  //endregion
+    //endregion
 
-  //region testGetRoles
+    //region testGetRoles
 
-  @Test
-  public void testGetRoles() {
-    ParseRole role = new ParseRole("Test");
+    @Test
+    public void testGetRoles() {
+        ParseRole role = new ParseRole("Test");
 
-    assertThat(role.getRoles(), instanceOf(ParseRelation.class));
-    assertSame(role.getRoles(), role.getRelation("roles"));
-  }
+        assertThat(role.getRoles(), instanceOf(ParseRelation.class));
+        assertSame(role.getRoles(), role.getRelation("roles"));
+    }
 
-  //endregion
+    //endregion
 
-  //region testValidateSave
+    //region testValidateSave
 
-  @Test
-  public void testValidateSaveSuccess() {
-    ParseRole role = new ParseRole("Test");
+    @Test
+    public void testValidateSaveSuccess() {
+        ParseRole role = new ParseRole("Test");
 
-    role.validateSave();
-  }
+        role.validateSave();
+    }
 
-  @Test
-  public void testValidateSaveSuccessWithNoName() {
-    ParseRole role = new ParseRole("Test");
-    role.setObjectId("test");
+    @Test
+    public void testValidateSaveSuccessWithNoName() {
+        ParseRole role = new ParseRole("Test");
+        role.setObjectId("test");
 
-    // objectId != null and name == null should not fail
-    role.validateSave();
-  }
+        // objectId != null and name == null should not fail
+        role.validateSave();
+    }
 
-  @Test(expected = IllegalStateException.class)
-  public void testValidateSaveFailureWithNoObjectIdAndName() {
-    ParseRole role = new ParseRole();
+    @Test(expected = IllegalStateException.class)
+    public void testValidateSaveFailureWithNoObjectIdAndName() {
+        ParseRole role = new ParseRole();
 
-    role.validateSave();
-  }
+        role.validateSave();
+    }
 
-  //endregion
+    //endregion
 
-  //region testPut
+    //region testPut
 
-  @Test
-  public void testPutSuccess() {
-    ParseRole role = new ParseRole("Test");
+    @Test
+    public void testPutSuccess() {
+        ParseRole role = new ParseRole("Test");
 
-    role.put("key", "value");
+        role.put("key", "value");
 
-    assertEquals("value", role.get("key"));
-  }
+        assertEquals("value", role.get("key"));
+    }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testPutFailureWithNameAndObjectIdSet() {
-    ParseRole role = new ParseRole("Test");
-    role.setObjectId("objectId");
+    @Test(expected = IllegalArgumentException.class)
+    public void testPutFailureWithNameAndObjectIdSet() {
+        ParseRole role = new ParseRole("Test");
+        role.setObjectId("objectId");
 
-    role.put("name", "value");
-  }
+        role.put("name", "value");
+    }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testPutFailureWithInvalidNameTypeSet() {
-    ParseRole role = new ParseRole("Test");
+    @Test(expected = IllegalArgumentException.class)
+    public void testPutFailureWithInvalidNameTypeSet() {
+        ParseRole role = new ParseRole("Test");
 
-    role.put("name", 1);
-  }
+        role.put("name", 1);
+    }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testPutFailureWithInvalidNameValueSet() {
-    ParseRole role = new ParseRole("Test");
+    @Test(expected = IllegalArgumentException.class)
+    public void testPutFailureWithInvalidNameValueSet() {
+        ParseRole role = new ParseRole("Test");
 
-    role.put("name", "!!!!");
-  }
+        role.put("name", "!!!!");
+    }
 
-  //endregion
+    //endregion
 
-  //region testGetQuery
+    //region testGetQuery
 
-  @Test
-  public void testGetQuery() {
-    ParseQuery<?> query = ParseRole.getQuery();
+    @Test
+    public void testGetQuery() {
+        ParseQuery<?> query = ParseRole.getQuery();
 
-    assertEquals(ParseCorePlugins.getInstance().getSubclassingController().getClassName(ParseRole.class), query.getBuilder().getClassName());
-  }
+        assertEquals(ParseCorePlugins.getInstance().getSubclassingController().getClassName(ParseRole.class), query.getBuilder().getClassName());
+    }
 
-  //endregion
+    //endregion
 }

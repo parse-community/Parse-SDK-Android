@@ -35,13 +35,12 @@ package com.parse;
  * </pre>
  */
 public interface RequestPasswordResetCallback extends ParseCallback1<ParseException> {
-  /**
-   * Override this function with the code you want to run after the request is complete.
-   * 
-   * @param e
-   *          The exception raised by the save, or {@code null} if no account is associated with the
-   *          email address.
-   */
-  @Override
-  void done(ParseException e);
+    /**
+     * Override this function with the code you want to run after the request is complete.
+     *
+     * @param e The exception raised by the save, or {@code null} if no account is associated with the
+     *          email address.
+     */
+    @Override
+    void done(ParseException e);
 }

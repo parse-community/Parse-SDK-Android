@@ -19,65 +19,65 @@ import static org.junit.Assert.assertTrue;
 
 public class ParseTextUtilsTest {
 
-  //region testJoin
+    //region testJoin
 
-  @Test
-  public void testJoinMultipleItems() {
-    String joined = ParseTextUtils.join(",", Arrays.asList("one", "two", "three"));
-    assertEquals("one,two,three", joined);
-  }
+    @Test
+    public void testJoinMultipleItems() {
+        String joined = ParseTextUtils.join(",", Arrays.asList("one", "two", "three"));
+        assertEquals("one,two,three", joined);
+    }
 
-  @Test
-  public void testJoinSingleItem() {
-    String joined = ParseTextUtils.join(",", Collections.singletonList("one"));
-    assertEquals("one", joined);
-  }
+    @Test
+    public void testJoinSingleItem() {
+        String joined = ParseTextUtils.join(",", Collections.singletonList("one"));
+        assertEquals("one", joined);
+    }
 
-  //endregion
+    //endregion
 
-  //region testIsEmpty
+    //region testIsEmpty
 
-  @Test
-  public void testEmptyStringIsEmpty() {
-    assertTrue(ParseTextUtils.isEmpty(""));
-  }
+    @Test
+    public void testEmptyStringIsEmpty() {
+        assertTrue(ParseTextUtils.isEmpty(""));
+    }
 
-  @Test
-  public void testNullStringIsEmpty() {
-    assertTrue(ParseTextUtils.isEmpty(null));
-  }
+    @Test
+    public void testNullStringIsEmpty() {
+        assertTrue(ParseTextUtils.isEmpty(null));
+    }
 
-  @Test
-  public void testStringIsNotEmpty() {
-    assertFalse(ParseTextUtils.isEmpty("not empty"));
-  }
+    @Test
+    public void testStringIsNotEmpty() {
+        assertFalse(ParseTextUtils.isEmpty("not empty"));
+    }
 
-  //endregion
+    //endregion
 
-  //region testEquals
+    //region testEquals
 
-  @Test
-  public void testEqualsNull() {
-    assertTrue(ParseTextUtils.equals(null, null));
-  }
+    @Test
+    public void testEqualsNull() {
+        assertTrue(ParseTextUtils.equals(null, null));
+    }
 
-  @Test
-  public void testNotEqualsNull() {
-    assertFalse(ParseTextUtils.equals("not null", null));
-    assertFalse(ParseTextUtils.equals(null, "not null"));
-  }
+    @Test
+    public void testNotEqualsNull() {
+        assertFalse(ParseTextUtils.equals("not null", null));
+        assertFalse(ParseTextUtils.equals(null, "not null"));
+    }
 
-  @Test
-  public void testEqualsString() {
-    String same = "Hello, world!";
-    assertTrue(ParseTextUtils.equals(same, same));
-    assertTrue(ParseTextUtils.equals(same, same + "")); // Hack to compare different instances
-  }
+    @Test
+    public void testEqualsString() {
+        String same = "Hello, world!";
+        assertTrue(ParseTextUtils.equals(same, same));
+        assertTrue(ParseTextUtils.equals(same, same + "")); // Hack to compare different instances
+    }
 
-  @Test
-  public void testNotEqualsString() {
-    assertFalse(ParseTextUtils.equals("grantland", "nlutsenko"));
-  }
+    @Test
+    public void testNotEqualsString() {
+        assertFalse(ParseTextUtils.equals("grantland", "nlutsenko"));
+    }
 
-  //endregion
+    //endregion
 }

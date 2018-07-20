@@ -36,14 +36,12 @@ import java.util.List;
  * </pre>
  */
 public interface FindCallback<T extends ParseObject> extends ParseCallback2<List<T>, ParseException> {
-  /**
-   * Override this function with the code you want to run after the fetch is complete.
-   * 
-   * @param objects
-   *          The objects that were retrieved, or null if it did not succeed.
-   * @param e
-   *          The exception raised by the save, or null if it succeeded.
-   */
-  @Override
-  void done(List<T> objects, ParseException e);
+    /**
+     * Override this function with the code you want to run after the fetch is complete.
+     *
+     * @param objects The objects that were retrieved, or null if it did not succeed.
+     * @param e       The exception raised by the save, or null if it succeeded.
+     */
+    @Override
+    void done(List<T> objects, ParseException e);
 }

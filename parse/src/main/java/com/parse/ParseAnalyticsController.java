@@ -16,26 +16,26 @@ import bolts.Task;
 
 class ParseAnalyticsController {
 
-  /* package for test */ ParseEventuallyQueue eventuallyQueue;
+    /* package for test */ ParseEventuallyQueue eventuallyQueue;
 
-  public ParseAnalyticsController(ParseEventuallyQueue eventuallyQueue) {
-    this.eventuallyQueue = eventuallyQueue;
-  }
+    public ParseAnalyticsController(ParseEventuallyQueue eventuallyQueue) {
+        this.eventuallyQueue = eventuallyQueue;
+    }
 
-  public Task<Void> trackEventInBackground(final String name,
-    Map<String, String> dimensions, String sessionToken) {
-    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackEventCommand(name, dimensions,
-        sessionToken);
+    public Task<Void> trackEventInBackground(final String name,
+                                             Map<String, String> dimensions, String sessionToken) {
+        ParseRESTCommand command = ParseRESTAnalyticsCommand.trackEventCommand(name, dimensions,
+                sessionToken);
 
-    Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
-    return eventuallyTask.makeVoid();
-  }
+        Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
+        return eventuallyTask.makeVoid();
+    }
 
-  public Task<Void> trackAppOpenedInBackground(String pushHash, String sessionToken) {
-    ParseRESTCommand command = ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushHash,
-        sessionToken);
+    public Task<Void> trackAppOpenedInBackground(String pushHash, String sessionToken) {
+        ParseRESTCommand command = ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushHash,
+                sessionToken);
 
-    Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
-    return eventuallyTask.makeVoid();
-  }
+        Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
+        return eventuallyTask.makeVoid();
+    }
 }

@@ -18,57 +18,52 @@ import java.io.OutputStream;
  */
 public abstract class ParseHttpBody {
 
-  private final String contentType;
-  private final long contentLength;
+    private final String contentType;
+    private final long contentLength;
 
-  /**
-   * Returns the content of this body.
-   *
-   * @return The content of this body.
-   * @throws IOException
-   *           Throws an exception if the content of this body is inaccessible.
-   */
-  public abstract InputStream getContent() throws IOException;
+    /**
+     * Creates an {@code ParseHttpBody} with given {@code Content-Type} and {@code Content-Length}.
+     *
+     * @param contentType   The {@code Content-Type} of the {@code ParseHttpBody}.
+     * @param contentLength The {@code Content-Length} of the {@code ParseHttpBody}.
+     */
+    public ParseHttpBody(String contentType, long contentLength) {
+        this.contentType = contentType;
+        this.contentLength = contentLength;
+    }
 
-  /**
-   * Writes the content of this request to {@code out}.
-   *
-   * @param out
-   *          The outputStream the content of this body needs to be written to.
-   * @throws IOException
-   *           Throws an exception if the content of this body can not be written to {@code out}.
-   */
-  public abstract void writeTo(OutputStream out) throws IOException;
+    /**
+     * Returns the content of this body.
+     *
+     * @return The content of this body.
+     * @throws IOException Throws an exception if the content of this body is inaccessible.
+     */
+    public abstract InputStream getContent() throws IOException;
 
-  /**
-   * Creates an {@code ParseHttpBody} with given {@code Content-Type} and {@code Content-Length}.
-   *
-   * @param contentType
-   *          The {@code Content-Type} of the {@code ParseHttpBody}.
-   * @param contentLength
-   *          The {@code Content-Length} of the {@code ParseHttpBody}.
-   */
-  public ParseHttpBody(String contentType, long contentLength) {
-    this.contentType = contentType;
-    this.contentLength = contentLength;
-  }
+    /**
+     * Writes the content of this request to {@code out}.
+     *
+     * @param out The outputStream the content of this body needs to be written to.
+     * @throws IOException Throws an exception if the content of this body can not be written to {@code out}.
+     */
+    public abstract void writeTo(OutputStream out) throws IOException;
 
-  /**
-   * Returns the number of bytes which will be written to {@code out} when {@link #writeTo} is
-   * called, or {@code -1} if that count is unknown.
-   *
-   * @return The Content-Length of this body.
-   */
-  public long getContentLength() {
-    return contentLength;
-  }
+    /**
+     * Returns the number of bytes which will be written to {@code out} when {@link #writeTo} is
+     * called, or {@code -1} if that count is unknown.
+     *
+     * @return The Content-Length of this body.
+     */
+    public long getContentLength() {
+        return contentLength;
+    }
 
-  /**
-   * Returns the {@code Content-Type} of this body.
-   *
-   * @return The {@code Content-Type} of this body.
-   */
-  public String getContentType() {
-    return contentType;
-  }
+    /**
+     * Returns the {@code Content-Type} of this body.
+     *
+     * @return The {@code Content-Type} of this body.
+     */
+    public String getContentType() {
+        return contentType;
+    }
 }

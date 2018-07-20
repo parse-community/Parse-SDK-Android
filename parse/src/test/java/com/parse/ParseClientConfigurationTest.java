@@ -20,33 +20,33 @@ import static org.junit.Assert.assertNull;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseClientConfigurationTest {
 
-  @Test
-  public void testBuilder() {
-    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
-    builder.applicationId("foo");
-    builder.clientKey("bar");
-    builder.enableLocalDataStore();
-    Parse.Configuration configuration = builder.build();
+    @Test
+    public void testBuilder() {
+        Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+        builder.applicationId("foo");
+        builder.clientKey("bar");
+        builder.enableLocalDataStore();
+        Parse.Configuration configuration = builder.build();
 
-    assertNull(configuration.context);
-    assertEquals(configuration.applicationId, "foo");
-    assertEquals(configuration.clientKey, "bar");
-    assertEquals(configuration.localDataStoreEnabled, true);
-  }
+        assertNull(configuration.context);
+        assertEquals(configuration.applicationId, "foo");
+        assertEquals(configuration.clientKey, "bar");
+        assertEquals(configuration.localDataStoreEnabled, true);
+    }
 
-  @Test
-  public void testBuilderServerURL() {
-    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
-    builder.server("http://myserver.com/parse/");
-    Parse.Configuration configuration = builder.build();
-    assertEquals(configuration.server, "http://myserver.com/parse/");
-  }
+    @Test
+    public void testBuilderServerURL() {
+        Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+        builder.server("http://myserver.com/parse/");
+        Parse.Configuration configuration = builder.build();
+        assertEquals(configuration.server, "http://myserver.com/parse/");
+    }
 
-  @Test
-  public void testBuilderServerMissingSlashURL() {
-    Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
-    builder.server("http://myserver.com/missingslash");
-    Parse.Configuration configuration = builder.build();
-    assertEquals(configuration.server, "http://myserver.com/missingslash/");
-  }
+    @Test
+    public void testBuilderServerMissingSlashURL() {
+        Parse.Configuration.Builder builder = new Parse.Configuration.Builder(null);
+        builder.server("http://myserver.com/missingslash");
+        Parse.Configuration configuration = builder.build();
+        assertEquals(configuration.server, "http://myserver.com/missingslash/");
+    }
 }

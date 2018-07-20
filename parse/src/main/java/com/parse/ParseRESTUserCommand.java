@@ -21,109 +21,108 @@ import bolts.Task;
 
 class ParseRESTUserCommand extends ParseRESTCommand {
 
-  private static final String HEADER_REVOCABLE_SESSION = "X-Parse-Revocable-Session";
-  private static final String HEADER_TRUE = "1";
+    private static final String HEADER_REVOCABLE_SESSION = "X-Parse-Revocable-Session";
+    private static final String HEADER_TRUE = "1";
+    private boolean isRevocableSessionEnabled;
 
-  public static ParseRESTUserCommand getCurrentUserCommand(String sessionToken) {
-    return new ParseRESTUserCommand("users/me", ParseHttpRequest.Method.GET, null, sessionToken);
-  }
+    //region Authentication
+    private int statusCode;
 
-  //region Authentication
-
-  public static ParseRESTUserCommand signUpUserCommand(JSONObject parameters, String sessionToken,
-      boolean revocableSession) {
-    return new ParseRESTUserCommand(
-        "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
-  }
-
-  public static ParseRESTUserCommand logInUserCommand(String username, String password,
-      boolean revocableSession) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("username", username);
-    parameters.put("password", password);
-    return new ParseRESTUserCommand(
-        "login", ParseHttpRequest.Method.GET, parameters, null, revocableSession);
-  }
-
-  public static ParseRESTUserCommand serviceLogInUserCommand(
-      String authType, Map<String, String> authData, boolean revocableSession) {
-
-    // Mimic ParseSetOperation
-    JSONObject parameters;
-    try {
-      JSONObject authenticationData = new JSONObject();
-      authenticationData.put(authType, PointerEncoder.get().encode(authData));
-
-      parameters = new JSONObject();
-      parameters.put("authData", authenticationData);
-    } catch (JSONException e) {
-      throw new RuntimeException("could not serialize object to JSON");
+    private ParseRESTUserCommand(
+            String httpPath,
+            ParseHttpRequest.Method httpMethod,
+            Map<String, ?> parameters,
+            String sessionToken) {
+        this(httpPath, httpMethod, parameters, sessionToken, false);
     }
 
-    return serviceLogInUserCommand(parameters, null, revocableSession);
-  }
-
-  public static ParseRESTUserCommand serviceLogInUserCommand(JSONObject parameters,
-      String sessionToken, boolean revocableSession) {
-    return new ParseRESTUserCommand(
-        "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
-  }
-
-  //endregion
-
-  public static ParseRESTUserCommand resetPasswordResetCommand(String email) {
-    Map<String, String> parameters = new HashMap<>();
-    parameters.put("email", email);
-    return new ParseRESTUserCommand(
-        "requestPasswordReset", ParseHttpRequest.Method.POST, parameters, null);
-  }
-
-  private boolean isRevocableSessionEnabled;
-  private int statusCode;
-
-  private ParseRESTUserCommand(
-      String httpPath,
-      ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
-      String sessionToken) {
-    this(httpPath, httpMethod, parameters, sessionToken, false);
-  }
-
-  private ParseRESTUserCommand(
-      String httpPath,
-      ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
-      String sessionToken, boolean isRevocableSessionEnabled) {
-    super(httpPath, httpMethod, parameters, sessionToken);
-    this.isRevocableSessionEnabled = isRevocableSessionEnabled;
-  }
-
-  private ParseRESTUserCommand(
-      String httpPath,
-      ParseHttpRequest.Method httpMethod,
-      JSONObject parameters,
-      String sessionToken, boolean isRevocableSessionEnabled) {
-    super(httpPath, httpMethod, parameters, sessionToken);
-    this.isRevocableSessionEnabled = isRevocableSessionEnabled;
-  }
-
-  public int getStatusCode() {
-    return statusCode;
-  }
-
-  @Override
-  protected void addAdditionalHeaders(ParseHttpRequest.Builder requestBuilder) {
-    super.addAdditionalHeaders(requestBuilder);
-    if (isRevocableSessionEnabled) {
-      requestBuilder.addHeader(HEADER_REVOCABLE_SESSION, HEADER_TRUE);
+    private ParseRESTUserCommand(
+            String httpPath,
+            ParseHttpRequest.Method httpMethod,
+            Map<String, ?> parameters,
+            String sessionToken, boolean isRevocableSessionEnabled) {
+        super(httpPath, httpMethod, parameters, sessionToken);
+        this.isRevocableSessionEnabled = isRevocableSessionEnabled;
     }
-  }
 
-  @Override
-  protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
-      ProgressCallback progressCallback) {
-    statusCode = response.getStatusCode();
-    return super.onResponseAsync(response, progressCallback);
-  }
+    private ParseRESTUserCommand(
+            String httpPath,
+            ParseHttpRequest.Method httpMethod,
+            JSONObject parameters,
+            String sessionToken, boolean isRevocableSessionEnabled) {
+        super(httpPath, httpMethod, parameters, sessionToken);
+        this.isRevocableSessionEnabled = isRevocableSessionEnabled;
+    }
+
+    //endregion
+
+    public static ParseRESTUserCommand getCurrentUserCommand(String sessionToken) {
+        return new ParseRESTUserCommand("users/me", ParseHttpRequest.Method.GET, null, sessionToken);
+    }
+
+    public static ParseRESTUserCommand signUpUserCommand(JSONObject parameters, String sessionToken,
+                                                         boolean revocableSession) {
+        return new ParseRESTUserCommand(
+                "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
+    }
+
+    public static ParseRESTUserCommand logInUserCommand(String username, String password,
+                                                        boolean revocableSession) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("username", username);
+        parameters.put("password", password);
+        return new ParseRESTUserCommand(
+                "login", ParseHttpRequest.Method.GET, parameters, null, revocableSession);
+    }
+
+    public static ParseRESTUserCommand serviceLogInUserCommand(
+            String authType, Map<String, String> authData, boolean revocableSession) {
+
+        // Mimic ParseSetOperation
+        JSONObject parameters;
+        try {
+            JSONObject authenticationData = new JSONObject();
+            authenticationData.put(authType, PointerEncoder.get().encode(authData));
+
+            parameters = new JSONObject();
+            parameters.put("authData", authenticationData);
+        } catch (JSONException e) {
+            throw new RuntimeException("could not serialize object to JSON");
+        }
+
+        return serviceLogInUserCommand(parameters, null, revocableSession);
+    }
+
+    public static ParseRESTUserCommand serviceLogInUserCommand(JSONObject parameters,
+                                                               String sessionToken, boolean revocableSession) {
+        return new ParseRESTUserCommand(
+                "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
+    }
+
+    public static ParseRESTUserCommand resetPasswordResetCommand(String email) {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("email", email);
+        return new ParseRESTUserCommand(
+                "requestPasswordReset", ParseHttpRequest.Method.POST, parameters, null);
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    @Override
+    protected void addAdditionalHeaders(ParseHttpRequest.Builder requestBuilder) {
+        super.addAdditionalHeaders(requestBuilder);
+        if (isRevocableSessionEnabled) {
+            requestBuilder.addHeader(HEADER_REVOCABLE_SESSION, HEADER_TRUE);
+        }
+    }
+
+    @Override
+    protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
+                                               ProgressCallback progressCallback) {
+        statusCode = response.getStatusCode();
+        return super.onResponseAsync(response, progressCallback);
+    }
 
 }

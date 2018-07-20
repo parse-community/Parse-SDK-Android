@@ -17,43 +17,43 @@ import bolts.Task;
 
 class ParseCloudCodeController {
 
-  /* package for test */ final ParseHttpClient restClient;
+    /* package for test */ final ParseHttpClient restClient;
 
-  public ParseCloudCodeController(ParseHttpClient restClient) {
-    this.restClient = restClient;
-  }
+    public ParseCloudCodeController(ParseHttpClient restClient) {
+        this.restClient = restClient;
+    }
 
-  public <T> Task<T> callFunctionInBackground(final String name,
-      final Map<String, ?> params, String sessionToken) {
-    ParseRESTCommand command = ParseRESTCloudCommand.callFunctionCommand(
-        name,
-        params,
-        sessionToken);
-    return command.executeAsync(restClient).onSuccess(new Continuation<JSONObject, T>() {
-      @Override
-      public T then(Task<JSONObject> task) throws Exception {
-        @SuppressWarnings("unchecked")
-        T result = (T) convertCloudResponse(task.getResult());
+    public <T> Task<T> callFunctionInBackground(final String name,
+                                                final Map<String, ?> params, String sessionToken) {
+        ParseRESTCommand command = ParseRESTCloudCommand.callFunctionCommand(
+                name,
+                params,
+                sessionToken);
+        return command.executeAsync(restClient).onSuccess(new Continuation<JSONObject, T>() {
+            @Override
+            public T then(Task<JSONObject> task) throws Exception {
+                @SuppressWarnings("unchecked")
+                T result = (T) convertCloudResponse(task.getResult());
+                return result;
+            }
+        });
+    }
+
+    /*
+     * Decodes any Parse data types in the result of the cloud function call.
+     */
+    /* package for test */ Object convertCloudResponse(Object result) {
+        if (result instanceof JSONObject) {
+            JSONObject jsonResult = (JSONObject) result;
+            result = jsonResult.opt("result");
+        }
+
+        ParseDecoder decoder = ParseDecoder.get();
+        Object finalResult = decoder.decode(result);
+        if (finalResult != null) {
+            return finalResult;
+        }
+
         return result;
-      }
-    });
-  }
-
-  /*
-   * Decodes any Parse data types in the result of the cloud function call.
-   */
-  /* package for test */ Object convertCloudResponse(Object result) {
-    if (result instanceof JSONObject) {
-      JSONObject jsonResult = (JSONObject)result;
-      result = jsonResult.opt("result");
     }
-
-    ParseDecoder decoder = ParseDecoder.get();
-    Object finalResult = decoder.decode(result);
-    if (finalResult != null) {
-      return finalResult;
-    }
-
-    return result;
-  }
 }

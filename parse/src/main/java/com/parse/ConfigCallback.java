@@ -30,15 +30,13 @@ package com.parse;
  * </pre>
  */
 public interface ConfigCallback extends ParseCallback2<ParseConfig, ParseException> {
-  /**
-   * Override this function with the code you want to run after the fetch is complete.
-   *
-   * @param config
-   *          A new {@code ParseConfig} instance from the server, or {@code null} if it did not
-   *          succeed.
-   * @param e
-   *          The exception raised by the fetch, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseConfig config, ParseException e);
+    /**
+     * Override this function with the code you want to run after the fetch is complete.
+     *
+     * @param config A new {@code ParseConfig} instance from the server, or {@code null} if it did not
+     *               succeed.
+     * @param e      The exception raised by the fetch, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseConfig config, ParseException e);
 }

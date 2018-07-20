@@ -12,9 +12,9 @@ import bolts.Task;
 
 interface ParseSessionController {
 
-  Task<ParseObject.State> getSessionAsync(String sessionToken);
+    Task<ParseObject.State> getSessionAsync(String sessionToken);
 
-  Task<Void> revokeAsync(String sessionToken);
+    Task<Void> revokeAsync(String sessionToken);
 
-  Task<ParseObject.State> upgradeToRevocable(String sessionToken);
+    Task<ParseObject.State> upgradeToRevocable(String sessionToken);
 }

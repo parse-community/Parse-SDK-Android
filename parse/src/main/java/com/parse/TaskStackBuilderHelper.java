@@ -22,11 +22,11 @@ import android.os.Build;
  * TODO (pdjones): make more similar to support-v4 api
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-/* package */ class TaskStackBuilderHelper {
-  public static void startActivities(Context context, Class<? extends Activity> cls, Intent activityIntent) {
-    TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-    stackBuilder.addParentStack(cls);
-    stackBuilder.addNextIntent(activityIntent);
-    stackBuilder.startActivities();
-  }
+        /* package */ class TaskStackBuilderHelper {
+    public static void startActivities(Context context, Class<? extends Activity> cls, Intent activityIntent) {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addParentStack(cls);
+        stackBuilder.addNextIntent(activityIntent);
+        stackBuilder.startActivities();
+    }
 }

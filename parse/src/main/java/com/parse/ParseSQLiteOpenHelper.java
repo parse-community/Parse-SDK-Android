@@ -16,46 +16,47 @@ import bolts.Task;
 
 abstract class ParseSQLiteOpenHelper {
 
-  private final SQLiteOpenHelper helper;
+    private final SQLiteOpenHelper helper;
 
-  public ParseSQLiteOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
-      int version) {
-    helper = new SQLiteOpenHelper(context, name, factory, version) {
-      @Override
-      public void onOpen(SQLiteDatabase db) {
-        super.onOpen(db);
-        ParseSQLiteOpenHelper.this.onOpen(db);
-      }
+    public ParseSQLiteOpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
+                                 int version) {
+        helper = new SQLiteOpenHelper(context, name, factory, version) {
+            @Override
+            public void onOpen(SQLiteDatabase db) {
+                super.onOpen(db);
+                ParseSQLiteOpenHelper.this.onOpen(db);
+            }
 
-      @Override
-      public void onCreate(SQLiteDatabase db) {
-        ParseSQLiteOpenHelper.this.onCreate(db);
-      }
+            @Override
+            public void onCreate(SQLiteDatabase db) {
+                ParseSQLiteOpenHelper.this.onCreate(db);
+            }
 
-      @Override
-      public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        ParseSQLiteOpenHelper.this.onUpgrade(db, oldVersion, newVersion);
-      }
-    };
-  }
+            @Override
+            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+                ParseSQLiteOpenHelper.this.onUpgrade(db, oldVersion, newVersion);
+            }
+        };
+    }
 
-  public Task<ParseSQLiteDatabase> getReadableDatabaseAsync() {
-    return getDatabaseAsync(false);
-  }
+    public Task<ParseSQLiteDatabase> getReadableDatabaseAsync() {
+        return getDatabaseAsync(false);
+    }
 
-  public Task<ParseSQLiteDatabase> getWritableDatabaseAsync() {
-    return getDatabaseAsync(true);
-  }
+    public Task<ParseSQLiteDatabase> getWritableDatabaseAsync() {
+        return getDatabaseAsync(true);
+    }
 
-  private Task<ParseSQLiteDatabase> getDatabaseAsync(final boolean writable) {
-    return ParseSQLiteDatabase.openDatabaseAsync(
-        helper, !writable ? SQLiteDatabase.OPEN_READONLY : SQLiteDatabase.OPEN_READWRITE);
-  }
+    private Task<ParseSQLiteDatabase> getDatabaseAsync(final boolean writable) {
+        return ParseSQLiteDatabase.openDatabaseAsync(
+                helper, !writable ? SQLiteDatabase.OPEN_READONLY : SQLiteDatabase.OPEN_READWRITE);
+    }
 
-  public void onOpen(SQLiteDatabase db) {
-    // do nothing
-  }
+    public void onOpen(SQLiteDatabase db) {
+        // do nothing
+    }
 
-  public abstract void onCreate(SQLiteDatabase db);
-  public abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
+    public abstract void onCreate(SQLiteDatabase db);
+
+    public abstract void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion);
 }

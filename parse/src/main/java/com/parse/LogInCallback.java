@@ -34,14 +34,12 @@ package com.parse;
  * </pre>
  */
 public interface LogInCallback extends ParseCallback2<ParseUser, ParseException> {
-  /**
-   * Override this function with the code you want to run after the save is complete.
-   * 
-   * @param user
-   *          The user that logged in, if the username and password is valid.
-   * @param e
-   *          The exception raised by the login, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseUser user, ParseException e);
+    /**
+     * Override this function with the code you want to run after the save is complete.
+     *
+     * @param user The user that logged in, if the username and password is valid.
+     * @param e    The exception raised by the login, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseUser user, ParseException e);
 }

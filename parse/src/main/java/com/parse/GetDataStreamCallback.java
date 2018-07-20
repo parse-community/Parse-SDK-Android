@@ -28,14 +28,12 @@ import java.io.InputStream;
  * </pre>
  */
 public interface GetDataStreamCallback extends ParseCallback2<InputStream, ParseException> {
-  /**
-   * Override this function with the code you want to run after the fetch is complete.
-   *
-   * @param input
-   *          The data that was retrieved, or {@code null} if it did not succeed.
-   * @param e
-   *          The exception raised by the fetch, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(InputStream input, ParseException e);
+    /**
+     * Override this function with the code you want to run after the fetch is complete.
+     *
+     * @param input The data that was retrieved, or {@code null} if it did not succeed.
+     * @param e     The exception raised by the fetch, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(InputStream input, ParseException e);
 }

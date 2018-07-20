@@ -34,14 +34,12 @@ package com.parse;
  * </pre>
  */
 public interface RefreshCallback extends ParseCallback2<ParseObject, ParseException> {
-  /**
-   * Override this function with the code you want to run after the save is complete.
-   *
-   * @param object
-   *          The object that was refreshed, or {@code null} if it did not succeed.
-   * @param e
-   *          The exception raised by the login, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseObject object, ParseException e);
+    /**
+     * Override this function with the code you want to run after the save is complete.
+     *
+     * @param object The object that was refreshed, or {@code null} if it did not succeed.
+     * @param e      The exception raised by the login, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseObject object, ParseException e);
 }

@@ -17,8 +17,8 @@ package com.parse;
 // FYI, this does not extend ParseCallback2 since it does not match the usual signature
 // done(T, ParseException), but is done(T).
 public interface ProgressCallback {
-  /**
-   * Override this function with your desired callback.
-   */
-  void done(Integer percentDone);
+    /**
+     * Override this function with your desired callback.
+     */
+    void done(Integer percentDone);
 }

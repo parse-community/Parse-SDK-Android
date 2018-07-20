@@ -36,12 +36,11 @@ package com.parse;
  * </pre>
  */
 public interface SendCallback extends ParseCallback1<ParseException> {
-  /**
-   * Override this function with the code you want to run after the send is complete.
-   * 
-   * @param e
-   *          The exception raised by the send, or {@code null} if it succeeded.
-   */
-  @Override
-  void done(ParseException e);
+    /**
+     * Override this function with the code you want to run after the send is complete.
+     *
+     * @param e The exception raised by the send, or {@code null} if it succeeded.
+     */
+    @Override
+    void done(ParseException e);
 }

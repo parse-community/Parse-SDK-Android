@@ -13,27 +13,27 @@ import java.util.LinkedList;
 import java.util.List;
 
 class ParseMulticastDelegate<T> {
-  private final List<ParseCallback2<T, ParseException>> callbacks;
+    private final List<ParseCallback2<T, ParseException>> callbacks;
 
-  public ParseMulticastDelegate() {
-    callbacks = new LinkedList<>();
-  }
-
-  public void subscribe(ParseCallback2<T, ParseException> callback) {
-    callbacks.add(callback);
-  }
-
-  public void unsubscribe(ParseCallback2<T, ParseException> callback) {
-    callbacks.remove(callback);
-  }
-
-  public void invoke(T result, ParseException exception) {
-    for (ParseCallback2<T, ParseException> callback : new ArrayList<>(callbacks)) {
-      callback.done(result, exception);
+    public ParseMulticastDelegate() {
+        callbacks = new LinkedList<>();
     }
-  }
 
-  public void clear() {
-    callbacks.clear();
-  }
+    public void subscribe(ParseCallback2<T, ParseException> callback) {
+        callbacks.add(callback);
+    }
+
+    public void unsubscribe(ParseCallback2<T, ParseException> callback) {
+        callbacks.remove(callback);
+    }
+
+    public void invoke(T result, ParseException exception) {
+        for (ParseCallback2<T, ParseException> callback : new ArrayList<>(callbacks)) {
+            callback.done(result, exception);
+        }
+    }
+
+    public void clear() {
+        callbacks.clear();
+    }
 }

@@ -21,25 +21,25 @@ import static org.junit.Assert.assertEquals;
 @Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseCoderTest {
 
-  @Test
-  public void testBytes() throws Exception {
-    // string of bytes, including some invalid UTF8 data
-    byte[] bytes = { 4, 8, 16, 32, -128, 0, 0, 0 };
+    @Test
+    public void testBytes() throws Exception {
+        // string of bytes, including some invalid UTF8 data
+        byte[] bytes = {4, 8, 16, 32, -128, 0, 0, 0};
 
-    ParseEncoder encoder = PointerEncoder.get();
-    JSONObject json = (JSONObject) encoder.encode(bytes);
+        ParseEncoder encoder = PointerEncoder.get();
+        JSONObject json = (JSONObject) encoder.encode(bytes);
 
-    ParseDecoder decoder = ParseDecoder.get();
-    byte[] bytesAgain = (byte[]) decoder.decode(json);
+        ParseDecoder decoder = ParseDecoder.get();
+        byte[] bytesAgain = (byte[]) decoder.decode(json);
 
-    assertEquals(8,     bytesAgain.length);
-    assertEquals(4,     bytesAgain[0]);
-    assertEquals(8,     bytesAgain[1]);
-    assertEquals(16,    bytesAgain[2]);
-    assertEquals(32,    bytesAgain[3]);
-    assertEquals(-128,  bytesAgain[4]);
-    assertEquals(0,     bytesAgain[5]);
-    assertEquals(0,     bytesAgain[6]);
-    assertEquals(0,     bytesAgain[7]);
-  }
+        assertEquals(8, bytesAgain.length);
+        assertEquals(4, bytesAgain[0]);
+        assertEquals(8, bytesAgain[1]);
+        assertEquals(16, bytesAgain[2]);
+        assertEquals(32, bytesAgain[3]);
+        assertEquals(-128, bytesAgain[4]);
+        assertEquals(0, bytesAgain[5]);
+        assertEquals(0, bytesAgain[6]);
+        assertEquals(0, bytesAgain[7]);
+    }
 }

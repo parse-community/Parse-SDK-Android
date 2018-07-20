@@ -27,68 +27,68 @@ import static org.mockito.Mockito.when;
 
 final class ParseTestUtils {
 
-  /**
-   * In our unit test, lots of controllers need to use currentParseUser. A normal
-   * currentUserController will try to read user off disk which will throw exception since we do
-   * not have android environment. This function register a mock currentUserController and simply
-   * return a mock ParseUser for currentParseUser and null for currentSessionToken. It will make
-   * ParseUser.getCurrentUserAsync() and ParseUser.getCurrentSessionTokenAsync() work.
-   */
-  public static void setTestParseUser() {
-    ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-    when(currentUserController.getAsync()).thenReturn(Task.forResult(mock(ParseUser.class)));
-    when(currentUserController.getCurrentSessionTokenAsync())
-        .thenReturn(Task.<String>forResult(null));
-    ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
-  }
-
-  public static ParseHttpClient mockParseHttpClientWithResponse(
-      JSONObject content, int statusCode, String reasonPhrase) throws IOException {
-    ParseHttpClient client = mock(ParseHttpClient.class);
-    updateMockParseHttpClientWithResponse(client, content, statusCode, reasonPhrase);
-    return client;
-  }
-
-  static void updateMockParseHttpClientWithResponse(
-          ParseHttpClient client, JSONObject content, int statusCode, String reasonPhrase) throws IOException {
-    byte[] contentBytes = content.toString().getBytes();
-    ParseHttpResponse response = new ParseHttpResponse.Builder()
-            .setContent(new ByteArrayInputStream(contentBytes))
-            .setStatusCode(statusCode)
-            .setTotalSize(contentBytes.length)
-            .setContentType("application/json")
-            .build();
-    when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
-  }
-
-  static ParsePlugins mockParsePlugins(Parse.Configuration configuration) {
-    ParsePlugins parsePlugins = mock(ParsePlugins.class);
-    when(parsePlugins.applicationId()).thenReturn(configuration.applicationId);
-    when(parsePlugins.clientKey()).thenReturn(configuration.clientKey);
-    when(parsePlugins.configuration()).thenReturn(configuration);
-    Context applicationContext = configuration.context.getApplicationContext();
-    when(parsePlugins.applicationContext()).thenReturn(applicationContext);
-    File parseDir = createFileDir(applicationContext.getDir("Parse", Context.MODE_PRIVATE));
-    when(parsePlugins.installationId())
-            .thenReturn(
-                    new InstallationId(new File(parseDir, "installationId")));
-    when(parsePlugins.getParseDir())
-            .thenReturn(parseDir);
-    when(parsePlugins.getCacheDir())
-            .thenReturn(createFileDir(
-                    new File(applicationContext.getCacheDir(), "com.parse")));
-    when(parsePlugins.getFilesDir())
-            .thenReturn(createFileDir(
-                    new File(applicationContext.getFilesDir(), "com.parse")));
-    return parsePlugins;
-  }
-
-  private static File createFileDir(File file) {
-    if (!file.exists()) {
-      if (!file.mkdirs()) {
-        return file;
-      }
+    /**
+     * In our unit test, lots of controllers need to use currentParseUser. A normal
+     * currentUserController will try to read user off disk which will throw exception since we do
+     * not have android environment. This function register a mock currentUserController and simply
+     * return a mock ParseUser for currentParseUser and null for currentSessionToken. It will make
+     * ParseUser.getCurrentUserAsync() and ParseUser.getCurrentSessionTokenAsync() work.
+     */
+    public static void setTestParseUser() {
+        ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
+        when(currentUserController.getAsync()).thenReturn(Task.forResult(mock(ParseUser.class)));
+        when(currentUserController.getCurrentSessionTokenAsync())
+                .thenReturn(Task.<String>forResult(null));
+        ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
     }
-    return file;
-  }
+
+    public static ParseHttpClient mockParseHttpClientWithResponse(
+            JSONObject content, int statusCode, String reasonPhrase) throws IOException {
+        ParseHttpClient client = mock(ParseHttpClient.class);
+        updateMockParseHttpClientWithResponse(client, content, statusCode, reasonPhrase);
+        return client;
+    }
+
+    static void updateMockParseHttpClientWithResponse(
+            ParseHttpClient client, JSONObject content, int statusCode, String reasonPhrase) throws IOException {
+        byte[] contentBytes = content.toString().getBytes();
+        ParseHttpResponse response = new ParseHttpResponse.Builder()
+                .setContent(new ByteArrayInputStream(contentBytes))
+                .setStatusCode(statusCode)
+                .setTotalSize(contentBytes.length)
+                .setContentType("application/json")
+                .build();
+        when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
+    }
+
+    static ParsePlugins mockParsePlugins(Parse.Configuration configuration) {
+        ParsePlugins parsePlugins = mock(ParsePlugins.class);
+        when(parsePlugins.applicationId()).thenReturn(configuration.applicationId);
+        when(parsePlugins.clientKey()).thenReturn(configuration.clientKey);
+        when(parsePlugins.configuration()).thenReturn(configuration);
+        Context applicationContext = configuration.context.getApplicationContext();
+        when(parsePlugins.applicationContext()).thenReturn(applicationContext);
+        File parseDir = createFileDir(applicationContext.getDir("Parse", Context.MODE_PRIVATE));
+        when(parsePlugins.installationId())
+                .thenReturn(
+                        new InstallationId(new File(parseDir, "installationId")));
+        when(parsePlugins.getParseDir())
+                .thenReturn(parseDir);
+        when(parsePlugins.getCacheDir())
+                .thenReturn(createFileDir(
+                        new File(applicationContext.getCacheDir(), "com.parse")));
+        when(parsePlugins.getFilesDir())
+                .thenReturn(createFileDir(
+                        new File(applicationContext.getFilesDir(), "com.parse")));
+        return parsePlugins;
+    }
+
+    private static File createFileDir(File file) {
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                return file;
+            }
+        }
+        return file;
+    }
 }

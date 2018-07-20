@@ -10,42 +10,39 @@ package com.parse;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.Callable;
-
-import bolts.Task;
 
 import static java.lang.Math.min;
 
 class ParseCountingByteArrayHttpBody extends ParseByteArrayHttpBody {
-  private static final int DEFAULT_CHUNK_SIZE = 4096;
-  private final ProgressCallback progressCallback;
+    private static final int DEFAULT_CHUNK_SIZE = 4096;
+    private final ProgressCallback progressCallback;
 
-  public ParseCountingByteArrayHttpBody(byte[] content, String contentType,
-      final ProgressCallback progressCallback) {
-    super(content, contentType);
-    this.progressCallback = progressCallback;
-  }
-
-  @Override
-  public void writeTo(OutputStream out) throws IOException {
-    if (out == null) {
-      throw new IllegalArgumentException("Output stream may not be null");
+    public ParseCountingByteArrayHttpBody(byte[] content, String contentType,
+                                          final ProgressCallback progressCallback) {
+        super(content, contentType);
+        this.progressCallback = progressCallback;
     }
 
-    int position = 0;
-    int totalLength = content.length;
-    while (position < totalLength) {
-      int length = min(totalLength - position, DEFAULT_CHUNK_SIZE);
+    @Override
+    public void writeTo(OutputStream out) throws IOException {
+        if (out == null) {
+            throw new IllegalArgumentException("Output stream may not be null");
+        }
 
-      out.write(content, position, length);
-      out.flush();
+        int position = 0;
+        int totalLength = content.length;
+        while (position < totalLength) {
+            int length = min(totalLength - position, DEFAULT_CHUNK_SIZE);
 
-      if (progressCallback != null) {
-        position += length;
+            out.write(content, position, length);
+            out.flush();
 
-        int progress = 100 * position / totalLength;
-        progressCallback.done(progress);
-      }
+            if (progressCallback != null) {
+                position += length;
+
+                int progress = 100 * position / totalLength;
+                progressCallback.done(progress);
+            }
+        }
     }
-  }
 }

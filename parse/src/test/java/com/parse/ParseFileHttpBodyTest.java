@@ -24,69 +24,69 @@ import static org.junit.Assert.assertNull;
 
 public class ParseFileHttpBodyTest {
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @Test
-  public void testInitializeWithFileAndContentType() throws IOException {
-    String contentType = "text/plain";
-    File file = makeTestFile(temporaryFolder.getRoot());
+    // Generate a test file used for create ParseFileHttpBody, if you change file's content, make sure
+    // you also change the test file content in verifyTestFileContent().
+    private static File makeTestFile(File root) throws IOException {
+        File file = new File(root, "test");
+        String content = "content";
+        FileWriter writer = new FileWriter(file);
+        writer.write(content);
+        writer.close();
+        return file;
+    }
 
-    ParseFileHttpBody body = new ParseFileHttpBody(file, contentType);
+    private static void verifyTestFileContent(byte[] bytes) throws IOException {
+        assertArrayEquals("content".getBytes(), bytes);
+    }
 
-    assertEquals(file.length(), body.getContentLength());
-    assertEquals(contentType, body.getContentType());
-    // Verify file content
-    InputStream content = body.getContent();
-    byte[] contentBytes = ParseIOUtils.toByteArray(content);
-    ParseIOUtils.closeQuietly(content);
-    verifyTestFileContent(contentBytes);
-  }
+    @Test
+    public void testInitializeWithFileAndContentType() throws IOException {
+        String contentType = "text/plain";
+        File file = makeTestFile(temporaryFolder.getRoot());
 
-  @Test
-  public void testInitializeWithFile() throws IOException {
-    File file = makeTestFile(temporaryFolder.getRoot());
+        ParseFileHttpBody body = new ParseFileHttpBody(file, contentType);
 
-    ParseFileHttpBody body = new ParseFileHttpBody(file);
+        assertEquals(file.length(), body.getContentLength());
+        assertEquals(contentType, body.getContentType());
+        // Verify file content
+        InputStream content = body.getContent();
+        byte[] contentBytes = ParseIOUtils.toByteArray(content);
+        ParseIOUtils.closeQuietly(content);
+        verifyTestFileContent(contentBytes);
+    }
 
-    assertEquals(file.length(), body.getContentLength());
-    assertNull(body.getContentType());
-    // Verify file content
-    InputStream content = body.getContent();
-    byte[] contentBytes = ParseIOUtils.toByteArray(content);
-    ParseIOUtils.closeQuietly(content);
-    verifyTestFileContent(contentBytes);
-  }
+    @Test
+    public void testInitializeWithFile() throws IOException {
+        File file = makeTestFile(temporaryFolder.getRoot());
 
-  @Test
-  public void testWriteTo() throws IOException {
-    File file = makeTestFile(temporaryFolder.getRoot());
-    ParseFileHttpBody body = new ParseFileHttpBody(file);
+        ParseFileHttpBody body = new ParseFileHttpBody(file);
 
-    // Check content
-    ByteArrayOutputStream output = new ByteArrayOutputStream();
-    body.writeTo(output);
-    verifyTestFileContent(output.toByteArray());
-  }
+        assertEquals(file.length(), body.getContentLength());
+        assertNull(body.getContentType());
+        // Verify file content
+        InputStream content = body.getContent();
+        byte[] contentBytes = ParseIOUtils.toByteArray(content);
+        ParseIOUtils.closeQuietly(content);
+        verifyTestFileContent(contentBytes);
+    }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testWriteToWithNullOutput() throws Exception {
-    ParseFileHttpBody body = new ParseFileHttpBody(makeTestFile(temporaryFolder.getRoot()));
-    body.writeTo(null);
-  }
+    @Test
+    public void testWriteTo() throws IOException {
+        File file = makeTestFile(temporaryFolder.getRoot());
+        ParseFileHttpBody body = new ParseFileHttpBody(file);
 
-  // Generate a test file used for create ParseFileHttpBody, if you change file's content, make sure
-  // you also change the test file content in verifyTestFileContent().
-  private static File makeTestFile(File root) throws IOException {
-    File file = new File(root, "test");
-    String content = "content";
-    FileWriter writer = new FileWriter(file);
-    writer.write(content);
-    writer.close();
-    return file;
-  }
+        // Check content
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        body.writeTo(output);
+        verifyTestFileContent(output.toByteArray());
+    }
 
-  private static void verifyTestFileContent(byte[] bytes) throws IOException {
-    assertArrayEquals("content".getBytes(), bytes);
-  }
+    @Test(expected = IllegalArgumentException.class)
+    public void testWriteToWithNullOutput() throws Exception {
+        ParseFileHttpBody body = new ParseFileHttpBody(makeTestFile(temporaryFolder.getRoot()));
+        body.writeTo(null);
+    }
 }

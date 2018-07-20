@@ -15,26 +15,26 @@ import java.util.Map;
 
 class ParseRESTConfigCommand extends ParseRESTCommand {
 
-  public ParseRESTConfigCommand(
-      String httpPath,
-      ParseHttpRequest.Method httpMethod,
-      Map<String, ?> parameters,
-      String sessionToken) {
-    super(httpPath, httpMethod, parameters, sessionToken);
-  }
-
-  public static ParseRESTConfigCommand fetchConfigCommand(String sessionToken) {
-    return new ParseRESTConfigCommand("config", ParseHttpRequest.Method.GET, null, sessionToken);
-  }
-
-  public static ParseRESTConfigCommand updateConfigCommand(
-      final Map<String, ?> configParameters, String sessionToken) {
-    Map<String, Map<String, ?>> commandParameters = null;
-    if (configParameters != null) {
-      commandParameters = new HashMap<>();
-      commandParameters.put("params", configParameters);
+    public ParseRESTConfigCommand(
+            String httpPath,
+            ParseHttpRequest.Method httpMethod,
+            Map<String, ?> parameters,
+            String sessionToken) {
+        super(httpPath, httpMethod, parameters, sessionToken);
     }
-    return new ParseRESTConfigCommand(
-        "config", ParseHttpRequest.Method.PUT, commandParameters, sessionToken);
-  }
+
+    public static ParseRESTConfigCommand fetchConfigCommand(String sessionToken) {
+        return new ParseRESTConfigCommand("config", ParseHttpRequest.Method.GET, null, sessionToken);
+    }
+
+    public static ParseRESTConfigCommand updateConfigCommand(
+            final Map<String, ?> configParameters, String sessionToken) {
+        Map<String, Map<String, ?>> commandParameters = null;
+        if (configParameters != null) {
+            commandParameters = new HashMap<>();
+            commandParameters.put("params", configParameters);
+        }
+        return new ParseRESTConfigCommand(
+                "config", ParseHttpRequest.Method.PUT, commandParameters, sessionToken);
+    }
 }

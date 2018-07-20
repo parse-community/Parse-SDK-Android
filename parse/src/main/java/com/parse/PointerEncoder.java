@@ -16,20 +16,21 @@ import org.json.JSONObject;
  */
 class PointerEncoder extends PointerOrLocalIdEncoder {
 
-  // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
-  // default instance.
-  private static final PointerEncoder INSTANCE = new PointerEncoder();
-  public static PointerEncoder get() {
-    return INSTANCE;
-  }
+    // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
+    // default instance.
+    private static final PointerEncoder INSTANCE = new PointerEncoder();
 
-  @Override
-  public JSONObject encodeRelatedObject(ParseObject object) {
-    // Ensure the ParseObject has an id so it can be encoded as a pointer.
-    if (object.getObjectId() == null) {
-      // object that hasn't been saved.
-      throw new IllegalStateException("unable to encode an association with an unsaved ParseObject");
+    public static PointerEncoder get() {
+        return INSTANCE;
     }
-    return super.encodeRelatedObject(object);
-  }
+
+    @Override
+    public JSONObject encodeRelatedObject(ParseObject object) {
+        // Ensure the ParseObject has an id so it can be encoded as a pointer.
+        if (object.getObjectId() == null) {
+            // object that hasn't been saved.
+            throw new IllegalStateException("unable to encode an association with an unsaved ParseObject");
+        }
+        return super.encodeRelatedObject(object);
+    }
 }

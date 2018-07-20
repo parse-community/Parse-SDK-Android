@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import bolts.Continuation;
 import bolts.Task;
 
 /**
@@ -37,46 +36,45 @@ import bolts.Task;
  * </ul>
  */
 public final class ParseAnonymousUtils {
-  /* package */ static final String AUTH_TYPE = "anonymous";
+    /* package */ static final String AUTH_TYPE = "anonymous";
 
-  /**
-   * Whether the user is logged in anonymously.
-   * 
-   * @param user
-   *          User to check for anonymity. The user must be logged in on this device.
-   * @return True if the user is anonymous. False if the user is not the current user or is not
-   *         anonymous.
-   */
-  public static boolean isLinked(ParseUser user) {
-    return user.isLinked(AUTH_TYPE);
-  }
+    private ParseAnonymousUtils() {
+        // do nothing
+    }
 
-  /**
-   * Creates an anonymous user in the background.
-   *
-   * @return A Task that will be resolved when logging in is completed.
-   */
-  public static Task<ParseUser> logInInBackground() {
-    return ParseUser.logInWithInBackground(AUTH_TYPE, getAuthData());
-  }
+    /**
+     * Whether the user is logged in anonymously.
+     *
+     * @param user User to check for anonymity. The user must be logged in on this device.
+     * @return True if the user is anonymous. False if the user is not the current user or is not
+     * anonymous.
+     */
+    public static boolean isLinked(ParseUser user) {
+        return user.isLinked(AUTH_TYPE);
+    }
 
-  /**
-   * Creates an anonymous user in the background.
-   * 
-   * @param callback
-   *          The callback to execute when anonymous user creation is complete.
-   */
-  public static void logIn(LogInCallback callback) {
-    ParseTaskUtils.callbackOnMainThreadAsync(logInInBackground(), callback);
-  }
+    /**
+     * Creates an anonymous user in the background.
+     *
+     * @return A Task that will be resolved when logging in is completed.
+     */
+    public static Task<ParseUser> logInInBackground() {
+        return ParseUser.logInWithInBackground(AUTH_TYPE, getAuthData());
+    }
 
-  /* package */ static Map<String, String> getAuthData() {
-    Map<String, String> authData = new HashMap<>();
-    authData.put("id", UUID.randomUUID().toString());
-    return authData;
-  }
+    /**
+     * Creates an anonymous user in the background.
+     *
+     * @param callback The callback to execute when anonymous user creation is complete.
+     */
+    public static void logIn(LogInCallback callback) {
+        ParseTaskUtils.callbackOnMainThreadAsync(logInInBackground(), callback);
+    }
 
-  private ParseAnonymousUtils() {
-    // do nothing
-  }
+    /* package */
+    static Map<String, String> getAuthData() {
+        Map<String, String> authData = new HashMap<>();
+        authData.put("id", UUID.randomUUID().toString());
+        return authData;
+    }
 }
