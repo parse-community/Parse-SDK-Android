@@ -84,6 +84,10 @@ public class ParsePlugins {
         return configuration.clientKey;
     }
 
+    public String server() {
+        return configuration.server;
+    }
+
     Parse.Configuration configuration() {
         return configuration;
     }
