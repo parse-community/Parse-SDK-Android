@@ -10,6 +10,7 @@ package com.parse;
 
 import android.os.Bundle;
 import android.os.Parcel;
+import android.support.annotation.NonNull;
 
 import org.json.JSONObject;
 
@@ -805,7 +806,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-    public void put(String key, Object value) {
+    public void put(@NonNull String key, @NonNull Object value) {
         synchronized (mutex) {
             if (KEY_USERNAME.equals(key)) {
                 // When the username is set, remove any semblance of anonymity.

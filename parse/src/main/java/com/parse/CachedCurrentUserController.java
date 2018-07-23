@@ -22,8 +22,7 @@ class CachedCurrentUserController implements ParseCurrentUserController {
      * Note about lock ordering:
      * <p>
      * You must NOT acquire the ParseUser instance mutex (the "mutex" field in ParseObject) while
-     * holding this static initialization lock. Doing so will cause a deadlock. Here's an example:
-     * https://phabricator.fb.com/P17182641
+     * holding this static initialization lock. Doing so will cause a deadlock.
      */
     private final Object mutex = new Object();
     private final TaskQueue taskQueue = new TaskQueue();

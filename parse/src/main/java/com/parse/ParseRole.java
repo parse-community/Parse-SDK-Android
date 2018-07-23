@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import java.util.regex.Pattern;
 
 /**
@@ -117,7 +119,7 @@ public class ParseRole extends ParseObject {
     }
 
     @Override
-    public void put(String key, Object value) {
+    public void put(@NonNull String key, @NonNull Object value) {
         if ("name".equals(key)) {
             if (this.getObjectId() != null) {
                 throw new IllegalArgumentException(

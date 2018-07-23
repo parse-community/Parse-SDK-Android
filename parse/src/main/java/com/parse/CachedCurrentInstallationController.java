@@ -23,8 +23,7 @@ class CachedCurrentInstallationController
      * while holding this current installation lock. (We used to use the ParseInstallation.class lock,
      * but moved on to an explicit lock object since anyone could acquire the ParseInstallation.class
      * lock as ParseInstallation is a public class.) Acquiring the instance mutex while holding this
-     * current installation lock will lead to a deadlock. Here is an example:
-     * https://phabricator.fb.com/P3251091
+     * current installation lock will lead to a deadlock.
      */
     private final Object mutex = new Object();
 
