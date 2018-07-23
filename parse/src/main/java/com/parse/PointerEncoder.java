@@ -11,10 +11,10 @@ package com.parse;
 import org.json.JSONObject;
 
 /**
- * Encodes {@link ParseObjects} as pointers. If the object does not have an objectId, throws an
+ * Encodes {@link ParseObject}s as pointers. If the object does not have an objectId, throws an
  * exception.
  */
-class PointerEncoder extends PointerOrLocalIdEncoder {
+public class PointerEncoder extends PointerOrLocalIdEncoder {
 
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
     // default instance.

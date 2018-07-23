@@ -20,12 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A {@code ParseEncoder} can be used to transform objects such as {@link ParseObjects} into JSON
+ * A {@code ParseEncoder} can be used to transform objects such as {@link ParseObject}s into JSON
  * data structures.
  *
  * @see com.parse.ParseDecoder
  */
-abstract class ParseEncoder {
+public abstract class ParseEncoder {
 
     /* package */
     static boolean isValidType(Object value) {
