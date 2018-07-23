@@ -37,6 +37,9 @@ class Cat : ParseObject() {
 
 ```
 
+## Contributing
+When contributing to the `ktx` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.
+
 ## License
     Copyright (c) 2015-present, Parse, LLC.
     All rights reserved.
