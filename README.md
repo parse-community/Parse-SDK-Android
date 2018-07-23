@@ -24,6 +24,8 @@ dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:parse:latest.version.here"
     // for FCM Push support (optional)
     implementation "com.github.parse-community.Parse-SDK-Android:fcm:latest.version.here"
+    // for Kotlin extensions support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:ktx:latest.version.here"
 }
 ```
 

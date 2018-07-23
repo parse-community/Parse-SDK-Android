@@ -7,15 +7,15 @@ Please note that GCM is deprecated in favor of FCM. This module exists as a back
 ## Setup
 
 ### Installation
-
-Add dependency to the application level `build.gradle` file.
+After including JitPack:
 
 ```groovy
 dependencies {
-    implementation 'com.parse:parse-android:latest.version.here'
-    implementation 'com.parse:parse-gcm-android:latest.version.here'
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:gcm:latest.version.here"
 }
 ```
+
 You will then need to register some things in your manifest, firstly, the GCM sender ID:
 ```xml
 <meta-data
