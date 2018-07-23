@@ -8,12 +8,16 @@
  */
 package com.parse;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 /**
- * Parse Logger
+ * Parse Logger. See {@link #setLogLevel(int)}
  */
+@SuppressWarnings("WeakerAccess")
 public class PLog {
+
+    @SuppressWarnings("unused")
     public static final int LOG_LEVEL_NONE = Integer.MAX_VALUE;
 
     private static int logLevel = Integer.MAX_VALUE;
@@ -45,6 +49,7 @@ public class PLog {
         PLog.logLevel = logLevel;
     }
 
+    @SuppressLint("WrongConstant")
     private static void log(int messageLogLevel, String tag, String message, Throwable tr) {
         if (messageLogLevel >= logLevel) {
             if (tr == null) {
@@ -55,27 +60,23 @@ public class PLog {
         }
     }
 
-    /* package */
-    static void v(String tag, String message, Throwable tr) {
+    public static void v(String tag, String message, Throwable tr) {
         log(Log.VERBOSE, tag, message, tr);
     }
 
-    static void v(String tag, String message) {
+    public static void v(String tag, String message) {
         v(tag, message, null);
     }
 
-    /* package */
-    static void d(String tag, String message, Throwable tr) {
+    public static void d(String tag, String message, Throwable tr) {
         log(Log.DEBUG, tag, message, tr);
     }
 
-    /* package */
     public static void d(String tag, String message) {
         d(tag, message, null);
     }
 
-    /* package */
-    static void i(String tag, String message, Throwable tr) {
+    public static void i(String tag, String message, Throwable tr) {
         log(Log.INFO, tag, message, tr);
     }
 
@@ -83,13 +84,11 @@ public class PLog {
         i(tag, message, null);
     }
 
-    /* package */
-    static void w(String tag, String message, Throwable tr) {
+    public static void w(String tag, String message, Throwable tr) {
         log(Log.WARN, tag, message, tr);
     }
 
-    /* package */
-    static void w(String tag, String message) {
+    public static void w(String tag, String message) {
         w(tag, message, null);
     }
 

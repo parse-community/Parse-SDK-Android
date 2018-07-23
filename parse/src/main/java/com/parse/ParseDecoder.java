@@ -22,11 +22,11 @@ import java.util.Map;
 
 /**
  * A {@code ParseDecoder} can be used to transform JSON data structures into actual objects, such as
- * {@link ParseObjects}.
+ * {@link ParseObject}s.
  *
  * @see com.parse.ParseEncoder
  */
-class ParseDecoder {
+public class ParseDecoder {
 
     // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
     // default instance.

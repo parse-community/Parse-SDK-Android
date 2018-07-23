@@ -246,9 +246,7 @@ public class ParseUser extends ParseObject {
 
     //region Getter/Setter helper methods
 
-    //TODO (grantland): Make it really async and publicize in v2
-    /* package */
-    static Task<String> getCurrentSessionTokenAsync() {
+    public static Task<String> getCurrentSessionTokenAsync() {
         return getCurrentUserController().getCurrentSessionTokenAsync();
     }
 
