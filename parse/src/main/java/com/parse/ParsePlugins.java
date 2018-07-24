@@ -20,6 +20,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * Public for LiveQuery. You probably don't need access
+ */
 public class ParsePlugins {
 
     private static final String INSTALLATION_ID_LOCATION = "installationId";

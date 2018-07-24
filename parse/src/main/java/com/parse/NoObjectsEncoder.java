@@ -11,7 +11,7 @@ package com.parse;
 import org.json.JSONObject;
 
 /**
- * Throws an exception if someone attemps to encode a {@code ParseObject}.
+ * Throws an exception if someone attempts to encode a {@code ParseObject}.
  */
 class NoObjectsEncoder extends ParseEncoder {
 

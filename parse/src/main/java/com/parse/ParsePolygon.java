@@ -35,7 +35,6 @@ import java.util.Locale;
  * object.save();
  * </pre>
  */
-
 public class ParsePolygon implements Parcelable {
 
     public final static Creator<ParsePolygon> CREATOR = new Creator<ParsePolygon>() {

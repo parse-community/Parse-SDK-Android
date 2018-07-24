@@ -36,6 +36,7 @@ class ParseHttpClient {
 
     private OkHttpClient okHttpClient;
     private boolean hasExecuted;
+
     ParseHttpClient(@Nullable OkHttpClient.Builder builder) {
 
         if (builder == null) {
