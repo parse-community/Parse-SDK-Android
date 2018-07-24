@@ -191,7 +191,7 @@ public class ParseFile implements Parcelable {
             public void done(final Integer percentDone) {
                 Task.call(new Callable<Void>() {
                     @Override
-                    public Void call() throws Exception {
+                    public Void call() {
                         progressCallback.done(percentDone);
                         return null;
                     }
@@ -261,7 +261,7 @@ public class ParseFile implements Parcelable {
         // Wait for our turn in the queue, then check state to decide whether to no-op.
         return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 if (!isDirty()) {
                     return Task.forResult(null);
                 }
@@ -288,7 +288,7 @@ public class ParseFile implements Parcelable {
 
                 return saveTask.onSuccessTask(new Continuation<State, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<State> task) throws Exception {
+                    public Task<Void> then(Task<State> task) {
                         state = task.getResult();
                         // Since we have successfully uploaded the file, we do not need to hold the file pointer
                         // anymore.
@@ -314,13 +314,13 @@ public class ParseFile implements Parcelable {
 
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 final String sessionToken = task.getResult();
                 return saveAsync(sessionToken, uploadProgressCallback, cts.getTask());
             }
         }).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 cts.trySetResult(null); // release
                 currentTasks.remove(cts);
                 return task;
@@ -332,7 +332,7 @@ public class ParseFile implements Parcelable {
                                        final ProgressCallback uploadProgressCallback, final Task<Void> cancellationToken) {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return saveAsync(sessionToken, uploadProgressCallback, toAwait, cancellationToken);
             }
         });
@@ -390,10 +390,10 @@ public class ParseFile implements Parcelable {
 
         return taskQueue.enqueue(new Continuation<Void, Task<byte[]>>() {
             @Override
-            public Task<byte[]> then(Task<Void> toAwait) throws Exception {
+            public Task<byte[]> then(Task<Void> toAwait) {
                 return fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(new Continuation<File, byte[]>() {
                     @Override
-                    public byte[] then(Task<File> task) throws Exception {
+                    public byte[] then(Task<File> task) {
                         File file = task.getResult();
                         try {
                             return ParseFileUtils.readFileToByteArray(file);
@@ -406,7 +406,7 @@ public class ParseFile implements Parcelable {
             }
         }).continueWithTask(new Continuation<byte[], Task<byte[]>>() {
             @Override
-            public Task<byte[]> then(Task<byte[]> task) throws Exception {
+            public Task<byte[]> then(Task<byte[]> task) {
                 cts.trySetResult(null); // release
                 currentTasks.remove(cts);
                 return task;
@@ -472,12 +472,12 @@ public class ParseFile implements Parcelable {
 
         return taskQueue.enqueue(new Continuation<Void, Task<File>>() {
             @Override
-            public Task<File> then(Task<Void> toAwait) throws Exception {
+            public Task<File> then(Task<Void> toAwait) {
                 return fetchInBackground(progressCallback, toAwait, cts.getTask());
             }
         }).continueWithTask(new Continuation<File, Task<File>>() {
             @Override
-            public Task<File> then(Task<File> task) throws Exception {
+            public Task<File> then(Task<File> task) {
                 cts.trySetResult(null); // release
                 currentTasks.remove(cts);
                 return task;
@@ -550,7 +550,7 @@ public class ParseFile implements Parcelable {
 
         return taskQueue.enqueue(new Continuation<Void, Task<InputStream>>() {
             @Override
-            public Task<InputStream> then(Task<Void> toAwait) throws Exception {
+            public Task<InputStream> then(Task<Void> toAwait) {
                 return fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(new Continuation<File, InputStream>() {
                     @Override
                     public InputStream then(Task<File> task) throws Exception {
@@ -560,7 +560,7 @@ public class ParseFile implements Parcelable {
             }
         }).continueWithTask(new Continuation<InputStream, Task<InputStream>>() {
             @Override
-            public Task<InputStream> then(Task<InputStream> task) throws Exception {
+            public Task<InputStream> then(Task<InputStream> task) {
                 cts.trySetResult(null); // release
                 currentTasks.remove(cts);
                 return task;
@@ -616,7 +616,7 @@ public class ParseFile implements Parcelable {
 
         return toAwait.continueWithTask(new Continuation<Void, Task<File>>() {
             @Override
-            public Task<File> then(Task<Void> task) throws Exception {
+            public Task<File> then(Task<Void> task) {
                 if (cancellationToken != null && cancellationToken.isCancelled()) {
                     return Task.cancelled();
                 }

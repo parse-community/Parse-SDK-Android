@@ -61,8 +61,7 @@ import java.util.Set;
 
         registerDecoder(ParseDeleteOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return ParseDeleteOperation.getInstance();
             }
 
@@ -74,8 +73,7 @@ import java.util.Set;
 
         registerDecoder(ParseIncrementOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return new ParseIncrementOperation((Number) decoder.decode(object.opt("amount")));
             }
 
@@ -87,8 +85,7 @@ import java.util.Set;
 
         registerDecoder(ParseAddOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return new ParseAddOperation((Collection) decoder.decode(object.opt("objects")));
             }
 
@@ -105,8 +102,7 @@ import java.util.Set;
 
         registerDecoder(ParseAddUniqueOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return new ParseAddUniqueOperation((Collection) decoder.decode(object.opt("objects")));
             }
 
@@ -123,8 +119,7 @@ import java.util.Set;
 
         registerDecoder(ParseRemoveOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return new ParseRemoveOperation((Collection) decoder.decode(object.opt("objects")));
             }
 
@@ -141,8 +136,7 @@ import java.util.Set;
 
         registerDecoder(ParseRelationOperation.OP_NAME_ADD, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 JSONArray objectsArray = object.optJSONArray("objects");
                 List<ParseObject> objectsList = (List<ParseObject>) decoder.decode(objectsArray);
                 return new ParseRelationOperation<>(new HashSet<>(objectsList), null);
@@ -161,8 +155,7 @@ import java.util.Set;
 
         registerDecoder(ParseRelationOperation.OP_NAME_REMOVE, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder)
-                    throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 JSONArray objectsArray = object.optJSONArray("objects");
                 List<ParseObject> objectsList = (List<ParseObject>) decoder.decode(objectsArray);
                 return new ParseRelationOperation<>(null, new HashSet<>(objectsList));
@@ -181,7 +174,7 @@ import java.util.Set;
 
         registerDecoder(ParseSetOperation.OP_NAME, new ParseFieldOperationFactory() {
             @Override
-            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) throws JSONException {
+            public ParseFieldOperation decode(JSONObject object, ParseDecoder decoder) {
                 return null; // Not called.
             }
 

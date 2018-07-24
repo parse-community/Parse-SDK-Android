@@ -362,7 +362,6 @@ class OfflineQueryLogic {
                 return true;
             }
         }
-        ;
 
         return false;
     }
@@ -534,8 +533,7 @@ class OfflineQueryLogic {
     /**
      * Matches $geoIntersects constraints.
      */
-    private static boolean matchesGeoIntersectsConstraint(Object constraint, Object value)
-            throws ParseException {
+    private static boolean matchesGeoIntersectsConstraint(Object constraint, Object value) {
         if (value == null || value == JSONObject.NULL) {
             return false;
         }
@@ -551,8 +549,7 @@ class OfflineQueryLogic {
     /**
      * Matches $geoWithin constraints.
      */
-    private static boolean matchesGeoWithinConstraint(Object constraint, Object value)
-            throws ParseException {
+    private static boolean matchesGeoWithinConstraint(Object constraint, Object value) {
         if (value == null || value == JSONObject.NULL) {
             return false;
         }
@@ -648,11 +645,8 @@ class OfflineQueryLogic {
         if (acl.getPublicReadAccess()) {
             return true;
         }
-        if (user != null && acl.getReadAccess(user)) {
-            return true;
-        }
+        return user != null && acl.getReadAccess(user);
         // TODO: Implement roles.
-        return false;
     }
 
     /**
@@ -671,11 +665,8 @@ class OfflineQueryLogic {
         if (acl.getPublicWriteAccess()) {
             return true;
         }
-        if (user != null && acl.getWriteAccess(user)) {
-            return true;
-        }
+        return user != null && acl.getWriteAccess(user);
         // TODO: Implement roles.
-        return false;
     }
 
     /**
@@ -779,8 +770,7 @@ class OfflineQueryLogic {
             final OfflineStore store,
             final Object container,
             final String path,
-            final ParseSQLiteDatabase db)
-            throws ParseException {
+            final ParseSQLiteDatabase db) {
         // If there's no object to include, that's fine.
         if (container == null) {
             return Task.forResult(null);
@@ -845,7 +835,7 @@ class OfflineQueryLogic {
                     // Make sure this object is fetched before descending into it.
                     return fetchIncludeAsync(store, container, null, db).onSuccess(new Continuation<Void, Object>() {
                         @Override
-                        public Object then(Task<Void> task) throws Exception {
+                        public Object then(Task<Void> task) {
                             return ((ParseObject) container).get(key);
                         }
                     });
@@ -920,7 +910,7 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
                 return inQueryMatcher.matchesAsync(object, db).onSuccess(new Continuation<Boolean, Boolean>() {
                     @Override
-                    public Boolean then(Task<Boolean> task) throws Exception {
+                    public Boolean then(Task<Boolean> task) {
                         return !task.getResult();
                     }
                 });
@@ -964,7 +954,7 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
                 return selectMatcher.matchesAsync(object, db).onSuccess(new Continuation<Boolean, Boolean>() {
                     @Override
-                    public Boolean then(Task<Boolean> task) throws Exception {
+                    public Boolean then(Task<Boolean> task) {
                         return !task.getResult();
                     }
                 });
@@ -1031,7 +1021,7 @@ class OfflineQueryLogic {
                 for (final ConstraintMatcher<T> matcher : matchers) {
                     task = task.onSuccessTask(new Continuation<Boolean, Task<Boolean>>() {
                         @Override
-                        public Task<Boolean> then(Task<Boolean> task) throws Exception {
+                        public Task<Boolean> then(Task<Boolean> task) {
                             if (task.getResult()) {
                                 return task;
                             }
@@ -1119,7 +1109,7 @@ class OfflineQueryLogic {
                 for (final ConstraintMatcher<T> matcher : matchers) {
                     task = task.onSuccessTask(new Continuation<Boolean, Task<Boolean>>() {
                         @Override
-                        public Task<Boolean> then(Task<Boolean> task) throws Exception {
+                        public Task<Boolean> then(Task<Boolean> task) {
                             if (!task.getResult()) {
                                 return task;
                             }

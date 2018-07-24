@@ -26,7 +26,7 @@ class ParsePushChannelsController {
         }
         return getCurrentInstallationController().getAsync().onSuccessTask(new Continuation<ParseInstallation, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseInstallation> task) throws Exception {
+            public Task<Void> then(Task<ParseInstallation> task) {
                 ParseInstallation installation = task.getResult();
                 List<String> channels = installation.getList(ParseInstallation.KEY_CHANNELS);
                 if (channels == null
@@ -47,7 +47,7 @@ class ParsePushChannelsController {
         }
         return getCurrentInstallationController().getAsync().onSuccessTask(new Continuation<ParseInstallation, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseInstallation> task) throws Exception {
+            public Task<Void> then(Task<ParseInstallation> task) {
                 ParseInstallation installation = task.getResult();
                 List<String> channels = installation.getList(ParseInstallation.KEY_CHANNELS);
                 if (channels != null && channels.contains(channel)) {

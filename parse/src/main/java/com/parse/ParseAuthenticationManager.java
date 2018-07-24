@@ -46,7 +46,7 @@ class ParseAuthenticationManager {
         // Synchronize the current user with the auth callback.
         controller.getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseUser> task) throws Exception {
+            public Task<Void> then(Task<ParseUser> task) {
                 ParseUser user = task.getResult();
                 if (user != null) {
                     return user.synchronizeAuthDataAsync(authType);
@@ -66,7 +66,7 @@ class ParseAuthenticationManager {
         }
         return Task.call(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return callback.onRestore(authData);
             }
         }, ParseExecutors.io());
@@ -80,7 +80,7 @@ class ParseAuthenticationManager {
         if (callback != null) {
             return Task.call(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception {
+                public Void call() {
                     callback.onRestore(null);
                     return null;
                 }

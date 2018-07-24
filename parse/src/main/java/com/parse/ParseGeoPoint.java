@@ -122,7 +122,7 @@ public class ParseGeoPoint implements Parcelable {
         return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
                 .onSuccess(new Continuation<Location, ParseGeoPoint>() {
                     @Override
-                    public ParseGeoPoint then(Task<Location> task) throws Exception {
+                    public ParseGeoPoint then(Task<Location> task) {
                         Location location = task.getResult();
                         return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
                     }
@@ -169,7 +169,7 @@ public class ParseGeoPoint implements Parcelable {
         return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
                 .onSuccess(new Continuation<Location, ParseGeoPoint>() {
                     @Override
-                    public ParseGeoPoint then(Task<Location> task) throws Exception {
+                    public ParseGeoPoint then(Task<Location> task) {
                         Location location = task.getResult();
                         return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
                     }

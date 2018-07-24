@@ -46,14 +46,14 @@ public class ParseSession extends ParseObject {
     public static Task<ParseSession> getCurrentSessionInBackground() {
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<ParseSession>>() {
             @Override
-            public Task<ParseSession> then(Task<String> task) throws Exception {
+            public Task<ParseSession> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 if (sessionToken == null) {
                     return Task.forResult(null);
                 }
                 return getSessionController().getSessionAsync(sessionToken).onSuccess(new Continuation<ParseObject.State, ParseSession>() {
                     @Override
-                    public ParseSession then(Task<ParseObject.State> task) throws Exception {
+                    public ParseSession then(Task<ParseObject.State> task) {
                         ParseObject.State result = task.getResult();
                         return ParseObject.from(result);
                     }
@@ -88,7 +88,7 @@ public class ParseSession extends ParseObject {
 
         return getSessionController().upgradeToRevocable(sessionToken).onSuccess(new Continuation<ParseObject.State, String>() {
             @Override
-            public String then(Task<ParseObject.State> task) throws Exception {
+            public String then(Task<ParseObject.State> task) {
                 ParseObject.State result = task.getResult();
                 return ParseObject.<ParseSession>from(result).getSessionToken();
             }

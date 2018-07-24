@@ -126,7 +126,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testInstallationObjectIdCannotBeChanged() throws Exception {
+    public void testInstallationObjectIdCannotBeChanged() {
         boolean hasException = false;
         ParseInstallation installation = new ParseInstallation();
         try {
@@ -304,7 +304,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testDeviceToken() throws Exception {
+    public void testDeviceToken() {
         ParseInstallation installation = new ParseInstallation();
         installation.setDeviceToken("deviceToken");
 
@@ -318,7 +318,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testDeviceTokenWithNullDeviceToken() throws Exception {
+    public void testDeviceTokenWithNullDeviceToken() {
         ParseInstallation installation = new ParseInstallation();
         installation.setDeviceToken("deviceToken");
 
@@ -330,7 +330,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetCurrentInstallation() throws Exception {
+    public void testGetCurrentInstallation() {
         // Mock currentInstallationController to make setAsync work
         ParseCurrentInstallationController controller =
                 mock(ParseCurrentInstallationController.class);
@@ -349,7 +349,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     // testFetchAsync
 
     @Test
-    public void testLocaleIdentifierSpecialCases() throws Exception {
+    public void testLocaleIdentifierSpecialCases() {
         mocksForUpdateBeforeSave();
 
         ParseInstallation installation = new ParseInstallation();

@@ -89,6 +89,7 @@ import bolts.TaskCompletionSource;
  * if your application has already spawned a background task to perform work, that background task
  * could use the blocking calls and avoid the code complexity of callbacks.
  */
+@SuppressWarnings("UnusedReturnValue")
 public class ParseQuery<T extends ParseObject> {
 
     private final State.Builder<T> builder;
@@ -164,7 +165,7 @@ public class ParseQuery<T extends ParseObject> {
      * @param subclass The {@link ParseObject} subclass type to retrieve.
      * @return A new {@code ParseQuery}.
      */
-    public static <T extends ParseObject> ParseQuery<T> getQuery(Class<T> subclass) {
+    public static <T extends ParseObject> ParseQuery<T> getQuery(@NonNull Class<T> subclass) {
         return new ParseQuery<>(subclass);
     }
 
@@ -175,18 +176,8 @@ public class ParseQuery<T extends ParseObject> {
      * @param className The name of the class to retrieve {@link ParseObject}s for.
      * @return A new {@code ParseQuery}.
      */
-    public static <T extends ParseObject> ParseQuery<T> getQuery(String className) {
+    public static <T extends ParseObject> ParseQuery<T> getQuery(@NonNull String className) {
         return new ParseQuery<>(className);
-    }
-
-    /**
-     * Constructs a query for {@link ParseUser}s.
-     *
-     * @deprecated Please use {@link ParseUser#getQuery()} instead.
-     */
-    @Deprecated
-    public static ParseQuery<ParseUser> getUserQuery() {
-        return ParseUser.getQuery();
     }
 
     private static void throwIfLDSEnabled() {
@@ -413,7 +404,7 @@ public class ParseQuery<T extends ParseObject> {
         }
         return task.continueWithTask(new Continuation<TResult, Task<TResult>>() {
             @Override
-            public Task<TResult> then(Task<TResult> task) throws Exception {
+            public Task<TResult> then(Task<TResult> task) {
                 tcs.trySetResult(null); // release
                 currentTasks.remove(tcs);
                 return task;
@@ -465,10 +456,10 @@ public class ParseQuery<T extends ParseObject> {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         return perform(new Callable<Task<List<T>>>() {
             @Override
-            public Task<List<T>> call() throws Exception {
+            public Task<List<T>> call() {
                 return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<List<T>>>() {
                     @Override
-                    public Task<List<T>> then(Task<ParseUser> task) throws Exception {
+                    public Task<List<T>> then(Task<ParseUser> task) {
                         final ParseUser user = task.getResult();
                         return findAsync(state, user, tcs.getTask());
                     }
@@ -532,10 +523,10 @@ public class ParseQuery<T extends ParseObject> {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         return perform(new Callable<Task<T>>() {
             @Override
-            public Task<T> call() throws Exception {
+            public Task<T> call() {
                 return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<T>>() {
                     @Override
-                    public Task<T> then(Task<ParseUser> task) throws Exception {
+                    public Task<T> then(Task<ParseUser> task) {
                         final ParseUser user = task.getResult();
                         return getFirstAsync(state, user, tcs.getTask());
                     }
@@ -608,10 +599,10 @@ public class ParseQuery<T extends ParseObject> {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         return perform(new Callable<Task<Integer>>() {
             @Override
-            public Task<Integer> call() throws Exception {
+            public Task<Integer> call() {
                 return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<Integer>>() {
                     @Override
-                    public Task<Integer> then(Task<ParseUser> task) throws Exception {
+                    public Task<Integer> then(Task<ParseUser> task) {
                         final ParseUser user = task.getResult();
                         return countAsync(state, user, tcs.getTask());
                     }
@@ -761,10 +752,10 @@ public class ParseQuery<T extends ParseObject> {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         return perform(new Callable<Task<TResult>>() {
             @Override
-            public Task<TResult> call() throws Exception {
+            public Task<TResult> call() {
                 return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<TResult>>() {
                     @Override
-                    public Task<TResult> then(Task<ParseUser> task) throws Exception {
+                    public Task<TResult> then(Task<ParseUser> task) {
                         final ParseUser user = task.getResult();
                         final State<T> cacheState = new State.Builder<T>(state)
                                 .setCachePolicy(CachePolicy.CACHE_ONLY)
@@ -777,7 +768,7 @@ public class ParseQuery<T extends ParseObject> {
                         executionTask = ParseTaskUtils.callbackOnMainThreadAsync(executionTask, callback);
                         return executionTask.continueWithTask(new Continuation<TResult, Task<TResult>>() {
                             @Override
-                            public Task<TResult> then(Task<TResult> task) throws Exception {
+                            public Task<TResult> then(Task<TResult> task) {
                                 if (task.isCancelled()) {
                                     return task;
                                 }
@@ -798,7 +789,7 @@ public class ParseQuery<T extends ParseObject> {
      * @param value The value that the {@link ParseObject} must contain.
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereEqualTo(String key, Object value) {
+    public ParseQuery<T> whereEqualTo(@NonNull String key, Object value) {
         builder.whereEqualTo(key, value);
         return this;
     }

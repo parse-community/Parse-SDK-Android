@@ -30,7 +30,7 @@ class NetworkSessionController implements ParseSessionController {
 
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
             @Override
-            public ParseObject.State then(Task<JSONObject> task) throws Exception {
+            public ParseObject.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
                 return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
                         .isComplete(true)
@@ -52,7 +52,7 @@ class NetworkSessionController implements ParseSessionController {
                 ParseRESTSessionCommand.upgradeToRevocableSessionCommand(sessionToken);
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
             @Override
-            public ParseObject.State then(Task<JSONObject> task) throws Exception {
+            public ParseObject.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
                 return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
                         .isComplete(true)

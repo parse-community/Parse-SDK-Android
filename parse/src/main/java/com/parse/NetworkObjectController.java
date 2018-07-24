@@ -36,7 +36,7 @@ class NetworkObjectController implements ParseObjectController {
 
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
             @Override
-            public ParseObject.State then(Task<JSONObject> task) throws Exception {
+            public ParseObject.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
                 // Copy and clear to create an new empty instance of the same type as `state`
                 ParseObject.State.Init<?> builder = state.newBuilder().clear();
@@ -65,7 +65,7 @@ class NetworkObjectController implements ParseObjectController {
                 sessionToken);
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
             @Override
-            public ParseObject.State then(Task<JSONObject> task) throws Exception {
+            public ParseObject.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
                 // Copy and clear to create an new empty instance of the same type as `state`
                 ParseObject.State.Init<?> builder = state.newBuilder().clear();
@@ -105,7 +105,7 @@ class NetworkObjectController implements ParseObjectController {
             final ParseDecoder decoder = decoders.get(i);
             tasks.add(batchTasks.get(i).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
                 @Override
-                public ParseObject.State then(Task<JSONObject> task) throws Exception {
+                public ParseObject.State then(Task<JSONObject> task) {
                     JSONObject result = task.getResult();
                     // Copy and clear to create an new empty instance of the same type as `state`
                     ParseObject.State.Init<?> builder = state.newBuilder().clear();

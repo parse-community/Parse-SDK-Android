@@ -89,7 +89,7 @@ public class ParseConfig {
     public static Task<ParseConfig> getInBackground() {
         return taskQueue.enqueue(new Continuation<Void, Task<ParseConfig>>() {
             @Override
-            public Task<ParseConfig> then(Task<Void> toAwait) throws Exception {
+            public Task<ParseConfig> then(Task<Void> toAwait) {
                 return getAsync(toAwait);
             }
         });
@@ -98,11 +98,11 @@ public class ParseConfig {
     private static Task<ParseConfig> getAsync(final Task<Void> toAwait) {
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<ParseConfig>>() {
             @Override
-            public Task<ParseConfig> then(Task<String> task) throws Exception {
+            public Task<ParseConfig> then(Task<String> task) {
                 final String sessionToken = task.getResult();
                 return toAwait.continueWithTask(new Continuation<Void, Task<ParseConfig>>() {
                     @Override
-                    public Task<ParseConfig> then(Task<Void> task) throws Exception {
+                    public Task<ParseConfig> then(Task<Void> task) {
                         return getConfigController().getAsync(sessionToken);
                     }
                 });

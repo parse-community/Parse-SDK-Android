@@ -61,7 +61,7 @@ public final class ParseCloud {
                                                        final Map<String, ?> params) {
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
             @Override
-            public Task<T> then(Task<String> task) throws Exception {
+            public Task<T> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 return getCloudCodeController().callFunctionInBackground(name, params, sessionToken);
             }

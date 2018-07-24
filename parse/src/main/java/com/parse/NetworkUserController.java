@@ -44,7 +44,7 @@ class NetworkUserController implements ParseUserController {
 
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
             @Override
-            public ParseUser.State then(Task<JSONObject> task) throws Exception {
+            public ParseUser.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
                 return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
                         .isComplete(false)
@@ -63,7 +63,7 @@ class NetworkUserController implements ParseUserController {
                 username, password, revocableSession);
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
             @Override
-            public ParseUser.State then(Task<JSONObject> task) throws Exception {
+            public ParseUser.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
 
                 return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
@@ -82,7 +82,7 @@ class NetworkUserController implements ParseUserController {
 
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
             @Override
-            public ParseUser.State then(Task<JSONObject> task) throws Exception {
+            public ParseUser.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
 
                 // TODO(grantland): Does the server really respond back with complete object data if the
@@ -105,7 +105,7 @@ class NetworkUserController implements ParseUserController {
                 authType, authData, revocableSession);
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
             @Override
-            public ParseUser.State then(Task<JSONObject> task) throws Exception {
+            public ParseUser.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
 
                 return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
@@ -124,7 +124,7 @@ class NetworkUserController implements ParseUserController {
         ParseRESTCommand command = ParseRESTUserCommand.getCurrentUserCommand(sessionToken);
         return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
             @Override
-            public ParseUser.State then(Task<JSONObject> task) throws Exception {
+            public ParseUser.State then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
 
                 return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())

@@ -98,7 +98,7 @@ public class ParseCloudTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testCallFunctionNullCallback() throws Exception {
+    public void testCallFunctionNullCallback() {
         ParseCloudCodeController controller = mockParseCloudCodeControllerWithResponse("result");
         ParseCorePlugins.getInstance().registerCloudCodeController(controller);
         Map<String, Object> parameters = new HashMap<>();

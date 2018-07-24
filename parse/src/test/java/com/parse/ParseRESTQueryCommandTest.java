@@ -75,7 +75,7 @@ public class ParseRESTQueryCommandTest {
     }
 
     @Test
-    public void testEncodeWithCount() throws Exception {
+    public void testEncodeWithCount() {
         ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
                 .setSkip(6)
                 .setLimit(3)

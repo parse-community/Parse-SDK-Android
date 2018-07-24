@@ -35,7 +35,7 @@ public class ParsePushStateTest {
     //region testDefaults
 
     @Test(expected = IllegalArgumentException.class)
-    public void testDefaultsWithoutData() throws Exception {
+    public void testDefaultsWithoutData() {
         // We have to set data to a state otherwise it will throw an exception
         JSONObject data = new JSONObject();
 
@@ -281,7 +281,7 @@ public class ParsePushStateTest {
     //region testData
 
     @Test(expected = IllegalArgumentException.class)
-    public void testDataNullData() throws Exception {
+    public void testDataNullData() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
         ParsePush.State state = builder
                 .data(null)
@@ -332,7 +332,7 @@ public class ParsePushStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPushToAndroidQueryAlreadySet() throws Exception {
+    public void testPushToAndroidQueryAlreadySet() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder
@@ -371,7 +371,7 @@ public class ParsePushStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPushToIOSQueryAlreadySet() throws Exception {
+    public void testPushToIOSQueryAlreadySet() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder
@@ -386,7 +386,7 @@ public class ParsePushStateTest {
     //region testQuery
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQueryNullQuery() throws Exception {
+    public void testQueryNullQuery() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder
@@ -396,7 +396,7 @@ public class ParsePushStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQueryPushToIOSPushToAndroidAlreadySet() throws Exception {
+    public void testQueryPushToIOSPushToAndroidAlreadySet() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder
@@ -408,7 +408,7 @@ public class ParsePushStateTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testQueryNotInstallationQuery() throws Exception {
+    public void testQueryNotInstallationQuery() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder

@@ -95,7 +95,7 @@ class NetworkQueryController extends AbstractQueryController {
 
         return command.executeAsync(restClient, ct).onSuccessTask(new Continuation<JSONObject, Task<JSONObject>>() {
             @Override
-            public Task<JSONObject> then(Task<JSONObject> task) throws Exception {
+            public Task<JSONObject> then(Task<JSONObject> task) {
                 // Cache the results, unless we are ignoring the cache
                 ParseQuery.CachePolicy policy = state.cachePolicy();
                 if (policy != null && policy != ParseQuery.CachePolicy.IGNORE_CACHE) {
@@ -106,7 +106,7 @@ class NetworkQueryController extends AbstractQueryController {
             }
         }, Task.BACKGROUND_EXECUTOR).onSuccess(new Continuation<JSONObject, Integer>() {
             @Override
-            public Integer then(Task<JSONObject> task) throws Exception {
+            public Integer then(Task<JSONObject> task) {
                 // Convert response
                 return task.getResult().optInt("count");
             }

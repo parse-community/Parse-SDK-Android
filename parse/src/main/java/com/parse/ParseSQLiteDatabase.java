@@ -53,7 +53,7 @@ class ParseSQLiteDatabase {
 
         taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 synchronized (currentLock) {
                     current = toAwait;
                 }
@@ -67,7 +67,7 @@ class ParseSQLiteDatabase {
         final ParseSQLiteDatabase db = new ParseSQLiteDatabase(flags);
         return db.open(helper).continueWithTask(new Continuation<Void, Task<ParseSQLiteDatabase>>() {
             @Override
-            public Task<ParseSQLiteDatabase> then(Task<Void> task) throws Exception {
+            public Task<ParseSQLiteDatabase> then(Task<Void> task) {
                 return Task.forResult(db);
             }
         });
@@ -77,7 +77,7 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Boolean> task = current.continueWith(new Continuation<Void, Boolean>() {
                 @Override
-                public Boolean then(Task<Void> task) throws Exception {
+                public Boolean then(Task<Void> task) {
                     return db.isReadOnly();
                 }
             });
@@ -90,7 +90,7 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Boolean> task = current.continueWith(new Continuation<Void, Boolean>() {
                 @Override
-                public Boolean then(Task<Void> task) throws Exception {
+                public Boolean then(Task<Void> task) {
                     return db.isOpen();
                 }
             });
@@ -107,7 +107,7 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             current = current.continueWith(new Continuation<Void, SQLiteDatabase>() {
                 @Override
-                public SQLiteDatabase then(Task<Void> task) throws Exception {
+                public SQLiteDatabase then(Task<Void> task) {
                     // get*Database() is synchronous and calls through SQLiteOpenHelper#onCreate, onUpdate,
                     // etc.
                     return (openFlags & SQLiteDatabase.OPEN_READONLY) == SQLiteDatabase.OPEN_READONLY
@@ -116,7 +116,7 @@ class ParseSQLiteDatabase {
                 }
             }, dbExecutor).continueWithTask(new Continuation<SQLiteDatabase, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<SQLiteDatabase> task) throws Exception {
+                public Task<Void> then(Task<SQLiteDatabase> task) {
                     db = task.getResult();
                     return task.makeVoid();
                 }
@@ -134,14 +134,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             current = current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     db.beginTransaction();
                     return task;
                 }
             }, dbExecutor);
             return current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -158,14 +158,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             current = current.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     db.setTransactionSuccessful();
                     return task;
                 }
             }, dbExecutor);
             return current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -182,7 +182,7 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             current = current.continueWith(new Continuation<Void, Void>() {
                 @Override
-                public Void then(Task<Void> task) throws Exception {
+                public Void then(Task<Void> task) {
                     db.endTransaction();
                     // We want to swallow any exceptions from our Session task
                     return null;
@@ -190,7 +190,7 @@ class ParseSQLiteDatabase {
             }, dbExecutor);
             return current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -206,7 +206,7 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             current = current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     try {
                         db.close();
                     } finally {
@@ -217,7 +217,7 @@ class ParseSQLiteDatabase {
             }, dbExecutor);
             return current.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -235,12 +235,12 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Cursor> task = current.onSuccess(new Continuation<Void, Cursor>() {
                 @Override
-                public Cursor then(Task<Void> task) throws Exception {
+                public Cursor then(Task<Void> task) {
                     return db.query(table, select, where, args, null, null, null);
                 }
             }, dbExecutor).onSuccess(new Continuation<Cursor, Cursor>() {
                 @Override
-                public Cursor then(Task<Cursor> task) throws Exception {
+                public Cursor then(Task<Cursor> task) {
                     Cursor cursor = ParseSQLiteCursor.create(task.getResult(), dbExecutor);
                     /* Ensure the cursor window is filled on the dbExecutor thread. We need to do this because
                      * the cursor cannot be filled from a different thread than it was created on.
@@ -252,7 +252,7 @@ class ParseSQLiteDatabase {
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Cursor, Task<Cursor>>() {
                 @Override
-                public Task<Cursor> then(Task<Cursor> task) throws Exception {
+                public Task<Cursor> then(Task<Cursor> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -270,14 +270,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Long> task = current.onSuccess(new Continuation<Void, Long>() {
                 @Override
-                public Long then(Task<Void> task) throws Exception {
+                public Long then(Task<Void> task) {
                     return db.insertWithOnConflict(table, null, values, conflictAlgorithm);
                 }
             }, dbExecutor);
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Long, Task<Long>>() {
                 @Override
-                public Task<Long> then(Task<Long> task) throws Exception {
+                public Task<Long> then(Task<Long> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -294,14 +294,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Long> task = current.onSuccess(new Continuation<Void, Long>() {
                 @Override
-                public Long then(Task<Void> task) throws Exception {
+                public Long then(Task<Void> task) {
                     return db.insertOrThrow(table, null, values);
                 }
             }, dbExecutor);
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Long, Task<Long>>() {
                 @Override
-                public Task<Long> then(Task<Long> task) throws Exception {
+                public Task<Long> then(Task<Long> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -319,14 +319,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Integer> task = current.onSuccess(new Continuation<Void, Integer>() {
                 @Override
-                public Integer then(Task<Void> task) throws Exception {
+                public Integer then(Task<Void> task) {
                     return db.update(table, values, where, args);
                 }
             }, dbExecutor);
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Integer, Task<Integer>>() {
                 @Override
-                public Task<Integer> then(Task<Integer> task) throws Exception {
+                public Task<Integer> then(Task<Integer> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -343,14 +343,14 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Integer> task = current.onSuccess(new Continuation<Void, Integer>() {
                 @Override
-                public Integer then(Task<Void> task) throws Exception {
+                public Integer then(Task<Void> task) {
                     return db.delete(table, where, args);
                 }
             }, dbExecutor);
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Integer, Task<Integer>>() {
                 @Override
-                public Task<Integer> then(Task<Integer> task) throws Exception {
+                public Task<Integer> then(Task<Integer> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }
@@ -367,12 +367,12 @@ class ParseSQLiteDatabase {
         synchronized (currentLock) {
             Task<Cursor> task = current.onSuccess(new Continuation<Void, Cursor>() {
                 @Override
-                public Cursor then(Task<Void> task) throws Exception {
+                public Cursor then(Task<Void> task) {
                     return db.rawQuery(sql, args);
                 }
             }, dbExecutor).onSuccess(new Continuation<Cursor, Cursor>() {
                 @Override
-                public Cursor then(Task<Cursor> task) throws Exception {
+                public Cursor then(Task<Cursor> task) {
                     Cursor cursor = ParseSQLiteCursor.create(task.getResult(), dbExecutor);
                     // Ensure the cursor window is filled on the dbExecutor thread. We need to do this because
                     // the cursor cannot be filled from a different thread than it was created on.
@@ -383,7 +383,7 @@ class ParseSQLiteDatabase {
             current = task.makeVoid();
             return task.continueWithTask(new Continuation<Cursor, Task<Cursor>>() {
                 @Override
-                public Task<Cursor> then(Task<Cursor> task) throws Exception {
+                public Task<Cursor> then(Task<Cursor> task) {
                     // We want to jump off the dbExecutor
                     return task;
                 }

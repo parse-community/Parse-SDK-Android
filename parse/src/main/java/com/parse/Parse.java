@@ -158,7 +158,7 @@ public class Parse {
         final Context context = configuration.context;
         Task.callInBackground(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 getEventuallyQueue(context);
                 return null;
             }
@@ -175,7 +175,7 @@ public class Parse {
 
         ParseUser.getCurrentUserAsync().makeVoid().continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 // Prime config in the background
                 ParseConfig.getCurrentConfig();
                 return null;

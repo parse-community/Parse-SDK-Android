@@ -39,7 +39,7 @@ public class TaskQueueTestHelper {
             final TaskCompletionSource<Void> tcs = new TaskCompletionSource();
             taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return tcs.getTask();
                 }
             });

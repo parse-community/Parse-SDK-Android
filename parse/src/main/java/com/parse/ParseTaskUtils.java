@@ -105,7 +105,7 @@ class ParseTaskUtils {
         final TaskCompletionSource<T> tcs = new TaskCompletionSource();
         task.continueWith(new Continuation<T, Void>() {
             @Override
-            public Void then(final Task<T> task) throws Exception {
+            public Void then(final Task<T> task) {
                 if (task.isCancelled() && !reportCancellation) {
                     tcs.setCancelled();
                     return null;

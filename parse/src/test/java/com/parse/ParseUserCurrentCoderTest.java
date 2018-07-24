@@ -51,7 +51,7 @@ public class ParseUserCurrentCoderTest {
     }
 
     @Test
-    public void testEncodeSuccessWithEmptyState() throws Exception {
+    public void testEncodeSuccessWithEmptyState() {
         ParseUser.State state = new ParseUser.State.Builder()
                 .build();
 
@@ -94,7 +94,7 @@ public class ParseUserCurrentCoderTest {
     }
 
     @Test
-    public void testDecodeSuccessWithoutSessionTokenAndAuthData() throws Exception {
+    public void testDecodeSuccessWithoutSessionTokenAndAuthData() {
         JSONObject objectJson = new JSONObject();
 
         ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
@@ -109,7 +109,7 @@ public class ParseUserCurrentCoderTest {
     }
 
     @Test
-    public void testEncodeDecodeWithNullValues() throws Exception {
+    public void testEncodeDecodeWithNullValues() {
         ParseUser.State state = new ParseUser.State.Builder()
                 .sessionToken(null)
                 .authData(null)

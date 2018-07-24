@@ -62,7 +62,7 @@ public class ParseConfigControllerTest {
     //region testConstructor
 
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() {
         ParseHttpClient restClient = mock(ParseHttpClient.class);
         ParseCurrentConfigController currentConfigController = mock(ParseCurrentConfigController.class);
         ParseConfigController controller = new ParseConfigController(restClient,

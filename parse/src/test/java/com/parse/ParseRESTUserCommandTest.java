@@ -44,7 +44,7 @@ public class ParseRESTUserCommandTest {
     //region testConstruct
 
     @Test
-    public void testGetCurrentUserCommand() throws Exception {
+    public void testGetCurrentUserCommand() {
         ParseRESTUserCommand command = ParseRESTUserCommand.getCurrentUserCommand("sessionToken");
 
         assertEquals("users/me", command.httpPath);
@@ -146,7 +146,7 @@ public class ParseRESTUserCommandTest {
     //region testOnResponseAsync
 
     @Test
-    public void testOnResponseAsync() throws Exception {
+    public void testOnResponseAsync() {
         ParseRESTUserCommand command =
                 ParseRESTUserCommand.getCurrentUserCommand("sessionToken");
 

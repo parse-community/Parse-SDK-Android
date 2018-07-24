@@ -135,7 +135,7 @@ abstract class ParseRequest<Response> {
             }
         }, NETWORK_EXECUTOR).continueWithTask(new Continuation<Response, Task<Response>>() {
             @Override
-            public Task<Response> then(Task<Response> task) throws Exception {
+            public Task<Response> then(Task<Response> task) {
                 if (task.isFaulted()) {
                     Exception error = task.getError();
                     if (error instanceof IOException) {
@@ -212,7 +212,7 @@ abstract class ParseRequest<Response> {
         }
         return sendOneRequestAsync(client, request, downloadProgressCallback).continueWithTask(new Continuation<Response, Task<Response>>() {
             @Override
-            public Task<Response> then(Task<Response> task) throws Exception {
+            public Task<Response> then(Task<Response> task) {
                 Exception e = task.getError();
                 if (task.isFaulted() && e instanceof ParseException) {
                     if (cancellationToken != null && cancellationToken.isCancelled()) {
@@ -240,7 +240,7 @@ abstract class ParseRequest<Response> {
                                         downloadProgressCallback,
                                         cancellationToken).continueWithTask(new Continuation<Response, Task<Void>>() {
                                     @Override
-                                    public Task<Void> then(Task<Response> task) throws Exception {
+                                    public Task<Void> then(Task<Response> task) {
                                         if (task.isCancelled()) {
                                             retryTask.setCancelled();
                                         } else if (task.isFaulted()) {

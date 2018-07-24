@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 public class ListsTest {
 
     @Test
-    public void testPartition() throws Exception {
+    public void testPartition() {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < 99; i++) {
             list.add(i);

@@ -73,7 +73,7 @@ public class ParseRESTCommandTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ParseRequest.setDefaultInitialRetryDelay(ParseRequest.DEFAULT_INITIAL_RETRY_DELAY);
         ParseCorePlugins.getInstance().reset();
         ParseRESTCommand.server = null;
@@ -249,7 +249,7 @@ public class ParseRESTCommandTest {
     }
 
     @Test
-    public void testGetCacheKeyWithNoJSONParameters() throws Exception {
+    public void testGetCacheKeyWithNoJSONParameters() {
         // Make test command
         String httpPath = "www.parse.com";
         String sessionToken = "sessionToken";
@@ -370,7 +370,7 @@ public class ParseRESTCommandTest {
     }
 
     @Test
-    public void testRetainLocalIds() throws Exception {
+    public void testRetainLocalIds() {
         // Register LocalIdManager
         LocalIdManager localIdManager = mock(LocalIdManager.class);
         when(localIdManager.createLocalId()).thenReturn("localIdAgain");
@@ -399,7 +399,7 @@ public class ParseRESTCommandTest {
     }
 
     @Test
-    public void testNewBodyWithNoJSONParameters() throws Exception {
+    public void testNewBodyWithNoJSONParameters() {
         // Make test command
         String httpPath = "www.parse.com";
         String sessionToken = "sessionToken";

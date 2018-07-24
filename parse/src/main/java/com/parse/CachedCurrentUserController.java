@@ -42,10 +42,10 @@ class CachedCurrentUserController implements ParseCurrentUserController {
     public Task<Void> setAsync(final ParseUser user) {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         ParseUser oldCurrentUser;
                         synchronized (mutex) {
                             oldCurrentUser = currentUser;
@@ -56,7 +56,7 @@ class CachedCurrentUserController implements ParseCurrentUserController {
                             // We don't need to remove persisted files since we're overwriting them
                             return oldCurrentUser.logOutAsync(false).continueWith(new Continuation<Void, Void>() {
                                 @Override
-                                public Void then(Task<Void> task) throws Exception {
+                                public Void then(Task<Void> task) {
                                     return null; // ignore errors
                                 }
                             });
@@ -65,16 +65,16 @@ class CachedCurrentUserController implements ParseCurrentUserController {
                     }
                 }).onSuccessTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         user.setIsCurrentUser(true);
                         return user.synchronizeAllAuthDataAsync();
                     }
                 }).onSuccessTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return store.setAsync(user).continueWith(new Continuation<Void, Void>() {
                             @Override
-                            public Void then(Task<Void> task) throws Exception {
+                            public Void then(Task<Void> task) {
                                 synchronized (mutex) {
                                     currentUserMatchesDisk = !task.isFaulted();
                                     currentUser = user;
@@ -114,10 +114,10 @@ class CachedCurrentUserController implements ParseCurrentUserController {
 
         return taskQueue.enqueue(new Continuation<Void, Task<Boolean>>() {
             @Override
-            public Task<Boolean> then(Task<Void> toAwait) throws Exception {
+            public Task<Boolean> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<Boolean>>() {
                     @Override
-                    public Task<Boolean> then(Task<Void> task) throws Exception {
+                    public Task<Boolean> then(Task<Void> task) {
                         return store.existsAsync();
                     }
                 });
@@ -157,7 +157,7 @@ class CachedCurrentUserController implements ParseCurrentUserController {
     public Task<String> getCurrentSessionTokenAsync() {
         return getAsync(false).onSuccess(new Continuation<ParseUser, String>() {
             @Override
-            public String then(Task<ParseUser> task) throws Exception {
+            public String then(Task<ParseUser> task) {
                 ParseUser user = task.getResult();
                 return user != null ? user.getSessionToken() : null;
             }
@@ -168,16 +168,16 @@ class CachedCurrentUserController implements ParseCurrentUserController {
     public Task<Void> logOutAsync() {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 // We can parallelize disk and network work, but only after we restore the current user from
                 // disk.
                 final Task<ParseUser> userTask = getAsync(false);
                 return Task.whenAll(Arrays.asList(userTask, toAwait)).continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         Task<Void> logOutTask = userTask.onSuccessTask(new Continuation<ParseUser, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<ParseUser> task) throws Exception {
+                            public Task<Void> then(Task<ParseUser> task) {
                                 ParseUser user = task.getResult();
                                 if (user == null) {
                                     return task.cast();
@@ -188,7 +188,7 @@ class CachedCurrentUserController implements ParseCurrentUserController {
 
                         Task<Void> diskTask = store.deleteAsync().continueWith(new Continuation<Void, Void>() {
                             @Override
-                            public Void then(Task<Void> task) throws Exception {
+                            public Void then(Task<Void> task) {
                                 boolean deleted = !task.isFaulted();
                                 synchronized (mutex) {
                                     currentUserMatchesDisk = deleted;
@@ -214,10 +214,10 @@ class CachedCurrentUserController implements ParseCurrentUserController {
 
         return taskQueue.enqueue(new Continuation<Void, Task<ParseUser>>() {
             @Override
-            public Task<ParseUser> then(Task<Void> toAwait) throws Exception {
+            public Task<ParseUser> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<ParseUser>>() {
                     @Override
-                    public Task<ParseUser> then(Task<Void> ignored) throws Exception {
+                    public Task<ParseUser> then(Task<Void> ignored) {
                         ParseUser current;
                         boolean matchesDisk;
                         synchronized (mutex) {
@@ -238,7 +238,7 @@ class CachedCurrentUserController implements ParseCurrentUserController {
 
                         return store.getAsync().continueWith(new Continuation<ParseUser, ParseUser>() {
                             @Override
-                            public ParseUser then(Task<ParseUser> task) throws Exception {
+                            public ParseUser then(Task<ParseUser> task) {
                                 ParseUser current = task.getResult();
                                 boolean matchesDisk = !task.isFaulted();
 

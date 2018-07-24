@@ -25,7 +25,7 @@ import static org.junit.Assert.assertSame;
 public class ParseHttpResponseTest {
 
     @Test
-    public void testParseHttpResponseDefaults() throws IOException {
+    public void testParseHttpResponseDefaults() {
         ParseHttpResponse response = new ParseHttpResponse.Builder().build();
 
         assertNull(response.getContent());
@@ -68,7 +68,7 @@ public class ParseHttpResponseTest {
     }
 
     @Test
-    public void testParseHttpResponseBuildWithParseHttpResponse() throws IOException {
+    public void testParseHttpResponseBuildWithParseHttpResponse() {
         Map<String, String> headers = new HashMap<>();
         String name = "name";
         String value = "value";

@@ -252,38 +252,6 @@ public class ParsePush {
     }
 
     /**
-     * Set whether this push notification will go to iOS devices.
-     * <p/>
-     * Setting this to {@code true} will set {@link #setPushToAndroid(boolean)} to {@code false}.
-     * <p/>
-     * <strong>Note:</strong> You must set up iOS push certificates before sending pushes to iOS.
-     *
-     * @deprecated Please use {@link #setQuery(ParseQuery)} with a {@link ParseQuery} targeting
-     * {@link ParseInstallation}s with a constraint on the {@code deviceType} field. If you use
-     * {@code #setPushToIOS(boolean)} or {@link #setPushToAndroid(boolean)}, then you will only be
-     * able to send to one of these two device types (e.g. and not Windows).
-     */
-    @Deprecated
-    public void setPushToIOS(boolean pushToIOS) {
-        builder.pushToIOS(pushToIOS);
-    }
-
-    /**
-     * Set whether this push notification will go to Android devices.
-     * <p/>
-     * Setting this to {@code true} will set {@link #setPushToIOS(boolean)} to {@code false}.
-     *
-     * @deprecated Please use {@link #setQuery(ParseQuery)} with a {@link ParseQuery} targeting
-     * {@link ParseInstallation}s with a constraint on the {@code deviceType} field. If you use
-     * {@code #setPushToAndroid(boolean)} or {@link #setPushToIOS(boolean)}, then you will only be
-     * able to send to one of these two device types (e.g. and not Windows).
-     */
-    @Deprecated
-    public void setPushToAndroid(boolean pushToAndroid) {
-        builder.pushToAndroid(pushToAndroid);
-    }
-
-    /**
      * Sets the entire data of the push message. See the push guide for more details on the data
      * format. This will overwrite any data specified in {@link #setMessage(String)}.
      */
@@ -316,7 +284,7 @@ public class ParsePush {
         final State state = builder.build();
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 return getPushController().sendInBackground(state, sessionToken);
             }

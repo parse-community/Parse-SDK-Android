@@ -139,7 +139,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetExpirationTime() throws Exception {
+    public void testSetExpirationTime() {
         ParsePush push = new ParsePush();
         push.setExpirationTime(10000);
 
@@ -158,7 +158,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetExpirationTimeInterval() throws Exception {
+    public void testSetExpirationTimeInterval() {
         ParsePush push = new ParsePush();
         push.setExpirationTimeInterval(10000);
 
@@ -211,7 +211,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetPushTime() throws Exception {
+    public void testSetPushTime() {
         ParsePush push = new ParsePush();
         long time = System.currentTimeMillis() / 1000 + 1000;
         push.setPushTime(time);
@@ -231,7 +231,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetPushToIOS() throws Exception {
+    public void testSetPushToIOS() {
         ParsePush push = new ParsePush();
         push.setPushToIOS(true);
 
@@ -250,7 +250,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetPushToAndroid() throws Exception {
+    public void testSetPushToAndroid() {
         ParsePush push = new ParsePush();
         push.setPushToAndroid(true);
 
