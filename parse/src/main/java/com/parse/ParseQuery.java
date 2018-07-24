@@ -92,6 +92,8 @@ import bolts.TaskCompletionSource;
 @SuppressWarnings("UnusedReturnValue")
 public class ParseQuery<T extends ParseObject> {
 
+    public static final int MAX_LIMIT = 1000;
+
     private final State.Builder<T> builder;
     private ParseUser user;
     // Just like ParseFile

@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused", "NOTHING_TO_INLINE")
 
 package com.parse.ktx
 
@@ -11,7 +11,7 @@ import com.parse.ParseObject
  * @return the value
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> ParseObject.getAs(key: String): T = get(key) as T
+inline fun <T> ParseObject.getAs(key: String): T = get(key) as T
 
 /**
  * Get the object optionally as null. This has a chance of throwing an exception if the object
@@ -20,7 +20,7 @@ fun <T> ParseObject.getAs(key: String): T = get(key) as T
  * @return the value, or null if nothing is there
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> ParseObject.getAsOrNull(key: String): T? {
+inline fun <T> ParseObject.getAsOrNull(key: String): T? {
     if (containsKey(key)) {
         return get(key) as T?
     }
@@ -30,7 +30,7 @@ fun <T> ParseObject.getAsOrNull(key: String): T? {
 /**
  * [ParseObject.put] the value, doing nothing if the value is null
  */
-fun ParseObject.putOrIgnore(key: String, value: Any?) {
+inline fun ParseObject.putOrIgnore(key: String, value: Any?) {
     if (value != null) {
         put(key, value)
     }
@@ -39,7 +39,7 @@ fun ParseObject.putOrIgnore(key: String, value: Any?) {
 /**
  * [ParseObject.put] the value, or [ParseObject.remove] it if the value is null
  */
-fun ParseObject.putOrRemove(key: String, value: Any?) {
+inline fun ParseObject.putOrRemove(key: String, value: Any?) {
     if (value == null) {
         remove(key)
     } else {
@@ -52,7 +52,7 @@ fun ParseObject.putOrRemove(key: String, value: Any?) {
  * @param key the key
  * @return the value, or null if nothing is there
  */
-fun ParseObject.getBooleanOrNull(key: String): Boolean? {
+inline fun ParseObject.getBooleanOrNull(key: String): Boolean? {
     if (containsKey(key)) {
         return getBoolean(key)
     }
@@ -64,7 +64,7 @@ fun ParseObject.getBooleanOrNull(key: String): Boolean? {
  * @param key the key
  * @return the value, or null if nothing is there
  */
-fun ParseObject.getIntOrNull(key: String): Int? {
+inline fun ParseObject.getIntOrNull(key: String): Int? {
     return getNumber(key)?.toInt()
 }
 
@@ -73,7 +73,7 @@ fun ParseObject.getIntOrNull(key: String): Int? {
  * @param key the key
  * @return the value, or null if nothing is there
  */
-fun ParseObject.getLongOrNull(key: String): Long? {
+inline fun ParseObject.getLongOrNull(key: String): Long? {
     return getNumber(key)?.toLong()
 }
 
@@ -82,6 +82,6 @@ fun ParseObject.getLongOrNull(key: String): Long? {
  * @param key the key
  * @return the value, or null if nothing is there
  */
-fun ParseObject.getDoubleOrNull(key: String): Double? {
+inline fun ParseObject.getDoubleOrNull(key: String): Double? {
     return getNumber(key)?.toDouble()
 }
