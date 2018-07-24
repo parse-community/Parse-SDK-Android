@@ -58,12 +58,11 @@ public class ParseRESTCommandTest {
     }
 
     private static ParseHttpResponse newMockParseHttpResponse(int statusCode, String body) {
-        ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+        return new ParseHttpResponse.Builder()
                 .setStatusCode(statusCode)
                 .setTotalSize((long) body.length())
                 .setContent(new ByteArrayInputStream(body.getBytes()))
                 .build();
-        return mockResponse;
     }
 
     @Before

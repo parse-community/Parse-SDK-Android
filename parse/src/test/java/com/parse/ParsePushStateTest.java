@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -57,8 +56,6 @@ public class ParsePushStateTest {
         assertEquals(null, state.pushTime());
         assertEquals(null, state.channelSet());
         JSONAssert.assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
-        assertEquals(null, state.pushToAndroid());
-        assertEquals(null, state.pushToIOS());
         assertEquals(null, state.queryState());
     }
 
@@ -75,8 +72,6 @@ public class ParsePushStateTest {
         JSONObject data = new JSONObject();
         data.put("foo", "bar");
         when(state.data()).thenReturn(data);
-        when(state.pushToAndroid()).thenReturn(true);
-        when(state.pushToIOS()).thenReturn(false);
         ParseQuery.State<ParseInstallation> queryState =
                 new ParseQuery.State.Builder<>(ParseInstallation.class).build();
         when(state.queryState()).thenReturn(queryState);
@@ -91,8 +86,6 @@ public class ParsePushStateTest {
         JSONObject dataCopy = copy.data();
         assertNotSame(data, dataCopy);
         assertEquals("bar", dataCopy.get("foo"));
-        assertTrue(copy.pushToAndroid());
-        assertFalse(copy.pushToIOS());
         ParseQuery.State<ParseInstallation> queryStateCopy = copy.queryState();
         assertNotSame(queryState, queryStateCopy);
         assertEquals("_Installation", queryStateCopy.className());
@@ -305,84 +298,6 @@ public class ParsePushStateTest {
 
     //endregion
 
-    //region testPushToAndroid
-
-    @Test
-    public void testPushToAndroidNullValue() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .pushToAndroid(null)
-                .data(new JSONObject())
-                .build();
-
-        assertEquals(null, state.pushToAndroid());
-    }
-
-    @Test
-    public void testPushToAndroidNormalValue() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .pushToAndroid(true)
-                .data(new JSONObject())
-                .build();
-
-        assertTrue(state.pushToAndroid());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPushToAndroidQueryAlreadySet() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .query(ParseInstallation.getQuery())
-                .pushToAndroid(true)
-                .data(new JSONObject())
-                .build();
-    }
-
-    //endregion
-
-    //region testPushToIOS
-
-    @Test
-    public void testPushToIOSNullValue() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .pushToIOS(null)
-                .data(new JSONObject())
-                .build();
-
-        assertEquals(null, state.pushToIOS());
-    }
-
-    @Test
-    public void testPushToIOSNormalValue() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .pushToIOS(true)
-                .data(new JSONObject())
-                .build();
-
-        assertTrue(state.pushToIOS());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testPushToIOSQueryAlreadySet() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .query(ParseInstallation.getQuery())
-                .pushToIOS(true)
-                .data(new JSONObject())
-                .build();
-    }
-
-    //endregion
-
     //region testQuery
 
     @Test(expected = IllegalArgumentException.class)
@@ -391,18 +306,6 @@ public class ParsePushStateTest {
 
         ParsePush.State state = builder
                 .query(null)
-                .data(new JSONObject())
-                .build();
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testQueryPushToIOSPushToAndroidAlreadySet() {
-        ParsePush.State.Builder builder = new ParsePush.State.Builder();
-
-        ParsePush.State state = builder
-                .pushToAndroid(true)
-                .pushToIOS(false)
-                .query(ParseInstallation.getQuery())
                 .data(new JSONObject())
                 .build();
     }

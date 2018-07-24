@@ -873,7 +873,7 @@ public class ParseQuery<T extends ParseObject> {
      * @param values The values that will match.
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereContainedIn(String key, Collection<? extends Object> values) {
+    public ParseQuery<T> whereContainedIn(String key, Collection<?> values) {
         builder.addCondition(key, "$in", values);
         return this;
     }
@@ -992,7 +992,7 @@ public class ParseQuery<T extends ParseObject> {
      * @param values The values that will not match.
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereNotContainedIn(String key, Collection<? extends Object> values) {
+    public ParseQuery<T> whereNotContainedIn(String key, Collection<?> values) {
         builder.addCondition(key, "$nin", values);
         return this;
     }
@@ -1843,7 +1843,7 @@ public class ParseQuery<T extends ParseObject> {
             }
 
             public Builder<T> addCondition(String key, String condition,
-                                           Collection<? extends Object> value) {
+                                           Collection<?> value) {
                 return addConditionInternal(key, condition, Collections.unmodifiableCollection(value));
             }
 

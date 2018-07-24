@@ -140,8 +140,7 @@ public class ParseDefaultACLControllerTest {
         when(acl.copy()).thenReturn(copiedACL);
         controller.defaultACL = acl;
         controller.defaultACLUsesCurrentUser = true;
-        ParseACL aclAgain = new ParseACL();
-        controller.defaultACLWithCurrentUser = aclAgain;
+        controller.defaultACLWithCurrentUser = new ParseACL();
         // Register currentUser
         ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
         ParseUser currentUser = mock(ParseUser.class);

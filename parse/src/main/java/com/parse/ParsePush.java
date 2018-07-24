@@ -319,8 +319,6 @@ public class ParsePush {
         private final Long expirationTime;
         private final Long expirationTimeInterval;
         private final Long pushTime;
-        private final Boolean pushToIOS;
-        private final Boolean pushToAndroid;
         private final JSONObject data;
         private State(Builder builder) {
             this.channelSet = builder.channelSet == null ?
@@ -329,8 +327,6 @@ public class ParsePush {
             this.expirationTime = builder.expirationTime;
             this.expirationTimeInterval = builder.expirationTimeInterval;
             this.pushTime = builder.pushTime;
-            this.pushToIOS = builder.pushToIOS;
-            this.pushToAndroid = builder.pushToAndroid;
             // Since in builder.build() we check data is not null, we do not need to check it again here.
             JSONObject copyData = null;
             try {
@@ -361,14 +357,6 @@ public class ParsePush {
             return pushTime;
         }
 
-        public Boolean pushToIOS() {
-            return pushToIOS;
-        }
-
-        public Boolean pushToAndroid() {
-            return pushToAndroid;
-        }
-
         public JSONObject data() {
             // Since in builder.build() we check data is not null, we do not need to check it again here.
             JSONObject copyData = null;
@@ -387,8 +375,6 @@ public class ParsePush {
             private Long expirationTime;
             private Long expirationTimeInterval;
             private Long pushTime;
-            private Boolean pushToIOS;
-            private Boolean pushToAndroid;
             private JSONObject data;
 
             public Builder() {
@@ -405,8 +391,6 @@ public class ParsePush {
                 this.expirationTime = state.expirationTime();
                 this.expirationTimeInterval = state.expirationTimeInterval();
                 this.pushTime = state.pushTime();
-                this.pushToIOS = state.pushToIOS();
-                this.pushToAndroid = state.pushToAndroid();
                 // Since in state.build() we check data is not null, we do not need to check it again here.
                 JSONObject copyData = null;
                 try {
@@ -441,20 +425,6 @@ public class ParsePush {
                 return this;
             }
 
-            public Builder pushToIOS(Boolean pushToIOS) {
-                checkArgument(query == null, "Cannot set push targets (i.e. setPushToAndroid or " +
-                        "setPushToIOS) when pushing to a query");
-                this.pushToIOS = pushToIOS;
-                return this;
-            }
-
-            public Builder pushToAndroid(Boolean pushToAndroid) {
-                checkArgument(query == null, "Cannot set push targets (i.e. setPushToAndroid or " +
-                        "setPushToIOS) when pushing to a query");
-                this.pushToAndroid = pushToAndroid;
-                return this;
-            }
-
             public Builder data(JSONObject data) {
                 this.data = data;
                 return this;
@@ -472,8 +442,6 @@ public class ParsePush {
 
             public Builder query(ParseQuery<ParseInstallation> query) {
                 checkArgument(query != null, "Cannot target a null query");
-                checkArgument(pushToIOS == null && pushToAndroid == null, "Cannot set push targets " +
-                        "(i.e. setPushToAndroid or setPushToIOS) when pushing to a query");
                 checkArgument(
                         query.getClassName().equals(
                                 getSubclassingController().getClassName(ParseInstallation.class)),

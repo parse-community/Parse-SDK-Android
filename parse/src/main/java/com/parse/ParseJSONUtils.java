@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Static utility methods pertaining to {@link JSONObject} and {@link JSONArray} instances.
+ * Static utility methods pertaining to org.json classes.
  */
 class ParseJSONUtils {
 

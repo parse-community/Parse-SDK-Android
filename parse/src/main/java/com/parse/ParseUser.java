@@ -30,6 +30,7 @@ import bolts.Task;
  * The {@code ParseUser} is a local representation of user data that can be saved and retrieved from
  * the Parse cloud.
  */
+@SuppressWarnings("unused")
 @ParseClassName("_User")
 public class ParseUser extends ParseObject {
 

@@ -122,10 +122,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                 super.setConnected(connected);
                 if (connected) {
                     connectionTaskCompletionSource.trySetResult(null);
-                    connectionTaskCompletionSource = Task.create();
+                    connectionTaskCompletionSource = new TaskCompletionSource<>();
                     connectionTaskCompletionSource.trySetResult(null);
                 } else {
-                    connectionTaskCompletionSource = Task.create();
+                    connectionTaskCompletionSource = new TaskCompletionSource<>();
                 }
             }
         }
@@ -180,7 +180,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
         synchronized (connectionLock) {
             // Error out tasks waiting on waitForConnectionAsync.
             connectionTaskCompletionSource.trySetError(new PauseException());
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
             connectionTaskCompletionSource.trySetError(new PauseException());
         }
 
@@ -206,10 +206,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
         // Reset waitForConnectionAsync.
         if (isConnected()) {
             connectionTaskCompletionSource.trySetResult(null);
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
             connectionTaskCompletionSource.trySetResult(null);
         } else {
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
         }
 
         populateQueueAsync();
@@ -438,7 +438,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                 if (pendingEventuallyTasks.containsKey(uuid)) {
                     tcs = pendingEventuallyTasks.get(uuid);
                 } else {
-                    tcs = Task.create();
+                    tcs = new TaskCompletionSource<>();
                     pendingEventuallyTasks.put(uuid, tcs);
                 }
                 return tcs.getTask();

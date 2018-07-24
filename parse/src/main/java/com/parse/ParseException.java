@@ -13,6 +13,7 @@ package com.parse;
  * deleting or editing an object that no longer exists on the server, or when there is a network
  * failure preventing communication with the Parse server.
  */
+@SuppressWarnings("unused")
 public class ParseException extends Exception {
     public static final int OTHER_CAUSE = -1;
     /**

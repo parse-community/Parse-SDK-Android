@@ -784,7 +784,7 @@ class OfflineQueryLogic {
             for (final Object item : collection) {
                 task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return fetchIncludeAsync(store, item, path, db);
                     }
                 });
@@ -830,7 +830,7 @@ class OfflineQueryLogic {
         // Make sure the container is fetched.
         return Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Object>>() {
             @Override
-            public Task<Object> then(Task<Void> task) throws Exception {
+            public Task<Object> then(Task<Void> task) {
                 if (container instanceof ParseObject) {
                     // Make sure this object is fetched before descending into it.
                     return fetchIncludeAsync(store, container, null, db).onSuccess(new Continuation<Void, Object>() {
@@ -853,7 +853,7 @@ class OfflineQueryLogic {
             }
         }).onSuccessTask(new Continuation<Object, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Object> task) throws Exception {
+            public Task<Void> then(Task<Object> task) {
                 return fetchIncludeAsync(store, task.getResult(), rest, db);
             }
         });
@@ -874,7 +874,7 @@ class OfflineQueryLogic {
         for (final String include : includes) {
             task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return fetchIncludeAsync(store, object, include, db);
                 }
             });
