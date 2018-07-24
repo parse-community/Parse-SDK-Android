@@ -12,7 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertTrue;
 
@@ -59,7 +59,7 @@ public class ParseSessionTest {
             }
 
             try {
-                session.removeAll(immutableKey, Arrays.asList());
+                session.removeAll(immutableKey, Collections.emptyList());
             } catch (IllegalArgumentException e) {
                 assertTrue(e.getMessage().contains("Cannot modify"));
             }

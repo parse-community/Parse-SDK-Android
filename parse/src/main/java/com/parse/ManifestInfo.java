@@ -97,14 +97,6 @@ public class ManifestInfo {
     }
 
     /**
-     * Returns whether the given action has an associated receiver defined in the manifest.
-     */
-    /* package */
-    static boolean hasIntentReceiver(String action) {
-        return !getIntentReceivers(action).isEmpty();
-    }
-
-    /**
      * Returns a list of ResolveInfo objects corresponding to the BroadcastReceivers with Intent Filters
      * specifying the given action within the app's package.
      */

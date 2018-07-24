@@ -76,14 +76,6 @@ public class ParseAnalytics {
     }
 
     /**
-     * @deprecated Please use {@link #trackAppOpenedInBackground(android.content.Intent)} instead.
-     */
-    @Deprecated
-    public static void trackAppOpened(Intent intent) {
-        trackAppOpenedInBackground(intent);
-    }
-
-    /**
      * Tracks this application being launched (and if this happened as the result of the user opening
      * a push notification, this method sends along information to correlate this open with that
      * push).

@@ -606,7 +606,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(@NonNull String key) {
         if (KEY_USERNAME.equals(key)) {
             throw new IllegalArgumentException("Can't remove the username key.");
         }

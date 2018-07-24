@@ -146,7 +146,7 @@ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
     protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
                                                ProgressCallback downloadProgressCallback) {
         InputStream responseStream = null;
-        String content = null;
+        String content;
         try {
             responseStream = response.getContent();
             content = new String(ParseIOUtils.toByteArray(responseStream));

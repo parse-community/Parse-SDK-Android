@@ -77,7 +77,7 @@ public final class ParseCloud {
      * @return The result of the cloud call. Result may be a @{link Map}&lt; {@link String}, ?&gt;,
      * {@link ParseObject}, {@link List}&lt;?&gt;, or any type that can be set as a field in a
      * ParseObject.
-     * @throws ParseException
+     * @throws ParseException exception
      */
     public static <T> T callFunction(String name, Map<String, ?> params) throws ParseException {
         return ParseTaskUtils.wait(ParseCloud.<T>callFunctionInBackground(name, params));

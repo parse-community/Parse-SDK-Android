@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
  * The {@code Parse} class contains static functions that handle global configuration for the Parse
  * library.
  */
+@SuppressWarnings("unused")
 public class Parse {
     public static final int LOG_LEVEL_VERBOSE = Log.VERBOSE;
     public static final int LOG_LEVEL_DEBUG = Log.DEBUG;

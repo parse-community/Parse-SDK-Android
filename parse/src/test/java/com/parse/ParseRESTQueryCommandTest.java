@@ -20,6 +20,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -46,7 +47,7 @@ public class ParseRESTQueryCommandTest {
         ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
                 .orderByAscending("orderKey")
                 .addCondition("inKey", "$in", Arrays.asList("inValue", "inValueAgain"))
-                .selectKeys(Arrays.asList("selectedKey, selectedKeyAgain"))
+                .selectKeys(Collections.singletonList("selectedKey, selectedKeyAgain"))
                 .include("includeKey")
                 .setLimit(5)
                 .setSkip(6)

@@ -292,7 +292,7 @@ public class ParseInstallation extends ParseObject {
 
     public void setPushType(String pushType) {
         if (pushType != null) {
-            performPut(KEY_PUSH_TYPE, pushType.toString());
+            performPut(KEY_PUSH_TYPE, pushType);
         }
     }
 

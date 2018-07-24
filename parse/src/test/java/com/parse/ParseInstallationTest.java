@@ -20,7 +20,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -118,7 +118,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
             }
 
             try {
-                installation.removeAll(immutableKey, Arrays.asList());
+                installation.removeAll(immutableKey, Collections.emptyList());
             } catch (IllegalArgumentException e) {
                 assertTrue(e.getMessage().contains("Cannot modify"));
             }

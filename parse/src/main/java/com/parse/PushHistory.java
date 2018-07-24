@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -138,7 +140,7 @@ class PushHistory {
         }
 
         @Override
-        public int compareTo(Entry other) {
+        public int compareTo(@NonNull Entry other) {
             return timestamp.compareTo(other.timestamp);
         }
     }

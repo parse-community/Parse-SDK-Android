@@ -316,7 +316,7 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testMatchesEqualsWithPolygon() throws Exception {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
@@ -334,7 +334,7 @@ public class OfflineQueryLogicTest {
                 .build();
         assertTrue(matches(logic, query, object));
 
-        List<ParseGeoPoint> diff = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> diff = new ArrayList<>();
         diff.add(new ParseGeoPoint(0, 0));
         diff.add(new ParseGeoPoint(0, 10));
         diff.add(new ParseGeoPoint(10, 10));
@@ -689,7 +689,7 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testMatchesGeoIntersects() throws ParseException {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
@@ -726,13 +726,13 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testMatchesGeoWithin() throws ParseException {
-        List<ParseGeoPoint> smallBox = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> smallBox = new ArrayList<>();
         smallBox.add(new ParseGeoPoint(0, 0));
         smallBox.add(new ParseGeoPoint(0, 1));
         smallBox.add(new ParseGeoPoint(1, 1));
         smallBox.add(new ParseGeoPoint(1, 0));
 
-        List<ParseGeoPoint> largeBox = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> largeBox = new ArrayList<>();
         largeBox.add(new ParseGeoPoint(0, 0));
         largeBox.add(new ParseGeoPoint(0, 10));
         largeBox.add(new ParseGeoPoint(10, 10));

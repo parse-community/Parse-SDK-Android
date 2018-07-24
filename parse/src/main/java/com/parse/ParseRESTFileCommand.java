@@ -8,15 +8,14 @@
  */
 package com.parse;
 
-/**
- * REST network command for creating & uploading {@link ParseFile}s.
- */
-
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 
 import java.io.File;
 
+/**
+ * REST network command for creating & uploading {@link ParseFile}s.
+ */
 class ParseRESTFileCommand extends ParseRESTCommand {
 
     private final byte[] data;

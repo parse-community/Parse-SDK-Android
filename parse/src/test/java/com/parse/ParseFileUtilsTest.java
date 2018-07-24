@@ -56,7 +56,7 @@ public class ParseFileUtilsTest {
         ParseFileUtils.writeStringToFile(file, TEST_STRING, "UTF-8");
 
         InputStream in = null;
-        String content = null;
+        String content;
         try {
             in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -91,7 +91,7 @@ public class ParseFileUtilsTest {
         ParseFileUtils.writeJSONObjectToFile(file, new JSONObject(TEST_JSON));
 
         InputStream in = null;
-        String content = null;
+        String content;
         try {
             in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();

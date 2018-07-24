@@ -272,7 +272,7 @@ public class ParseObjectTest {
         ParseObject.State state = mock(ParseObject.State.class);
         when(state.className()).thenReturn("TestObject");
         when(state.isComplete()).thenReturn(false);
-        when(state.availableKeys()).thenReturn(new HashSet<>(Arrays.asList("foo")));
+        when(state.availableKeys()).thenReturn(new HashSet<>(Collections.singletonList("foo")));
         ParseObject object = ParseObject.from(state);
         object.get("foo");
     }
@@ -396,7 +396,7 @@ public class ParseObjectTest {
     @Test
     public void testGetParsePolygon() {
         ParseObject object = new ParseObject("Test");
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));

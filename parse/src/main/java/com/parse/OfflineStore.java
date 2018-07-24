@@ -1337,7 +1337,7 @@ class OfflineStore {
             if (oldObjectId.equals(newObjectId)) {
                 return;
             }
-            /**
+            /*
              * Special case for re-saving installation if it was deleted on the server
              * @see ParseInstallation#saveAsync(String, Task)
              */

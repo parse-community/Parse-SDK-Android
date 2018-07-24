@@ -104,7 +104,7 @@ public class ParseEncoderTest {
 
     @Test
     public void testParsePolygon() throws JSONException {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));

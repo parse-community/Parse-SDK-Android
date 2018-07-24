@@ -36,7 +36,7 @@ public class ParsePolygonTest {
                 new ParseGeoPoint(1, 0)
         );
 
-        List<ParseGeoPoint> listPoints = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> listPoints = new ArrayList<>();
         listPoints.add(new ParseGeoPoint(0, 0));
         listPoints.add(new ParseGeoPoint(0, 1));
         listPoints.add(new ParseGeoPoint(1, 1));
@@ -65,13 +65,13 @@ public class ParsePolygonTest {
 
     @Test
     public void testEquality() {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
         points.add(new ParseGeoPoint(1, 0));
 
-        List<ParseGeoPoint> diff = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> diff = new ArrayList<>();
         diff.add(new ParseGeoPoint(0, 0));
         diff.add(new ParseGeoPoint(0, 10));
         diff.add(new ParseGeoPoint(10, 10));
@@ -93,7 +93,7 @@ public class ParsePolygonTest {
 
     @Test
     public void testContainsPoint() {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
@@ -110,7 +110,7 @@ public class ParsePolygonTest {
 
     @Test
     public void testParcelable() {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
