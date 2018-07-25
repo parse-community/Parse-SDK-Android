@@ -30,7 +30,7 @@ class ParseCurrentConfigController {
     public Task<Void> setCurrentConfigAsync(final ParseConfig config) {
         return Task.call(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 synchronized (currentConfigMutex) {
                     currentConfig = config;
                     saveToDisk(config);
@@ -43,7 +43,7 @@ class ParseCurrentConfigController {
     public Task<ParseConfig> getCurrentConfigAsync() {
         return Task.call(new Callable<ParseConfig>() {
             @Override
-            public ParseConfig call() throws Exception {
+            public ParseConfig call() {
                 synchronized (currentConfigMutex) {
                     if (currentConfig == null) {
                         ParseConfig config = getFromDisk();

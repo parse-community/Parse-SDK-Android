@@ -123,7 +123,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testOnSaveRestoreState() throws Exception {
+    public void testOnSaveRestoreState() {
         ParseUser user = new ParseUser();
         user.setObjectId("objId");
         user.setIsCurrentUser(true);
@@ -140,7 +140,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region SignUpAsync
 
     @Test
-    public void testParcelableState() throws Exception {
+    public void testParcelableState() {
         ParseUser.State state = new ParseUser.State.Builder()
                 .objectId("test")
                 .isNew(true)
@@ -406,7 +406,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testLogInWithAsync
 
     @Test
-    public void testSignUpAsyncWithNoCurrentUserAndSignUpFailure() throws Exception {
+    public void testSignUpAsyncWithNoCurrentUserAndSignUpFailure() {
         // Register a mock currentUserController to make getCurrentUser work
         ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
         when(currentUserController.getAsync(anyBoolean()))
@@ -867,7 +867,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     // TODO(mengyan): Add testValidateSaveWithIsAuthenticatedWithIsCurrentUser
 
     @Test
-    public void testValidateSaveWithNoObjectId() throws Exception {
+    public void testValidateSaveWithNoObjectId() {
         ParseUser user = new ParseUser();
 
         thrown.expect(IllegalArgumentException.class);
@@ -877,7 +877,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testValidateSaveWithLDSNotEnabled() throws Exception {
+    public void testValidateSaveWithLDSNotEnabled() {
         // Register a mock currentUserController to make getCurrentUser work
         ParseUser currentUser = new ParseUser();
         currentUser.setObjectId("test");
@@ -900,7 +900,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testSaveAsync
 
     @Test
-    public void testValidateSaveWithLDSNotEnabledAndCurrentUserNotMatch() throws Exception {
+    public void testValidateSaveWithLDSNotEnabledAndCurrentUserNotMatch() {
         // Register a mock currentUserController to make getCurrentUser work
         ParseUser currentUser = new ParseUser();
         currentUser.setObjectId("testAgain");
@@ -1084,7 +1084,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testUnlinkFromAsync
 
     @Test
-    public void testDontOverwriteSessionTokenForCurrentUser() throws Exception {
+    public void testDontOverwriteSessionTokenForCurrentUser() {
         ParseUser.State sessionTokenState = new ParseUser.State.Builder()
                 .sessionToken("sessionToken")
                 .put("key0", "value0")
@@ -1278,7 +1278,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testToRest
 
     @Test
-    public void testBecomeWithCallback() throws Exception {
+    public void testBecomeWithCallback() {
         // Register a mock currentUserController to make setCurrentUser work
         ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
         when(currentUserController.setAsync(any(ParseUser.class)))
@@ -1336,7 +1336,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testValidateDelete
 
     @Test
-    public void testValidDelete() throws Exception {
+    public void testValidDelete() {
         // Register a mock currentUserController to make getCurrentUser work
         ParseUser currentUser = new ParseUser();
         currentUser.setObjectId("test");
@@ -1437,7 +1437,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testAutomaticUser
 
     @Test
-    public void testAutomaticUser() throws Exception {
+    public void testAutomaticUser() {
         new ParseUser();
 
         ParseUser.disableAutomaticUser();
@@ -1452,7 +1452,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testPinCurrentUserIfNeededAsync
 
     @Test
-    public void testPinCurrentUserIfNeededAsyncWithNoLDSEnabled() throws Exception {
+    public void testPinCurrentUserIfNeededAsyncWithNoLDSEnabled() {
         thrown.expect(IllegalStateException.class);
         thrown.expectMessage("Method requires Local Datastore.");
 
@@ -1464,7 +1464,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testRemove
 
     @Test
-    public void testPinCurrentUserIfNeededAsync() throws Exception {
+    public void testPinCurrentUserIfNeededAsync() {
         // Enable LDS
         Parse.enableLocalDatastore(null);
         // Register a mock currentUserController to make getCurrentUser work
@@ -1487,7 +1487,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //region testSetState
 
     @Test
-    public void testRemoveWithUserName() throws Exception {
+    public void testRemoveWithUserName() {
         ParseUser user = new ParseUser();
 
         thrown.expect(IllegalArgumentException.class);
@@ -1497,7 +1497,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testSetCurrentUserStateWithoutAuthData() throws Exception {
+    public void testSetCurrentUserStateWithoutAuthData() {
         // Set user initial state
         String authType = "facebook";
         Map<String, String> authData = new HashMap<>();
@@ -1531,7 +1531,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
     //endregion
 
     @Test
-    public void testSetStateDoesNotAddNonExistentAuthData() throws Exception {
+    public void testSetStateDoesNotAddNonExistentAuthData() {
         // Set user initial state
         ParseUser.State userState = new ParseUser.State.Builder()
                 .objectId("test")
@@ -1600,7 +1600,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
         final Capture<Exception> exceptionCapture = new Capture<>();
         user.saveInBackground().continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 exceptionCapture.set(task.getError());
                 saveCountDown1.countDown();
                 return null;
@@ -1622,7 +1622,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
         final CountDownLatch saveEventuallyCountDown = new CountDownLatch(1);
         user.saveEventually().continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 exceptionCapture.set(task.getError());
                 saveEventuallyCountDown.countDown();
                 return null;
@@ -1652,7 +1652,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
         final CountDownLatch saveCountDown2 = new CountDownLatch(1);
         user.saveInBackground().continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 exceptionCapture.set(task.getError());
                 saveCountDown2.countDown();
                 return null;

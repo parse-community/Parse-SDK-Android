@@ -2792,7 +2792,7 @@ public class ParseObject implements Parcelable {
 
         return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 isDeleting = true;
                 if (state.objectId() == null) {
                     return task.cast(); // no reason to call delete since it doesn't exist

@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -20,6 +21,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
+@Documented
 public @interface ParseClassName {
     /**
      * @return The Parse class name associated with the ParseObject subclass.

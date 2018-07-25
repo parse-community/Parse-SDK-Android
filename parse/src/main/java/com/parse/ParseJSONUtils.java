@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.support.annotation.NonNull;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -16,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Static utility methods pertaining to {@link JSONObject} and {@link JSONArray} instances.
+ * Static utility methods pertaining to org.json classes.
  */
 class ParseJSONUtils {
 
@@ -47,6 +49,7 @@ class ParseJSONUtils {
     public static Iterable<String> keys(JSONObject object) {
         final JSONObject finalObject = object;
         return new Iterable<String>() {
+            @NonNull
             @Override
             public Iterator<String> iterator() {
                 return finalObject.keys();

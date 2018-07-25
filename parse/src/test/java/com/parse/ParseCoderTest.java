@@ -22,7 +22,7 @@ import static org.junit.Assert.assertEquals;
 public class ParseCoderTest {
 
     @Test
-    public void testBytes() throws Exception {
+    public void testBytes() {
         // string of bytes, including some invalid UTF8 data
         byte[] bytes = {4, 8, 16, 32, -128, 0, 0, 0};
 

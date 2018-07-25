@@ -272,13 +272,13 @@ public class ParseObjectTest {
         ParseObject.State state = mock(ParseObject.State.class);
         when(state.className()).thenReturn("TestObject");
         when(state.isComplete()).thenReturn(false);
-        when(state.availableKeys()).thenReturn(new HashSet<>(Arrays.asList("foo")));
+        when(state.availableKeys()).thenReturn(new HashSet<>(Collections.singletonList("foo")));
         ParseObject object = ParseObject.from(state);
         object.get("foo");
     }
 
     @Test
-    public void testGetList() throws Exception {
+    public void testGetList() {
         ParseObject object = new ParseObject("Test");
         JSONArray array = new JSONArray();
         array.put("value");
@@ -293,7 +293,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetListWithWrongValue() throws Exception {
+    public void testGetListWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -313,7 +313,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetJsonArrayWithWrongValue() throws Exception {
+    public void testGetJsonArrayWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -336,7 +336,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetJsonObjectWithWrongValue() throws Exception {
+    public void testGetJsonObjectWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -344,7 +344,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetBoolean() throws Exception {
+    public void testGetBoolean() {
         ParseObject object = new ParseObject("Test");
         object.put("key", true);
 
@@ -352,7 +352,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetBooleanWithWrongValue() throws Exception {
+    public void testGetBooleanWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -360,7 +360,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetDate() throws Exception {
+    public void testGetDate() {
         ParseObject object = new ParseObject("Test");
         Date date = new Date();
         object.put("key", date);
@@ -369,7 +369,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetDateWithWrongValue() throws Exception {
+    public void testGetDateWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -377,7 +377,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseGeoPoint() throws Exception {
+    public void testGetParseGeoPoint() {
         ParseObject object = new ParseObject("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
         object.put("key", point);
@@ -386,7 +386,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseGeoPointWithWrongValue() throws Exception {
+    public void testGetParseGeoPointWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -394,9 +394,9 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParsePolygon() throws Exception {
+    public void testGetParsePolygon() {
         ParseObject object = new ParseObject("Test");
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
@@ -409,7 +409,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParsePolygonWithWrongValue() throws Exception {
+    public void testGetParsePolygonWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -417,7 +417,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetACL() throws Exception {
+    public void testGetACL() {
         ParseObject object = new ParseObject("Test");
         ParseACL acl = new ParseACL();
         object.put("ACL", acl);
@@ -426,7 +426,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetACLWithSharedACL() throws Exception {
+    public void testGetACLWithSharedACL() {
         ParseObject object = new ParseObject("Test");
         ParseACL acl = new ParseACL();
         acl.setShared(true);
@@ -438,14 +438,14 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetACLWithNullValue() throws Exception {
+    public void testGetACLWithNullValue() {
         ParseObject object = new ParseObject("Test");
 
         assertNull(object.getACL());
     }
 
     @Test
-    public void testGetACLWithWrongValue() throws Exception {
+    public void testGetACLWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("ACL", 1);
 
@@ -471,7 +471,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetMapWithWrongValue() throws Exception {
+    public void testGetMapWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -479,7 +479,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseUser() throws Exception {
+    public void testGetParseUser() {
         ParseObject object = new ParseObject("Test");
         ParseUser user = mock(ParseUser.class);
         object.put("key", user);
@@ -488,7 +488,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseUserWithWrongValue() throws Exception {
+    public void testGetParseUserWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -496,7 +496,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseFile() throws Exception {
+    public void testGetParseFile() {
         ParseObject object = new ParseObject("Test");
         ParseFile file = mock(ParseFile.class);
         object.put("key", file);
@@ -505,7 +505,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetParseFileWithWrongValue() throws Exception {
+    public void testGetParseFileWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1);
 
@@ -513,7 +513,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetDouble() throws Exception {
+    public void testGetDouble() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 1.1);
 
@@ -525,7 +525,7 @@ public class ParseObjectTest {
     //region testParcelable
 
     @Test
-    public void testGetDoubleWithWrongValue() throws Exception {
+    public void testGetDoubleWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", "str");
 
@@ -533,7 +533,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetLong() throws Exception {
+    public void testGetLong() {
         ParseObject object = new ParseObject("Test");
         object.put("key", 10L);
 
@@ -541,7 +541,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testGetLongWithWrongValue() throws Exception {
+    public void testGetLongWithWrongValue() {
         ParseObject object = new ParseObject("Test");
         object.put("key", "str");
 
@@ -549,7 +549,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testParcelable() throws Exception {
+    public void testParcelable() {
         ParseObject object = ParseObject.createWithoutData("Test", "objectId");
         object.isDeleted = true;
         object.put("long", 200L);
@@ -617,7 +617,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testParcelWithCircularReference() throws Exception {
+    public void testParcelWithCircularReference() {
         ParseObject parent = new ParseObject("Parent");
         ParseObject child = new ParseObject("Child");
         parent.setObjectId("parentId");
@@ -640,7 +640,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testParcelWithCircularReferenceFromServer() throws Exception {
+    public void testParcelWithCircularReferenceFromServer() {
         ParseObject parent = new ParseObject("Parent");
         ParseObject child = new ParseObject("Child");
         parent.setState(new ParseObject.State.Builder("Parent")

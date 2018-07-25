@@ -58,7 +58,7 @@ public class ParseGCMJobService extends JobService {
 
         Task.callInBackground(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 try {
                     InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
                     String senderId = job.getExtras().getString(KEY_GCM_SENDER_ID);

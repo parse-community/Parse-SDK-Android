@@ -38,7 +38,7 @@ public class ParseFileHttpBodyTest {
         return file;
     }
 
-    private static void verifyTestFileContent(byte[] bytes) throws IOException {
+    private static void verifyTestFileContent(byte[] bytes) {
         assertArrayEquals("content".getBytes(), bytes);
     }
 

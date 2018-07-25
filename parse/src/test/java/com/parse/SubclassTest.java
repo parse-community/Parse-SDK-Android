@@ -37,7 +37,7 @@ public class SubclassTest extends ResetPluginsParseTest {
     }
 
     @SuppressWarnings("unused")
-    public void testUnregisteredConstruction() throws Exception {
+    public void testUnregisteredConstruction() {
         Exception thrown = null;
         try {
             new UnregisteredClass();
@@ -54,13 +54,13 @@ public class SubclassTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testSubclassPointers() throws Exception {
+    public void testSubclassPointers() {
         Person flashPointer = (Person) ParseObject.createWithoutData("Person", "someFakeObjectId");
         assertFalse(flashPointer.isDirty());
     }
 
     @Test
-    public void testDirtyingConstructorsThrow() throws Exception {
+    public void testDirtyingConstructorsThrow() {
         ClassWithDirtyingConstructor dirtyObj = new ClassWithDirtyingConstructor();
         assertTrue(dirtyObj.isDirty());
         try {
@@ -72,7 +72,7 @@ public class SubclassTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testRegisteringSubclassesUsesMostDescendantSubclass() throws Exception {
+    public void testRegisteringSubclassesUsesMostDescendantSubclass() {
         try {
             // When we register a ParseUser subclass, we have to clear the cached currentParseUser, so
             // we need to register a mock ParseUserController here, otherwise Parse.getCacheDir() will
@@ -101,7 +101,7 @@ public class SubclassTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testRegisteringClassWithNoDefaultConstructorThrows() throws Exception {
+    public void testRegisteringClassWithNoDefaultConstructorThrows() {
         Exception thrown = null;
         try {
             ParseObject.registerSubclass(NoDefaultConstructor.class);

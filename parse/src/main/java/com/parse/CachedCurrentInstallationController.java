@@ -50,15 +50,15 @@ class CachedCurrentInstallationController
 
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return store.setAsync(installation);
                     }
                 }).continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         installationId.set(installation.getInstallationId());
                         return task;
                     }
@@ -77,10 +77,10 @@ class CachedCurrentInstallationController
 
         return taskQueue.enqueue(new Continuation<Void, Task<ParseInstallation>>() {
             @Override
-            public Task<ParseInstallation> then(Task<Void> toAwait) throws Exception {
+            public Task<ParseInstallation> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<ParseInstallation>>() {
                     @Override
-                    public Task<ParseInstallation> then(Task<Void> task) throws Exception {
+                    public Task<ParseInstallation> then(Task<Void> task) {
                         synchronized (mutex) {
                             if (currentInstallation != null) {
                                 return Task.forResult(currentInstallation);
@@ -89,7 +89,7 @@ class CachedCurrentInstallationController
 
                         return store.getAsync().continueWith(new Continuation<ParseInstallation, ParseInstallation>() {
                             @Override
-                            public ParseInstallation then(Task<ParseInstallation> task) throws Exception {
+                            public ParseInstallation then(Task<ParseInstallation> task) {
                                 ParseInstallation current = task.getResult();
                                 if (current == null) {
                                     current = ParseObject.create(ParseInstallation.class);
@@ -121,10 +121,10 @@ class CachedCurrentInstallationController
 
         return taskQueue.enqueue(new Continuation<Void, Task<Boolean>>() {
             @Override
-            public Task<Boolean> then(Task<Void> toAwait) throws Exception {
+            public Task<Boolean> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<Boolean>>() {
                     @Override
-                    public Task<Boolean> then(Task<Void> task) throws Exception {
+                    public Task<Boolean> then(Task<Void> task) {
                         return store.existsAsync();
                     }
                 });

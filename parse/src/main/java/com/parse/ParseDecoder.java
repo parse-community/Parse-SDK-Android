@@ -127,7 +127,7 @@ public class ParseDecoder {
         }
 
         if (typeString.equals("Polygon")) {
-            List<ParseGeoPoint> coordinates = new ArrayList<ParseGeoPoint>();
+            List<ParseGeoPoint> coordinates = new ArrayList<>();
             try {
                 JSONArray array = jsonObject.getJSONArray("coordinates");
                 for (int i = 0; i < array.length(); ++i) {

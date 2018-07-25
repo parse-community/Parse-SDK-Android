@@ -100,7 +100,7 @@ class EventuallyPin extends ParseObject {
         }
         return pin.pinInBackground(PIN_NAME).continueWith(new Continuation<Void, EventuallyPin>() {
             @Override
-            public EventuallyPin then(Task<Void> task) throws Exception {
+            public EventuallyPin then(Task<Void> task) {
                 return pin;
             }
         });
@@ -124,7 +124,7 @@ class EventuallyPin extends ParseObject {
         // from LDS.
         return query.findInBackground().onSuccessTask(new Continuation<List<EventuallyPin>, Task<List<EventuallyPin>>>() {
             @Override
-            public Task<List<EventuallyPin>> then(Task<List<EventuallyPin>> task) throws Exception {
+            public Task<List<EventuallyPin>> then(Task<List<EventuallyPin>> task) {
                 final List<EventuallyPin> pins = task.getResult();
                 List<Task<Void>> tasks = new ArrayList<>();
 
@@ -137,7 +137,7 @@ class EventuallyPin extends ParseObject {
 
                 return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<List<EventuallyPin>>>() {
                     @Override
-                    public Task<List<EventuallyPin>> then(Task<Void> task) throws Exception {
+                    public Task<List<EventuallyPin>> then(Task<Void> task) {
                         return Task.forResult(pins);
                     }
                 });

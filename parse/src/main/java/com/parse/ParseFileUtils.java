@@ -315,7 +315,7 @@ public class ParseFileUtils {
             output = fos.getChannel();
             final long size = input.size(); // TODO See IO-386
             long pos = 0;
-            long count = 0;
+            long count;
             while (pos < size) {
                 final long remain = size - pos;
                 count = remain > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : remain;
@@ -490,7 +490,7 @@ public class ParseFileUtils {
 //    if (FilenameUtils.isSystemWindows()) {
 //      return false;
 //    }
-        File fileInCanonicalDir = null;
+        File fileInCanonicalDir;
         if (file.getParent() == null) {
             fileInCanonicalDir = file;
         } else {
@@ -498,11 +498,7 @@ public class ParseFileUtils {
             fileInCanonicalDir = new File(canonicalDir, file.getName());
         }
 
-        if (fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile())) {
-            return false;
-        } else {
-            return true;
-        }
+        return !fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile());
     }
 
     //region String

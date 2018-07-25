@@ -61,7 +61,7 @@ public final class ParseCloud {
                                                        final Map<String, ?> params) {
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
             @Override
-            public Task<T> then(Task<String> task) throws Exception {
+            public Task<T> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 return getCloudCodeController().callFunctionInBackground(name, params, sessionToken);
             }
@@ -77,7 +77,7 @@ public final class ParseCloud {
      * @return The result of the cloud call. Result may be a @{link Map}&lt; {@link String}, ?&gt;,
      * {@link ParseObject}, {@link List}&lt;?&gt;, or any type that can be set as a field in a
      * ParseObject.
-     * @throws ParseException
+     * @throws ParseException exception
      */
     public static <T> T callFunction(String name, Map<String, ?> params) throws ParseException {
         return ParseTaskUtils.wait(ParseCloud.<T>callFunctionInBackground(name, params));

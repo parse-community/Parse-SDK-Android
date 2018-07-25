@@ -232,66 +232,6 @@ public class ParsePushControllerTest {
         assertEquals("1.2", inequality.getString("$lt"));
     }
 
-    @Test
-    public void testBuildRESTSendPushCommandWithPushToAndroid() throws Exception {
-        ParseHttpClient restClient = mock(ParseHttpClient.class);
-        ParsePushController controller = new ParsePushController(restClient);
-
-        // Build PushState
-        JSONObject data = new JSONObject();
-        data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .pushToAndroid(true)
-                .data(data)
-                .build();
-
-        // Build command
-        ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
-
-        // Verify command
-        JSONObject jsonParameters = pushCommand.jsonParameters;
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
-                        .getString(ParsePush.KEY_DATA_MESSAGE));
-        assertEquals(ParsePushController.DEVICE_TYPE_ANDROID,
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_WHERE)
-                        .optString(ParseRESTPushCommand.KEY_DEVICE_TYPE, null));
-    }
-
-    @Test
-    public void testBuildRESTSendPushCommandWithPushToIOS() throws Exception {
-        ParseHttpClient restClient = mock(ParseHttpClient.class);
-        ParsePushController controller = new ParsePushController(restClient);
-
-        // Build PushState
-        JSONObject data = new JSONObject();
-        data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .pushToIOS(true)
-                .data(data)
-                .build();
-
-        // Build command
-        ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
-
-        // Verify command
-        JSONObject jsonParameters = pushCommand.jsonParameters;
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
-        assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
-                        .getString(ParsePush.KEY_DATA_MESSAGE));
-        assertEquals(ParsePushController.DEVICE_TYPE_IOS,
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_WHERE)
-                        .optString(ParseRESTPushCommand.KEY_DEVICE_TYPE, null));
-    }
-
     //endregion
 
     //region testSendInBackground
@@ -305,8 +245,6 @@ public class ParsePushControllerTest {
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
         ParsePush.State state = new ParsePush.State.Builder()
-                .pushToAndroid(true)
-                .pushToIOS(true)
                 .data(data)
                 .build();
 

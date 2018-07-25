@@ -33,10 +33,10 @@ class TaskQueue {
     static <T> Continuation<T, Task<T>> waitFor(final Task<Void> toAwait) {
         return new Continuation<T, Task<T>>() {
             @Override
-            public Task<T> then(final Task<T> task) throws Exception {
+            public Task<T> then(final Task<T> task) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<T>>() {
                     @Override
-                    public Task<T> then(Task<Void> ignored) throws Exception {
+                    public Task<T> then(Task<Void> ignored) {
                         return task;
                     }
                 });
@@ -56,7 +56,7 @@ class TaskQueue {
             Task<Void> toAwait = tail != null ? tail : Task.<Void>forResult(null);
             return toAwait.continueWith(new Continuation<Void, Void>() {
                 @Override
-                public Void then(Task<Void> task) throws Exception {
+                public Void then(Task<Void> task) {
                     return null;
                 }
             });

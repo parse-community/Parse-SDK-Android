@@ -15,29 +15,29 @@ interface ParseObjectCurrentController<T extends ParseObject> {
     /**
      * Persist the currentParseObject
      *
-     * @param object
-     * @return
+     * @param object object
+     * @return task
      */
     Task<Void> setAsync(T object);
 
     /**
      * Get the persisted currentParseObject
      *
-     * @return
+     * @return task
      */
     Task<T> getAsync();
 
     /**
      * Check whether the currentParseObject exists or not
      *
-     * @return
+     * @return task
      */
     Task<Boolean> existsAsync();
 
     /**
      * Judge whether the given ParseObject is the currentParseObject
      *
-     * @param object
+     * @param object object
      * @return {@code true} if the give {@link ParseObject} is the currentParseObject
      */
     boolean isCurrent(T object);

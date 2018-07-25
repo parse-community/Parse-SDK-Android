@@ -39,7 +39,7 @@ public class ParseKeyValueCacheTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ParseKeyValueCache.clearKeyValueCacheDir();
         ParseKeyValueCache.maxKeyValueCacheBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
         ParseKeyValueCache.maxKeyValueCacheFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
@@ -59,7 +59,7 @@ public class ParseKeyValueCacheTest {
         for (int i = 0; i < 1000; i++) {
             tasks.add(Task.call(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception {
+                public Void call() {
                     ParseKeyValueCache.saveToKeyValueCache("foo", "test");
                     return null;
                 }
@@ -85,7 +85,7 @@ public class ParseKeyValueCacheTest {
     }
 
     @Test
-    public void testGetSizeWithoutCacheDir() throws Exception {
+    public void testGetSizeWithoutCacheDir() {
         // Delete the cache folder(Simulate users clear the app cache)
         assertTrue(keyValueCacheDir.exists());
         keyValueCacheDir.delete();

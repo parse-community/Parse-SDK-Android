@@ -62,7 +62,7 @@ public class ParseFileControllerTest {
     }
 
     @Test
-    public void testGetCacheFile() throws Exception {
+    public void testGetCacheFile() {
         File root = temporaryFolder.getRoot();
         ParseFileController controller = new ParseFileController(null, root);
 
@@ -97,7 +97,7 @@ public class ParseFileControllerTest {
     //region testSaveAsync
 
     @Test
-    public void testSaveAsyncRequest() throws Exception {
+    public void testSaveAsyncRequest() {
         // TODO(grantland): Verify proper command is constructed
     }
 

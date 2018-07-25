@@ -64,7 +64,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() {
         ParseACL acl = new ParseACL();
 
         assertEquals(0, acl.getPermissionsById().size());
@@ -75,7 +75,7 @@ public class ParseACLTest {
     //region testCopy
 
     @Test
-    public void testConstructorWithUser() throws Exception {
+    public void testConstructorWithUser() {
         ParseUser user = new ParseUser();
         user.setObjectId("test");
         ParseACL acl = new ParseACL(user);
@@ -85,7 +85,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testCopy() throws Exception {
+    public void testCopy() {
         ParseACL acl = new ParseACL();
         final ParseUser unresolvedUser = mock(ParseUser.class);
         when(unresolvedUser.isLazy()).thenReturn(true);
@@ -112,7 +112,7 @@ public class ParseACLTest {
     //region toJson
 
     @Test
-    public void testCopyWithSaveListener() throws Exception {
+    public void testCopyWithSaveListener() {
         ParseACL acl = new ParseACL();
         final ParseUser unresolvedUser = mock(ParseUser.class);
         when(unresolvedUser.isLazy()).thenReturn(true);
@@ -173,7 +173,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testParcelable() throws Exception {
+    public void testParcelable() {
         ParseACL acl = new ParseACL();
         acl.setReadAccess("userId", true);
         ParseUser user = new ParseUser();
@@ -200,7 +200,7 @@ public class ParseACLTest {
     //region testCreateACLFromJSONObject
 
     @Test
-    public void testParcelableWithUnresolvedUser() throws Exception {
+    public void testParcelableWithUnresolvedUser() {
         ParseFieldOperations.registerDefaultDecoders(); // Needed for unparceling ParseObjects
         ParseACL acl = new ParseACL();
         ParseUser unresolved = new ParseUser();
@@ -245,7 +245,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testResolveUserWithNewUser() throws Exception {
+    public void testResolveUserWithNewUser() {
         ParseUser unresolvedUser = new ParseUser();
         setLazy(unresolvedUser);
         ParseACL acl = new ParseACL();
@@ -266,7 +266,7 @@ public class ParseACLTest {
     //region testSetAccess
 
     @Test
-    public void testResolveUserWithUnresolvedUser() throws Exception {
+    public void testResolveUserWithUnresolvedUser() {
         ParseACL acl = new ParseACL();
         ParseUser unresolvedUser = new ParseUser();
         setLazy(unresolvedUser);
@@ -285,7 +285,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetAccessWithNoPermissionAndNotAllowed() throws Exception {
+    public void testSetAccessWithNoPermissionAndNotAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setReadAccess("userId", false);
@@ -295,7 +295,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetAccessWithAllowed() throws Exception {
+    public void testSetAccessWithAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setReadAccess("userId", true);
@@ -305,7 +305,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetAccessWithPermissionsAndNotAllowed() throws Exception {
+    public void testSetAccessWithPermissionsAndNotAllowed() {
         ParseACL acl = new ParseACL();
         acl.setReadAccess("userId", true);
 
@@ -317,7 +317,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetPublicReadAccessAllowed() throws Exception {
+    public void testSetPublicReadAccessAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setPublicReadAccess(true);
@@ -326,7 +326,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetPublicReadAccessNotAllowed() throws Exception {
+    public void testSetPublicReadAccessNotAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setPublicReadAccess(false);
@@ -336,7 +336,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetPublicWriteAccessAllowed() throws Exception {
+    public void testSetPublicWriteAccessAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setPublicWriteAccess(true);
@@ -346,7 +346,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetPublicWriteAccessNotAllowed() throws Exception {
+    public void testSetPublicWriteAccessNotAllowed() {
         ParseACL acl = new ParseACL();
 
         acl.setPublicWriteAccess(false);
@@ -356,7 +356,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetReadAccessWithNullUserId() throws Exception {
+    public void testSetReadAccessWithNullUserId() {
         ParseACL acl = new ParseACL();
 
         String userId = null;
@@ -364,7 +364,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetWriteAccessWithNullUserId() throws Exception {
+    public void testSetWriteAccessWithNullUserId() {
         ParseACL acl = new ParseACL();
 
         String userId = null;
@@ -372,7 +372,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetRoleReadAccessWithInvalidRole() throws Exception {
+    public void testSetRoleReadAccessWithInvalidRole() {
         ParseRole role = new ParseRole();
         role.setName("Player");
         ParseACL acl = new ParseACL();
@@ -381,7 +381,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetRoleReadAccess() throws Exception {
+    public void testSetRoleReadAccess() {
         ParseRole role = new ParseRole();
         role.setName("Player");
         role.setObjectId("test");
@@ -394,7 +394,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetRoleWriteAccessWithInvalidRole() throws Exception {
+    public void testSetRoleWriteAccessWithInvalidRole() {
         ParseRole role = new ParseRole();
         role.setName("Player");
         ParseACL acl = new ParseACL();
@@ -403,7 +403,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetRoleWriteAccess() throws Exception {
+    public void testSetRoleWriteAccess() {
         ParseRole role = new ParseRole();
         role.setName("Player");
         role.setObjectId("test");
@@ -416,7 +416,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetUserReadAccessWithNotSavedNotLazyUser() throws Exception {
+    public void testSetUserReadAccessWithNotSavedNotLazyUser() {
         ParseUser user = new ParseUser();
         ParseACL acl = new ParseACL();
 
@@ -424,7 +424,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetUserReadAccessWithLazyUser() throws Exception {
+    public void testSetUserReadAccessWithLazyUser() {
         ParseUser unresolvedUser = mock(ParseUser.class);
         when(unresolvedUser.isLazy()).thenReturn(true);
         ParseACL acl = new ParseACL();
@@ -439,7 +439,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetUserReadAccessWithNormalUser() throws Exception {
+    public void testSetUserReadAccessWithNormalUser() {
         ParseUser user = new ParseUser();
         user.setObjectId("test");
         ParseACL acl = new ParseACL();
@@ -451,7 +451,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSetUserWriteAccessWithNotSavedNotLazyUser() throws Exception {
+    public void testSetUserWriteAccessWithNotSavedNotLazyUser() {
         ParseUser user = new ParseUser();
         ParseACL acl = new ParseACL();
 
@@ -459,7 +459,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testSetUserWriteAccessWithLazyUser() throws Exception {
+    public void testSetUserWriteAccessWithLazyUser() {
         ParseUser user = mock(ParseUser.class);
         when(user.isLazy()).thenReturn(true);
         ParseACL acl = new ParseACL();
@@ -477,7 +477,7 @@ public class ParseACLTest {
     //region testGetAccess
 
     @Test
-    public void testSetUserWriteAccessWithNormalUser() throws Exception {
+    public void testSetUserWriteAccessWithNormalUser() {
         ParseUser user = new ParseUser();
         user.setObjectId("test");
         ParseACL acl = new ParseACL();
@@ -489,14 +489,14 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetAccessWithNoPermission() throws Exception {
+    public void testGetAccessWithNoPermission() {
         ParseACL acl = new ParseACL();
 
         assertFalse(acl.getReadAccess("userId"));
     }
 
     @Test
-    public void testGetAccessWithNoAccessType() throws Exception {
+    public void testGetAccessWithNoAccessType() {
         ParseACL acl = new ParseACL();
         acl.setReadAccess("userId", true);
 
@@ -504,7 +504,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetAccessWithPermission() throws Exception {
+    public void testGetAccessWithPermission() {
         ParseACL acl = new ParseACL();
         acl.setReadAccess("userId", true);
 
@@ -512,7 +512,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetPublicReadAccess() throws Exception {
+    public void testGetPublicReadAccess() {
         ParseACL acl = new ParseACL();
         acl.setPublicWriteAccess(true);
 
@@ -520,7 +520,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetPublicWriteAccess() throws Exception {
+    public void testGetPublicWriteAccess() {
         ParseACL acl = new ParseACL();
         acl.setPublicWriteAccess(true);
 
@@ -528,7 +528,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetReadAccessWithNullUserId() throws Exception {
+    public void testGetReadAccessWithNullUserId() {
         ParseACL acl = new ParseACL();
 
         String userId = null;
@@ -536,7 +536,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetWriteAccessWithNullUserId() throws Exception {
+    public void testGetWriteAccessWithNullUserId() {
         ParseACL acl = new ParseACL();
 
         String userId = null;
@@ -544,7 +544,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetRoleReadAccessWithInvalidRole() throws Exception {
+    public void testGetRoleReadAccessWithInvalidRole() {
         ParseACL acl = new ParseACL();
         ParseRole role = new ParseRole();
         role.setName("Player");
@@ -553,7 +553,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetRoleReadAccess() throws Exception {
+    public void testGetRoleReadAccess() {
         ParseACL acl = new ParseACL();
         ParseRole role = new ParseRole();
         role.setName("Player");
@@ -564,7 +564,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetRoleWriteAccessWithInvalidRole() throws Exception {
+    public void testGetRoleWriteAccessWithInvalidRole() {
         ParseACL acl = new ParseACL();
         ParseRole role = new ParseRole();
         role.setName("Player");
@@ -573,7 +573,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetRoleWriteAccess() throws Exception {
+    public void testGetRoleWriteAccess() {
         ParseACL acl = new ParseACL();
         ParseRole role = new ParseRole();
         role.setName("Player");
@@ -584,7 +584,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetUserReadAccessWithUnresolvedUser() throws Exception {
+    public void testGetUserReadAccessWithUnresolvedUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);
@@ -595,7 +595,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetUserReadAccessWithLazyUser() throws Exception {
+    public void testGetUserReadAccessWithLazyUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);
@@ -604,7 +604,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetUserReadAccessWithNotSavedUser() throws Exception {
+    public void testGetUserReadAccessWithNotSavedUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
 
@@ -612,7 +612,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetUserReadAccessWithNormalUser() throws Exception {
+    public void testGetUserReadAccessWithNormalUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         user.setObjectId("test");
@@ -622,7 +622,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetUserWriteAccessWithUnresolvedUser() throws Exception {
+    public void testGetUserWriteAccessWithUnresolvedUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);
@@ -633,7 +633,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testGetUserWriteAccessWithLazyUser() throws Exception {
+    public void testGetUserWriteAccessWithLazyUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = mock(ParseUser.class);
         when(user.isLazy()).thenReturn(true);
@@ -642,7 +642,7 @@ public class ParseACLTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetUserWriteAccessWithNotSavedUser() throws Exception {
+    public void testGetUserWriteAccessWithNotSavedUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
 
@@ -654,7 +654,7 @@ public class ParseACLTest {
     //region testGetter/Setter
 
     @Test
-    public void testGetUserWriteAccessWithNormalUser() throws Exception {
+    public void testGetUserWriteAccessWithNormalUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         user.setObjectId("test");
@@ -664,7 +664,7 @@ public class ParseACLTest {
     }
 
     @Test
-    public void testIsShared() throws Exception {
+    public void testIsShared() {
         ParseACL acl = new ParseACL();
         acl.setShared(true);
 
@@ -674,7 +674,7 @@ public class ParseACLTest {
     //endregion
 
     @Test
-    public void testUnresolvedUser() throws Exception {
+    public void testUnresolvedUser() {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);

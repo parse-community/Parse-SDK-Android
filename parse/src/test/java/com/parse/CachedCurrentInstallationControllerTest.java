@@ -205,7 +205,7 @@ public class CachedCurrentInstallationControllerTest {
     //endregion
 
     @Test
-    public void testClearFromMemory() throws Exception {
+    public void testClearFromMemory() {
         CachedCurrentInstallationController controller =
                 new CachedCurrentInstallationController(null, null);
         controller.currentInstallation = mock(ParseInstallation.class);
@@ -216,7 +216,7 @@ public class CachedCurrentInstallationControllerTest {
     }
 
     @Test
-    public void testClearFromDisk() throws Exception {
+    public void testClearFromDisk() {
         // Mock installationId
         InstallationId installationId = mock(InstallationId.class);
         //noinspection unchecked
@@ -237,7 +237,7 @@ public class CachedCurrentInstallationControllerTest {
     }
 
     @Test
-    public void testIsCurrent() throws Exception {
+    public void testIsCurrent() {
         // Create test controller
         CachedCurrentInstallationController controller =
                 new CachedCurrentInstallationController(null, null);

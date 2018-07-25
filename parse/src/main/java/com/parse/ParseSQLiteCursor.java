@@ -199,7 +199,7 @@ class ParseSQLiteCursor implements Cursor {
         // Basically close _eventually_.
         Task.call(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 cursor.close();
                 return null;
             }

@@ -135,7 +135,7 @@ public class ParseInstallation extends ParseObject {
             }
             return result.onSuccessTask(new Continuation<Void, Task<T>>() {
                 @Override
-                public Task<T> then(Task<Void> task) throws Exception {
+                public Task<T> then(Task<Void> task) {
                     return ParseInstallation.super.fetchAsync(sessionToken, toAwait);
                 }
             });
@@ -146,7 +146,7 @@ public class ParseInstallation extends ParseObject {
         /* package */ Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
         return super.saveAsync(sessionToken, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 // Retry the fetch as a save operation because this Installation was deleted on the server.
                 if (task.getError() != null
                         && task.getError() instanceof ParseException) {
@@ -176,7 +176,7 @@ public class ParseInstallation extends ParseObject {
 
         return task.onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return getCurrentInstallationController().setAsync(ParseInstallation.this);
             }
         });
@@ -186,7 +186,7 @@ public class ParseInstallation extends ParseObject {
         /* package */ Task<Void> handleFetchResultAsync(final ParseObject.State newState) {
         return super.handleFetchResultAsync(newState).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return getCurrentInstallationController().setAsync(ParseInstallation.this);
             }
         });
@@ -292,7 +292,7 @@ public class ParseInstallation extends ParseObject {
 
     public void setPushType(String pushType) {
         if (pushType != null) {
-            performPut(KEY_PUSH_TYPE, pushType.toString());
+            performPut(KEY_PUSH_TYPE, pushType);
         }
     }
 

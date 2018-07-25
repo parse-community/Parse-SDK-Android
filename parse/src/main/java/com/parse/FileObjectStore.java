@@ -83,7 +83,7 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public Task<Void> setAsync(final T object) {
         return Task.call(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 saveToDisk(coder, object, file);
                 //TODO (grantland): check to see if this failed? We currently don't for legacy reasons.
                 return null;
@@ -95,7 +95,7 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public Task<T> getAsync() {
         return Task.call(new Callable<T>() {
             @Override
-            public T call() throws Exception {
+            public T call() {
                 if (!file.exists()) {
                     return null;
                 }
@@ -108,7 +108,7 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public Task<Boolean> existsAsync() {
         return Task.call(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return file.exists();
             }
         }, ParseExecutors.io());
@@ -118,7 +118,7 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public Task<Void> deleteAsync() {
         return Task.call(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 if (file.exists() && !ParseFileUtils.deleteQuietly(file)) {
                     throw new RuntimeException("Unable to delete");
                 }

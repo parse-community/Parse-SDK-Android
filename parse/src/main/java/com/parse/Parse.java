@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
  * The {@code Parse} class contains static functions that handle global configuration for the Parse
  * library.
  */
+@SuppressWarnings("unused")
 public class Parse {
     public static final int LOG_LEVEL_VERBOSE = Log.VERBOSE;
     public static final int LOG_LEVEL_DEBUG = Log.DEBUG;
@@ -158,7 +159,7 @@ public class Parse {
         final Context context = configuration.context;
         Task.callInBackground(new Callable<Void>() {
             @Override
-            public Void call() throws Exception {
+            public Void call() {
                 getEventuallyQueue(context);
                 return null;
             }
@@ -175,7 +176,7 @@ public class Parse {
 
         ParseUser.getCurrentUserAsync().makeVoid().continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 // Prime config in the background
                 ParseConfig.getCurrentConfig();
                 return null;

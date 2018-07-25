@@ -131,7 +131,7 @@ class CacheQueryController extends AbstractQueryController {
                 return c.runFromCacheAsync().continueWithTask(new Continuation<TResult, Task<TResult>>() {
                     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
                     @Override
-                    public Task<TResult> then(Task<TResult> task) throws Exception {
+                    public Task<TResult> then(Task<TResult> task) {
                         if (task.getError() instanceof ParseException) {
                             return c.runOnNetworkAsync();
                         }
@@ -142,7 +142,7 @@ class CacheQueryController extends AbstractQueryController {
                 return c.runOnNetworkAsync().continueWithTask(new Continuation<TResult, Task<TResult>>() {
                     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
                     @Override
-                    public Task<TResult> then(Task<TResult> task) throws Exception {
+                    public Task<TResult> then(Task<TResult> task) {
                         Exception error = task.getError();
                         if (error instanceof ParseException &&
                                 ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {

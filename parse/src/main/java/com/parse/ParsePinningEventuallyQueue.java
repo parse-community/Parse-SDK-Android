@@ -122,10 +122,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                 super.setConnected(connected);
                 if (connected) {
                     connectionTaskCompletionSource.trySetResult(null);
-                    connectionTaskCompletionSource = Task.create();
+                    connectionTaskCompletionSource = new TaskCompletionSource<>();
                     connectionTaskCompletionSource.trySetResult(null);
                 } else {
-                    connectionTaskCompletionSource = Task.create();
+                    connectionTaskCompletionSource = new TaskCompletionSource<>();
                 }
             }
         }
@@ -145,10 +145,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return pendingCountAsync(toAwait).continueWithTask(new Continuation<Integer, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Integer> task) throws Exception {
+                    public Task<Void> then(Task<Integer> task) {
                         int count = task.getResult();
                         tcs.setResult(count);
                         return Task.forResult(null);
@@ -163,10 +163,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     public Task<Integer> pendingCountAsync(Task<Void> toAwait) {
         return toAwait.continueWithTask(new Continuation<Void, Task<Integer>>() {
             @Override
-            public Task<Integer> then(Task<Void> task) throws Exception {
+            public Task<Integer> then(Task<Void> task) {
                 return EventuallyPin.findAllPinned().continueWithTask(new Continuation<List<EventuallyPin>, Task<Integer>>() {
                     @Override
-                    public Task<Integer> then(Task<List<EventuallyPin>> task) throws Exception {
+                    public Task<Integer> then(Task<List<EventuallyPin>> task) {
                         List<EventuallyPin> pins = task.getResult();
                         return Task.forResult(pins.size());
                     }
@@ -180,7 +180,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
         synchronized (connectionLock) {
             // Error out tasks waiting on waitForConnectionAsync.
             connectionTaskCompletionSource.trySetError(new PauseException());
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
             connectionTaskCompletionSource.trySetError(new PauseException());
         }
 
@@ -206,10 +206,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
         // Reset waitForConnectionAsync.
         if (isConnected()) {
             connectionTaskCompletionSource.trySetResult(null);
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
             connectionTaskCompletionSource.trySetResult(null);
         } else {
-            connectionTaskCompletionSource = Task.create();
+            connectionTaskCompletionSource = new TaskCompletionSource<>();
         }
 
         populateQueueAsync();
@@ -234,7 +234,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return enqueueEventuallyAsync(command, object, toAwait, tcs);
             }
         });
@@ -246,12 +246,12 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                                               final ParseObject object, Task<Void> toAwait, final TaskCompletionSource<JSONObject> tcs) {
         return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 Task<EventuallyPin> pinTask = EventuallyPin.pinEventuallyCommand(object, command);
 
                 return pinTask.continueWithTask(new Continuation<EventuallyPin, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<EventuallyPin> task) throws Exception {
+                    public Task<Void> then(Task<EventuallyPin> task) {
                         EventuallyPin pin = task.getResult();
                         Exception error = task.getError();
                         if (error != null) {
@@ -267,7 +267,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                         // We don't need to wait for this.
                         populateQueueAsync().continueWithTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 /*
                                  * We need to wait until after we populated the operationSetTaskQueue to notify
                                  * that we've enqueued this command.
@@ -293,7 +293,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     private Task<Void> populateQueueAsync() {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return populateQueueAsync(toAwait);
             }
         });
@@ -302,13 +302,13 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     private Task<Void> populateQueueAsync(Task<Void> toAwait) {
         return toAwait.continueWithTask(new Continuation<Void, Task<List<EventuallyPin>>>() {
             @Override
-            public Task<List<EventuallyPin>> then(Task<Void> task) throws Exception {
+            public Task<List<EventuallyPin>> then(Task<Void> task) {
                 // We don't want to enqueue any EventuallyPins that are already queued.
                 return EventuallyPin.findAllPinned(eventuallyPinUUIDQueue);
             }
         }).onSuccessTask(new Continuation<List<EventuallyPin>, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<List<EventuallyPin>> task) throws Exception {
+            public Task<Void> then(Task<List<EventuallyPin>> task) {
                 List<EventuallyPin> pins = task.getResult();
 
                 for (final EventuallyPin pin : pins) {
@@ -337,10 +337,10 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         operationSetTaskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(final Task<Void> toAwait) throws Exception {
+            public Task<Void> then(final Task<Void> toAwait) {
                 return runEventuallyAsync(eventuallyPin, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         eventuallyPinUUIDQueue.remove(uuid);
                         return task;
                     }
@@ -360,15 +360,15 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     private Task<Void> runEventuallyAsync(final EventuallyPin eventuallyPin, final Task<Void> toAwait) {
         return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return waitForConnectionAsync();
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return waitForOperationSetAndEventuallyPin(null, eventuallyPin).continueWithTask(new Continuation<JSONObject, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<JSONObject> task) throws Exception {
+                    public Task<Void> then(Task<JSONObject> task) {
                         Exception error = task.getError();
                         if (error != null) {
                             if (error instanceof PauseException) {
@@ -438,7 +438,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                 if (pendingEventuallyTasks.containsKey(uuid)) {
                     tcs = pendingEventuallyTasks.get(uuid);
                 } else {
-                    tcs = Task.create();
+                    tcs = new TaskCompletionSource<>();
                     pendingEventuallyTasks.put(uuid, tcs);
                 }
                 return tcs.getTask();
@@ -449,7 +449,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         return process(eventuallyPin, operationSet).continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
             @Override
-            public Task<JSONObject> then(Task<JSONObject> task) throws Exception {
+            public Task<JSONObject> then(Task<JSONObject> task) {
                 synchronized (taskQueueSyncLock) {
                     pendingEventuallyTasks.remove(uuid);
                     uuidToOperationSet.remove(uuid);
@@ -499,7 +499,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
                 return executeTask.continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
                     @Override
-                    public Task<JSONObject> then(final Task<JSONObject> executeTask) throws Exception {
+                    public Task<JSONObject> then(final Task<JSONObject> executeTask) {
                         Exception error = executeTask.getError();
                         if (error != null) {
                             if (error instanceof ParseException
@@ -520,7 +520,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                         // since this EventuallyPin is still in eventuallyPinUUIDQueue.
                         return eventuallyPin.unpinInBackground(EventuallyPin.PIN_NAME).continueWithTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 JSONObject result = executeTask.getResult();
                                 if (type == EventuallyPin.TYPE_SAVE) {
                                     return object.handleSaveEventuallyResultAsync(result, operationSet);
@@ -536,7 +536,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
                             }
                         }).continueWithTask(new Continuation<Void, Task<JSONObject>>() {
                             @Override
-                            public Task<JSONObject> then(Task<Void> task) throws Exception {
+                            public Task<JSONObject> then(Task<Void> task) {
                                 return executeTask;
                             }
                         });
@@ -564,13 +564,13 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         Task<Void> task = taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return EventuallyPin.findAllPinned().onSuccessTask(new Continuation<List<EventuallyPin>, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<List<EventuallyPin>> task) throws Exception {
+                            public Task<Void> then(Task<List<EventuallyPin>> task) {
                                 List<EventuallyPin> pins = task.getResult();
 
                                 List<Task<Void>> tasks = new ArrayList<>();
@@ -609,7 +609,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
         for (TaskQueue taskQueue : taskQueues) {
             Task<Void> task = taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> toAwait) throws Exception {
+                public Task<Void> then(Task<Void> toAwait) {
                     return toAwait;
                 }
             });

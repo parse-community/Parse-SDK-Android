@@ -30,6 +30,7 @@ import bolts.Task;
  * The {@code ParseUser} is a local representation of user data that can be saved and retrieved from
  * the Parse cloud.
  */
+@SuppressWarnings("unused")
 @ParseClassName("_User")
 public class ParseUser extends ParseObject {
 
@@ -101,12 +102,12 @@ public class ParseUser extends ParseObject {
 
         return getUserController().logInAsync(username, password).onSuccessTask(new Continuation<State, Task<ParseUser>>() {
             @Override
-            public Task<ParseUser> then(Task<State> task) throws Exception {
+            public Task<ParseUser> then(Task<State> task) {
                 State result = task.getResult();
                 final ParseUser newCurrent = ParseObject.from(result);
                 return saveCurrentUserAsync(newCurrent).onSuccess(new Continuation<Void, ParseUser>() {
                     @Override
-                    public ParseUser then(Task<Void> task) throws Exception {
+                    public ParseUser then(Task<Void> task) {
                         return newCurrent;
                     }
                 });
@@ -163,13 +164,13 @@ public class ParseUser extends ParseObject {
 
         return getUserController().getUserAsync(sessionToken).onSuccessTask(new Continuation<State, Task<ParseUser>>() {
             @Override
-            public Task<ParseUser> then(Task<State> task) throws Exception {
+            public Task<ParseUser> then(Task<State> task) {
                 State result = task.getResult();
 
                 final ParseUser user = ParseObject.from(result);
                 return saveCurrentUserAsync(user).onSuccess(new Continuation<Void, ParseUser>() {
                     @Override
-                    public ParseUser then(Task<Void> task) throws Exception {
+                    public ParseUser then(Task<Void> task) {
                         return user;
                     }
                 });
@@ -391,15 +392,15 @@ public class ParseUser extends ParseObject {
 
         final Continuation<Void, Task<ParseUser>> logInWithTask = new Continuation<Void, Task<ParseUser>>() {
             @Override
-            public Task<ParseUser> then(Task<Void> task) throws Exception {
+            public Task<ParseUser> then(Task<Void> task) {
                 return getUserController().logInAsync(authType, authData).onSuccessTask(new Continuation<ParseUser.State, Task<ParseUser>>() {
                     @Override
-                    public Task<ParseUser> then(Task<ParseUser.State> task) throws Exception {
+                    public Task<ParseUser> then(Task<ParseUser.State> task) {
                         ParseUser.State result = task.getResult();
                         final ParseUser user = ParseObject.from(result);
                         return saveCurrentUserAsync(user).onSuccess(new Continuation<Void, ParseUser>() {
                             @Override
-                            public ParseUser then(Task<Void> task) throws Exception {
+                            public ParseUser then(Task<Void> task) {
                                 return user;
                             }
                         });
@@ -411,7 +412,7 @@ public class ParseUser extends ParseObject {
         // Handle claiming of user.
         return getCurrentUserController().getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<ParseUser>>() {
             @Override
-            public Task<ParseUser> then(Task<ParseUser> task) throws Exception {
+            public Task<ParseUser> then(Task<ParseUser> task) {
                 final ParseUser user = task.getResult();
                 if (user != null) {
                     synchronized (user.mutex) {
@@ -421,10 +422,10 @@ public class ParseUser extends ParseObject {
                                         user.getAuthData(ParseAnonymousUtils.AUTH_TYPE);
                                 return user.taskQueue.enqueue(new Continuation<Void, Task<ParseUser>>() {
                                     @Override
-                                    public Task<ParseUser> then(final Task<Void> toAwait) throws Exception {
+                                    public Task<ParseUser> then(final Task<Void> toAwait) {
                                         return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
                                             @Override
-                                            public Task<Void> then(Task<Void> task) throws Exception {
+                                            public Task<Void> then(Task<Void> task) {
                                                 synchronized (user.mutex) {
                                                     // Replace any anonymity with the new linked authData.
                                                     user.stripAnonymity();
@@ -435,7 +436,7 @@ public class ParseUser extends ParseObject {
                                             }
                                         }).continueWithTask(new Continuation<Void, Task<ParseUser>>() {
                                             @Override
-                                            public Task<ParseUser> then(Task<Void> task) throws Exception {
+                                            public Task<ParseUser> then(Task<Void> task) {
                                                 synchronized (user.mutex) {
                                                     if (task.isFaulted()) {
                                                         user.removeAuthData(authType);
@@ -458,7 +459,7 @@ public class ParseUser extends ParseObject {
                                 return user.linkWithInBackground(authType, authData)
                                         .continueWithTask(new Continuation<Void, Task<ParseUser>>() {
                                             @Override
-                                            public Task<ParseUser> then(Task<Void> task) throws Exception {
+                                            public Task<ParseUser> then(Task<Void> task) {
                                                 if (task.isFaulted()) {
                                                     Exception error = task.getError();
                                                     if (error instanceof ParseException
@@ -530,7 +531,7 @@ public class ParseUser extends ParseObject {
 
         return getCurrentUserController().getAsync(false).onSuccessTask(new Continuation<ParseUser, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseUser> task) throws Exception {
+            public Task<Void> then(Task<ParseUser> task) {
                 ParseUser user = task.getResult();
                 if (user == null) {
                     return Task.forResult(null);
@@ -606,7 +607,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-    public void remove(String key) {
+    public void remove(@NonNull String key) {
         if (KEY_USERNAME.equals(key)) {
             throw new IllegalArgumentException("Can't remove the username key.");
         }
@@ -876,12 +877,12 @@ public class ParseUser extends ParseObject {
             // If the user is the currently logged in user, we persist all data to disk
             return task.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return cleanUpAuthDataAsync();
                 }
             }).onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return saveCurrentUserAsync(ParseUser.this);
                 }
             });
@@ -921,17 +922,17 @@ public class ParseUser extends ParseObject {
         if (isCurrentUser()) {
             return task.onSuccessTask(new Continuation<T, Task<Void>>() {
                 @Override
-                public Task<Void> then(final Task<T> fetchAsyncTask) throws Exception {
+                public Task<Void> then(final Task<T> fetchAsyncTask) {
                     return cleanUpAuthDataAsync();
                 }
             }).onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return saveCurrentUserAsync(ParseUser.this);
                 }
             }).onSuccess(new Continuation<Void, T>() {
                 @Override
-                public T then(Task<Void> task) throws Exception {
+                public T then(Task<Void> task) {
                     return (T) ParseUser.this;
                 }
             });
@@ -957,7 +958,7 @@ public class ParseUser extends ParseObject {
     public Task<Void> signUpInBackground() {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return signUpAsync(task);
             }
         });
@@ -1021,7 +1022,7 @@ public class ParseUser extends ParseObject {
 
                 return user.saveAsync(sessionToken, isLazy, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         if (task.isCancelled() || task.isFaulted()) { // Error
                             synchronized (user.mutex) {
                                 if (oldUsername != null) {
@@ -1052,17 +1053,17 @@ public class ParseUser extends ParseObject {
 
             return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return getUserController().signUpAsync(
                             getState(), operations, sessionToken
                     ).continueWithTask(new Continuation<ParseUser.State, Task<Void>>() {
                         @Override
-                        public Task<Void> then(final Task<ParseUser.State> signUpTask) throws Exception {
+                        public Task<Void> then(final Task<ParseUser.State> signUpTask) {
                             ParseUser.State result = signUpTask.getResult();
                             return handleSaveResultAsync(result,
                                     operations).continueWithTask(new Continuation<Void, Task<Void>>() {
                                 @Override
-                                public Task<Void> then(Task<Void> task) throws Exception {
+                                public Task<Void> then(Task<Void> task) {
                                     if (!signUpTask.isCancelled() && !signUpTask.isFaulted()) {
                                         return saveCurrentUserAsync(ParseUser.this);
                                     }
@@ -1198,7 +1199,7 @@ public class ParseUser extends ParseObject {
             ParseAuthenticationManager manager, final String authType, Map<String, String> authData) {
         return manager.restoreAuthenticationAsync(authType, authData).continueWithTask(new Continuation<Boolean, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Boolean> task) throws Exception {
+            public Task<Void> then(Task<Boolean> task) {
                 boolean success = !task.isFaulted() && task.getResult();
                 if (!success) {
                     return unlinkFromInBackground(authType);
@@ -1222,7 +1223,7 @@ public class ParseUser extends ParseObject {
 
             return saveAsync(sessionToken, isLazy, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     synchronized (mutex) {
                         if (task.isFaulted() || task.isCancelled()) {
                             removeAuthData(authType);
@@ -1244,7 +1245,7 @@ public class ParseUser extends ParseObject {
             final String sessionToken) {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return linkWithAsync(authType, authData, task, sessionToken);
             }
         });
@@ -1317,10 +1318,10 @@ public class ParseUser extends ParseObject {
             // Otherwise, treat this as a SignUpOrLogIn
             return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return getUserController().logInAsync(getState(), operations).onSuccessTask(new Continuation<ParseUser.State, Task<Void>>() {
                         @Override
-                        public Task<Void> then(Task<ParseUser.State> task) throws Exception {
+                        public Task<Void> then(Task<ParseUser.State> task) {
                             final ParseUser.State result = task.getResult();
 
                             Task<ParseUser.State> resultTask;
@@ -1332,14 +1333,14 @@ public class ParseUser extends ParseObject {
                                 resultTask = handleSaveResultAsync(result,
                                         operations).onSuccess(new Continuation<Void, ParseUser.State>() {
                                     @Override
-                                    public ParseUser.State then(Task<Void> task) throws Exception {
+                                    public ParseUser.State then(Task<Void> task) {
                                         return result;
                                     }
                                 });
                             }
                             return resultTask.onSuccessTask(new Continuation<ParseUser.State, Task<Void>>() {
                                 @Override
-                                public Task<Void> then(Task<ParseUser.State> task) throws Exception {
+                                public Task<Void> then(Task<ParseUser.State> task) {
                                     ParseUser.State result = task.getResult();
                                     if (!result.isNew()) {
                                         // If the result is not a new user, treat this as a fresh logIn with complete
@@ -1392,7 +1393,7 @@ public class ParseUser extends ParseObject {
     /* package */ Task<Void> upgradeToRevocableSessionAsync() {
         return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> toAwait) throws Exception {
+            public Task<Void> then(Task<Void> toAwait) {
                 return upgradeToRevocableSessionAsync(toAwait);
             }
         });
@@ -1402,12 +1403,12 @@ public class ParseUser extends ParseObject {
         final String sessionToken = getSessionToken();
         return toAwait.continueWithTask(new Continuation<Void, Task<String>>() {
             @Override
-            public Task<String> then(Task<Void> task) throws Exception {
+            public Task<String> then(Task<Void> task) {
                 return ParseSession.upgradeToRevocableSessionAsync(sessionToken);
             }
         }).onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String result = task.getResult();
                 return setSessionTokenInBackground(result);
             }

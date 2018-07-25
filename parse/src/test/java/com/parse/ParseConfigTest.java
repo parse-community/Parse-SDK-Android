@@ -207,7 +207,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetCurrentConfig
 
     @Test
-    public void testGetCurrentConfigSuccess() throws Exception {
+    public void testGetCurrentConfigSuccess() {
         final Map<String, Object> params = new HashMap<>();
         params.put("string", "value");
 
@@ -221,7 +221,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetCurrentConfigFail() throws Exception {
+    public void testGetCurrentConfigFail() {
         ParseException exception = new ParseException(ParseException.CONNECTION_FAILED, "error");
         ParseConfigController controller = new ParseConfigController(mock(ParseHttpClient.class),
                 mockParseCurrentConfigControllerWithException(exception));
@@ -237,7 +237,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetBoolean
 
     @Test
-    public void testGetBooleanKeyExist() throws Exception {
+    public void testGetBooleanKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", true);
 
@@ -247,7 +247,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetBooleanKeyNotExist() throws Exception {
+    public void testGetBooleanKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", true);
 
@@ -257,7 +257,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetBooleanKeyExistValueNotBoolean() throws Exception {
+    public void testGetBooleanKeyExistValueNotBoolean() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 1);
 
@@ -271,7 +271,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetInt
 
     @Test
-    public void testGetIntKeyExist() throws Exception {
+    public void testGetIntKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 998);
 
@@ -281,7 +281,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetIntKeyNotExist() throws Exception {
+    public void testGetIntKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 998);
 
@@ -295,7 +295,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetDouble
 
     @Test
-    public void testGetDoubleKeyExist() throws Exception {
+    public void testGetDoubleKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 998.1);
 
@@ -305,7 +305,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetDoubleKeyNotExist() throws Exception {
+    public void testGetDoubleKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 998.1);
 
@@ -319,7 +319,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetLong
 
     @Test
-    public void testGetLongKeyExist() throws Exception {
+    public void testGetLongKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", (long) 998);
 
@@ -329,7 +329,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetLongKeyNotExist() throws Exception {
+    public void testGetLongKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", (long) 998);
 
@@ -343,7 +343,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGet
 
     @Test
-    public void testGetKeyExist() throws Exception {
+    public void testGetKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", "value");
 
@@ -353,7 +353,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetKeyNotExist() throws Exception {
+    public void testGetKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", "value");
 
@@ -363,7 +363,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetKeyExistValueNull() throws Exception {
+    public void testGetKeyExistValueNull() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", JSONObject.NULL);
         params.put("keyAgain", null);
@@ -380,7 +380,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetString
 
     @Test
-    public void testGetStringKeyExist() throws Exception {
+    public void testGetStringKeyExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", "value");
 
@@ -390,7 +390,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetStringKeyNotExist() throws Exception {
+    public void testGetStringKeyNotExist() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", "value");
 
@@ -400,7 +400,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetStringKeyExistValueNotString() throws Exception {
+    public void testGetStringKeyExistValueNotString() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 1);
 
@@ -410,7 +410,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetStringKeyExistValueNull() throws Exception {
+    public void testGetStringKeyExistValueNull() {
         final Map<String, Object> params = new HashMap<>();
         params.put("key", JSONObject.NULL);
         params.put("keyAgain", null);
@@ -427,7 +427,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetDate
 
     @Test
-    public void testGetDateKeyExist() throws Exception {
+    public void testGetDateKeyExist() {
         final Date date = new Date();
         date.setTime(10);
         Date dateAgain = new Date();
@@ -441,7 +441,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetDateKeyNotExist() throws Exception {
+    public void testGetDateKeyNotExist() {
         final Date date = new Date();
         date.setTime(10);
         Date dateAgain = new Date();
@@ -455,7 +455,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetDateKeyExistValueNotDate() throws Exception {
+    public void testGetDateKeyExistValueNotDate() {
         Date date = new Date();
         date.setTime(20);
         final Map<String, Object> params = new HashMap<>();
@@ -467,7 +467,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetDateKeyExistValueNull() throws Exception {
+    public void testGetDateKeyExistValueNull() {
         Date date = new Date();
         date.setTime(20);
         final Map<String, Object> params = new HashMap<>();
@@ -486,7 +486,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetList
 
     @Test
-    public void testGetListKeyExist() throws Exception {
+    public void testGetListKeyExist() {
         final List<String> list = new ArrayList<>();
         list.add("foo");
         list.add("bar");
@@ -504,7 +504,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetListKeyNotExist() throws Exception {
+    public void testGetListKeyNotExist() {
         final List<String> list = new ArrayList<>();
         list.add("foo");
         list.add("bar");
@@ -522,7 +522,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetListKeyExistValueNotList() throws Exception {
+    public void testGetListKeyExistValueNotList() {
         final List<String> list = new ArrayList<>();
         list.add("foo");
         list.add("bar");
@@ -536,7 +536,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetListKeyExistValueNull() throws Exception {
+    public void testGetListKeyExistValueNull() {
         final List<String> list = new ArrayList<>();
         list.add("fooAgain");
         list.add("barAgain");
@@ -557,7 +557,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetNumber
 
     @Test
-    public void testGetNumberKeyExist() throws Exception {
+    public void testGetNumberKeyExist() {
         final Number number = 1;
         Number numberAgain = 2;
         final Map<String, Object> params = new HashMap<>();
@@ -569,7 +569,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetNumberKeyNotExist() throws Exception {
+    public void testGetNumberKeyNotExist() {
         final Number number = 1;
         Number numberAgain = 2;
         final Map<String, Object> params = new HashMap<>();
@@ -581,7 +581,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetNumberKeyExistValueNotNumber() throws Exception {
+    public void testGetNumberKeyExistValueNotNumber() {
         Number number = 2;
         final Map<String, Object> params = new HashMap<>();
         params.put("key", new ArrayList<String>());
@@ -592,7 +592,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetNumberKeyExistValueNull() throws Exception {
+    public void testGetNumberKeyExistValueNull() {
         Number number = 2;
         final Map<String, Object> params = new HashMap<>();
         params.put("key", JSONObject.NULL);
@@ -610,7 +610,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetMap
 
     @Test
-    public void testGetMapKeyExist() throws Exception {
+    public void testGetMapKeyExist() {
         final Map<String, Object> map = new HashMap<>();
         map.put("first", "foo");
         map.put("second", "bar");
@@ -632,7 +632,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetMapKeyNotExist() throws Exception {
+    public void testGetMapKeyNotExist() {
         final Map<String, Object> map = new HashMap<>();
         map.put("first", "foo");
         map.put("second", "bar");
@@ -650,7 +650,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetMapKeyExistValueNotMap() throws Exception {
+    public void testGetMapKeyExistValueNotMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("firstAgain", "fooAgain");
         map.put("secondAgain", "barAgain");
@@ -664,7 +664,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetMapKeyExistValueNull() throws Exception {
+    public void testGetMapKeyExistValueNull() {
         Map<String, Object> map = new HashMap<>();
         map.put("firstAgain", "fooAgain");
         map.put("secondAgain", "barAgain");
@@ -838,7 +838,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetParseGeoPoint
 
     @Test
-    public void testGetParseGeoPointKeyExist() throws Exception {
+    public void testGetParseGeoPointKeyExist() {
         final ParseGeoPoint geoPoint = new ParseGeoPoint(44.484, 26.029);
         ParseGeoPoint geoPointAgain = new ParseGeoPoint(45.484, 27.029);
         final Map<String, Object> params = new HashMap<>();
@@ -852,7 +852,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseGeoPointKeyNotExist() throws Exception {
+    public void testGetParseGeoPointKeyNotExist() {
         final ParseGeoPoint geoPoint = new ParseGeoPoint(44.484, 26.029);
         ParseGeoPoint geoPointAgain = new ParseGeoPoint(45.484, 27.029);
         final Map<String, Object> params = new HashMap<>();
@@ -864,7 +864,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseGeoPointKeyExistValueNotParseGeoPoint() throws Exception {
+    public void testGetParseGeoPointKeyExistValueNotParseGeoPoint() {
         ParseGeoPoint geoPoint = new ParseGeoPoint(45.484, 27.029);
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 1);
@@ -875,7 +875,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseGeoPointKeyExistValueNull() throws Exception {
+    public void testGetParseGeoPointKeyExistValueNull() {
         ParseGeoPoint geoPoint = new ParseGeoPoint(45.484, 27.029);
         final Map<String, Object> params = new HashMap<>();
         params.put("key", JSONObject.NULL);
@@ -893,7 +893,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testGetParseFile
 
     @Test
-    public void testGetParseFileKeyExist() throws Exception {
+    public void testGetParseFileKeyExist() {
         final ParseFile file = new ParseFile(
                 new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
         ParseFile fileAgain = new ParseFile(
@@ -909,7 +909,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseFileKeyNotExist() throws Exception {
+    public void testGetParseFileKeyNotExist() {
         final ParseFile file = new ParseFile(
                 new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
         ParseFile fileAgain = new ParseFile(
@@ -923,7 +923,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseFileKeyExistValueNotParseFile() throws Exception {
+    public void testGetParseFileKeyExistValueNotParseFile() {
         ParseFile file = new ParseFile(
                 new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
         final Map<String, Object> params = new HashMap<>();
@@ -935,7 +935,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testGetParseFileKeyExistValueNull() throws Exception {
+    public void testGetParseFileKeyExistValueNull() {
         ParseFile file = new ParseFile(
                 new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
         final Map<String, Object> params = new HashMap<>();
@@ -954,7 +954,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     //region testToString
 
     @Test
-    public void testToStringList() throws Exception {
+    public void testToStringList() {
         final List<String> list = new ArrayList<>();
         list.add("foo");
         list.add("bar");
@@ -973,7 +973,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testToStringMap() throws Exception {
+    public void testToStringMap() {
         final Map<String, Object> map = new HashMap<>();
         map.put("first", "foo");
         map.put("second", "bar");
@@ -991,7 +991,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     }
 
     @Test
-    public void testToStringParseGeoPoint() throws Exception {
+    public void testToStringParseGeoPoint() {
         final ParseGeoPoint geoPoint = new ParseGeoPoint(45.484, 27.029);
         final Map<String, Object> params = new HashMap<>();
         params.put("geoPoint", geoPoint);

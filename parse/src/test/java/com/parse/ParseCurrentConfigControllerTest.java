@@ -311,7 +311,7 @@ public class ParseCurrentConfigControllerTest {
     //region testClearCurrentConfigForTesting
 
     @Test
-    public void testClearCurrentConfigForTestingSuccess() throws Exception {
+    public void testClearCurrentConfigForTestingSuccess() {
         File configFile = new File(temporaryFolder.getRoot(), "config");
         ParseCurrentConfigController currentConfigController =
                 new ParseCurrentConfigController(configFile);

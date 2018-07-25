@@ -182,12 +182,12 @@ class ParseFileController {
         final File cacheFile = getCacheFile(state);
         return Task.call(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return cacheFile.exists();
             }
         }, ParseExecutors.io()).continueWithTask(new Continuation<Boolean, Task<File>>() {
             @Override
-            public Task<File> then(Task<Boolean> task) throws Exception {
+            public Task<File> then(Task<Boolean> task) {
                 boolean result = task.getResult();
                 if (result) {
                     return Task.forResult(cacheFile);

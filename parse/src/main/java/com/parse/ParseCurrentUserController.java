@@ -16,30 +16,30 @@ interface ParseCurrentUserController
     /**
      * Gets the persisted current ParseUser.
      *
-     * @param shouldAutoCreateUser
-     * @return
+     * @param shouldAutoCreateUser should auto create user
+     * @return task
      */
     Task<ParseUser> getAsync(boolean shouldAutoCreateUser);
 
     /**
      * Sets the persisted current ParseUser only if it's current or we're not synced with disk.
      *
-     * @param user
-     * @return
+     * @param user user
+     * @return task
      */
     Task<Void> setIfNeededAsync(ParseUser user);
 
     /**
      * Gets the session token of the persisted current ParseUser.
      *
-     * @return
+     * @return task
      */
     Task<String> getCurrentSessionTokenAsync();
 
     /**
      * Logs out the current ParseUser.
      *
-     * @return
+     * @return task
      */
     Task<Void> logOutAsync();
 }

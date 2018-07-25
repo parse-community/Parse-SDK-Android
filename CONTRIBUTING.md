@@ -1,9 +1,6 @@
 # Contributing to Parse SDK for Android
 We want to make contributing to this project as easy and transparent as possible.
 
-## Code of Conduct
-Facebook has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](https://code.facebook.com/codeofconduct) so that you can understand what actions will and will not be tolerated.
-
 ## Our Development Process
 Most of our work will be done in public directly on GitHub. There may be changes done through our internal source control, but it will be rare and only as needed.
 
@@ -18,12 +15,6 @@ We actively welcome your pull requests. When we get one, we'll run some Parse-sp
 3. If you've changed APIs, update the documentation.
 4. Ensure the test suite passes.
 5. Make sure your code lints.
-6. If you haven't already, complete the Contributor License Agreement ("CLA").
-
-### Contributor License Agreement ("CLA")
-In order to accept your pull request, we need you to submit a CLA. You only need to do this once to work on any of Facebook's open source projects.
-
-Complete your CLA here: <https://developers.facebook.com/opensource/cla>
 
 ## Bugs
 Although we try to keep developing on Parse easy, you still may run into some issues. Technical questions should be asked on [Stack Overflow][stack-overflow], and for everything else we'll be using GitHub issues.
@@ -44,14 +35,8 @@ Details are key. The more information you provide us the easier it'll be for us 
 * [Stacktrace or GTFO][stacktrace-or-gtfo]. In all honesty, full stacktraces with line numbers make a happy developer.
 * Anything else you find relevant.
 
-### Security Bugs
-Facebook has a [bounty program](https://www.facebook.com/whitehat/) for the safe disclosure of security bugs. In those cases, please go through the process outlined on that page and do not file a public issue.
-
-## Style Guide
-We're still working on providing a code style for your IDE and getting a linter on GitHub, but for now try to keep the following:
-
-* Most importantly, match the existing code style as much as possible.
-* Try to keep lines under 100 characters, if possible.
+## Code of Conduct
+This project adheres to the [Contributor Covenant Code of Conduct](https://github.com/parse-community/parse-server/blob/master/CODE_OF_CONDUCT.md). By participating, you are expected to honor this code.
 
 ## License
 By contributing to Parse Android SDK, you agree that your contributions will be licensed under its license.
@@ -60,6 +45,6 @@ By contributing to Parse Android SDK, you agree that your contributions will be 
  [bug-reports]: https://github.com/parse-community/parse-server
  [rest-api]: http://docs.parseplatform.org/rest/guide/
  [network-debugging-tool]: https://github.com/square/okhttp/wiki/Interceptors
- [parse-api-console]: http://blog.parse.com/announcements/introducing-the-parse-api-console/
+ [parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
  [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
- [tests-dir]: /Parse/src/test/java/com/parse
+ [tests-dir]: /parse/src/test/java/com/parse

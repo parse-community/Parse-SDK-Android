@@ -73,7 +73,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
         */
             Task.call(new Callable<Void>() {
                 @Override
-                public Void call() throws Exception {
+                public Void call() {
                     if (connectionLost) {
                         setConnected(false);
                     } else {
@@ -427,7 +427,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
             final Capture<Boolean> finished = new Capture<>(false);
             task.continueWith(new Continuation<T, Void>() {
                 @Override
-                public Void then(Task<T> task) throws Exception {
+                public Void then(Task<T> task) {
                     finished.set(true);
                     synchronized (lock) {
                         lock.notifyAll();
@@ -520,7 +520,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
                     } else {
                         commandTask = command.executeAsync(httpClient).continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
                             @Override
-                            public Task<JSONObject> then(Task<JSONObject> task) throws Exception {
+                            public Task<JSONObject> then(Task<JSONObject> task) {
                                 String localId = command.getLocalId();
                                 Exception error = task.getError();
                                 if (error != null) {

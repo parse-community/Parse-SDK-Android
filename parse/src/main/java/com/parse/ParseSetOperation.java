@@ -8,12 +8,11 @@
  */
 package com.parse;
 
+import android.os.Parcel;
+
 /**
  * An operation where a field is set to a given value regardless of its previous value.
  */
-
-import android.os.Parcel;
-
 class ParseSetOperation implements ParseFieldOperation {
     /* package */ final static String OP_NAME = "Set";
 

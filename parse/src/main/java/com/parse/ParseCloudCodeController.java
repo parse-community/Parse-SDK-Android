@@ -31,7 +31,7 @@ class ParseCloudCodeController {
                 sessionToken);
         return command.executeAsync(restClient).onSuccess(new Continuation<JSONObject, T>() {
             @Override
-            public T then(Task<JSONObject> task) throws Exception {
+            public T then(Task<JSONObject> task) {
                 @SuppressWarnings("unchecked")
                 T result = (T) convertCloudResponse(task.getResult());
                 return result;

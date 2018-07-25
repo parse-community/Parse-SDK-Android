@@ -32,13 +32,13 @@ class ParseConfigController {
         final ParseRESTCommand command = ParseRESTConfigCommand.fetchConfigCommand(sessionToken);
         return command.executeAsync(restClient).onSuccessTask(new Continuation<JSONObject, Task<ParseConfig>>() {
             @Override
-            public Task<ParseConfig> then(Task<JSONObject> task) throws Exception {
+            public Task<ParseConfig> then(Task<JSONObject> task) {
                 JSONObject result = task.getResult();
 
                 final ParseConfig config = ParseConfig.decode(result, ParseDecoder.get());
                 return currentConfigController.setCurrentConfigAsync(config).continueWith(new Continuation<Void, ParseConfig>() {
                     @Override
-                    public ParseConfig then(Task<Void> task) throws Exception {
+                    public ParseConfig then(Task<Void> task) {
                         return config;
                     }
                 });

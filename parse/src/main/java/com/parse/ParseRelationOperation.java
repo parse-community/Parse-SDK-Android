@@ -144,8 +144,7 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
     /*
      * Converts a set of objects into a JSONArray of Parse pointers.
      */
-    JSONArray convertSetToArray(Set<ParseObject> set, ParseEncoder objectEncoder)
-            throws JSONException {
+    JSONArray convertSetToArray(Set<ParseObject> set, ParseEncoder objectEncoder) {
         JSONArray array = new JSONArray();
         for (ParseObject obj : set) {
             array.put(objectEncoder.encode(obj));

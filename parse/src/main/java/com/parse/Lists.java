@@ -19,8 +19,7 @@ import java.util.AbstractList;
 import java.util.List;
 
 /**
- * Static utility methods pertaining to {@link List} instances. Also see this
- * class's counterparts {@link Sets}, {@link Maps} and {@link Queues}.
+ * Static utility methods pertaining to {@link List} instances.
  * <p>
  * <p>See the Guava User Guide article on <a href=
  * "https://github.com/google/guava/wiki/CollectionUtilitiesExplained#lists">

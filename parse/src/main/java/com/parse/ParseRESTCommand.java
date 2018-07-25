@@ -388,7 +388,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
      * command's result. If so, change the "create" operation to an "update", and add the objectId to
      * the command.
      */
-    private void maybeChangeServerOperation() throws JSONException {
+    private void maybeChangeServerOperation() {
         if (localId != null) {
             String objectId = getLocalIdManager().getObjectId(localId);
             if (objectId != null) {

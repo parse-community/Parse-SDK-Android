@@ -39,7 +39,7 @@ import java.util.Map;
     }
 
     /* package */ boolean isSubclassValid(String className, Class<? extends ParseObject> clazz) {
-        Constructor<? extends ParseObject> constructor = null;
+        Constructor<? extends ParseObject> constructor;
 
         synchronized (mutex) {
             constructor = registeredSubclasses.get(className);
@@ -56,7 +56,7 @@ import java.util.Map;
         }
 
         String className = getClassName(clazz);
-        Constructor<? extends ParseObject> previousConstructor = null;
+        Constructor<? extends ParseObject> previousConstructor;
 
         synchronized (mutex) {
             previousConstructor = registeredSubclasses.get(className);
@@ -111,7 +111,7 @@ import java.util.Map;
     }
 
     /* package */ ParseObject newInstance(String className) {
-        Constructor<? extends ParseObject> constructor = null;
+        Constructor<? extends ParseObject> constructor;
 
         synchronized (mutex) {
             constructor = registeredSubclasses.get(className);

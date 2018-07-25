@@ -26,13 +26,13 @@ public class EventuallyPinTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         ParseObject.registerSubclass(EventuallyPin.class);
         ParseObject.registerSubclass(ParsePin.class);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ParseObject.unregisterSubclass(EventuallyPin.class);
         ParseObject.unregisterSubclass(ParsePin.class);
         Parse.setLocalDatastore(null);

@@ -329,7 +329,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     //region testLazyLogin
 
     @Test
-    public void testLazyLogin() throws Exception {
+    public void testLazyLogin() {
         CachedCurrentUserController controller =
                 new CachedCurrentUserController(null);
 
@@ -390,7 +390,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     //region testClearFromMemory
 
     @Test
-    public void testClearFromMemory() throws Exception {
+    public void testClearFromMemory() {
         CachedCurrentUserController controller =
                 new CachedCurrentUserController(null);
         controller.currentUser = mock(ParseUser.class);
@@ -406,7 +406,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     //region testClearFromDisk()
 
     @Test
-    public void testClearFromDisk() throws Exception {
+    public void testClearFromDisk() {
         ParseObjectStore<ParseUser> store =
                 (ParseObjectStore<ParseUser>) mock(ParseObjectStore.class);
         when(store.deleteAsync()).thenReturn(Task.<Void>forResult(null));
@@ -465,7 +465,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     //region testIsCurrent
 
     @Test
-    public void testIsCurrent() throws Exception {
+    public void testIsCurrent() {
         CachedCurrentUserController controller =
                 new CachedCurrentUserController(null);
         ParseUser currentUser = new ParseUser();

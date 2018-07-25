@@ -83,7 +83,7 @@ public class ParseObjectCurrentCoderTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testEncodeFailureWithNotNullParseOperationSet() throws Exception {
+    public void testEncodeFailureWithNotNullParseOperationSet() {
         ParseObject.State state = new ParseObject.State.Builder("Test")
                 .build();
 

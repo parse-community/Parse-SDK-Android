@@ -35,7 +35,7 @@ class ParseRESTPushCommand extends ParseRESTCommand {
     }
 
     public static ParseRESTPushCommand sendPushCommand(ParseQuery.State<ParseInstallation> query,
-                                                       Set<String> targetChannels, String targetDeviceType, Long expirationTime,
+                                                       Set<String> targetChannels, Long expirationTime,
                                                        Long expirationInterval, Long pushTime, JSONObject payload, String sessionToken) {
         JSONObject parameters = new JSONObject();
         try {
@@ -46,10 +46,6 @@ class ParseRESTPushCommand extends ParseRESTCommand {
                 if (query != null) {
                     ParseQuery.QueryConstraints where = query.constraints();
                     whereJSON = (JSONObject) PointerEncoder.get().encode(where);
-                }
-                if (targetDeviceType != null) {
-                    whereJSON = new JSONObject();
-                    whereJSON.put(KEY_DEVICE_TYPE, targetDeviceType);
                 }
                 if (whereJSON == null) {
                     // If there are no conditions set, then push to everyone by specifying empty query conditions.

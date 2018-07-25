@@ -53,7 +53,7 @@ public class ParseCloudCodeControllerTest {
     //region testConstructor
 
     @Test
-    public void testConstructor() throws Exception {
+    public void testConstructor() {
         ParseHttpClient restClient = mock(ParseHttpClient.class);
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
@@ -65,7 +65,7 @@ public class ParseCloudCodeControllerTest {
     //region testConvertCloudResponse
 
     @Test
-    public void testConvertCloudResponseNullResponse() throws Exception {
+    public void testConvertCloudResponseNullResponse() {
         ParseHttpClient restClient = mock(ParseHttpClient.class);
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
@@ -111,7 +111,7 @@ public class ParseCloudCodeControllerTest {
     //region testCallFunctionInBackground
 
     @Test
-    public void testCallFunctionInBackgroundCommand() throws Exception {
+    public void testCallFunctionInBackgroundCommand() {
         // TODO(mengyan): Verify proper command is constructed
     }
 

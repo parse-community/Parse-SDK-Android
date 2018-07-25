@@ -117,7 +117,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testCopy() throws InterruptedException {
+    public void testCopy() {
         ParseQuery<ParseObject> query = new ParseQuery<>("TestObject");
         query.setUser(new ParseUser());
         query.whereEqualTo("foo", "bar");
@@ -153,7 +153,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testMultipleQueries() throws ParseException {
+    public void testMultipleQueries() {
         TestQueryController controller1 = new TestQueryController();
         TestQueryController controller2 = new TestQueryController();
 
@@ -206,7 +206,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testCountLimitReset() throws ParseException {
+    public void testCountLimitReset() {
         // Mock CacheQueryController
         ParseQueryController controller = mock(CacheQueryController.class);
         ParseCorePlugins.getInstance().registerQueryController(controller);
@@ -222,7 +222,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testCountWithCallbackLimitReset() throws ParseException {
+    public void testCountWithCallbackLimitReset() {
         // Mock CacheQueryController
         CacheQueryController controller = mock(CacheQueryController.class);
         ParseCorePlugins.getInstance().registerQueryController(controller);
@@ -246,7 +246,7 @@ public class ParseQueryTest {
     //region testConditions
 
     @Test
-    public void testCountLimit() throws ParseException {
+    public void testCountLimit() {
         CacheQueryController controller = mock(CacheQueryController.class);
         ParseCorePlugins.getInstance().registerQueryController(controller);
         when(controller.countAsync(
@@ -263,7 +263,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testCountWithCallbackLimit() throws ParseException {
+    public void testCountWithCallbackLimit() {
         CacheQueryController controller = mock(CacheQueryController.class);
         ParseCorePlugins.getInstance().registerQueryController(controller);
         when(controller.countAsync(
@@ -280,7 +280,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testIsRunning() throws ParseException {
+    public void testIsRunning() {
         TestQueryController controller = new TestQueryController();
         ParseCorePlugins.getInstance().registerQueryController(controller);
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
@@ -328,7 +328,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testCachePolicy() throws Exception {
+    public void testCachePolicy() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
 
@@ -336,7 +336,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testFromNetwork() throws Exception {
+    public void testFromNetwork() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         Parse.enableLocalDatastore(null);
         query.fromNetwork();
@@ -345,7 +345,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testFromPin() throws Exception {
+    public void testFromPin() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         Parse.enableLocalDatastore(null);
         query.fromPin();
@@ -357,7 +357,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testMaxCacheAge() throws Exception {
+    public void testMaxCacheAge() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         query.setMaxCacheAge(10);
 
@@ -365,7 +365,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereNotEqualTo() throws Exception {
+    public void testWhereNotEqualTo() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereNotEqualTo("key", "value");
@@ -374,7 +374,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereGreaterThan() throws Exception {
+    public void testWhereGreaterThan() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereGreaterThan("key", "value");
@@ -383,7 +383,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereLessThanOrEqualTo() throws Exception {
+    public void testWhereLessThanOrEqualTo() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereLessThanOrEqualTo("key", "value");
@@ -392,7 +392,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereGreaterThanOrEqualTo() throws Exception {
+    public void testWhereGreaterThanOrEqualTo() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereGreaterThanOrEqualTo("key", "value");
@@ -401,7 +401,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereContainedIn() throws Exception {
+    public void testWhereContainedIn() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         List<String> values = Arrays.asList("value", "valueAgain");
 
@@ -411,7 +411,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereFullText() throws Exception {
+    public void testWhereFullText() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         String text = "TestString";
         query.whereFullText("key", text);
@@ -427,7 +427,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereContainsAll() throws Exception {
+    public void testWhereContainsAll() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         List<String> values = Arrays.asList("value", "valueAgain");
 
@@ -437,7 +437,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereContainsAllStartingWith() throws Exception {
+    public void testWhereContainsAllStartingWith() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         String value = "value";
         String valueAgain = "valueAgain";
@@ -456,7 +456,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereNotContainedIn() throws Exception {
+    public void testWhereNotContainedIn() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         List<String> values = Arrays.asList("value", "valueAgain");
 
@@ -466,7 +466,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereMatches() throws Exception {
+    public void testWhereMatches() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereMatches("key", "regex");
@@ -475,7 +475,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereMatchesWithModifiers() throws Exception {
+    public void testWhereMatchesWithModifiers() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereMatches("key", "regex", "modifiers");
@@ -485,7 +485,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereStartsWith() throws Exception {
+    public void testWhereStartsWith() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         String value = "prefix";
@@ -495,7 +495,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereEndsWith() throws Exception {
+    public void testWhereEndsWith() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         String value = "suffix";
@@ -505,7 +505,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereExists() throws Exception {
+    public void testWhereExists() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereExists("key");
@@ -514,7 +514,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereDoesNotExist() throws Exception {
+    public void testWhereDoesNotExist() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.whereDoesNotExist("key");
@@ -523,7 +523,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereContains() throws Exception {
+    public void testWhereContains() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         String value = "value";
@@ -533,7 +533,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereMatchesQuery() throws Exception {
+    public void testWhereMatchesQuery() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseQuery<ParseObject> conditionQuery = new ParseQuery<>("Test");
         conditionQuery.whereExists("keyAgain");
@@ -544,7 +544,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereDoesNotMatchQuery() throws Exception {
+    public void testWhereDoesNotMatchQuery() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseQuery<ParseObject> conditionQuery = new ParseQuery<>("Test");
         conditionQuery.whereExists("keyAgain");
@@ -555,7 +555,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereMatchesKeyInQuery() throws Exception {
+    public void testWhereMatchesKeyInQuery() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseQuery<ParseObject> conditionQuery = new ParseQuery<>("Test");
         conditionQuery.whereExists("keyAgain");
@@ -569,7 +569,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereDoesNotMatchKeyInQuery() throws Exception {
+    public void testWhereDoesNotMatchKeyInQuery() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseQuery<ParseObject> conditionQuery = new ParseQuery<>("Test");
         conditionQuery.whereExists("keyAgain");
@@ -583,7 +583,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereNear() throws Exception {
+    public void testWhereNear() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
 
@@ -593,7 +593,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereWithinGeoBox() throws Exception {
+    public void testWhereWithinGeoBox() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
         ParseGeoPoint pointAgain = new ParseGeoPoint(20, 20);
@@ -613,7 +613,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereWithinPolygon() throws Exception {
+    public void testWhereWithinPolygon() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
         ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
@@ -635,7 +635,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereWithinPolygonWithPolygon() throws Exception {
+    public void testWhereWithinPolygonWithPolygon() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point1 = new ParseGeoPoint(10, 10);
         ParseGeoPoint point2 = new ParseGeoPoint(20, 20);
@@ -657,7 +657,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWherePolygonContains() throws Exception {
+    public void testWherePolygonContains() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
 
@@ -674,7 +674,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereWithinRadians() throws Exception {
+    public void testWhereWithinRadians() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
 
@@ -687,7 +687,7 @@ public class ParseQueryTest {
     // TODO(mengyan): Add testOr illegal cases unit test
 
     @Test
-    public void testWhereWithinMiles() throws Exception {
+    public void testWhereWithinMiles() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
 
@@ -698,7 +698,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testWhereWithinKilometers() throws Exception {
+    public void testWhereWithinKilometers() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         ParseGeoPoint point = new ParseGeoPoint(10, 10);
 
@@ -709,7 +709,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testClear() throws Exception {
+    public void testClear() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         query.whereEqualTo("key", "value");
         query.whereEqualTo("otherKey", "otherValue");
@@ -721,7 +721,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testOr() throws Exception {
+    public void testOr() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
         query.whereEqualTo("key", "value");
         ParseQuery<ParseObject> queryAgain = new ParseQuery<>("Test");
@@ -747,7 +747,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testInclude() throws Exception {
+    public void testInclude() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.include("key");
@@ -759,7 +759,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testSelectKeys() throws Exception {
+    public void testSelectKeys() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.selectKeys(Arrays.asList("key", "keyAgain"));
@@ -772,7 +772,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testAddAscendingOrder() throws Exception {
+    public void testAddAscendingOrder() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.addAscendingOrder("key");
@@ -784,7 +784,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testAddDescendingOrder() throws Exception {
+    public void testAddDescendingOrder() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.addDescendingOrder("key");
@@ -796,7 +796,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testOrderByAscending() throws Exception {
+    public void testOrderByAscending() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.orderByAscending("key");
@@ -809,7 +809,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testOrderByDescending() throws Exception {
+    public void testOrderByDescending() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.orderByDescending("key");
@@ -822,7 +822,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testLimit() throws Exception {
+    public void testLimit() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.setLimit(5);
@@ -831,7 +831,7 @@ public class ParseQueryTest {
     }
 
     @Test
-    public void testSkip() throws Exception {
+    public void testSkip() {
         ParseQuery<ParseObject> query = new ParseQuery<>("Test");
 
         query.setSkip(5);
@@ -856,7 +856,7 @@ public class ParseQueryTest {
         public Task<Void> await(final Task<Void> task) {
             toAwait = toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> ignored) throws Exception {
+                public Task<Void> then(Task<Void> ignored) {
                     return task;
                 }
             });
@@ -869,14 +869,14 @@ public class ParseQueryTest {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
             cancellationToken.continueWith(new Continuation<Void, Void>() {
                 @Override
-                public Void then(Task<Void> task) throws Exception {
+                public Void then(Task<Void> task) {
                     cancelled.set(true);
                     return null;
                 }
             });
             return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     if (cancelled.get()) {
                         return Task.cancelled();
                     }
@@ -891,14 +891,14 @@ public class ParseQueryTest {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
             cancellationToken.continueWith(new Continuation<Void, Void>() {
                 @Override
-                public Void then(Task<Void> task) throws Exception {
+                public Void then(Task<Void> task) {
                     cancelled.set(true);
                     return null;
                 }
             });
             return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     if (cancelled.get()) {
                         return Task.cancelled();
                     }
@@ -913,14 +913,14 @@ public class ParseQueryTest {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
             cancellationToken.continueWith(new Continuation<Void, Void>() {
                 @Override
-                public Void then(Task<Void> task) throws Exception {
+                public Void then(Task<Void> task) {
                     cancelled.set(true);
                     return null;
                 }
             });
             return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     if (cancelled.get()) {
                         return Task.cancelled();
                     }

@@ -104,7 +104,7 @@ public class ParseEncoderTest {
 
     @Test
     public void testParsePolygon() throws JSONException {
-        List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
+        List<ParseGeoPoint> points = new ArrayList<>();
         points.add(new ParseGeoPoint(0, 0));
         points.add(new ParseGeoPoint(0, 1));
         points.add(new ParseGeoPoint(1, 1));
@@ -118,7 +118,7 @@ public class ParseEncoderTest {
     }
 
     @Test
-    public void testParseACL() throws JSONException {
+    public void testParseACL() {
         ParseACL parseACL = new ParseACL();
         JSONObject aclJSON = (JSONObject) testClassObject.encode(parseACL);
         assertNotNull(aclJSON);
@@ -177,13 +177,13 @@ public class ParseEncoderTest {
     }
 
     @Test
-    public void testNull() throws JSONException {
+    public void testNull() {
         Object object = testClassObject.encode(null);
         assertEquals(object, JSONObject.NULL);
     }
 
     @Test
-    public void testPrimitives() throws JSONException {
+    public void testPrimitives() {
         String encodedStr = (String) testClassObject.encode("String");
         assertEquals(encodedStr, "String");
         int encodedInteger = (Integer) testClassObject.encode(5);
@@ -196,7 +196,7 @@ public class ParseEncoderTest {
     }
 
     @Test
-    public void testIllegalArgument() throws JSONException {
+    public void testIllegalArgument() {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("invalid type for ParseObject: "
                 + ParseDecoder.class.toString());

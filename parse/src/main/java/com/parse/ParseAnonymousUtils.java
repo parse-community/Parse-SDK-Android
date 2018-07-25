@@ -35,6 +35,7 @@ import bolts.Task;
  * </ul>
  * </ul>
  */
+@SuppressWarnings("unused")
 public final class ParseAnonymousUtils {
     /* package */ static final String AUTH_TYPE = "anonymous";
 

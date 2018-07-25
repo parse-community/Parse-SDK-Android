@@ -87,7 +87,7 @@ public class ParseRelationTest {
     //region testParcelable
 
     @Test
-    public void testParcelable() throws Exception {
+    public void testParcelable() {
         ParseFieldOperations.registerDefaultDecoders();
         ParseRelation<ParseObject> relation = new ParseRelation<>("Test");
         ParseObject parent = new ParseObject("Parent");
@@ -117,7 +117,7 @@ public class ParseRelationTest {
     //region testEnsureParentAndKey
 
     @Test
-    public void testEnsureParentAndKey() throws Exception {
+    public void testEnsureParentAndKey() {
         ParseRelation relation = new ParseRelation("Test");
 
         ParseObject parent = mock(ParseObject.class);
@@ -128,7 +128,7 @@ public class ParseRelationTest {
     }
 
     @Test
-    public void testEnsureParentAndKeyWithDifferentParent() throws Exception {
+    public void testEnsureParentAndKeyWithDifferentParent() {
         ParseRelation relation = new ParseRelation(mock(ParseObject.class), "key");
 
         thrown.expect(IllegalStateException.class);
@@ -139,7 +139,7 @@ public class ParseRelationTest {
     }
 
     @Test
-    public void testEnsureParentAndKeyWithDifferentKey() throws Exception {
+    public void testEnsureParentAndKeyWithDifferentKey() {
         ParseObject parent = mock(ParseObject.class);
         ParseRelation relation = new ParseRelation(parent, "key");
 
@@ -155,7 +155,7 @@ public class ParseRelationTest {
     //region testAdd
 
     @Test
-    public void testAdd() throws Exception {
+    public void testAdd() {
         ParseObject parent = new ParseObject("Parent");
         ParseRelation relation = new ParseRelation(parent, "key");
 
@@ -178,7 +178,7 @@ public class ParseRelationTest {
     //region testRemove
 
     @Test
-    public void testRemove() throws Exception {
+    public void testRemove() {
         ParseObject parent = new ParseObject("Parent");
         ParseRelation relation = new ParseRelation(parent, "key");
 
@@ -202,7 +202,7 @@ public class ParseRelationTest {
     //region testGetQuery
 
     @Test
-    public void testGetQueryWithNoTargetClass() throws Exception {
+    public void testGetQueryWithNoTargetClass() {
         ParseObject parent = new ParseObject("Parent");
         ParseRelation relation = new ParseRelation(parent, "key");
 
@@ -221,7 +221,7 @@ public class ParseRelationTest {
     }
 
     @Test
-    public void testGetQueryWithTargetClass() throws Exception {
+    public void testGetQueryWithTargetClass() {
         ParseObject parent = new ParseObject("Parent");
         ParseRelation relation = new ParseRelation(parent, "key");
         relation.setTargetClass("targetClass");

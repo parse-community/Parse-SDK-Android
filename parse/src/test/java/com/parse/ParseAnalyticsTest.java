@@ -76,7 +76,7 @@ public class ParseAnalyticsTest {
     // No need to test ParseAnalytics since it has no instance fields and all methods are static.
 
     @Test
-    public void testGetAnalyticsController() throws Exception {
+    public void testGetAnalyticsController() {
         assertSame(controller, ParseAnalytics.getAnalyticsController());
     }
 
@@ -128,7 +128,7 @@ public class ParseAnalyticsTest {
     }
 
     @Test
-    public void testTrackEventInBackgroundNullCallback() throws Exception {
+    public void testTrackEventInBackgroundNullCallback() {
         Map<String, String> dimensions = new HashMap<>();
         ParseAnalytics.trackEventInBackground("test", dimensions, null);
 
@@ -242,7 +242,7 @@ public class ParseAnalyticsTest {
     //region testGetPushHashFromIntent
 
     @Test
-    public void testGetPushHashFromIntentNullIntent() throws Exception {
+    public void testGetPushHashFromIntentNullIntent() {
         String pushHash = ParseAnalytics.getPushHashFromIntent(null);
 
         assertEquals(null, pushHash);
@@ -277,7 +277,7 @@ public class ParseAnalyticsTest {
     }
 
     @Test
-    public void testGetPushHashFromIntentWrongPushHashIntent() throws Exception {
+    public void testGetPushHashFromIntentWrongPushHashIntent() {
         Intent intent = new Intent();
         Bundle bundle = new Bundle();
         bundle.putString(ParsePushBroadcastReceiver.KEY_PUSH_DATA, "error_data");

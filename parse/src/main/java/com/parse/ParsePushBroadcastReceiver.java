@@ -76,6 +76,7 @@ import java.util.Random;
  * {@link #getActivity(Context, Intent)}.
  */
 // Hack note: Javadoc smashes the last two paragraphs together without the <p> tags.
+@SuppressWarnings("unused")
 public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     /**
      * The name of the Intent extra which contains a channel used to route this notification.
@@ -118,16 +119,18 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String intentAction = intent.getAction();
-        switch (intentAction) {
-            case ACTION_PUSH_RECEIVE:
-                onPushReceive(context, intent);
-                break;
-            case ACTION_PUSH_DELETE:
-                onPushDismiss(context, intent);
-                break;
-            case ACTION_PUSH_OPEN:
-                onPushOpen(context, intent);
-                break;
+        if (intentAction != null) {
+            switch (intentAction) {
+                case ACTION_PUSH_RECEIVE:
+                    onPushReceive(context, intent);
+                    break;
+                case ACTION_PUSH_DELETE:
+                    onPushDismiss(context, intent);
+                    break;
+                case ACTION_PUSH_OPEN:
+                    onPushOpen(context, intent);
+                    break;
+            }
         }
     }
 

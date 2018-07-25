@@ -36,6 +36,7 @@ class ParseHttpClient {
 
     private OkHttpClient okHttpClient;
     private boolean hasExecuted;
+
     ParseHttpClient(@Nullable OkHttpClient.Builder builder) {
 
         if (builder == null) {
@@ -72,8 +73,7 @@ class ParseHttpClient {
         return getResponse(okHttpResponse);
     }
 
-    ParseHttpResponse getResponse(Response okHttpResponse)
-            throws IOException {
+    ParseHttpResponse getResponse(Response okHttpResponse) {
         // Status code
         int statusCode = okHttpResponse.code();
 
@@ -109,7 +109,7 @@ class ParseHttpClient {
                 .build();
     }
 
-    Request getRequest(ParseHttpRequest parseRequest) throws IOException {
+    Request getRequest(ParseHttpRequest parseRequest) {
         Request.Builder okHttpRequestBuilder = new Request.Builder();
         ParseHttpRequest.Method method = parseRequest.getMethod();
         // Set method
@@ -168,7 +168,7 @@ class ParseHttpClient {
         }
 
         @Override
-        public long contentLength() throws IOException {
+        public long contentLength() {
             return parseBody.getContentLength();
         }
 

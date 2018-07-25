@@ -99,7 +99,7 @@ class OfflineStore {
             uuidToObjectMap.put(newUUID, object);
             fetchedObjects.put(object, tcs.getTask().onSuccess(new Continuation<String, ParseObject>() {
                 @Override
-                public ParseObject then(Task<String> task) throws Exception {
+                public ParseObject then(Task<String> task) {
                     return object;
                 }
             }));
@@ -116,7 +116,7 @@ class OfflineStore {
         db.insertOrThrowAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, values).continueWith(
                 new Continuation<Void, Void>() {
                     @Override
-                    public Void then(Task<Void> task) throws Exception {
+                    public Void then(Task<Void> task) {
                         // This will signal that the UUID does represent a row in the database.
                         tcs.setResult(newUUID);
                         return null;
@@ -157,7 +157,7 @@ class OfflineStore {
         return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args).onSuccess(
                 new Continuation<Cursor, T>() {
                     @Override
-                    public T then(Task<Cursor> task) throws Exception {
+                    public T then(Task<Cursor> task) {
                         Cursor cursor = task.getResult();
                         cursor.moveToFirst();
                         if (cursor.isAfterLast()) {
@@ -257,7 +257,7 @@ class OfflineStore {
 
             queryTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
                 @Override
-                public Task<Cursor> then(Task<String> task) throws Exception {
+                public Task<Cursor> then(Task<String> task) {
                     String uuid = task.getResult();
 
                     String table = OfflineSQLiteOpenHelper.TABLE_OBJECTS + " A " +
@@ -278,7 +278,7 @@ class OfflineStore {
 
         return queryTask.onSuccessTask(new Continuation<Cursor, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Cursor> task) throws Exception {
+            public Task<Void> then(Task<Cursor> task) {
                 Cursor cursor = task.getResult();
                 List<String> uuids = new ArrayList<>();
                 for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
@@ -295,18 +295,18 @@ class OfflineStore {
 
                     checkedAllObjects = checkedAllObjects.onSuccessTask(new Continuation<Void, Task<T>>() {
                         @Override
-                        public Task<T> then(Task<Void> task) throws Exception {
+                        public Task<T> then(Task<Void> task) {
                             return getPointerAsync(uuid, db);
                         }
                     }).onSuccessTask(new Continuation<T, Task<T>>() {
                         @Override
-                        public Task<T> then(Task<T> task) throws Exception {
+                        public Task<T> then(Task<T> task) {
                             object.set(task.getResult());
                             return fetchLocallyAsync(object.get(), db);
                         }
                     }).onSuccessTask(new Continuation<T, Task<Boolean>>() {
                         @Override
-                        public Task<Boolean> then(Task<T> task) throws Exception {
+                        public Task<Boolean> then(Task<T> task) {
                             if (!object.get().isDataAvailable()) {
                                 return Task.forResult(false);
                             }
@@ -350,7 +350,7 @@ class OfflineStore {
                 for (final T object : trimmedResults) {
                     fetchedIncludesTask = fetchedIncludesTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
                         @Override
-                        public Task<Void> then(Task<Void> task) throws Exception {
+                        public Task<Void> then(Task<Void> task) {
                             return OfflineQueryLogic.fetchIncludesAsync(OfflineStore.this, object, query, db);
                         }
                     });
@@ -359,7 +359,7 @@ class OfflineStore {
                 final List<T> finalTrimmedResults = trimmedResults;
                 return fetchedIncludesTask.onSuccess(new Continuation<Void, List<T>>() {
                     @Override
-                    public List<T> then(Task<Void> task) throws Exception {
+                    public List<T> then(Task<Void> task) {
                         return finalTrimmedResults;
                     }
                 });
@@ -431,14 +431,14 @@ class OfflineStore {
                 final Capture<String> uuid = new Capture<>();
                 jsonStringTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
                     @Override
-                    public Task<Cursor> then(Task<String> task) throws Exception {
+                    public Task<Cursor> then(Task<String> task) {
                         uuid.set(task.getResult());
                         String[] args = {uuid.get()};
                         return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args);
                     }
                 }).onSuccess(new Continuation<Cursor, String>() {
                     @Override
-                    public String then(Task<Cursor> task) throws Exception {
+                    public String then(Task<Cursor> task) {
                         Cursor cursor = task.getResult();
                         cursor.moveToFirst();
                         if (cursor.isAfterLast()) {
@@ -518,7 +518,7 @@ class OfflineStore {
 
         return jsonStringTask.onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String jsonString = task.getResult();
                 if (jsonString == null) {
                     /*
@@ -558,7 +558,7 @@ class OfflineStore {
 
                 return Task.whenAll(offlineObjects.values()).onSuccess(new Continuation<Void, Void>() {
                     @Override
-                    public Void then(Task<Void> task) throws Exception {
+                    public Void then(Task<Void> task) {
                         object.mergeREST(object.getState(), json, new OfflineDecoder(offlineObjects));
                         return null;
                     }
@@ -566,7 +566,7 @@ class OfflineStore {
             }
         }).continueWithTask(new Continuation<Void, Task<T>>() {
             @Override
-            public Task<T> then(Task<Void> task) throws Exception {
+            public Task<T> then(Task<Void> task) {
                 if (task.isCancelled()) {
                     tcs.setCancelled();
                 } else if (task.isFaulted()) {
@@ -615,14 +615,14 @@ class OfflineStore {
         // Make sure we have a UUID for the object to be saved.
         return getOrCreateUUIDAsync(object, db).onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String uuid = task.getResult();
                 uuidCapture.set(uuid);
                 return updateDataForObjectAsync(uuid, object, db);
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 final ContentValues values = new ContentValues();
                 values.put(OfflineSQLiteOpenHelper.KEY_KEY, key);
                 values.put(OfflineSQLiteOpenHelper.KEY_UUID, uuidCapture.get());
@@ -686,12 +686,12 @@ class OfflineStore {
 
         return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<String>>() {
             @Override
-            public Task<String> then(Task<Void> task) throws Exception {
+            public Task<String> then(Task<Void> task) {
                 return objectToUuidMap.get(object);
             }
         }).onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String uuid = task.getResult();
                 if (uuid == null) {
                     // The root object was never stored in the offline store, so nothing to unpin.
@@ -704,12 +704,12 @@ class OfflineStore {
             }
         }).onSuccessTask(new Continuation<Void, Task<String>>() {
             @Override
-            public Task<String> then(Task<Void> task) throws Exception {
+            public Task<String> then(Task<Void> task) {
                 return getOrCreateUUIDAsync(object, db);
             }
         }).onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String uuid = task.getResult();
 
                 // Call saveLocallyAsync for each of them individually.
@@ -731,7 +731,7 @@ class OfflineStore {
         }
         return uuidTask.continueWithTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 final String uuid = task.getResult();
                 if (uuid == null) {
                     // The root object was never stored in the offline store, so nothing to unpin.
@@ -747,7 +747,7 @@ class OfflineStore {
         // A continueWithTask that ends with "return task" is essentially a try-finally.
         return Task.forResult((Void) null).continueWithTask(new Continuation<Void, Task<Cursor>>() {
             @Override
-            public Task<Cursor> then(Task<Void> task) throws Exception {
+            public Task<Cursor> then(Task<Void> task) {
                 // Fetch all uuids from Dependencies for key=? grouped by uuid having a count of 1
                 String sql = "SELECT " + OfflineSQLiteOpenHelper.KEY_UUID + " FROM " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES +
                         " WHERE " + OfflineSQLiteOpenHelper.KEY_KEY + "=? AND " + OfflineSQLiteOpenHelper.KEY_UUID + " IN (" +
@@ -760,7 +760,7 @@ class OfflineStore {
             }
         }).onSuccessTask(new Continuation<Cursor, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Cursor> task) throws Exception {
+            public Task<Void> then(Task<Cursor> task) {
                 // DELETE FROM Objects
 
                 Cursor cursor = task.getResult();
@@ -773,7 +773,7 @@ class OfflineStore {
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 // DELETE FROM Dependencies
                 String where = OfflineSQLiteOpenHelper.KEY_KEY + "=?";
                 String[] args = {key};
@@ -781,7 +781,7 @@ class OfflineStore {
             }
         }).onSuccess(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 synchronized (lock) {
                     // Remove uuids from memory
                     for (String uuid : uuidsToDelete) {
@@ -807,7 +807,7 @@ class OfflineStore {
         if (uuids.size() > MAX_SQL_VARIABLES) {
             return deleteObjects(uuids.subList(0, MAX_SQL_VARIABLES), db).onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return deleteObjects(uuids.subList(MAX_SQL_VARIABLES, uuids.size()), db);
                 }
             });
@@ -840,7 +840,7 @@ class OfflineStore {
         }
         return fetched.continueWithTask(new Continuation<ParseObject, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseObject> task) throws Exception {
+            public Task<Void> then(Task<ParseObject> task) {
                 if (task.isFaulted()) {
                     // Catch CACHE_MISS
                     //noinspection ThrowableResultOfMethodCallIgnored
@@ -853,20 +853,20 @@ class OfflineStore {
 
                 return helper.getWritableDatabaseAsync().continueWithTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<ParseSQLiteDatabase> task) throws Exception {
+                    public Task<Void> then(Task<ParseSQLiteDatabase> task) {
                         final ParseSQLiteDatabase db = task.getResult();
                         return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 return updateDataForObjectAsync(object, db).onSuccessTask(new Continuation<Void, Task<Void>>() {
                                     @Override
-                                    public Task<Void> then(Task<Void> task) throws Exception {
+                                    public Task<Void> then(Task<Void> task) {
                                         return db.setTransactionSuccessfulAsync();
                                     }
                                 }).continueWithTask(new Continuation<Void, Task<Void>>() {
                                     // } finally {
                                     @Override
-                                    public Task<Void> then(Task<Void> task) throws Exception {
+                                    public Task<Void> then(Task<Void> task) {
                                         db.endTransactionAsync();
                                         db.closeAsync();
                                         return task;
@@ -894,7 +894,7 @@ class OfflineStore {
         }
         return uuidTask.onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String uuid = task.getResult();
                 return updateDataForObjectAsync(uuid, object, db);
             }
@@ -934,20 +934,20 @@ class OfflineStore {
     /* package */ Task<Void> deleteDataForObjectAsync(final ParseObject object) {
         return helper.getWritableDatabaseAsync().continueWithTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseSQLiteDatabase> task) throws Exception {
+            public Task<Void> then(Task<ParseSQLiteDatabase> task) {
                 final ParseSQLiteDatabase db = task.getResult();
                 return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return deleteDataForObjectAsync(object, db).onSuccessTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 return db.setTransactionSuccessfulAsync();
                             }
                         }).continueWithTask(new Continuation<Void, Task<Void>>() {
                             // } finally {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 db.endTransactionAsync();
                                 db.closeAsync();
                                 return task;
@@ -973,7 +973,7 @@ class OfflineStore {
         }
         uuidTask = uuidTask.onSuccessTask(new Continuation<String, Task<String>>() {
             @Override
-            public Task<String> then(Task<String> task) throws Exception {
+            public Task<String> then(Task<String> task) {
                 uuid.set(task.getResult());
                 return task;
             }
@@ -982,7 +982,7 @@ class OfflineStore {
         // If the object was the root of a pin, unpin it.
         Task<Void> unpinTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
             @Override
-            public Task<Cursor> then(Task<String> task) throws Exception {
+            public Task<Cursor> then(Task<String> task) {
                 // Find all the roots for this object.
                 String[] select = {OfflineSQLiteOpenHelper.KEY_KEY};
                 String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
@@ -991,7 +991,7 @@ class OfflineStore {
             }
         }).onSuccessTask(new Continuation<Cursor, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Cursor> task) throws Exception {
+            public Task<Void> then(Task<Cursor> task) {
                 // Try to unpin this object from the pin label if it's a root of the ParsePin.
                 Cursor cursor = task.getResult();
                 List<String> uuids = new ArrayList<>();
@@ -1004,13 +1004,13 @@ class OfflineStore {
                 for (final String uuid : uuids) {
                     Task<Void> unpinTask = getPointerAsync(uuid, db).onSuccessTask(new Continuation<ParseObject, Task<ParsePin>>() {
                         @Override
-                        public Task<ParsePin> then(Task<ParseObject> task) throws Exception {
+                        public Task<ParsePin> then(Task<ParseObject> task) {
                             ParsePin pin = (ParsePin) task.getResult();
                             return fetchLocallyAsync(pin, db);
                         }
                     }).continueWithTask(new Continuation<ParsePin, Task<Void>>() {
                         @Override
-                        public Task<Void> then(Task<ParsePin> task) throws Exception {
+                        public Task<Void> then(Task<ParsePin> task) {
                             ParsePin pin = task.getResult();
 
                             List<ParseObject> modified = pin.getObjects();
@@ -1037,21 +1037,21 @@ class OfflineStore {
         // Delete the object from the Local Datastore in case it wasn't the root of a pin.
         return unpinTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
                 String[] args = {uuid.get()};
                 return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, where, args);
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
                 String[] args = {uuid.get()};
                 return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, where, args);
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 synchronized (lock) {
                     // Clean up
                     //TODO (grantland): we should probably clean up uuidToObjectMap and objectToUuidMap, but
@@ -1073,7 +1073,7 @@ class OfflineStore {
          */
         return findAsync(query, null, null, db).onSuccess(new Continuation<List<ParsePin>, ParsePin>() {
             @Override
-            public ParsePin then(Task<List<ParsePin>> task) throws Exception {
+            public ParsePin then(Task<List<ParsePin>> task) {
                 ParsePin pin = null;
                 if (task.getResult() != null && task.getResult().size() > 0) {
                     pin = task.getResult().get(0);
@@ -1115,7 +1115,7 @@ class OfflineStore {
 
         return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParsePin> task) throws Exception {
+            public Task<Void> then(Task<ParsePin> task) {
                 ParsePin pin = task.getResult();
 
                 //TODO (grantland): change to use relations. currently the related PO are only getting saved
@@ -1165,7 +1165,7 @@ class OfflineStore {
 
         return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParsePin> task) throws Exception {
+            public Task<Void> then(Task<ParsePin> task) {
                 ParsePin pin = task.getResult();
 
                 //TODO (grantland): change to use relations. currently the related PO are only getting saved
@@ -1203,7 +1203,7 @@ class OfflineStore {
     private Task<Void> unpinAllObjectsAsync(final String name, final ParseSQLiteDatabase db) {
         return getParsePin(name, db).continueWithTask(new Continuation<ParsePin, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParsePin> task) throws Exception {
+            public Task<Void> then(Task<ParsePin> task) {
                 if (task.isFaulted()) {
                     return task.makeVoid();
                 }
@@ -1238,7 +1238,7 @@ class OfflineStore {
         }
         return task.onSuccessTask(new Continuation<ParsePin, Task<List<T>>>() {
             @Override
-            public Task<List<T>> then(Task<ParsePin> task) throws Exception {
+            public Task<List<T>> then(Task<ParsePin> task) {
                 ParsePin pin = task.getResult();
                 return findAsync(state, user, pin, false, db);
             }
@@ -1270,11 +1270,11 @@ class OfflineStore {
         }
         return task.onSuccessTask(new Continuation<ParsePin, Task<Integer>>() {
             @Override
-            public Task<Integer> then(Task<ParsePin> task) throws Exception {
+            public Task<Integer> then(Task<ParsePin> task) {
                 ParsePin pin = task.getResult();
                 return findAsync(state, user, pin, true, db).onSuccess(new Continuation<List<T>, Integer>() {
                     @Override
-                    public Integer then(Task<List<T>> task) throws Exception {
+                    public Integer then(Task<List<T>> task) {
                         return task.getResult().size();
                     }
                 });
@@ -1337,7 +1337,7 @@ class OfflineStore {
             if (oldObjectId.equals(newObjectId)) {
                 return;
             }
-            /**
+            /*
              * Special case for re-saving installation if it was deleted on the server
              * @see ParseInstallation#saveAsync(String, Task)
              */
@@ -1374,11 +1374,11 @@ class OfflineStore {
     private <T> Task<T> runWithManagedConnection(final SQLiteDatabaseCallable<Task<T>> callable) {
         return helper.getWritableDatabaseAsync().onSuccessTask(new Continuation<ParseSQLiteDatabase, Task<T>>() {
             @Override
-            public Task<T> then(Task<ParseSQLiteDatabase> task) throws Exception {
+            public Task<T> then(Task<ParseSQLiteDatabase> task) {
                 final ParseSQLiteDatabase db = task.getResult();
                 return callable.call(db).continueWithTask(new Continuation<T, Task<T>>() {
                     @Override
-                    public Task<T> then(Task<T> task) throws Exception {
+                    public Task<T> then(Task<T> task) {
                         db.closeAsync();
                         return task;
                     }
@@ -1393,19 +1393,19 @@ class OfflineStore {
     private Task<Void> runWithManagedTransaction(final SQLiteDatabaseCallable<Task<Void>> callable) {
         return helper.getWritableDatabaseAsync().onSuccessTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseSQLiteDatabase> task) throws Exception {
+            public Task<Void> then(Task<ParseSQLiteDatabase> task) {
                 final ParseSQLiteDatabase db = task.getResult();
                 return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         return callable.call(db).onSuccessTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 return db.setTransactionSuccessfulAsync();
                             }
                         }).continueWithTask(new Continuation<Void, Task<Void>>() {
                             @Override
-                            public Task<Void> then(Task<Void> task) throws Exception {
+                            public Task<Void> then(Task<Void> task) {
                                 db.endTransactionAsync();
                                 db.closeAsync();
                                 return task;
@@ -1502,7 +1502,7 @@ class OfflineStore {
         public Task<Void> whenFinished() {
             return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> ignore) throws Exception {
+                public Task<Void> then(Task<Void> ignore) {
                     synchronized (tasksLock) {
                         // It might be better to return an aggregate error here.
                         for (Task<Void> task : tasks) {

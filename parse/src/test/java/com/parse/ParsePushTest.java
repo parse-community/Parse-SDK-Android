@@ -139,7 +139,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetExpirationTime() throws Exception {
+    public void testSetExpirationTime() {
         ParsePush push = new ParsePush();
         push.setExpirationTime(10000);
 
@@ -158,7 +158,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetExpirationTimeInterval() throws Exception {
+    public void testSetExpirationTimeInterval() {
         ParsePush push = new ParsePush();
         push.setExpirationTimeInterval(10000);
 
@@ -211,7 +211,7 @@ public class ParsePushTest {
     // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
     // builder test cases should be in ParsePushState test
     @Test
-    public void testSetPushTime() throws Exception {
+    public void testSetPushTime() {
         ParsePush push = new ParsePush();
         long time = System.currentTimeMillis() / 1000 + 1000;
         push.setPushTime(time);
@@ -222,44 +222,6 @@ public class ParsePushTest {
         push.setMessage("message");
         ParsePush.State state = push.builder.build();
         assertEquals(time, state.pushTime().longValue());
-    }
-
-    //endregion
-
-    //region testSetPushToIOS
-
-    // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
-    // builder test cases should be in ParsePushState test
-    @Test
-    public void testSetPushToIOS() throws Exception {
-        ParsePush push = new ParsePush();
-        push.setPushToIOS(true);
-
-        // Right now it is hard for us to test a builder, so we build a state to test the builder is
-        // set correctly
-        // We have to set message otherwise build() will throw an exception
-        push.setMessage("message");
-        ParsePush.State state = push.builder.build();
-        assertTrue(state.pushToIOS());
-    }
-
-    //endregion
-
-    //region testSetPushToAndroid
-
-    // We only test a basic case here to make sure logic in ParsePush is correct, more comprehensive
-    // builder test cases should be in ParsePushState test
-    @Test
-    public void testSetPushToAndroid() throws Exception {
-        ParsePush push = new ParsePush();
-        push.setPushToAndroid(true);
-
-        // Right now it is hard for us to test a builder, so we build a state to test the builder is
-        // set correctly
-        // We have to set message otherwise build() will throw an exception
-        push.setMessage("message");
-        ParsePush.State state = push.builder.build();
-        assertTrue(state.pushToAndroid());
     }
 
     //endregion
@@ -474,7 +436,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         ParseTaskUtils.wait(push.sendInBackground());
 
@@ -482,7 +443,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));
@@ -506,7 +466,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
@@ -524,7 +483,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));
@@ -549,7 +507,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         Task<Void> pushTask = push.sendInBackground();
         pushTask.waitForCompletion();
@@ -558,7 +515,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));
@@ -586,7 +542,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
@@ -604,7 +559,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));
@@ -628,7 +582,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         push.send();
 
@@ -636,7 +589,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));
@@ -661,7 +613,6 @@ public class ParsePushTest {
         channels.add("testAgain");
         push.builder.expirationTime((long) 1000)
                 .data(data)
-                .pushToIOS(true)
                 .channelSet(channels);
         try {
             push.send();
@@ -673,7 +624,6 @@ public class ParsePushTest {
         ArgumentCaptor<ParsePush.State> stateCaptor = ArgumentCaptor.forClass(ParsePush.State.class);
         verify(controller, times(1)).sendInBackground(stateCaptor.capture(), anyString());
         ParsePush.State state = stateCaptor.getValue();
-        assertTrue(state.pushToIOS());
         assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("test"));

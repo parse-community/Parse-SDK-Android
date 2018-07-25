@@ -68,19 +68,11 @@ public class ParseAnalytics {
         }
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 return getAnalyticsController().trackAppOpenedInBackground(pushHash.get(), sessionToken);
             }
         });
-    }
-
-    /**
-     * @deprecated Please use {@link #trackAppOpenedInBackground(android.content.Intent)} instead.
-     */
-    @Deprecated
-    public static void trackAppOpened(Intent intent) {
-        trackAppOpenedInBackground(intent);
     }
 
     /**
@@ -96,14 +88,6 @@ public class ParseAnalytics {
     }
 
     /**
-     * @deprecated Please use {@link #trackEventInBackground(String)} instead.
-     */
-    @Deprecated
-    public static void trackEvent(String name) {
-        trackEventInBackground(name);
-    }
-
-    /**
      * Tracks the occurrence of a custom event. Parse will store a data point at the time of
      * invocation with the given event name.
      *
@@ -112,14 +96,6 @@ public class ParseAnalytics {
      */
     public static void trackEventInBackground(String name, SaveCallback callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(trackEventInBackground(name), callback);
-    }
-
-    /**
-     * @deprecated Please use {@link #trackEventInBackground(String, java.util.Map)} instead.
-     */
-    @Deprecated
-    public static void trackEvent(String name, Map<String, String> dimensions) {
-        trackEventInBackground(name, dimensions);
     }
 
     /**
@@ -197,7 +173,7 @@ public class ParseAnalytics {
 
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<String> task) throws Exception {
+            public Task<Void> then(Task<String> task) {
                 String sessionToken = task.getResult();
                 return getAnalyticsController().trackEventInBackground(name, dimensionsCopy, sessionToken);
             }

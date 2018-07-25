@@ -20,6 +20,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -75,8 +76,8 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
         constraints = builder
                 .whereEqualTo("foo", "bar")
                 .whereEqualTo("foo", "baz") // Should overwrite since same key
-                .addCondition("people", "$in", Arrays.asList("stanley")) // Collection
-                .addCondition("people", "$in", Arrays.asList("grantland")) // Collection (overwrite)
+                .addCondition("people", "$in", Collections.singletonList("stanley")) // Collection
+                .addCondition("people", "$in", Collections.singletonList("grantland")) // Collection (overwrite)
                 .addCondition("something", "$exists", false) // Object
                 .build()
                 .constraints();
@@ -137,7 +138,7 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
         builder.include("foo").include("bar");
         assertEquals(2, builder.build().includes().size());
 
-        builder.selectKeys(Arrays.asList("foo")).selectKeys(Arrays.asList("bar", "baz", "qux"));
+        builder.selectKeys(Collections.singletonList("foo")).selectKeys(Arrays.asList("bar", "baz", "qux"));
         assertEquals(4, builder.build().selectedKeys().size());
 
         builder.setLimit(42);
@@ -262,7 +263,7 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
     public void testOrThrowsWithSelectedKeys() {
         List<ParseQuery.State.Builder<ParseObject>> subqueries = new ArrayList<>();
         subqueries.add(new ParseQuery.State.Builder<>("TestObjectA"));
-        subqueries.add(new ParseQuery.State.Builder<>("TestObjectB").selectKeys(Arrays.asList("blah")));
+        subqueries.add(new ParseQuery.State.Builder<>("TestObjectB").selectKeys(Collections.singletonList("blah")));
         ParseQuery.State.Builder.or(subqueries).build();
     }
 

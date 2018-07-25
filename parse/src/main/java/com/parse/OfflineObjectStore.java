@@ -36,7 +36,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
             final ParseObjectStore<T> from, final ParseObjectStore<T> to) {
         return from.getAsync().onSuccessTask(new Continuation<T, Task<T>>() {
             @Override
-            public Task<T> then(Task<T> task) throws Exception {
+            public Task<T> then(Task<T> task) {
                 final T object = task.getResult();
                 if (object == null) {
                     return task;
@@ -47,7 +47,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
                         to.setAsync(object)
                 )).continueWith(new Continuation<Void, T>() {
                     @Override
-                    public T then(Task<Void> task) throws Exception {
+                    public T then(Task<Void> task) {
                         return object;
                     }
                 });
@@ -59,7 +59,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public Task<Void> setAsync(final T object) {
         return ParseObject.unpinAllInBackground(pinName).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return object.pinInBackground(pinName, false);
             }
         });
@@ -73,7 +73,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
                 .ignoreACLs();
         return query.findInBackground().onSuccessTask(new Continuation<List<T>, Task<T>>() {
             @Override
-            public Task<T> then(Task<List<T>> task) throws Exception {
+            public Task<T> then(Task<List<T>> task) {
                 List<T> results = task.getResult();
                 if (results != null) {
                     if (results.size() == 1) {
@@ -86,7 +86,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
             }
         }).onSuccessTask(new Continuation<T, Task<T>>() {
             @Override
-            public Task<T> then(Task<T> task) throws Exception {
+            public Task<T> then(Task<T> task) {
                 T ldsObject = task.getResult();
                 if (ldsObject != null) {
                     return task;
@@ -105,7 +105,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
                 .ignoreACLs();
         return query.countInBackground().onSuccessTask(new Continuation<Integer, Task<Boolean>>() {
             @Override
-            public Task<Boolean> then(Task<Integer> task) throws Exception {
+            public Task<Boolean> then(Task<Integer> task) {
                 boolean exists = task.getResult() == 1;
                 if (exists) {
                     return Task.forResult(true);
@@ -123,7 +123,7 @@ class OfflineObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
                 ldsTask
         )).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 // We only really care about the result of unpinning.
                 return ldsTask;
             }
