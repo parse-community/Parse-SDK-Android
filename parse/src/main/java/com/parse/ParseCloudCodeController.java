@@ -45,6 +45,10 @@ class ParseCloudCodeController {
     /* package for test */ Object convertCloudResponse(Object result) {
         if (result instanceof JSONObject) {
             JSONObject jsonResult = (JSONObject) result;
+            // We want to make sure we pass back a null result as null, and not a JSONObject
+            if (jsonResult.isNull("result")) {
+                return null;
+            }
             result = jsonResult.opt("result");
         }
 
