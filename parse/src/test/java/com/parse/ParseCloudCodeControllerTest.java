@@ -185,6 +185,28 @@ public class ParseCloudCodeControllerTest {
 
     //endregion
 
+    @Test
+    public void testCallFunctionWithNullResult() throws Exception {
+        String content = "{ result: null }";
+
+        ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
+                .setStatusCode(200)
+                .setTotalSize((long) content.length())
+                .setContent(new ByteArrayInputStream(content.getBytes()))
+                .build();
+
+        ParseHttpClient restClient = mockParseHttpClientWithReponse(mockResponse);
+        ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
+
+        Task<String> cloudCodeTask = controller.callFunctionInBackground(
+                "test", new HashMap<String, Object>(), "sessionToken");
+        ParseTaskUtils.wait(cloudCodeTask);
+
+        verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
+        String result = cloudCodeTask.getResult();
+        assertEquals(null, result);
+    }
+
     private ParseHttpClient mockParseHttpClientWithReponse(ParseHttpResponse response)
             throws IOException {
         ParseHttpClient client = mock(ParseHttpClient.class);
