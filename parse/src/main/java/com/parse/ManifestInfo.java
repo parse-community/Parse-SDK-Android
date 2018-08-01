@@ -61,6 +61,7 @@ public class ManifestInfo {
                     versionName = getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName;
                 } catch (NameNotFoundException e) {
                     PLog.e(TAG, "Couldn't find info about own package", e);
+                    versionName = "unknown";
                 }
             }
         }
