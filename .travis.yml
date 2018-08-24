@@ -1,28 +1,24 @@
 branches:
   only:
     - master
+    - /^\d+\.\d+\.\d+$/ # regex
 
 language: android
-sudo: false
 
-android:
-  components:
-    - build-tools-23.0.1
-    - android-22
-    - doc-23
-    - extra-android-support
-    - extra-android-m2repository
+jdk:
+  - oraclejdk8
 
 before_install:
     - pip install --user codecov
+    - mkdir "$ANDROID_HOME/licenses" || true
+    - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
 
 script:
-  - ./gradlew clean testDebugUnitTest jacocoTestReport --info
+  - ./gradlew clean testDebugUnitTest jacocoTestReport
 
 after_success:
   - ./gradlew coveralls
   - codecov
-  - ./scripts/publish_snapshot.sh
 
 cache:
   directories:
