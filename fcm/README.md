@@ -29,7 +29,7 @@ Additional, you will register:
 
 ```xml
 <service
-    android:name="com.parse.fcm.ParseFirebaseMessagingService"
+    android:name="com.parse.fcm.ParseFirebaseMessagingService">
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT"/>
     </intent-filter>
