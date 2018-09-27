@@ -14,8 +14,8 @@ class BooleanParseDelegate {
         return parseObject.getBoolean(property.name)
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, boolean: Boolean) {
-        parseObject.put(property.name, boolean)
+    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Boolean) {
+        parseObject.put(property.name, value)
     }
 
 }
