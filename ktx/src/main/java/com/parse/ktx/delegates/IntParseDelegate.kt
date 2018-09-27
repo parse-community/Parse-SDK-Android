@@ -6,7 +6,7 @@ import com.parse.ParseObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [Int] property delegation for [ParseObject].
  */
 class IntParseDelegate {
 
@@ -20,4 +20,8 @@ class IntParseDelegate {
 
 }
 
+/**
+ * Returns a [Int] property delegate for [ParseObject]s. This uses [ParseObject.getInt]
+ * and [ParseObject.put].
+ */
 inline fun intAttribute() = IntParseDelegate()

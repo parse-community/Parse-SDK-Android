@@ -8,7 +8,7 @@ import org.json.JSONArray
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [JSONArray] property delegation for [ParseObject].
  */
 class JsonArrayParseDelegate {
 
@@ -22,4 +22,8 @@ class JsonArrayParseDelegate {
 
 }
 
+/**
+ * Returns a [JSONArray] property delegate for [ParseObject]s. This uses [ParseObject.getDouble]
+ * and [ParseObject.putOrIgnore].
+ */
 inline fun jsonArrayAttribute() = JsonArrayParseDelegate()

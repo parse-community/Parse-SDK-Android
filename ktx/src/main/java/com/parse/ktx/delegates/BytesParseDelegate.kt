@@ -7,7 +7,7 @@ import com.parse.ktx.putOrIgnore
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [ByteArray] property delegation for [ParseObject].
  */
 class BytesParseDelegate {
 
@@ -21,4 +21,8 @@ class BytesParseDelegate {
 
 }
 
+/**
+ * Returns a [ByteArray] property delegate for [ParseObject]s. This uses [ParseObject.getBytes]
+ * and [ParseObject.putOrIgnore].
+ */
 inline fun bytesAttribute() = BytesParseDelegate()

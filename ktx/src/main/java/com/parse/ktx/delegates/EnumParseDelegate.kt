@@ -6,7 +6,10 @@ import com.parse.ParseObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/27/18
+ * A [Enum] property delegation for [ParseObject].
+ *
+ * This implementation save enum's name in lower case on parse-server and when try retrieve it
+ * convert again to upper case to find correspondent local enum.
  */
 class EnumParseDelegate<T : Enum<T>>(private val default: T?, private val enumClass: Class<T>) {
 
@@ -24,4 +27,8 @@ class EnumParseDelegate<T : Enum<T>>(private val default: T?, private val enumCl
 
 }
 
+/**
+ * Returns a [Enum] property delegate for [ParseObject]s. This uses custom implementation for get
+ * to retrieve a local version of the your enum and [ParseObject.put].
+ */
 inline fun <reified T : Enum<T>> enumAttribute(default: T? = null) = EnumParseDelegate(default, T::class.java)

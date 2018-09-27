@@ -7,7 +7,7 @@ import com.parse.ktx.putOrIgnore
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [Map] property delegation for [ParseObject].
  */
 class MapParseDelegate<V> {
 
@@ -21,4 +21,8 @@ class MapParseDelegate<V> {
 
 }
 
+/**
+ * Returns a [Map] property delegate for [ParseObject]s. This uses [ParseObject.getMap]
+ * and [ParseObject.putOrIgnore].
+ */
 inline fun <V> mapAttribute() = MapParseDelegate<V>()

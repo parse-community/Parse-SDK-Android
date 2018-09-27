@@ -8,7 +8,7 @@ import com.parse.ktx.putOrIgnore
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A generic property delegation for [ParseObject].
  */
 class ParseDelegate<T> {
 
@@ -23,4 +23,8 @@ class ParseDelegate<T> {
 
 }
 
+/**
+ * Returns a generic property delegate for [ParseObject]s. This uses [ParseObject.getAs]
+ * and [ParseObject.putOrIgnore].
+ */
 inline fun <T> attribute() = ParseDelegate<T>()

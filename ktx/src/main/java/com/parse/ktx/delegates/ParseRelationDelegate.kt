@@ -7,7 +7,7 @@ import com.parse.ParseRelation
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/27/18
+ * A [ParseRelation] property delegation for [ParseObject].
  */
 class ParseRelationDelegate<T : ParseObject> {
 
@@ -17,4 +17,8 @@ class ParseRelationDelegate<T : ParseObject> {
 
 }
 
+/**
+ * Returns a [ParseRelation] property delegate for [ParseObject]s.
+ * This uses [ParseObject.getRelation].
+ */
 inline fun <T : ParseObject> relationAttribute() = ParseRelationDelegate<T>()

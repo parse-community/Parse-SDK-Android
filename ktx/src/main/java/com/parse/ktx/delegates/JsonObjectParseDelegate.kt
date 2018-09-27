@@ -8,7 +8,7 @@ import org.json.JSONObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [JSONObject] property delegation for [ParseObject].
  */
 class JsonObjectParseDelegate {
 
@@ -22,4 +22,8 @@ class JsonObjectParseDelegate {
 
 }
 
+/**
+ * Returns a [JSONObject] property delegate for [ParseObject]s. This uses [ParseObject.getJSONObject]
+ * and [ParseObject.putOrIgnore].
+ */
 fun jsonObjectAttribute() = JsonObjectParseDelegate()

@@ -7,7 +7,7 @@ import com.parse.ktx.getAs
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [String] property delegation for [ParseObject].
  */
 class StringParseDelegate<S : String?>(private val filter: (String) -> String) {
 
@@ -23,10 +23,18 @@ class StringParseDelegate<S : String?>(private val filter: (String) -> String) {
 
 }
 
-inline fun stringAttribute(
+/**
+ * Returns a nullable [String] property delegate for [ParseObject]s. This uses [ParseObject.getAs]
+ * and a custom implementation for set.
+ */
+inline fun nullableStringAttribute(
     noinline filter: (String) -> String = { it }
 ) = StringParseDelegate<String?>(filter)
 
-inline fun nonNullStringAttribute(
+/**
+ * Returns a [String] property delegate for [ParseObject]s. This uses [ParseObject.getAs]
+ * and a custom implementation for set.
+ */
+inline fun stringAttribute(
     noinline filter: (String) -> String = { it }
 ) = StringParseDelegate<String>(filter)

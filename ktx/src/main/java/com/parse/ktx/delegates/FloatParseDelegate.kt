@@ -6,7 +6,7 @@ import com.parse.ParseObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [Float] property delegation for [ParseObject].
  */
 class FloatParseDelegate {
 
@@ -20,4 +20,8 @@ class FloatParseDelegate {
 
 }
 
+/**
+ * Returns a [Float] property delegate for [ParseObject]s. This uses a custom implementation for get
+ * and [ParseObject.put].
+ */
 inline fun floatAttribute() = FloatParseDelegate()

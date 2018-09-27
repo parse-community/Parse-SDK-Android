@@ -6,7 +6,7 @@ import com.parse.ParseObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [Boolean] property delegation for [ParseObject].
  */
 class BooleanParseDelegate {
 
@@ -20,4 +20,8 @@ class BooleanParseDelegate {
 
 }
 
+/**
+ * Returns a [Boolean] property delegate for [ParseObject]s. This uses [ParseObject.getBoolean]
+ * and [ParseObject.put].
+ */
 inline fun booleanAttribute() = BooleanParseDelegate()

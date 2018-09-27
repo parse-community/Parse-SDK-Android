@@ -8,7 +8,8 @@ import org.json.JSONObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/27/18
+ * A generic property delegation for [ParseObject], and give some checks to avoid throw some
+ * exceptions.
  */
 class SafeParseDelegate<T> {
 
@@ -32,4 +33,8 @@ class SafeParseDelegate<T> {
 
 }
 
+/**
+ * Returns a generic property delegate for [ParseObject]s. This uses a custom get implementation
+ * and [ParseObject.putOrRemove].
+ */
 inline fun <T> safeAttribute() = SafeParseDelegate<T>()

@@ -6,7 +6,7 @@ import com.parse.ParseObject
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [Long] property delegation for [ParseObject].
  */
 class LongParseDelegate {
 
@@ -20,4 +20,8 @@ class LongParseDelegate {
 
 }
 
+/**
+ * Returns a [Long] property delegate for [ParseObject]s. This uses [ParseObject.getLong]
+ * and [ParseObject.put].
+ */
 inline fun longAttribute() = LongParseDelegate()

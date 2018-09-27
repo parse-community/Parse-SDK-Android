@@ -7,7 +7,7 @@ import com.parse.ktx.putOrIgnore
 import kotlin.reflect.KProperty
 
 /**
- * Created by daniel on 9/26/18
+ * A [List] property delegation for [ParseObject].
  */
 class ListParseDelegate<T> {
 
@@ -21,4 +21,8 @@ class ListParseDelegate<T> {
 
 }
 
+/**
+ * Returns a [List] property delegate for [ParseObject]s. This uses [ParseObject.getList]
+ * and [ParseObject.putOrIgnore].
+ */
 inline fun <T> listAttribute() = ListParseDelegate<T>()
