@@ -17,7 +17,7 @@ class ParseDelegate<T> {
         return parseObject.getAs(property.name)
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: T?) {
+    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: T) {
         parseObject.putOrIgnore(property.name, value)
     }
 
