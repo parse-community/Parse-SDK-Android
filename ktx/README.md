@@ -37,6 +37,44 @@ class Cat : ParseObject() {
 
 ```
 
+## Property Delegation
+
+> "There are certain common kinds of properties, that, though we can implement them manually every time we need them, would be very nice to implement once and for all, and put into a library."
+
+The text quoted above is the best explanation anyone could pass us, we use property delegation for the properties of our ParseObject, this prevents us having to write very much boilerplate.
+
+### Without property delegation:
+
+```kotlin
+@ParseClassName("Cat")
+class Cat : ParseObject() {
+
+    companion object {
+        const val KEY_NAME = "name"
+    }
+
+    var name: String
+        get = getString(KEY_NAME)
+        set(value) = putString(KEY_NAME, value)
+
+}
+```
+
+### With property delegation:
+
+```kotlin
+@ParseClassName("Cat")
+class Cat : ParseObject() {
+
+    var name: String by stringAttribute() // That's it
+
+}
+```
+
+The `stringAttribute` is a property delegate, and we have many other specialized types and also for generic types.
+
+This causes us to not have to write get/set and besides, it removed the get/put boilerplate which is a must to map our classes with the Parse collections.
+
 ## Contributing
 When contributing to the `ktx` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.
 
