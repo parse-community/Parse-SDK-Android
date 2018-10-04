@@ -75,6 +75,29 @@ The `stringAttribute` is a property delegate, and we have many other specialized
 
 This causes us to not have to write get/set and besides, it removed the get/put boilerplate which is a must to map our classes with the Parse collections.
 
+## ParseQuery extensions
+
+Using Property Delegates will allow you to use a more secure way of creating queries.
+
+If is needed to rename some property of a ParseObject, it is only necessary to use the IDE refactoring tool, that your queries will be automatically updated, which is not the case if hard coded strings are used.
+
+```kotlin
+@ParseClassName("Cat")
+class Cat : ParseObject() {
+
+    var age by intAttribute()
+
+}
+
+val query = ParseQuery.getQuery(Cat::class.java)
+// Use this syntax
+query.whereEqualTo(Cat::name, 1)
+// instead of
+query.whereEqualTo("age", 1)
+// or
+query.whereEqualTo(Cat::age.name, 1)
+```
+
 ## Contributing
 When contributing to the `ktx` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.
 
