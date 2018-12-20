@@ -1,3 +1,2 @@
-include ':Parse'
-include ':ParseStarterProject'
+include ':parse', ':fcm', ':gcm', ':ktx'
 
