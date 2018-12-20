@@ -1,0 +1,12 @@
+def getWorkingBranch() {
+    // Triple double-quotes for the breaklines
+    def workingBranch = """git --git-dir=${rootDir}/.git
+                               --work-tree=${rootDir}
+                               rev-parse --abbrev-ref HEAD""".execute().text.trim()
+    print "Working branch: " + workingBranch
+    if (workingBranch) {
+        return workingBranch
+    } else {
+        return "default"
+    }
+}

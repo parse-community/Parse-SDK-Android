@@ -1,6 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.kt3k.coveralls'
 
+apply from: '../gradle/version-branch.gradle'
+
+version = hasProperty('version') ? version : getWorkingBranch()
+ext.artifact = "parse-android"
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
@@ -8,7 +13,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName version
         consumerProguardFiles 'release-proguard.pro'
     }
 
@@ -85,4 +90,4 @@ coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacoco
 
 //endregion
 
-apply from: 'https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle'
+apply from: '../gradle/bintray.gradle'

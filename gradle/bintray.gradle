@@ -1,0 +1,59 @@
+apply plugin: 'digital.wup.android-maven-publish'
+apply plugin: 'com.jfrog.bintray'
+apply from: '../gradle/javadocs.gradle'
+
+task install(dependsOn: publishToMavenLocal) {
+    print "Using new maven publishing plugin"
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+	    from components.android
+            groupId group
+            artifactId project.name
+            artifact sourcesJar
+            artifact javadocJar
+            version project.version
+        }
+
+    }
+}
+
+// Requires apply plugin: 'com.jfrog.bintray'
+
+def ossrhUsername = hasProperty('NEXUS_USERNAME') ? NEXUS_USERNAME : System.getenv('CI_NEXUS_USERNAME')
+def ossrhPassword = hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : System.getenv('CI_NEXUS_PASSWORD')
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    publications = ["mavenAar"]
+
+//    dryRun = true
+    publish = false
+    pkg {
+        repo = 'maven'
+        name = 'com.parse:parse-android'
+        userOrg = 'parse'
+        licenses = ['BSD License']
+        vcsUrl = 'https://github.com/parse-community/Parse-SDK-Android'
+        version {
+            name = project.version
+            desc = 'A library that gives you access to the powerful Parse cloud platform from your Android app.'
+            released = new Date()
+            vcsTag = project.version
+
+            // Sonatype username/passwrod must be set for this operation to happen
+/*            mavenCentralSync {
+              sync = true
+              user = ossrhUsername
+              password = ossrhPassword
+              close = '1' // release automatically
+           }*/
+        }
+    }
+}
+
+// End of Bintray plugin
+

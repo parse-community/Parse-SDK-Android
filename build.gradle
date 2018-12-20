@@ -7,16 +7,20 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.1'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 plugins {
     id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'digital.wup.android-maven-publish' version '3.6.2'
+    id "com.jfrog.bintray" version "1.8.4"
 }
 
 allprojects {
+    // Allow Jitpack to set the group
+    group = project.hasProperty('group') ? group : DEFAULT_GROUP
+
     repositories {
         google()
         jcenter()
