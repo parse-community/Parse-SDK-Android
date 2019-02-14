@@ -4076,7 +4076,7 @@ public class ParseObject implements Parcelable {
                 objectId = state.objectId();
                 createdAt = state.createdAt();
                 updatedAt = state.updatedAt();
-                availableKeys = Collections.synchronizedSet(state.availableKeys());
+                availableKeys = Collections.synchronizedSet(new HashSet<>(state.availableKeys()));
                 for (String key : state.keySet()) {
                     serverData.put(key, state.get(key));
                     availableKeys.add(key);
