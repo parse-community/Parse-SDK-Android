@@ -8,7 +8,7 @@
  */
 package com.parse.fcm;
 
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.parse.ParseInstallation;
