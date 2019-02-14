@@ -44,6 +44,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -128,7 +129,7 @@ public class ParseObjectTest {
 
     //endregion
 
-    //region testGetter
+    //region testFromJson
 
     @Test
     public void testFromJSONPayloadWithoutClassname() throws JSONException {
@@ -136,6 +137,30 @@ public class ParseObjectTest {
         ParseObject parseObject = ParseObject.fromJSONPayload(json, ParseDecoder.get());
         assertNull(parseObject);
     }
+
+    @Test
+    public void testFromJsonWithLdsStackOverflow() throws JSONException {
+        ParseObject localObj = ParseObject.createWithoutData("GameScore", "TT1ZskATqS");
+        OfflineStore lds = mock(OfflineStore.class);
+        Parse.setLocalDatastore(lds);
+
+        when(lds.getObject(eq("GameScore"), eq("TT1ZskATqS"))).thenReturn(localObj);
+
+        JSONObject json = new JSONObject("{" +
+                "\"className\":\"GameScore\"," +
+                "\"createdAt\":\"2015-06-22T21:23:41.733Z\"," +
+                "\"objectId\":\"TT1ZskATqS\"," +
+                "\"updatedAt\":\"2015-06-22T22:06:18.104Z\"" +
+                "}");
+        ParseObject obj;
+        for (int i = 0; i < 50000; i++) {
+            obj = ParseObject.fromJSON(json, "GameScore", ParseDecoder.get(), Collections.<String>emptySet());
+        }
+    }
+
+    //endregion
+
+    //region testGetter
 
     @Test
     public void testRevert() throws ParseException {
