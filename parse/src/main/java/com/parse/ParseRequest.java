@@ -8,7 +8,7 @@
  */
 package com.parse;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;

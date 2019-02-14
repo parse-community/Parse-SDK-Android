@@ -28,12 +28,12 @@ android {
 }
 
 ext {
-    okhttpVersion = '3.11.0'
+    okhttpVersion = '3.12.1'
 }
 
 dependencies {
-    api "com.android.support:support-annotations:$supportLibVersion"
-    api "com.android.support:support-compat:$supportLibVersion"
+    api "androidx.annotation:annotation:1.0.1"
+    api "androidx.core:core:1.0.1"
     api 'com.parse.bolts:bolts-tasks:1.4.0'
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
