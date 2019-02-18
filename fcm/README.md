@@ -14,19 +14,7 @@ dependencies {
 ```
 Then, follow Google's docs for [setting up an Firebase app](https://firebase.google.com/docs/android/setup). Although the steps are different for setting up FCM with Parse, it is also a good idea to read over the [Firebase FCM Setup](https://firebase.google.com/docs/cloud-messaging/android/client).
 
-You will then need to register some things in your manifest, specifically:
-```xml
-<service
-    android:name="com.parse.fcm.ParseFirebaseInstanceIdService"
-    android:exported="true">
-    <intent-filter>
-        <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-    </intent-filter>
-</service>
-```
-
-Additional, you will register:
-
+You will then need to register the messaging service in your manifest, specifically:
 ```xml
 <service
     android:name="com.parse.fcm.ParseFirebaseMessagingService">
@@ -49,17 +37,17 @@ After these services are registered in the Manifest, you then need to register y
 </receiver>
 ```
 
-After this, you are all set. Adding the `parse-fcm-android` package will include a [ParseFirebaseJobService](https://github.com/parse-community/Parse-SDK-Android/blob/master/fcm/src/main/java/com/parse/fcm/ParseFirebaseJobService.java) in the `AndroidManifest.xml` file that will register for a FCM token when the app starts.  You should see `ParseFCM: FCM registration success` messages assuming you have enabled logging:
-
+After this, you are all set. You should see `ParseFCM: FCM registration success` messages, assuming you have enabled logging via:
 ```java
+// be sure to disable this in the release apk
 Parse.setLogLevel(Parse.LOG_LEVEL_DEBUG);
 ```
 
 ## Custom Notifications
 If you need to customize the notification that is sent out from a push, you can do so easily by extending `ParsePushBroadcastReceiver` with your own class and registering it instead in the Manifest.
 
-## Instance ID Service
-If you need to store the FCM token elsewhere outside of Parse, you can create your own implementation of the `FirebaseInstanceIdService`, just make sure you are either extending `ParseFirebaseInstanceIdService` or are calling `ParseFCM.register(getApplicationContext());` in the `onTokenRefresh` method.
+## Messaging Service
+If you need to store the FCM token elsewhere outside of Parse, you can create your own implementation of the `FirebaseMessagingService`, just make sure you are either extending `ParseFirebaseMessagingService` or are calling `ParseFCM.register(token);` in the `onNewToken` method.
 
 ## License
     Copyright (c) 2015-present, Parse, LLC.
