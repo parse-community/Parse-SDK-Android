@@ -32,7 +32,6 @@ android {
 
 dependencies {
     api "com.google.firebase:firebase-messaging:17.3.4"
-    api "com.firebase:firebase-jobdispatcher:$firebaseJobdispatcherVersion"
     implementation project(':parse')
 }
 

@@ -30,8 +30,6 @@ task clean(type: Delete) {
 ext {
     compileSdkVersion = 28
 
-    firebaseJobdispatcherVersion = '0.8.5'
-
     minSdkVersion = 14
     targetSdkVersion = 28
 }

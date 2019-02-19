@@ -11,6 +11,12 @@ import org.json.JSONObject;
 public class ParseFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
+    public void onNewToken(String token) {
+        super.onNewToken(token);
+        ParseFCM.register(token);
+    }
+
+    @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         PLog.d(ParseFCM.TAG, "onMessageReceived");
