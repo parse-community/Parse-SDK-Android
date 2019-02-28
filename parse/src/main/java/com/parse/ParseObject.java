@@ -67,11 +67,11 @@ public class ParseObject implements Parcelable {
     /*
   REST JSON Keys
   */
-    private static final String KEY_OBJECT_ID = "objectId";
+    public static final String KEY_OBJECT_ID = "objectId";
+    public static final String KEY_CREATED_AT = "createdAt";
+    public static final String KEY_UPDATED_AT = "updatedAt";
     private static final String KEY_CLASS_NAME = "className";
     private static final String KEY_ACL = "ACL";
-    private static final String KEY_CREATED_AT = "createdAt";
-    private static final String KEY_UPDATED_AT = "updatedAt";
     /*
   Internal JSON Keys - Used to store internal data when persisting {@code ParseObject}s locally.
   */
