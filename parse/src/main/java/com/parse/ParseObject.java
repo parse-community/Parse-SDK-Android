@@ -11,6 +11,8 @@ package com.parse;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,8 +36,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
