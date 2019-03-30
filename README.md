@@ -1,6 +1,11 @@
 # Parse SDK for Android
 
-[![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)](https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE) [![Build Status](https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master)](https://travis-ci.org/parse-community/Parse-SDK-Android) [![Join Chat](https://img.shields.io/badge/gitter-join%20chat%20%E2%86%92-brightgreen.svg)](https://gitter.im/ParsePlatform/Chat) [![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
+[![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)](https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master)](https://travis-ci.org/parse-community/Parse-SDK-Android)
+[![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
+[![Join The Conversation](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
 
 A library that gives you access to the powerful Parse cloud platform from your Android app.
 For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).
