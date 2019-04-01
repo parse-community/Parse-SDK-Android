@@ -4,9 +4,9 @@
 [![Build Status](https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master)](https://travis-ci.org/parse-community/Parse-SDK-Android)
 [![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
 [![Join The Conversation](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
-[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)](#sponsors)
-![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)
+[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
+[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
+[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
 
 A library that gives you access to the powerful Parse cloud platform from your Android app.
 For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).
@@ -95,3 +95,4 @@ We want to make contributing to this project as easy and transparent as possible
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
  [guide]: http://docs.parseplatform.org/android/guide/
+ [open-collective-link]: https://opencollective.com/parse-server
