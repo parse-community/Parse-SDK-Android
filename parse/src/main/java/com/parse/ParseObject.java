@@ -967,7 +967,8 @@ public class ParseObject implements Parcelable {
         }
 
         final ParseQuery<T> query = ParseQuery.<T>getQuery(className)
-                .whereContainedIn(KEY_OBJECT_ID, objectIds);
+                .whereContainedIn(KEY_OBJECT_ID, objectIds)
+                .setLimit(objectIds.size());
         return toAwait.continueWithTask(new Continuation<Void, Task<List<T>>>() {
             @Override
             public Task<List<T>> then(Task<Void> task) {
