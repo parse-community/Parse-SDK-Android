@@ -77,6 +77,7 @@ We want to make contributing to this project as easy and transparent as possible
 
  - [Parse FCM](/fcm)
  - [Parse KTX](/ktx)
+ - [Parse Coroutines](/coroutines)
  - [ParseUI](https://github.com/parse-community/ParseUI-Android)
  - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android)
  - [ParseFacebookUtils](https://github.com/parse-community/ParseFacebookUtils-Android)
