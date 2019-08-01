@@ -1,14 +1,29 @@
-# Parse SDK for Android
+<p align="center">
+    <img alt="Parse Platform" src="Assets/logo large.png" width="200">
+  </a>
+</p>
 
-[![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)](https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE)
-[![Build Status](https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master)](https://travis-ci.org/parse-community/Parse-SDK-Android)
-[![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
-[![Join The Conversation](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
-[![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
-[![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
-[![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
+<h2 align="center">Parse SDK for Android</h2>
 
-A library that gives you access to the powerful Parse cloud platform from your Android app.
+<p align="center">
+    A library that gives you access to the powerful Parse Server backend from your Android app.
+</p>
+
+<p align="center">
+    <a href="https://twitter.com/intent/follow?screen_name=parseplatform"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/parseplatform?style=social&label=Follow"></a>
+    <a href="https://community.parseplatform.org/"><img alt="Join the conversation" src="https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg"></a>
+    <a href="https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE"><img alt="License" src="https://img.shields.io/badge/license-BSD-lightgrey.svg"></a>
+    <a href=" https://travis-ci.org/parse-community/Parse-SDK-Android"><img alt="Build status" src="https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master"></a>
+</p>
+
+<p align="center">
+   <a href="https://jitpack.io/#parse-community/Parse-SDK-Android"><img alt="Jitpack" src="https://jitpack.io/v/parse-community/Parse-SDK-Android.svg"></a>
+   <a href=" https://travis-ci.org/parse-community/Parse-SDK-Android"><img alt="Build status" src="https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master"></a>
+   <a href="#backers"><img alt="Backers on Open Collective" src="https://opencollective.com/parse-server/backers/badge.svg" /></a>
+   <a href="#sponsors"><img alt="Sponsors on Open Collective" src="https://opencollective.com/parse-server/sponsors/badge.svg" /></a>
+</p>
+<br>
+
 For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).
 
 ## Dependency
