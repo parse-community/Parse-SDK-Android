@@ -13,7 +13,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import com.parse.OfflineQueryLogic.ConstraintMatcher;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 
 import bolts.Capture;
 import bolts.Continuation;
