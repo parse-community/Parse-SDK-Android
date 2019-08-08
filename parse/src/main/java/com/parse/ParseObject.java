@@ -1098,6 +1098,11 @@ public class ParseObject implements Parcelable {
         return pinAllInBackground(name, objects, true);
     }
 
+    public static <T extends ParseObject> Task<Void> pinAllInBackgroundNonRecursive(final String name,
+                                                                                    final List<T> objects) {
+        return pinAllInBackground(name, objects, false);
+    }
+
     private static <T extends ParseObject> Task<Void> pinAllInBackground(final String name,
                                                                          final List<T> objects, final boolean includeAllChildren) {
         if (!Parse.isLocalDatastoreEnabled()) {
@@ -1259,6 +1264,18 @@ public class ParseObject implements Parcelable {
             name = DEFAULT_PIN;
         }
         return Parse.getLocalDatastore().unpinAllObjectsAsync(name, objects);
+    }
+
+    public static <T extends ParseObject> Task<Void> unpinAllInBackgroundNonRecursive(String name,
+                                                                                      List<T> objects) {
+        if (!Parse.isLocalDatastoreEnabled()) {
+            throw new IllegalStateException("Method requires Local Datastore. " +
+                    "Please refer to `Parse#enableLocalDatastore(Context)`.");
+        }
+        if (name == null) {
+            name = DEFAULT_PIN;
+        }
+        return Parse.getLocalDatastore().unpinAllObjectsAsyncNonRecursive(name, objects);
     }
 
     /**
@@ -3710,6 +3727,10 @@ public class ParseObject implements Parcelable {
         return pinAllInBackground(name, Collections.singletonList(this));
     }
 
+    public Task<Void> pinInBackgroundNonRecursive(String name) {
+        return pinAllInBackgroundNonRecursive(name, Collections.singletonList(this));
+    }
+
     Task<Void> pinInBackground(String name, boolean includeAllChildren) {
         return pinAllInBackground(name, Collections.singletonList(this), includeAllChildren);
     }
@@ -3727,6 +3748,10 @@ public class ParseObject implements Parcelable {
      */
     public void pin(String name) throws ParseException {
         ParseTaskUtils.wait(pinInBackground(name));
+    }
+
+    public void pinNonRecurisive(String name) throws ParseException {
+        ParseTaskUtils.wait(pinInBackgroundNonRecursive(name));
     }
 
     /**
@@ -3797,6 +3822,10 @@ public class ParseObject implements Parcelable {
         return unpinAllInBackground(name, Collections.singletonList(this));
     }
 
+    public Task<Void> unpinInBackgroundNonRecursive(String name) {
+        return unpinAllInBackgroundNonRecursive(name, Collections.singletonList(this));
+    }
+
     /**
      * Removes the object and every object it points to in the local datastore, recursively.
      *
@@ -3804,6 +3833,10 @@ public class ParseObject implements Parcelable {
      */
     public void unpin(String name) throws ParseException {
         ParseTaskUtils.wait(unpinInBackground(name));
+    }
+
+    public void unpinNonRecursive(String name) throws ParseException {
+        ParseTaskUtils.wait(unpinInBackgroundNonRecursive(name));
     }
 
     /**

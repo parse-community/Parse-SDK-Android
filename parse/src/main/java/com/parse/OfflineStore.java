@@ -1155,6 +1155,17 @@ class OfflineStore {
         });
     }
 
+    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsAsyncNonRecursive(
+            final String name,
+            final List<T> objects) {
+        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
+            @Override
+            public Task<Void> call(ParseSQLiteDatabase db) {
+                return unpinAllObjectsAsyncNonRecursive(name, objects, db);
+            }
+        });
+    }
+
     private <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
             String name,
             final List<T> objects,
@@ -1187,6 +1198,42 @@ class OfflineStore {
                 pin.setObjects(modified);
 
                 return saveLocallyAsync(pin, true, db);
+            }
+        });
+    }
+
+    private <T extends ParseObject> Task<Void> unpinAllObjectsAsyncNonRecursive(
+            String name,
+            final List<T> objects,
+            final ParseSQLiteDatabase db) {
+        if (objects == null || objects.size() == 0) {
+            return Task.forResult(null);
+        }
+
+        return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<ParsePin> task) {
+                ParsePin pin = task.getResult();
+
+                //TODO (grantland): change to use relations. currently the related PO are only getting saved
+                // offline as pointers.
+//        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
+//        relation.remove(object);
+
+                // Hack to store collections in a pin
+                List<ParseObject> modified = pin.getObjects();
+                if (modified == null) {
+                    // Unpin a pin that doesn't exist. Wat?
+                    return Task.forResult(null);
+                }
+
+                modified.removeAll(objects);
+                if (modified.size() == 0) {
+                    return unpinAsync(pin, db);
+                }
+                pin.setObjects(modified);
+
+                return saveLocallyAsync(pin, false, db);
             }
         });
     }
