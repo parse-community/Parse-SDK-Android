@@ -1237,27 +1237,6 @@ class OfflineStore {
         });
     }
 
-//    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
-//            final List<T> objects) {
-//        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
-//            @Override
-//            public Task<Void> call(ParseSQLiteDatabase db) {
-//                return unpinAllObjectsEverywhereAsync( objects, db);
-//            }
-//        });
-//    }
-//
-//    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereForceAsync(
-//            final List<T> objects) {
-//        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
-//            @Override
-//            public Task<Void> call(ParseSQLiteDatabase db) {
-//                return unpinAllObjectsEverywhereAsync( objects, db, true);
-//            }
-//        });
-//    }
-
-
     private <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
             String name,
             final List<T> objects,
@@ -1302,60 +1281,6 @@ class OfflineStore {
             }
         });
     }
-
-//    private <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
-//            final List<T> objects,
-//            final ParseSQLiteDatabase db) {
-//        return unpinAllObjectsEverywhereAsync(objects,db,false);
-//    }
-//
-//    private <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
-//            final List<T> objects,
-//            final ParseSQLiteDatabase db, final boolean force) {
-//        if (objects == null || objects.size() == 0) {
-//            return Task.forResult(null);
-//        }
-//
-//        return getParsePins(db).onSuccessTask(new Continuation<List<ParsePin>, Task<Void>>() {
-//            @Override
-//            public Task<Void> then(Task<List<ParsePin>> task) {
-//                List<ParsePin> pins = task.getResult();
-//
-//                //TODO (grantland): change to use relations. currently the related PO are only getting saved
-//                // offline as pointers.
-////        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
-////        relation.remove(object);
-//
-//                List<Task<Void>> tasks = new ArrayList<>();
-//
-//                for (ParsePin pin :
-//                        pins) {
-//                    if(pin.getName().compareTo("test")==0||pin.getName().compareTo("test2")==0) {
-//
-//                        //hier
-//
-//                        if (force) {
-//                            tasks.add( ParseObject.unpinAllForceInBackground(pin.getName(), objects));
-//
-//
-//                        }// else {
-////                            tasks.add( ParseObject.unpinAllInBackground(pin.getName(), objects));
-////                        }
-//                    }
-//
-//                }
-//
-//                try {
-//                    Task.whenAll(tasks).waitForCompletion();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//                return null;
-//                //Exception e = new Exception(String.valueOf(pins));
-//
-//            }
-//        });
-//    }
 
     /* package */ Task<Void> unpinAllObjectsAsync(final String name) {
         return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {

@@ -1367,7 +1367,6 @@ public class ParseObject implements Parcelable {
                     "Please refer to `Parse#enableLocalDatastore(Context)`.");
         }
         return unpinAllEverywhereInBackground(objects, false);
-//        return Parse.getLocalDatastore().unpinAllObjectsEverywhereAsync(objects);
     }
 
     /**
@@ -1387,7 +1386,6 @@ public class ParseObject implements Parcelable {
                     "Please refer to `Parse#enableLocalDatastore(Context)`.");
         }
         return unpinAllEverywhereInBackground(objects, true);
-  //      return Parse.getLocalDatastore().unpinAllObjectsEverywhereForceAsync(objects);
     }
 
     private static <T extends ParseObject> Task<Void> unpinAllEverywhereInBackground(List<T> objects, boolean force){
