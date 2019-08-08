@@ -1233,7 +1233,7 @@ class OfflineStore {
                 }
                 pin.setObjects(modified);
 
-                return saveLocallyAsync(pin, false, db);
+                return saveLocallyAsync(pin, true, db);
             }
         });
     }
