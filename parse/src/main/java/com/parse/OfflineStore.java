@@ -13,6 +13,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import com.parse.OfflineQueryLogic.ConstraintMatcher;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.Callable;
 
 import bolts.Capture;
 import bolts.Continuation;
@@ -650,6 +652,29 @@ class OfflineStore {
      */
     private Task<Void> saveLocallyAsync(
             final ParseObject object, final boolean includeAllChildren, final ParseSQLiteDatabase db) {
+        return saveLocallyAsync(object, includeAllChildren, db, new ArrayList<ParseObject>());
+    }
+
+    /**
+     * Stores an object (and optionally, every object it points to recursively) in the local database,
+     * except the excluded Objects.
+     * If any of the objects have not been fetched from Parse, they will not be stored. However, if
+     * they have changed data, the data will be retained. To get the objects back later, you can use a
+     * ParseQuery with a cache policy that uses the local cache, or you can create an unfetched
+     * pointer with ParseObject.createWithoutData() and then call fetchFromLocalDatastore() on it. If you modify
+     * the object after saving it locally, such as by fetching it or saving it, those changes will
+     * automatically be applied to the cache.
+     * <p>
+     * Any objects previously stored with the same key will be removed from the local database.
+     *
+     * @param object             Root object
+     * @param includeAllChildren {@code true} to recursively save all pointers.
+     * @param db                 DB connection
+     * @param exclude            the excluded Objects
+     * @return A Task that will be resolved when saving is complete
+     */
+    private <T extends ParseObject> Task<Void> saveLocallyAsync(
+            final ParseObject object, final boolean includeAllChildren, final ParseSQLiteDatabase db, final List<T> exclude) {
         final ArrayList<ParseObject> objectsInTree = new ArrayList<>();
         // Fetch all objects locally in case they are being re-added
         if (!includeAllChildren) {
@@ -658,7 +683,7 @@ class OfflineStore {
             (new ParseTraverser() {
                 @Override
                 protected boolean visit(Object object) {
-                    if (object instanceof ParseObject) {
+                    if (!exclude.contains(object) && object instanceof ParseObject) {
                         objectsInTree.add((ParseObject) object);
                     }
                     return true;
@@ -1090,6 +1115,54 @@ class OfflineStore {
         });
     }
 
+    private Task<List<ParsePin>> getParsePins(ParseSQLiteDatabase db) {
+        ParseQuery.State<ParsePin> query = new ParseQuery.State.Builder<>(ParsePin.class)
+                .build();
+
+        /* We need to call directly to the OfflineStore since we don't want/need a user to query for
+         * ParsePins
+         */
+        return findAsync(query, null, null, db).onSuccess(new Continuation<List<ParsePin>, List<ParsePin>>() {
+            @Override
+            public List<ParsePin> then(Task<List<ParsePin>> task) {
+                List<ParsePin> pins = new ArrayList<>();
+                if (task.getResult() != null && task.getResult().size() > 0) {
+                    pins = task.getResult();
+                }
+                return pins;
+            }
+        });
+    }
+
+    String[] getParsePinNames() {
+
+        final ArrayList<String> names = new ArrayList<>();
+
+        try {
+            runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
+                @Override
+                public Task<Void> call(ParseSQLiteDatabase db) {
+                    return getParsePins(db).onSuccess(new Continuation<List<ParsePin>, Void>() {
+                        @Override
+                        public Void then(Task<List<ParsePin>> task) throws Exception {
+                            List<ParsePin> pins = task.getResult();
+                            if(pins!=null){
+                                for (ParsePin pin :
+                                        pins) {
+                                    names.add(pin.getName());
+                                }
+                            }
+                            return null;
+                        }
+                    });
+                }
+            }).waitForCompletion();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return names.toArray(new String[0]);
+    }
+
     //region ParsePin
 
     /* package */ <T extends ParseObject> Task<Void> pinAllObjectsAsync(
@@ -1155,57 +1228,51 @@ class OfflineStore {
         });
     }
 
-    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsAsyncNonRecursive(
+    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsForceAsync(
             final String name,
             final List<T> objects) {
         return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
             @Override
             public Task<Void> call(ParseSQLiteDatabase db) {
-                return unpinAllObjectsAsyncNonRecursive(name, objects, db);
+                return unpinAllObjectsAsync(name, objects, db, true);
             }
         });
     }
+
+//    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
+//            final List<T> objects) {
+//        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
+//            @Override
+//            public Task<Void> call(ParseSQLiteDatabase db) {
+//                return unpinAllObjectsEverywhereAsync( objects, db);
+//            }
+//        });
+//    }
+//
+//    /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereForceAsync(
+//            final List<T> objects) {
+//        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
+//            @Override
+//            public Task<Void> call(ParseSQLiteDatabase db) {
+//                return unpinAllObjectsEverywhereAsync( objects, db, true);
+//            }
+//        });
+//    }
+
 
     private <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
             String name,
             final List<T> objects,
             final ParseSQLiteDatabase db) {
-        if (objects == null || objects.size() == 0) {
-            return Task.forResult(null);
-        }
 
-        return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParsePin> task) {
-                ParsePin pin = task.getResult();
-
-                //TODO (grantland): change to use relations. currently the related PO are only getting saved
-                // offline as pointers.
-//        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
-//        relation.remove(object);
-
-                // Hack to store collections in a pin
-                List<ParseObject> modified = pin.getObjects();
-                if (modified == null) {
-                    // Unpin a pin that doesn't exist. Wat?
-                    return Task.forResult(null);
-                }
-
-                modified.removeAll(objects);
-                if (modified.size() == 0) {
-                    return unpinAsync(pin, db);
-                }
-                pin.setObjects(modified);
-
-                return saveLocallyAsync(pin, true, db);
-            }
-        });
+        return unpinAllObjectsAsync(name, objects, db, false);
     }
 
-    private <T extends ParseObject> Task<Void> unpinAllObjectsAsyncNonRecursive(
+    private <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
             String name,
             final List<T> objects,
-            final ParseSQLiteDatabase db) {
+            final ParseSQLiteDatabase db,
+            final boolean force) {
         if (objects == null || objects.size() == 0) {
             return Task.forResult(null);
         }
@@ -1233,10 +1300,64 @@ class OfflineStore {
                 }
                 pin.setObjects(modified);
 
-                return saveLocallyAsync(pin, true, db);
+                return saveLocallyAsync(pin, true, db, force?objects:new ArrayList<T>());
             }
         });
     }
+
+//    private <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
+//            final List<T> objects,
+//            final ParseSQLiteDatabase db) {
+//        return unpinAllObjectsEverywhereAsync(objects,db,false);
+//    }
+//
+//    private <T extends ParseObject> Task<Void> unpinAllObjectsEverywhereAsync(
+//            final List<T> objects,
+//            final ParseSQLiteDatabase db, final boolean force) {
+//        if (objects == null || objects.size() == 0) {
+//            return Task.forResult(null);
+//        }
+//
+//        return getParsePins(db).onSuccessTask(new Continuation<List<ParsePin>, Task<Void>>() {
+//            @Override
+//            public Task<Void> then(Task<List<ParsePin>> task) {
+//                List<ParsePin> pins = task.getResult();
+//
+//                //TODO (grantland): change to use relations. currently the related PO are only getting saved
+//                // offline as pointers.
+////        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
+////        relation.remove(object);
+//
+//                List<Task<Void>> tasks = new ArrayList<>();
+//
+//                for (ParsePin pin :
+//                        pins) {
+//                    if(pin.getName().compareTo("test")==0||pin.getName().compareTo("test2")==0) {
+//
+//                        //hier
+//
+//                        if (force) {
+//                            tasks.add( ParseObject.unpinAllForceInBackground(pin.getName(), objects));
+//
+//
+//                        }// else {
+////                            tasks.add( ParseObject.unpinAllInBackground(pin.getName(), objects));
+////                        }
+//                    }
+//
+//                }
+//
+//                try {
+//                    Task.whenAll(tasks).waitForCompletion();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                return null;
+//                //Exception e = new Exception(String.valueOf(pins));
+//
+//            }
+//        });
+//    }
 
     /* package */ Task<Void> unpinAllObjectsAsync(final String name) {
         return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
