@@ -28,6 +28,7 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
     private static final String KEY_CLASS_NAME = "classname";
     private static final String KEY_CREATED_AT = "createdAt";
     private static final String KEY_UPDATED_AT = "updatedAt";
+    private static final String KEY_ACL = "ACL";
     private static final String KEY_DATA = "data";
 
     /*
@@ -167,6 +168,11 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
                     }
                     if (key.equals(KEY_UPDATED_AT)) {
                         builder.updatedAt(ParseDateFormat.getInstance().parse(data.getString(key)));
+                        continue;
+                    }
+                    if (key.equals(KEY_ACL)) {
+                        ParseACL acl = ParseACL.createACLFromJSONObject(data.getJSONObject(key), decoder);
+                        builder.put(KEY_ACL, acl);
                         continue;
                     }
 
