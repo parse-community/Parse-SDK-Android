@@ -28,6 +28,7 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
     private static final String KEY_CLASS_NAME = "classname";
     private static final String KEY_CREATED_AT = "createdAt";
     private static final String KEY_UPDATED_AT = "updatedAt";
+    private static final String KEY_ACL = "ACL";
     private static final String KEY_DATA = "data";
 
     /*
@@ -155,27 +156,28 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
                 Iterator<?> keys = data.keys();
                 while (keys.hasNext()) {
                     String key = (String) keys.next();
-
-                    if (key.equals(KEY_OBJECT_ID)) {
-                        String newObjectId = data.getString(key);
-                        builder.objectId(newObjectId);
-                        continue;
+                    switch (key) {
+                        case KEY_OBJECT_ID:
+                            String newObjectId = data.getString(key);
+                            builder.objectId(newObjectId);
+                            break;
+                        case KEY_CREATED_AT:
+                            builder.createdAt(ParseDateFormat.getInstance().parse(data.getString(key)));
+                            break;
+                        case KEY_UPDATED_AT:
+                            builder.updatedAt(ParseDateFormat.getInstance().parse(data.getString(key)));
+                            break;
+                        case KEY_ACL:
+                            ParseACL acl = ParseACL.createACLFromJSONObject(data.getJSONObject(key), decoder);
+                            builder.put(KEY_ACL, acl);
+                            break;
+                        default:
+                            Object value = data.get(key);
+                            Object decodedObject = decoder.decode(value);
+                            builder.put(key, decodedObject);
                     }
-                    if (key.equals(KEY_CREATED_AT)) {
-                        builder.createdAt(ParseDateFormat.getInstance().parse(data.getString(key)));
-                        continue;
-                    }
-                    if (key.equals(KEY_UPDATED_AT)) {
-                        builder.updatedAt(ParseDateFormat.getInstance().parse(data.getString(key)));
-                        continue;
-                    }
-
-                    Object value = data.get(key);
-                    Object decodedObject = decoder.decode(value);
-                    builder.put(key, decodedObject);
                 }
             }
-
             return builder;
         } catch (JSONException e) {
             throw new RuntimeException(e);
