@@ -1113,7 +1113,7 @@ public class ParseObject implements Parcelable {
      * @see #unpinAllInBackground(String, java.util.List)
      * @see #pinAllInBackground(String, java.util.List)
      */
-    public static <T extends ParseObject> Task<Void> pinAllNonRecursiveInBackground(final String name,
+    public static <T extends ParseObject> Task<Void> pinAllNotRecursiveInBackground(final String name,
                                                                                     final List<T> objects) {
         return pinAllInBackground(name, objects, false);
     }
@@ -3953,8 +3953,8 @@ public class ParseObject implements Parcelable {
      * @see #unpinInBackground(String)
      * @see #pinInBackground(String)
      */
-    public Task<Void> pinInBackgroundNonRecursive(String name) {
-        return pinAllNonRecursiveInBackground(name, Collections.singletonList(this));
+    public Task<Void> pinNotRecursiveInBackground(String name) {
+        return pinAllNotRecursiveInBackground(name, Collections.singletonList(this));
     }
 
     Task<Void> pinInBackground(String name, boolean includeAllChildren) {
@@ -3990,8 +3990,8 @@ public class ParseObject implements Parcelable {
      * @see #unpin(String)
      * @see #pin(String)
      */
-    public void pinNonRecurisive(String name) throws ParseException {
-        ParseTaskUtils.wait(pinInBackgroundNonRecursive(name));
+    public void pinNotRecurisive(String name) throws ParseException {
+        ParseTaskUtils.wait(pinNotRecursiveInBackground(name));
     }
 
     /**
