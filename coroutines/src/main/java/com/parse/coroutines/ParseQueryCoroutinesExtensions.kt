@@ -22,6 +22,32 @@ suspend fun <T : ParseObject> ParseQuery<T>.find(): List<T> {
     }
 }
 
+suspend fun <T : ParseObject> ParseQuery<T>.get(id: String): T {
+    return suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation {
+            cancel()
+        }
+
+        getInBackground(id) { obj, e ->
+            if (e == null) continuation.resume(obj)
+            else continuation.resumeWithException(e)
+        }
+    }
+}
+
+suspend fun <T : ParseObject> ParseQuery<T>.first(): T {
+    return suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation {
+            cancel()
+        }
+
+        getFirstInBackground { obj, e ->
+            if (e == null) continuation.resume(obj)
+            else continuation.resumeWithException(e)
+        }
+    }
+}
+
 suspend fun <T : ParseObject> ParseQuery<T>.count(): Int {
     return suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
