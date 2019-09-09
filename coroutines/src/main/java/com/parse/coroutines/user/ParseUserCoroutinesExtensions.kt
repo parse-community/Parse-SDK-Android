@@ -1,6 +1,6 @@
 @file:JvmName("ParseUserCoroutinesExtensions")
 
-package com.parse.coroutines
+package com.parse.coroutines.user
 
 import com.parse.ParseUser
 import kotlin.coroutines.resume

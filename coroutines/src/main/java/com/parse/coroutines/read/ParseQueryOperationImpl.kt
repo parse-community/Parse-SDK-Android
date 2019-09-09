@@ -1,4 +1,4 @@
-package com.parse.coroutines
+package com.parse.coroutines.read
 
 import com.parse.ParseObject
 import com.parse.ParseQuery
