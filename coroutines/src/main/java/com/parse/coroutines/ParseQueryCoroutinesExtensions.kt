@@ -10,6 +10,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 suspend fun <T : ParseObject> ParseQuery<T>.find(): List<T> {
+    return findInternal()
+}
+
+internal suspend fun <T : ParseObject> ParseQuery<T>.findInternal(): List<T> {
     return suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
             cancel()
@@ -23,6 +27,10 @@ suspend fun <T : ParseObject> ParseQuery<T>.find(): List<T> {
 }
 
 suspend fun <T : ParseObject> ParseQuery<T>.get(id: String): T {
+    return getInternal(id)
+}
+
+internal suspend fun <T : ParseObject> ParseQuery<T>.getInternal(id: String): T {
     return suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
             cancel()
@@ -36,6 +44,10 @@ suspend fun <T : ParseObject> ParseQuery<T>.get(id: String): T {
 }
 
 suspend fun <T : ParseObject> ParseQuery<T>.first(): T {
+    return firstInternal()
+}
+
+internal suspend fun <T : ParseObject> ParseQuery<T>.firstInternal(): T {
     return suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
             cancel()
@@ -49,6 +61,10 @@ suspend fun <T : ParseObject> ParseQuery<T>.first(): T {
 }
 
 suspend fun <T : ParseObject> ParseQuery<T>.count(): Int {
+    return countInternal()
+}
+
+internal suspend fun <T : ParseObject> ParseQuery<T>.countInternal(): Int {
     return suspendCancellableCoroutine { continuation ->
         continuation.invokeOnCancellation {
             cancel()
