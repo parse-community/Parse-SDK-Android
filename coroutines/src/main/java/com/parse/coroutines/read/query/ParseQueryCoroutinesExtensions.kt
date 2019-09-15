@@ -1,7 +1,6 @@
 @file:JvmName("ParseQueryCoroutinesExtensions")
-@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 
-package com.parse.coroutines.read
+package com.parse.coroutines.read.query
 
 import com.parse.ParseObject
 import com.parse.ParseQuery

@@ -26,6 +26,16 @@ launch { // Coroutine builder
 ```
 We use a coroutine builder because `find()` is a suspend function.
 
+We can also, use a function like a coroutine builder, it will be provider us a flexibility call our query without any extensions function.
+
+````kotlin
+launchQuery(query) {
+	// doing operations like find, get, first and count
+}
+````
+
+It uses a a regular coroutine builder `launch` and pass as receiver a `ParseQueryOperation`` 
+
 ### ParseCloud
 
 We can call cloud function inline:
@@ -59,6 +69,10 @@ launch { // Coroutine builder
     val user = parseLogIn("username", "password")
 }
 ```
+
+### Parse Object
+
+We can save, pinning and fetch parse objects use coroutines as well.
 
 ## Contributing
 When contributing to the `coroutines` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.
