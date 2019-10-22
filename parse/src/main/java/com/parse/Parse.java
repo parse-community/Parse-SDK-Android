@@ -191,6 +191,15 @@ public class Parse {
         }
     }
 
+    /**
+     * Destroys this client and erases its local data store.
+     * Calling this after {@code Parse.initialize} allows you to re-initialize this client
+     * with a new configuration.
+     */
+    public static void destroy() {
+        destroy();
+    }
+
     static void destroy() {
         ParseObject.unregisterParseSubclasses();
 
