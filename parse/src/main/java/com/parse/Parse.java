@@ -197,10 +197,6 @@ public class Parse {
      * with a new configuration.
      */
     public static void destroy() {
-        destroy();
-    }
-
-    static void destroy() {
         ParseObject.unregisterParseSubclasses();
 
         ParseEventuallyQueue queue;
