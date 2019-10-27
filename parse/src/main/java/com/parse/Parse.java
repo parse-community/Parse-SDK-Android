@@ -12,6 +12,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import android.util.Log;
 
 import java.io.File;
@@ -190,6 +192,47 @@ public class Parse {
             Parse.callbacks = null;
         }
     }
+
+    //region Server URL
+
+    /**
+     * Sets the server URL. This can be used to update the server URL after this client has been
+     * initialized, without having to {@link Parse#destroy()} this client.
+     * @param server The server URL to set.
+     */
+    public static void setServer(@NonNull String server) {
+        try {
+            ParseRESTCommand.server = new URL(validateServerUrl(server));
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Returns the current server URL.
+     */
+    public static @Nullable String getServer() {
+        URL server = ParseRESTCommand.server;
+        return server == null ? null : server.toString();
+    }
+
+    /**
+     * Validates the server URL.
+     * @param server The server URL to validate.
+     * @return The validated server URL.
+     */
+    private static @Nullable String validateServerUrl(@Nullable String server) {
+
+        // Add an extra trailing slash so that Parse REST commands include
+        // the path as part of the server URL (i.e. http://api.myhost.com/parse)
+        if (server != null && !server.endsWith("/")) {
+            server = server + "/";
+        }
+
+        return server;
+    }
+
+    //endregion
 
     /**
      * Destroys this client and erases its local data store.
@@ -578,14 +621,7 @@ public class Parse {
              * @return The same builder, for easy chaining.
              */
             public Builder server(String server) {
-
-                // Add an extra trailing slash so that Parse REST commands include
-                // the path as part of the server URL (i.e. http://api.myhost.com/parse)
-                if (server != null && !server.endsWith("/")) {
-                    server = server + "/";
-                }
-
-                this.server = server;
+                this.server = validateServerUrl(server);
                 return this;
             }
 
