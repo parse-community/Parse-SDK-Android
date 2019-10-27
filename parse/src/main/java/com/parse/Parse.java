@@ -193,8 +193,9 @@ public class Parse {
 
     /**
      * Destroys this client and erases its local data store.
-     * Calling this after {@code Parse.initialize} allows you to re-initialize this client
-     * with a new configuration.
+     * Calling this after {@link Parse#initialize} allows you to re-initialize this client with a
+     * new configuration. Calling this while server requests are in progress can cause undefined
+     * behavior.
      */
     public static void destroy() {
         ParseObject.unregisterParseSubclasses();
