@@ -202,7 +202,7 @@ public class Parse {
      * having to {@link Parse#destroy()} this client. An example use case is server connection failover, where the
      * clients connects to another URL if the server becomes unreachable at the current URL.
      * <p/>
-     * <b>Waring:</b><br/>
+     * <b>Warning:</b><br/>
      * The new server URL must point to a Parse Server that connects to the same database.
      * Otherwise, issues may arise related to locally cached data or delayed methods such as
      * {@link ParseObject#saveEventually()}.
