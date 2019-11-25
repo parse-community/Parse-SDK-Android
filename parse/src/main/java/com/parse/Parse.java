@@ -196,8 +196,16 @@ public class Parse {
     //region Server URL
 
     /**
-     * Sets the server URL. This can be used to update the server URL after this client has been
-     * initialized, without having to {@link Parse#destroy()} this client.
+     * Sets the server URL. The local client cache is not cleared.
+     * <p/>
+     * This can be used to update the server URL after this client has been initialized, without
+     * having to {@link Parse#destroy()} this client. An example use case is server connection failover, where the
+     * clients connects to another URL if the server becomes unreachable at the current URL.
+     * <p/>
+     * <b>Waring:</b><br/>
+     * The new server URL must point to a Parse Server that connects to the same database.
+     * Otherwise, issues may arise related to locally cached data or delayed methods such as
+     * {@link ParseObject#saveEventually()}.
      * @param server The server URL to set.
      */
     public static void setServer(@NonNull String server) {
