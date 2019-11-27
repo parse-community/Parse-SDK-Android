@@ -16,7 +16,11 @@ class ListOfEnumParseDelegate<T : Enum<T>>(private val enumClass: Class<T>) {
   operator fun getValue(parseObject: ParseObject, property: KProperty<*>): MutableList<T>? {
     val value = parseObject.getList<String>(property.name)
     return value?.map {
-      java.lang.Enum.valueOf(enumClass, it.toUpperCase())
+      try {
+        java.lang.Enum.valueOf(enumClass, it.toUpperCase())
+      } catch (e: Exception) {
+        throw e
+      }
     } as? MutableList<T>
   }
 
