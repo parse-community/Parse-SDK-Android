@@ -6,7 +6,7 @@ branches:
 language: android
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 before_install:
     - pip install --user codecov
