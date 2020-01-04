@@ -34,7 +34,7 @@ dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:ktx:latest.version.here"
 }
 ```
-replacing `latest.version.here` with the latest released version (see JitPack badge above)
+replacing `latest.version.here` with the latest released version (see JitPack badge above).
 
 ### Setup
 Initialize Parse in a custom class that extends `Application`:
