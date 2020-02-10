@@ -39,6 +39,7 @@ object ParseGoogleUtils {
      * easily get the [clientId] value via context.getString(R.string.default_web_client_id)
      * @param clientId the server clientId
      */
+    @JvmStatic
     fun initialize(clientId: String) {
         isInitialized = true
         this.clientId = clientId
@@ -48,6 +49,7 @@ object ParseGoogleUtils {
      * @param user A [com.parse.ParseUser] object.
      * @return `true` if the user is linked to a Facebook account.
      */
+    @JvmStatic
     fun isLinked(user: ParseUser): Boolean {
         return user.isLinked(AUTH_TYPE)
     }
@@ -58,6 +60,7 @@ object ParseGoogleUtils {
      * @param activity The activity which passes along the result via [onActivityResult]
      * @param callback The [LogInCallback] which is invoked on log in success or error
      */
+    @JvmStatic
     fun logIn(activity: Activity, callback: LogInCallback) {
         checkInitialization()
         this.currentCallback = callback
@@ -73,6 +76,7 @@ object ParseGoogleUtils {
      * @param data        The result data that's received by the Activity or Fragment.
      * @return true if the result could be handled.
      */
+    @JvmStatic
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         if (requestCode != REQUEST_CODE_GOOGLE_SIGN_IN) {
             return false
@@ -94,6 +98,7 @@ object ParseGoogleUtils {
      * @param callback A callback that will be executed when unlinking is complete.
      * @return A task that will be resolved when linking is complete.
      */
+    @JvmStatic
     fun unlinkInBackground(user: ParseUser, callback: SaveCallback): Task<Void> {
         return callbackOnMainThreadAsync(unlinkInBackground(user), callback, false)
     }
@@ -104,6 +109,7 @@ object ParseGoogleUtils {
      * @param user The user to unlink.
      * @return A task that will be resolved when unlinking has completed.
      */
+    @JvmStatic
     fun unlinkInBackground(user: ParseUser): Task<Void> {
         checkInitialization()
         return user.unlinkFromInBackground(AUTH_TYPE)
@@ -117,6 +123,7 @@ object ParseGoogleUtils {
      * @param account Authorization credentials of a Google user.
      * @return A task that will be resolved when linking is complete.
      */
+    @JvmStatic
     fun linkInBackground(user: ParseUser, account: GoogleSignInAccount): Task<Void> {
         return user.linkWithInBackground(AUTH_TYPE, getAuthData(account))
     }

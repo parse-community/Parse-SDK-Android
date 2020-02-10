@@ -13,7 +13,7 @@ dependencies {
 ```
 
 ## Usage
-Extensive docs can be found in the [guide][guide]. The basic steps are:
+Here we will show the basic steps for logging in/signing up with Google. First:
 ```java
 // in Application.onCreate(); or somewhere similar
 ParseGoogleUtils.initialize(context, getString(R.string.default_web_client_id));
