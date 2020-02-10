@@ -26,6 +26,7 @@ object ParseGoogleUtils {
     private val lock = Any()
 
     private var isInitialized = false
+    private var googleSignInClient: GoogleSignInClient? = null
 
     /**
      * Just hope this doesn't clash I guess...
@@ -65,6 +66,7 @@ object ParseGoogleUtils {
         checkInitialization()
         this.currentCallback = callback
         val googleSignInClient = buildGoogleSignInClient(activity)
+        this.googleSignInClient = googleSignInClient
         activity.startActivityForResult(googleSignInClient.signInIntent, REQUEST_CODE_GOOGLE_SIGN_IN)
     }
 
@@ -145,6 +147,7 @@ object ParseGoogleUtils {
     }
 
     private fun onSignedIn(account: GoogleSignInAccount) {
+        googleSignInClient?.signOut()?.addOnCompleteListener {}
         val authData: Map<String, String> = getAuthData(account)
         ParseUser.logInWithInBackground(AUTH_TYPE, authData)
                 .continueWith { task ->
@@ -167,6 +170,8 @@ object ParseGoogleUtils {
         val authData = mutableMapOf<String, String>()
         authData["id"] = account.id!!
         authData["id_token"] = account.idToken!!
+        account.email?.let { authData["email"] = it }
+        account.photoUrl?.let { authData["photo_url"] = it.toString() }
         return authData
     }
 
