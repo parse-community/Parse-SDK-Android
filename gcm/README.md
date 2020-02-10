@@ -2,7 +2,7 @@
 GCM support for Parse Android apps
 
 ## Deprecated
-Please note that GCM is deprecated in favor of FCM. This module exists as a backwards compatible solution for projects already using GCM. New apps should instead use FCM.
+Please note that GCM is deprecated in favor of FCM. This module exists as a backwards compatible solution for projects already using GCM. New apps should instead use FCM. Note that if your app targets Android Q or later, [GCM will not function](https://developers.google.com/cloud-messaging/faq)
 
 ## Setup
 
