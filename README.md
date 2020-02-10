@@ -80,6 +80,7 @@ We want to make contributing to this project as easy and transparent as possible
  - [Parse Coroutines](/coroutines)
  - [ParseUI](https://github.com/parse-community/ParseUI-Android)
  - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android)
+ - [ParseGoogleUtils](/google)
  - [ParseFacebookUtils](https://github.com/parse-community/ParseFacebookUtils-Android)
  - [ParseTwitterUtils](https://github.com/parse-community/ParseTwitterUtils-Android)
 
