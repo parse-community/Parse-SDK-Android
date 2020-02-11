@@ -1,12 +1,10 @@
 # Parse SDK Android Coroutines
 Kotlin coroutines support for Parse Android
 
-## Setup
+## Dependency
 
-### Installation
 After including JitPack:
-
-```groovy
+```gradle
 dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:coroutines:latest.version.here"
 }
