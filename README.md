@@ -66,6 +66,7 @@ The custom `Application` class must be registered in `AndroidManifest.xml`:
 ```xml
 <application
     android:name=".App"
+    android:usesCleartextTraffic="true"
     ...>
     ...
 </application>
