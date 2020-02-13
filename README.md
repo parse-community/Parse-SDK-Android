@@ -54,7 +54,7 @@ public class App extends Application {
         .applicationId("YOUR_APP_ID")
         // if desired
         .clientKey("YOUR_CLIENT_KEY")
-        .server("http://localhost:1337/parse/")
+        .server("https://your-server-address/parse/")
         .build()
       );
     }
@@ -70,6 +70,7 @@ The custom `Application` class must be registered in `AndroidManifest.xml`:
     ...
 </application>
 ```
+Note that if you are testing with a server using `http`, you will need to add `android:usesCleartextTraffic="true"` to your above `<application>` definition, but you should only do this while testing and should use `https` for your final product.
 
 See the [guide][guide] for the rest of the SDK usage.
 
