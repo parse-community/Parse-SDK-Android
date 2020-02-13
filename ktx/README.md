@@ -1,12 +1,10 @@
 # Parse SDK Android KTX
 Kotlin extension support for Parse Android
 
-## Setup
+## Dependency
 
-### Installation
 After including JitPack:
-
-```groovy
+```gradle
 dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:ktx:latest.version.here"
 }

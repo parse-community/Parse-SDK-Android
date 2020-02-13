@@ -1,2 +1,2 @@
-include ':parse', ':fcm', ':gcm', ':ktx', ':coroutines', ':google'
+include ':parse', ':fcm', ':gcm', ':ktx', ':coroutines', ':google', ':facebook', ':twitter'
 

@@ -1,8 +1,6 @@
 # Parse Google Utils for Android
 A utility library to authenticate `ParseUser`s with the Google SDK.
 
-## Setup
-
 ## Dependency
 
 After including JitPack:
@@ -43,9 +41,6 @@ ParseGoogleUtils.logInWithReadPermissionsInBackground(this, permissions, new Log
   }
 });
 ```
-
-## How Do I Contribute?
-We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](https://github.com/parse-community/Parse-SDK-Android/blob/master/CONTRIBUTING.md).
 
 ## License
     Copyright (c) 2015-present, Parse, LLC.

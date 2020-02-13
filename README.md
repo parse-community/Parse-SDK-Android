@@ -85,8 +85,8 @@ These are other official libraries we made that can help you create your Parse a
 - [Parse Coroutines](/coroutines) - Kotlin Coroutines support for various Parse async operations
 - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android) - Realtime query subscription.
 - [ParseGoogleUtils](/google) - Google login/signup.
-- [ParseFacebookUtils](https://github.com/parse-community/ParseFacebookUtils-Android) - Facebook login/signup.
-- [ParseTwitterUtils](https://github.com/parse-community/ParseTwitterUtils-Android) - Twitter login/signup.
+- [ParseFacebookUtils](/facebook) - Facebook login/signup.
+- [ParseTwitterUtils](/twitter) - Twitter login/signup.
 - [ParseUI](https://github.com/parse-community/ParseUI-Android) - Prebuilt UI elements.
 
 ## License
