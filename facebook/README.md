@@ -1,5 +1,5 @@
 # Parse Facebook Utils for Android
-A utility library to authenticate `ParseUser`s with the Facebook SDK. For more information, see our [guide][guide].
+A utility library to authenticate `ParseUser`s with the Facebook SDK.
 
 ## Dependency
 
