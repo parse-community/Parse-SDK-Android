@@ -26,7 +26,7 @@ allprojects {
 Then, add the library to your project `build.gradle`
 ```gradle
 ext {
-   parseVersion = latest.version.here
+   parseVersion = "latest.version.here"
 }
 dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:parse:$parseVersion"
