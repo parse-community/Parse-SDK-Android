@@ -24,14 +24,22 @@ allprojects {
 ```
 
 Then, add the library to your project `build.gradle`
-
 ```gradle
+ext {
+   parseVersion = latest.version.here
+}
 dependencies {
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:$parseVersion"
+    // for Google login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:google:$parseVersion"
+    // for Facebook login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:facebook:$parseVersion"
+    // for Twitter login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:twitter:$parseVersion"
     // for FCM Push support (optional)
-    implementation "com.github.parse-community.Parse-SDK-Android:fcm:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:fcm:$parseVersion"
     // for Kotlin extensions support (optional)
-    implementation "com.github.parse-community.Parse-SDK-Android:ktx:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:ktx:$parseVersion"
 }
 ```
 
@@ -81,13 +89,13 @@ We want to make contributing to this project as easy and transparent as possible
 ## Other Parse Projects
 These are other official libraries we made that can help you create your Parse app.
 
+- [ParseGoogleUtils](/google) - Google login/signup.
+- [ParseFacebookUtils](/facebook) - Facebook login/signup.
+- [ParseTwitterUtils](/twitter) - Twitter login/signup.
 - [Parse FCM](/fcm) - [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) support for sending push notifications.
 - [Parse KTX](/ktx) - Kotlin extensions for ease of developer use.
 - [Parse Coroutines](/coroutines) - Kotlin Coroutines support for various Parse async operations
 - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android) - Realtime query subscription.
-- [ParseGoogleUtils](/google) - Google login/signup.
-- [ParseFacebookUtils](/facebook) - Facebook login/signup.
-- [ParseTwitterUtils](/twitter) - Twitter login/signup.
 - [ParseUI](https://github.com/parse-community/ParseUI-Android) - Prebuilt UI elements.
 
 ## License
