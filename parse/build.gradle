@@ -29,7 +29,7 @@ android {
 
 ext {
     // Note: Don't update past 3.12.x, as it sets the minSdk to Android 5.0
-    okhttpVersion = "3.12.8"
+    okhttpVersion = "3.12.9"
 }
 
 dependencies {
