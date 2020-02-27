@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import androidx.annotation.NonNull;
+
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +59,8 @@ public final class ParseCloud {
      *               be placed in a ParseObject except for ParseObjects themselves.
      * @return A Task that will be resolved when the cloud function has returned.
      */
-    public static <T> Task<T> callFunctionInBackground(final String name,
-                                                       final Map<String, ?> params) {
+    public static <T> Task<T> callFunctionInBackground(@NonNull final String name,
+                                                       @NonNull final Map<String, ?> params) {
         return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
             @Override
             public Task<T> then(Task<String> task) {
@@ -79,7 +81,7 @@ public final class ParseCloud {
      * ParseObject.
      * @throws ParseException exception
      */
-    public static <T> T callFunction(String name, Map<String, ?> params) throws ParseException {
+    public static <T> T callFunction(@NonNull String name, @NonNull Map<String, ?> params) throws ParseException {
         return ParseTaskUtils.wait(ParseCloud.<T>callFunctionInBackground(name, params));
     }
 
@@ -91,8 +93,8 @@ public final class ParseCloud {
      *                 be placed in a ParseObject except for ParseObjects themselves.
      * @param callback The callback that will be called when the cloud function has returned.
      */
-    public static <T> void callFunctionInBackground(String name, Map<String, ?> params,
-                                                    FunctionCallback<T> callback) {
+    public static <T> void callFunctionInBackground(@NonNull String name, @NonNull Map<String, ?> params,
+                                                    @NonNull FunctionCallback<T> callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(
                 ParseCloud.<T>callFunctionInBackground(name, params),
                 callback);
