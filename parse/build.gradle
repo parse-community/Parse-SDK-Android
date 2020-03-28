@@ -35,7 +35,7 @@ ext {
 dependencies {
     api "androidx.annotation:annotation:1.1.0"
     api "androidx.core:core:1.2.0"
-    api "com.parse.bolts:bolts-tasks:1.4.0"
+    api "com.parse.bolts:bolts-tasks:1.5.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
     testImplementation "org.robolectric:robolectric:3.8"
