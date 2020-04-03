@@ -63,6 +63,12 @@ public class ManifestInfo {
                     PLog.e(TAG, "Couldn't find info about own package", e);
                     versionName = "unknown";
                 }
+                if (versionName == null) {
+                    // Some contexts, such as instrumentation tests can always have this value
+                    // return as null. We will change to "unknown" for this case as well, so that
+                    // an exception isn't thrown for adding a null header later.
+                    versionName = "unknown";
+                }
             }
         }
 
