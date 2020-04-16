@@ -28,7 +28,7 @@ android {
 }
 
 dependencies {
-    api "com.google.firebase:firebase-messaging:20.1.0"
+    api "com.google.firebase:firebase-messaging:20.1.5"
     implementation project(":parse")
 }
 
