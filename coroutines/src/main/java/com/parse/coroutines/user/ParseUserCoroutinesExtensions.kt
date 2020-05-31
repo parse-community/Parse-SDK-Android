@@ -7,7 +7,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun ParseUser.singUp(): ParseUser {
+suspend fun ParseUser.signUp(): ParseUser {
     return suspendCoroutine { continuation ->
         signUpInBackground { e ->
             if (e == null) continuation.resume(this)

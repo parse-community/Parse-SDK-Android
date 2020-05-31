@@ -1,14 +1,11 @@
 # Parse SDK Android FCM
 FCM support for Parse Android apps
 
-## Setup
+## Dependency
 
-### Installation
 After including JitPack:
-
-```groovy
+```gradle
 dependencies {
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:latest.version.here"
     implementation "com.github.parse-community.Parse-SDK-Android:fcm:latest.version.here"
 }
 ```

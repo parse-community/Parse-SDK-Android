@@ -1,0 +1,32 @@
+apply plugin: "com.android.library"
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+    }
+
+    packagingOptions {
+        exclude "**/BuildConfig.class"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    api "androidx.appcompat:appcompat:1.1.0"
+    api "oauth.signpost:signpost-core:1.2.1.2"
+    api "se.akerfeldt:okhttp-signpost:1.1.0"
+    implementation project(":parse")
+
+    testImplementation "junit:junit:4.13"
+    testImplementation "org.mockito:mockito-core:1.10.19"
+}
+
+apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"

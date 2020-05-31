@@ -3,7 +3,6 @@
 [![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)](https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE)
 [![Build Status](https://travis-ci.org/parse-community/Parse-SDK-Android.svg?branch=master)](https://travis-ci.org/parse-community/Parse-SDK-Android)
 [![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
-[![Join The Conversation](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
 [![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
 [![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
@@ -26,18 +25,30 @@ allprojects {
 
 Then, add the library to your project `build.gradle`
 ```gradle
+ext {
+   parseVersion = "latest.version.here"
+}
 dependencies {
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:$parseVersion"
+    // for Google login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:google:$parseVersion"
+    // for Facebook login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:facebook:$parseVersion"
+    // for Twitter login/signup support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:twitter:$parseVersion"
     // for FCM Push support (optional)
-    implementation "com.github.parse-community.Parse-SDK-Android:fcm:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:fcm:$parseVersion"
     // for Kotlin extensions support (optional)
-    implementation "com.github.parse-community.Parse-SDK-Android:ktx:latest.version.here"
+    implementation "com.github.parse-community.Parse-SDK-Android:ktx:$parseVersion"
 }
 ```
+
 replacing `latest.version.here` with the latest released version (see JitPack badge above).
 
 ### Setup
+
 Initialize Parse in a custom class that extends `Application`:
+
 ```java
 import com.parse.Parse;
 import android.app.Application;
@@ -51,7 +62,7 @@ public class App extends Application {
         .applicationId("YOUR_APP_ID")
         // if desired
         .clientKey("YOUR_CLIENT_KEY")
-        .server("http://localhost:1337/parse/")
+        .server("https://your-server-address/parse/")
         .build()
       );
     }
@@ -67,23 +78,28 @@ The custom `Application` class must be registered in `AndroidManifest.xml`:
     ...
 </application>
 ```
+Note that if you are testing with a server using `http`, you will need to add `android:usesCleartextTraffic="true"` to your above `<application>` definition, but you should only do this while testing and should use `https` for your final product.
 
 See the [guide][guide] for the rest of the SDK usage.
 
 ## How Do I Contribute?
+
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
 
 ## Other Parse Projects
+These are other official libraries we made that can help you create your Parse app.
 
- - [Parse FCM](/fcm)
- - [Parse KTX](/ktx)
- - [Parse Coroutines](/coroutines)
- - [ParseUI](https://github.com/parse-community/ParseUI-Android)
- - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android)
- - [ParseFacebookUtils](https://github.com/parse-community/ParseFacebookUtils-Android)
- - [ParseTwitterUtils](https://github.com/parse-community/ParseTwitterUtils-Android)
+- [ParseGoogleUtils](/google) - Google login/signup.
+- [ParseFacebookUtils](/facebook) - Facebook login/signup.
+- [ParseTwitterUtils](/twitter) - Twitter login/signup.
+- [Parse FCM](/fcm) - [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) support for sending push notifications.
+- [Parse KTX](/ktx) - Kotlin extensions for ease of developer use.
+- [Parse Coroutines](/coroutines) - Kotlin Coroutines support for various Parse async operations
+- [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android) - Realtime query subscription.
+- [ParseUI](https://github.com/parse-community/ParseUI-Android) - Prebuilt UI elements.
 
 ## License
+
     Copyright (c) 2015-present, Parse, LLC.
     All rights reserved.
 
@@ -91,9 +107,9 @@ We want to make contributing to this project as easy and transparent as possible
     LICENSE file in the root directory of this source tree. An additional grant
     of patent rights can be found in the PATENTS file in the same directory.
 
------
+---
 
 As of April 5, 2017, Parse, LLC has transferred this code to the parse-community organization, and will no longer be contributing to or distributing this code.
 
- [guide]: http://docs.parseplatform.org/android/guide/
- [open-collective-link]: https://opencollective.com/parse-server
+[guide]: http://docs.parseplatform.org/android/guide/
+[open-collective-link]: https://opencollective.com/parse-server
