@@ -41,10 +41,9 @@ public class ParseInstallation extends ParseObject {
     private static final String KEY_TIME_ZONE = "timeZone";
     private static final String KEY_LOCALE = "localeIdentifier";
     private static final String KEY_APP_VERSION = "appVersion";
-    private static final String KEY_APP_BUILD = "appBuild";
     private static final List<String> READ_ONLY_FIELDS = Collections.unmodifiableList(
             Arrays.asList(KEY_DEVICE_TYPE, KEY_INSTALLATION_ID, KEY_DEVICE_TOKEN, KEY_PUSH_TYPE,
-                    KEY_TIME_ZONE, KEY_LOCALE, KEY_APP_VERSION, KEY_APP_BUILD, KEY_APP_NAME, KEY_PARSE_VERSION,
+                    KEY_TIME_ZONE, KEY_LOCALE, KEY_APP_VERSION, KEY_APP_NAME, KEY_PARSE_VERSION,
                     KEY_APP_IDENTIFIER, KEY_OBJECT_ID));
 
     public ParseInstallation() {
@@ -210,8 +209,7 @@ public class ParseInstallation extends ParseObject {
                 String packageName = context.getPackageName();
                 PackageManager pm = context.getPackageManager();
                 PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
-                String appVersion = pkgInfo.versionName;
-                String appBuild = String.valueOf(pkgInfo.versionCode);
+                String appVersion = String.valueOf(pkgInfo.versionCode);
                 String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
 
                 if (packageName != null && !packageName.equals(get(KEY_APP_IDENTIFIER))) {
@@ -222,9 +220,6 @@ public class ParseInstallation extends ParseObject {
                 }
                 if (appVersion != null && !appVersion.equals(get(KEY_APP_VERSION))) {
                     performPut(KEY_APP_VERSION, appVersion);
-                }
-                if (appBuild != null && !appVersion.equals(get(KEY_APP_BUILD))) {
-                    performPut(KEY_APP_BUILD, appBuild);
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 PLog.w(TAG, "Cannot load package info; will not be saved to installation");

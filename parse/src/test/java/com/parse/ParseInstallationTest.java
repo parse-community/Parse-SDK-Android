@@ -48,7 +48,6 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     private static final String KEY_TIME_ZONE = "timeZone";
     private static final String KEY_LOCALE_IDENTIFIER = "localeIdentifier";
     private static final String KEY_APP_VERSION = "appVersion";
-    private static final String KEY_APP_BUILD = "appBuild";
 
     private Locale defaultLocale;
 
@@ -290,13 +289,11 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         String packageName = context.getPackageName();
         PackageManager pm = context.getPackageManager();
         PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
-        String appVersion = pkgInfo.versionName;
-        String appBuild = String.valueOf(pkgInfo.versionCode);
+        String appVersion = String.valueOf(pkgInfo.versionCode);
         String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
         assertEquals(packageName, installation.getString(KEY_APP_IDENTIFIER));
         assertEquals(appName, installation.getString(KEY_APP_NAME));
         assertEquals(appVersion, installation.getString(KEY_APP_VERSION));
-        assertEquals(appBuild, installation.getString(KEY_APP_BUILD));
 
         // Make sure we update device info
         assertEquals("android", installation.getString(KEY_DEVICE_TYPE));
