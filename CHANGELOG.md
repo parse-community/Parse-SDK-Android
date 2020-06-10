@@ -3,7 +3,7 @@
 ### master
 
 > __BREAKING CHANGES__
-> - FIX: Corrected the `Installation` property `appVersion` to be the build version instead of the version name. This aligns the property with its equivalent in the Parse iOS SDK. See [#902](https://github.com/parse-community/parse-server/pull/902) for details. Thanks to [Manuel Trezza](https://github.com/mtrezza).
+> - FIX: Corrected the `Installation` property `appVersion` to be the build version instead of the version name. This aligns the property with its equivalent in the Parse iOS SDK. See [#902](https://github.com/parse-community/Parse-SDK-Android/pull/902) for details. Thanks to [Manuel Trezza](https://github.com/mtrezza).
 
 - Update OkHttp version to allow for future Android API 30 compilation
 - Compile with Android 29
