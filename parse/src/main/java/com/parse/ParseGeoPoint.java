@@ -15,8 +15,8 @@ import android.os.Parcelable;
 
 import java.util.Locale;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * {@code ParseGeoPoint} represents a latitude / longitude point that may be associated with a key

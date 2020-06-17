@@ -11,9 +11,9 @@ package com.parse;
 import java.util.ArrayList;
 import java.util.List;
 
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * Helper class to step through a {@link TaskQueue}.

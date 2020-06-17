@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

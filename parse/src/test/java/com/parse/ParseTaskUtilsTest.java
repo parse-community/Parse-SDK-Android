@@ -13,15 +13,15 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-import bolts.AggregateException;
-import bolts.Task;
+import com.parse.boltsinternal.AggregateException;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertTrue;
 
 public class ParseTaskUtilsTest {
     /**
-     * Verifies {@link bolts.AggregateException} gets wrapped with {@link ParseException} when thrown from
-     * {@link com.parse.ParseTaskUtils#wait(bolts.Task)}.
+     * Verifies {@link AggregateException} gets wrapped with {@link ParseException} when thrown from
+     * {@link com.parse.ParseTaskUtils#wait(Task)}.
      */
     @Test
     public void testWaitForTaskWrapsAggregateExceptionAsParseException() {

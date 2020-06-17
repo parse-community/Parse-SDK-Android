@@ -17,7 +17,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 class ParseRESTUserCommand extends ParseRESTCommand {
 

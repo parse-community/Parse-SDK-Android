@@ -3,8 +3,8 @@ package com.parse.google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import bolts.Continuation
-import bolts.Task
+import com.parse.boltsinternal.Continuation
+import com.parse.boltsinternal.Task
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient

@@ -23,7 +23,7 @@ import com.parse.ParseInstallation;
 
 import java.util.concurrent.Callable;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /**
  * Handles saving the GCM token to the Parse Installation

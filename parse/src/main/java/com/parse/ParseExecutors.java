@@ -11,7 +11,7 @@ package com.parse;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 class ParseExecutors {
 

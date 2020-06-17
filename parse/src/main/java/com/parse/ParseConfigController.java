@@ -10,8 +10,8 @@ package com.parse;
 
 import org.json.JSONObject;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 class ParseConfigController {
 
