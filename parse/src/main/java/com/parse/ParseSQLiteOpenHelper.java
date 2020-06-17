@@ -12,7 +12,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 abstract class ParseSQLiteOpenHelper {
 

@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /**
  * A helper object to send requests to the server.

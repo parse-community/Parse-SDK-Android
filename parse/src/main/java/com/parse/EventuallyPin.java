@@ -19,8 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * Properties

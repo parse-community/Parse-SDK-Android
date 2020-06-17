@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import bolts.Capture;
-import bolts.Task;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

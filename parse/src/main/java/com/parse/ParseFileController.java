@@ -17,8 +17,8 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 // TODO(grantland): Create ParseFileController interface
 class ParseFileController {

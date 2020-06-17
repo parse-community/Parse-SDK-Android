@@ -18,9 +18,9 @@ import android.os.Bundle;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import bolts.Capture;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * LocationNotifier is a wrapper around fetching the current device's location. It looks for the GPS

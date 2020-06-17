@@ -13,8 +13,8 @@ import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Map;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The ParseCloud class defines provides methods for interacting with Parse Cloud Functions. A Cloud
