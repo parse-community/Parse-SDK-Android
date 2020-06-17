@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /**
  * Provides utility functions for working with Anonymously logged-in users. Anonymous users have

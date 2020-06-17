@@ -12,8 +12,8 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 class ParseCloudCodeController {
 

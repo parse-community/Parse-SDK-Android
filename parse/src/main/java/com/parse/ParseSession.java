@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseSession} is a local representation of session data that can be saved

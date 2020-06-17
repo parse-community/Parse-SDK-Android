@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static com.parse.ParseMatchers.hasParseErrorCode;
 import static org.junit.Assert.assertEquals;

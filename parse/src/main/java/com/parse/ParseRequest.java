@@ -23,9 +23,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * ParseRequest takes an arbitrary HttpUriRequest and retries it a number of times with

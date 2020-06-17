@@ -15,7 +15,7 @@ import com.parse.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 class TwitterController {
 

@@ -17,7 +17,7 @@ import org.mockito.Matchers;
 import java.util.HashMap;
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;

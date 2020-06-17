@@ -16,9 +16,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 class ParseSQLiteDatabase {
 

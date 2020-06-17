@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * {@code ParseFile} is a local representation of a file that is saved to the Parse cloud.

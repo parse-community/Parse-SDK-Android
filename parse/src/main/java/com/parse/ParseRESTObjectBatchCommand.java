@@ -22,9 +22,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 class ParseRESTObjectBatchCommand extends ParseRESTCommand {
     public final static int COMMAND_OBJECT_BATCH_MAX_SIZE = 50;

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /* package */ abstract class ParseEventuallyQueue {
 

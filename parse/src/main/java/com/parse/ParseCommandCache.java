@@ -26,10 +26,10 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import bolts.Capture;
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * ParseCommandCache manages an on-disk cache of commands to be executed, and a thread with a

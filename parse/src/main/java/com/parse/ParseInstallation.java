@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseInstallation} is a local representation of installation data that can be saved

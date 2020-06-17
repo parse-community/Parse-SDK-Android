@@ -28,8 +28,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 class OfflineQueryLogic {
     private final OfflineStore store;

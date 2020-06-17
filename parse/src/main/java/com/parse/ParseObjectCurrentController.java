@@ -8,7 +8,7 @@
  */
 package com.parse;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 interface ParseObjectCurrentController<T extends ParseObject> {
 

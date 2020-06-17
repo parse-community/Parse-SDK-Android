@@ -18,7 +18,7 @@ import org.junit.rules.TemporaryFolder;
 import java.util.Arrays;
 import java.util.Collections;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertSame;

@@ -16,7 +16,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /**
  * Request returns a byte array of the response and provides a callback the progress of the data

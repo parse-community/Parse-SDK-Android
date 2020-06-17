@@ -10,7 +10,7 @@ package com.parse;
 
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 interface ParseUserController {
 
