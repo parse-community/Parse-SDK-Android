@@ -209,7 +209,7 @@ public class ParseInstallation extends ParseObject {
                 String packageName = context.getPackageName();
                 PackageManager pm = context.getPackageManager();
                 PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
-                String appVersion = pkgInfo.versionName;
+                String appVersion = String.valueOf(pkgInfo.versionCode);
                 String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
 
                 if (packageName != null && !packageName.equals(get(KEY_APP_IDENTIFIER))) {
