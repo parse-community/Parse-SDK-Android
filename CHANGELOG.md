@@ -1,7 +1,5 @@
 ## Changelog
 
-- FIX/ADD/REMOVE/CHANGE: _Description_ See [#_IssueNumber_](https://github.com/parse-community/Parse-SDK-Android/issues/_IssueNumber_) for details. Thanks to [_Name_](https://github.com/_name_).
-
 ### master
 
 ### 1.24.2
