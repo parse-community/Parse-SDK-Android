@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

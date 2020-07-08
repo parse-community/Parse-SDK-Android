@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

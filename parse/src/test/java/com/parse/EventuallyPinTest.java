@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;

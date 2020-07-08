@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

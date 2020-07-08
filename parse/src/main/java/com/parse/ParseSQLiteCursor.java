@@ -21,7 +21,7 @@ import android.os.Bundle;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 /**
  * Wrapper class to invoke {@link Cursor#close()} on a specific thread on Android versions below

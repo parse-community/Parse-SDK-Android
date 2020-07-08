@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SimpleTimeZone;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 class FacebookController {
 

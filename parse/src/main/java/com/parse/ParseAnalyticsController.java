@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 class ParseAnalyticsController {
 

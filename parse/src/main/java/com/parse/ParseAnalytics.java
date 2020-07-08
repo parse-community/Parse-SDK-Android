@@ -18,9 +18,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import bolts.Capture;
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseAnalytics} class provides an interface to Parse's logging and analytics backend.

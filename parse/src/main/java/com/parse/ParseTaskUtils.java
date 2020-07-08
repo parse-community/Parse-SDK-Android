@@ -10,10 +10,10 @@ package com.parse;
 
 import java.util.concurrent.CancellationException;
 
-import bolts.AggregateException;
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.AggregateException;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 class ParseTaskUtils {
 

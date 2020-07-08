@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseInstallation} is a local representation of installation data that can be saved
@@ -209,7 +209,7 @@ public class ParseInstallation extends ParseObject {
                 String packageName = context.getPackageName();
                 PackageManager pm = context.getPackageManager();
                 PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
-                String appVersion = pkgInfo.versionName;
+                String appVersion = String.valueOf(pkgInfo.versionCode);
                 String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
 
                 if (packageName != null && !packageName.equals(get(KEY_APP_IDENTIFIER))) {

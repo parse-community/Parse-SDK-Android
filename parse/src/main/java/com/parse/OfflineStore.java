@@ -28,10 +28,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
-import bolts.Capture;
-import bolts.Continuation;
-import bolts.Task;
-import bolts.TaskCompletionSource;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 class OfflineStore {
 

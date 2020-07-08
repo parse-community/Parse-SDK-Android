@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -16,8 +16,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParsePush} is a local representation of data that can be sent as a push notification.

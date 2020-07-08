@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -289,7 +289,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         String packageName = context.getPackageName();
         PackageManager pm = context.getPackageManager();
         PackageInfo pkgInfo = pm.getPackageInfo(packageName, 0);
-        String appVersion = pkgInfo.versionName;
+        String appVersion = String.valueOf(pkgInfo.versionCode);
         String appName = pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString();
         assertEquals(packageName, installation.getString(KEY_APP_IDENTIFIER));
         assertEquals(appName, installation.getString(KEY_APP_NAME));

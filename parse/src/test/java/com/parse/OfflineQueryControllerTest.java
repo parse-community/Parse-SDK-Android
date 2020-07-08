@@ -14,7 +14,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import bolts.Task;
+import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertTrue;
 

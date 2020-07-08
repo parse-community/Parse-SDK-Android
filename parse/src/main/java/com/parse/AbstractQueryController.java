@@ -10,8 +10,8 @@ package com.parse;
 
 import java.util.List;
 
-import bolts.Continuation;
-import bolts.Task;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 /**
  * {@code AbstractParseQueryController} is an abstract implementation of
