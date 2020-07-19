@@ -40,6 +40,10 @@ dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:fcm:$parseVersion"
     // for Kotlin extensions support (optional)
     implementation "com.github.parse-community.Parse-SDK-Android:ktx:$parseVersion"
+    // for Kotlin coroutines support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:coroutines:$parseVersion"
+    // for RxJava support (optional)
+    implementation "com.github.parse-community.Parse-SDK-Android:rxjava:$parseVersion"
 }
 ```
 
@@ -95,6 +99,7 @@ These are other official libraries we made that can help you create your Parse a
 - [Parse FCM](/fcm) - [Firebase Cloud Messaging](https://firebase.google.com/docs/cloud-messaging) support for sending push notifications.
 - [Parse KTX](/ktx) - Kotlin extensions for ease of developer use.
 - [Parse Coroutines](/coroutines) - Kotlin Coroutines support for various Parse async operations
+- [Parse RxJava](/rxjava) - Transform Parse `Task`s to RxJava `Completable`s and `Single`s
 - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android) - Realtime query subscription.
 - [ParseUI](https://github.com/parse-community/ParseUI-Android) - Prebuilt UI elements.
 

@@ -1,2 +1,2 @@
-include ':parse', ':fcm', ':gcm', ':ktx', ':coroutines', ':google', ':facebook', ':twitter', ':bolts-tasks'
+include ':parse', ':fcm', ':gcm', ':ktx', ':coroutines', 'rxjava', ':google', ':facebook', ':twitter', ':bolts-tasks'
 
