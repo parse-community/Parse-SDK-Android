@@ -1,6 +1,8 @@
 ## Changelog
 
 ### master
+
+### 1.25.0
 > __BREAKING CHANGES__
 >
 > - FIX: Corrected the `Installation` property `appVersion` to be the build version instead of the version name. This aligns the property with its equivalent in the Parse iOS SDK. See [#902](https://github.com/parse-community/Parse-SDK-Android/issues/902) for details. Thanks to [Manuel Trezza](https://github.com/mtrezza).
