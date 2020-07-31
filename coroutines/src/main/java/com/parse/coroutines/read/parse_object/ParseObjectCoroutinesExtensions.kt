@@ -1,5 +1,4 @@
 @file:JvmName("ParseObjectCoroutinesExtensions")
-@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 
 package com.parse.coroutines.read.parse_object
 
@@ -8,7 +7,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun <T : ParseObject> ParseObject.fetch(): T {
+suspend fun <T : ParseObject> ParseObject.coroutineFetch(): T {
     return suspendCoroutine { continuation ->
 
         fetchInBackground<T> { obj, e ->
@@ -18,7 +17,7 @@ suspend fun <T : ParseObject> ParseObject.fetch(): T {
     }
 }
 
-suspend fun <T : ParseObject> ParseObject.fetchIfNeeded(): T {
+suspend fun <T : ParseObject> ParseObject.coroutinesFetchIfNeeded(): T {
     return suspendCoroutine { continuation ->
 
         fetchIfNeededInBackground<T> { obj, e ->
