@@ -1,6 +1,6 @@
 @file:JvmName("ParseCloudCoroutinesExtensions")
 
-package com.parse.coroutines.cloudfunction
+package com.parse.coroutines
 
 import com.parse.ParseCloud
 import kotlin.coroutines.resume

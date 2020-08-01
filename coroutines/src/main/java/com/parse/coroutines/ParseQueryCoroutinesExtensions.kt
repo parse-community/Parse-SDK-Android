@@ -1,6 +1,6 @@
 @file:JvmName("ParseQueryCoroutinesExtensions")
 
-package com.parse.coroutines.read.query
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import com.parse.ParseQuery
@@ -8,7 +8,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-suspend fun <T : ParseObject> ParseQuery<T>.coroutineFind(): List<T> {
+suspend fun <T : ParseObject> ParseQuery<T>.suspendFind(): List<T> {
     return findInternal()
 }
 
@@ -59,7 +59,7 @@ internal suspend fun <T : ParseObject> ParseQuery<T>.firstInternal(): T {
     }
 }
 
-suspend fun <T : ParseObject> ParseQuery<T>.coroutineCount(): Int {
+suspend fun <T : ParseObject> ParseQuery<T>.suspendCount(): Int {
     return countInternal()
 }
 

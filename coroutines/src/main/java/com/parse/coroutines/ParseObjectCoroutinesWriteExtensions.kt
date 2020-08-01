@@ -1,13 +1,13 @@
 @file:JvmName("ParseObjectCoroutinesWriteExtensions")
 
-package com.parse.coroutines.write.parse_object
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun ParseObject.coroutineSave() {
+suspend fun ParseObject.suspendSave() {
     return suspendCoroutine { continuation ->
         saveInBackground {
             if (it == null) continuation.resume(Unit)
@@ -16,7 +16,7 @@ suspend fun ParseObject.coroutineSave() {
     }
 }
 
-suspend fun ParseObject.coroutinePin() {
+suspend fun ParseObject.suspendPin() {
     return suspendCoroutine { continuation ->
         pinInBackground {
             if (it == null) continuation.resume(Unit)

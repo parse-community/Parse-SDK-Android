@@ -1,13 +1,13 @@
 @file:JvmName("ParseObjectCoroutinesExtensions")
 
-package com.parse.coroutines.read.parse_object
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun <T : ParseObject> ParseObject.coroutineFetch(): T {
+suspend fun <T : ParseObject> ParseObject.suspendFetch(): T {
     return suspendCoroutine { continuation ->
 
         fetchInBackground<T> { obj, e ->
@@ -17,7 +17,7 @@ suspend fun <T : ParseObject> ParseObject.coroutineFetch(): T {
     }
 }
 
-suspend fun <T : ParseObject> ParseObject.coroutinesFetchIfNeeded(): T {
+suspend fun <T : ParseObject> ParseObject.suspendFetchIfNeeded(): T {
     return suspendCoroutine { continuation ->
 
         fetchIfNeededInBackground<T> { obj, e ->

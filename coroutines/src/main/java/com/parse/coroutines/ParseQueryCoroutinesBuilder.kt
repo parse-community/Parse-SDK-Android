@@ -1,11 +1,9 @@
 @file:JvmName("ParseQueryCoroutinesBuilder")
 
-package com.parse.coroutines.read.query
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import com.parse.ParseQuery
-import com.parse.coroutines.read.ParseQueryOperation
-import com.parse.coroutines.read.ParseQueryOperationImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
