@@ -1,4 +1,4 @@
-package com.parse.coroutines.read
+package com.parse.coroutines
 
 interface ParseQueryOperation<out T> {
     suspend fun find(): List<T>

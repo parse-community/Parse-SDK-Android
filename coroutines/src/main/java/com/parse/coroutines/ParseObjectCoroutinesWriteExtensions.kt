@@ -1,14 +1,13 @@
 @file:JvmName("ParseObjectCoroutinesWriteExtensions")
-@file:Suppress("EXTENSION_SHADOWED_BY_MEMBER")
 
-package com.parse.coroutines.write.parse_object
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun ParseObject.save() {
+suspend fun ParseObject.suspendSave() {
     return suspendCoroutine { continuation ->
         saveInBackground {
             if (it == null) continuation.resume(Unit)
@@ -17,7 +16,7 @@ suspend fun ParseObject.save() {
     }
 }
 
-suspend fun ParseObject.pin() {
+suspend fun ParseObject.suspendPin() {
     return suspendCoroutine { continuation ->
         pinInBackground {
             if (it == null) continuation.resume(Unit)

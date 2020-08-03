@@ -18,11 +18,11 @@ Now we can call a parse query using a synchronous style, this is possible when w
 
 ```kotlin
 launch { // Coroutine builder
-    val cat = ParseQuery.getQuery(...).find()
+    val cat = ParseQuery.getQuery(...).coroutineFind()
     // get cats without callback
 }
 ```
-We use a coroutine builder because `find()` is a suspend function.
+We use a coroutine builder because `coroutineFind()` is a suspend function.
 
 We can also, use a function like a coroutine builder, it will be provider us a flexibility call our query without any extensions function.
 
@@ -56,7 +56,7 @@ launch { // Coroutine builder
         setPassword("my pass")
         setEmail("email@example.com")
     }.also {
-        signUp()
+        coroutineSignUp()
     }
 }
 ```

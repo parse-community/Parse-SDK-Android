@@ -1,11 +1,7 @@
-package com.parse.coroutines.read
+package com.parse.coroutines
 
 import com.parse.ParseObject
 import com.parse.ParseQuery
-import com.parse.coroutines.read.query.countInternal
-import com.parse.coroutines.read.query.findInternal
-import com.parse.coroutines.read.query.firstInternal
-import com.parse.coroutines.read.query.getInternal
 
 class ParseQueryOperationImpl<T : ParseObject>(private val query: ParseQuery<T>) : ParseQueryOperation<T> {
 
