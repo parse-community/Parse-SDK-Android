@@ -1489,6 +1489,9 @@ public class ParseObject implements Parcelable {
     /**
      * Returns a set view of the keys contained in this object. This does not include createdAt,
      * updatedAt, authData, or objectId. It does include things like username and ACL.
+     *
+     * Note that while the returned set is unmodifiable, it is in fact not thread-safe, and creating a copy
+     * is recommended before iterating over it.
      */
     public Set<String> keySet() {
         synchronized (mutex) {
