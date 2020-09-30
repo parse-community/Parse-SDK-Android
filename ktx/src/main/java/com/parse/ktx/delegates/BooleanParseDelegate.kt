@@ -8,14 +8,14 @@ import kotlin.reflect.KProperty
 /**
  * A [Boolean] property delegation for [ParseObject].
  */
-class BooleanParseDelegate {
+class BooleanParseDelegate(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): Boolean {
-        return parseObject.getBoolean(property.name)
+        return parseObject.getBoolean(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Boolean) {
-        parseObject.put(property.name, value)
+        parseObject.put(name ?: property.name, value)
     }
 
 }
@@ -24,4 +24,4 @@ class BooleanParseDelegate {
  * Returns a [Boolean] property delegate for [ParseObject]s. This uses [ParseObject.getBoolean]
  * and [ParseObject.put].
  */
-inline fun booleanAttribute() = BooleanParseDelegate()
+inline fun booleanAttribute(name: String? = null) = BooleanParseDelegate(name)
