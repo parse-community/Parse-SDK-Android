@@ -72,6 +72,33 @@ launch { // Coroutine builder
 
 We can save, pinning and fetch parse objects use coroutines as well.
 
+## Task Wrapper
+Coroutine support can be provided as an extension method on any `Task`. For example:
+```kotlin
+suspend fun anonymousLogin() {
+    try {
+        val user = ParseAnonymousUtils.logInInBackground().suspendGet()
+        Timber.d("Logged in with user ${user.objectId}")
+    } catch (e: ParseException) {
+        Timber.e(e)
+    }
+}
+```
+Tasks with a Void results, ie. `Task<Void>` can be made into a `Completable`.
+For example:
+```kotlin
+suspend fun updateUserLastLogIn() {
+    val user = ParseUser.getCurrentUser()
+    user.put("lastLoggedIn", System.currentTimeMillis())
+    try {
+        user.saveInBackground().suspendRun()
+        Timber.d("user saved")
+    } catch (e: ParseException) {
+        Timber.e(it)
+    }
+}
+```
+
 ## Contributing
 When contributing to the `coroutines` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.
 
