@@ -65,6 +65,7 @@ class Cat : ParseObject() {
 class Cat : ParseObject() {
 
     var name: String by stringAttribute() // That's it
+    var legs: Int by intAttribute("cat-legs")
 
 }
 ```
