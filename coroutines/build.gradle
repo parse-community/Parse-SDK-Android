@@ -29,7 +29,7 @@ android {
 }
 
 ext {
-    coroutinesVersion = "1.3.3"
+    coroutinesVersion = "1.3.9"
 }
 
 dependencies {
