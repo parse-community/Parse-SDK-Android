@@ -21,7 +21,7 @@ android {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
     api "com.google.android.gms:play-services-auth:18.0.0"
     implementation project(":parse")
 }

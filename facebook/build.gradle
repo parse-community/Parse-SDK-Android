@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -20,6 +21,8 @@ android {
 }
 
 dependencies {
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$versions.coroutines"
     api "com.facebook.android:facebook-login:6.3.0"
     implementation project(":parse")
 
