@@ -3,6 +3,7 @@ package com.parse.google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.fragment.app.Fragment
 import com.parse.boltsinternal.Continuation
 import com.parse.boltsinternal.Task
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -68,6 +69,24 @@ object ParseGoogleUtils {
         val googleSignInClient = buildGoogleSignInClient(activity)
         this.googleSignInClient = googleSignInClient
         activity.startActivityForResult(googleSignInClient.signInIntent, REQUEST_CODE_GOOGLE_SIGN_IN)
+    }
+
+    /**
+     * Log in using a Google.
+     *
+     * @param fragment The fragment which passes along the result via [onActivityResult]
+     * @param callback The [LogInCallback] which is invoked on log in success or error
+     */
+    @JvmStatic
+    fun logIn(fragment: Fragment, callback: LogInCallback) {
+        checkInitialization()
+        this.currentCallback = callback
+        val googleSignInClient = buildGoogleSignInClient(fragment.requireContext())
+        this.googleSignInClient = googleSignInClient
+        fragment.startActivityForResult(
+            googleSignInClient.signInIntent,
+            REQUEST_CODE_GOOGLE_SIGN_IN
+        )
     }
 
     /**
