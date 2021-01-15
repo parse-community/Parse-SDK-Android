@@ -225,10 +225,10 @@ object ParseGoogleUtils {
                         error = ParseException(error)
                     }
                     if (callback is SaveCallback) {
-                        callback.done(error as ParseException)
+                        callback.done(error as? ParseException)
                     } else if (callback is LogInCallback) {
                         callback.done(
-                                task.result as ParseUser, error as ParseException)
+                                task.result as? ParseUser, error as? ParseException)
                     }
                 } finally {
                     when {
