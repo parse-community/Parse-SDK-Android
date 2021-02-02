@@ -3338,7 +3338,7 @@ public class ParseObject implements Parcelable {
      */
     public double getDouble(@NonNull String key) {
         Number number = getNumber(key);
-        if (number == null) {
+        if (number == null || !has(key)) {
             return 0;
         }
         return number.doubleValue();
