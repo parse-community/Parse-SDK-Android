@@ -52,8 +52,8 @@ class Cat : ParseObject() {
     }
 
     var name: String
-        get = getString(KEY_NAME)
-        set(value) = putString(KEY_NAME, value)
+        get() = getString(KEY_NAME)
+        set(value) = put(KEY_NAME, value)
 
 }
 ```
