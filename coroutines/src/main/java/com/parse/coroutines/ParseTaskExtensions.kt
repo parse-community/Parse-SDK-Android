@@ -15,10 +15,8 @@ import kotlin.coroutines.suspendCoroutine
 suspend fun <T> Task<T>.suspendGet(dispatcher: CoroutineDispatcher = Dispatchers.IO) = withContext<T>(dispatcher) {
     return@withContext suspendCoroutine { continuation ->
         waitForCompletion()
-        if (isFaulted) {
-            continuation.resumeWithException(error)
-        }
-        continuation.resume(result)
+        if (isFaulted) continuation.resumeWithException(error)
+        else continuation.resume(result)
     }
 }
 
@@ -26,10 +24,8 @@ suspend fun <T> Task<T>.suspendGet(dispatcher: CoroutineDispatcher = Dispatchers
 suspend fun Task<Void>.suspendRun(dispatcher: CoroutineDispatcher = Dispatchers.IO) = withContext<Unit>(dispatcher) {
     return@withContext suspendCoroutine { continuation ->
         waitForCompletion()
-        if (isFaulted) {
-            continuation.resumeWithException(error)
-        }
-        continuation.resume(Unit)
+        if (isFaulted) continuation.resumeWithException(error)
+        else continuation.resume(Unit)
     }
 }
 
