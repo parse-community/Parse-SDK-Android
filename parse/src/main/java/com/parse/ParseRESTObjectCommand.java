@@ -38,7 +38,7 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
                     operations,
                     sessionToken);
         } else {
-            if(Parse.isAllowCustomObjectId()){
+            if(Parse.isAllowCustomObjectId() && !state.className().equals(ParseInstallation.class)){
                 return ParseRESTObjectCommand.createObjectCommand(
                         state.className(),
                         operations,
