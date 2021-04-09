@@ -2253,6 +2253,10 @@ public class ParseObject implements Parcelable {
             return Task.forResult(null);
         }
 
+        if(Parse.isAllowCustomObjectId() && getObjectId() == null){
+            return Task.forError(new ParseException(-1, "ObjectId must not be null"));
+        }
+
         final ParseOperationSet operations;
         synchronized (mutex) {
             updateBeforeSave();
@@ -2363,6 +2367,10 @@ public class ParseObject implements Parcelable {
         if (!isDirty()) {
             Parse.getEventuallyQueue().fakeObjectUpdate();
             return Task.forResult(null);
+        }
+
+        if(Parse.isAllowCustomObjectId() && getObjectId() == null){
+            return Task.forError(new ParseException(-1, "ObjectId must not be null"));
         }
 
         final ParseOperationSet operationSet;
