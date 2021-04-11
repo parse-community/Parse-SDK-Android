@@ -39,7 +39,7 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
                     sessionToken);
         } else {
             if(Parse.isAllowCustomObjectId()){
-                if(state.createdAt() == 0){
+                if(state.createdAt() == -1){
                     return ParseRESTObjectCommand.createObjectCommand(
                             state.className(),
                             operations,
