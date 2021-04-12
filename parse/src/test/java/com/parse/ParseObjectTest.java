@@ -37,10 +37,13 @@ import java.util.Set;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -159,6 +162,109 @@ public class ParseObjectTest {
     }
 
     //endregion
+
+    @Test
+    public void testSaveCustomObjectIdMissing(){
+        // Mocked to let save work
+        mockCurrentUserController();
+
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.APPLICATION_ID)
+                        .server("https://api.parse.com/1")
+                        .allowCustomObjectId()
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
+
+        ParseObject object = new ParseObject("TestObject");
+        try {
+            object.save();
+        } catch (ParseException e) {
+            assertEquals(e.getCode(), 104);
+            assertThat(e.getMessage(), is("ObjectId must not be null"));
+        }
+    }
+
+    @Test
+    public void testSaveCustomObjectIdNotMissing() throws ParseException{
+        // Mocked to let save work
+        mockCurrentUserController();
+
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.APPLICATION_ID)
+                        .server("https://api.parse.com/1")
+                        .allowCustomObjectId()
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
+
+        ParseObject object = new ParseObject("TestObject");
+        object.setObjectId("ABCDEF123456");
+        object.save();
+    }
+
+    @Test
+    public void testSaveEventuallyCustomObjectIdMissing(){
+        // Mocked to let save work
+        mockCurrentUserController();
+
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.APPLICATION_ID)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
+
+        OfflineStore lds = mock(OfflineStore.class);
+        Parse.setLocalDatastore(lds);
+
+        ParseObject object = new ParseObject("TestObject");
+        object.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                assertNotNull(e);
+                assertEquals(e.getCode(), 104);
+                assertThat(e.getMessage(), is("ObjectId must not be null"));
+            }
+        });
+    }
+
+    @Test
+    public void testSaveEventuallyCustomObjectIdNotMissing() throws ParseException{
+        // Mocked to let save work
+        mockCurrentUserController();
+
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.APPLICATION_ID)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
+
+        OfflineStore lds = mock(OfflineStore.class);
+        Parse.setLocalDatastore(lds);
+
+        ParseObject object = new ParseObject("TestObject");
+        object.setObjectId("ABCDEF123456");
+        object.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                assertNull(e);
+            }
+        });
+    }
 
     //region testGetter
 
