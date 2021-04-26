@@ -17,7 +17,7 @@ public class ParseFCM {
 
     static final String TAG = "ParseFCM";
 
-    private static final String PUSH_TYPE = "gcm"; // Backwards compatability with Parse servers
+    private static final String PUSH_TYPE = "gcm"; // Backwards compatibility with Parse servers
 
     /**
      * You can call this manually if you are overriding the {@link com.google.firebase.messaging.FirebaseMessagingService}

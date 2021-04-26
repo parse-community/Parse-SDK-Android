@@ -4,7 +4,6 @@
 // LICENSE file in the root directory of this source tree.
 
 apply plugin: 'java'
-apply plugin: 'maven'
 
 configurations {
     provided
@@ -18,7 +17,7 @@ sourceSets {
 
 dependencies {
     provided 'com.google.android:android:4.1.1.4'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 
