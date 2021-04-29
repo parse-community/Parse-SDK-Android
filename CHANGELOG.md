@@ -5,7 +5,7 @@
 ### 1.27.0
 > __BREAKING CHANGES__
 >
-> - Removed the `gcm` module since GCM is no longer supported by Google.
+> - Removed the `gcm` module since GCM is no longer supported by Google (#1091)
 
 ### 1.26.0
 - fix TypeCastException when unlinking google account (#1076)
