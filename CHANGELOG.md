@@ -1,8 +1,6 @@
 ## Changelog
 
 ### master
-
-### 1.27.0
 > __BREAKING CHANGES__
 >
 > - Removed the `gcm` module since GCM is no longer supported by Google (#1091)
