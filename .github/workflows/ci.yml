@@ -1,0 +1,29 @@
+name: ci
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '**'
+jobs:
+  gradle:
+    name: Tests
+    timeout-minutes: 15
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK environment
+      uses: actions/setup-java@v2
+      with:
+        java-version: 1.8
+    - name: Gradle Command
+      uses: eskatos/gradle-command-action@v1.3.3
+      with:
+        arguments: build
+    - run: pip install --user codecov
+    - run: mkdir "$ANDROID_HOME/licenses" || true
+    - run: echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
+    - run: ./gradlew clean testDebugUnitTest jacocoTestReport
+    - run: ./gradlew coveralls
+    - run: codecov
