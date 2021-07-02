@@ -24,7 +24,6 @@ import static org.robolectric.Shadows.shadowOf;
 
 // For android.webkit.MimeTypeMap
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileStateTest {
 
     @Before

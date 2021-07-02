@@ -24,6 +24,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.Shadows;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
 
 import java.util.Collections;
 import java.util.Date;
@@ -43,6 +44,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyMapOf;
@@ -56,10 +58,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 // For ParseExecutors.main()
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+@LooperMode(PAUSED)
 public class ParseUserTest extends ResetPluginsParseTest {
 
     @Rule
@@ -380,7 +384,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
                 .sessionToken("newSessionToken")
                 .build();
         when(userController.signUpAsync(
-                any(ParseUser.State.class), any(ParseOperationSet.class), anyString()))
+                any(ParseUser.State.class), any(ParseOperationSet.class), nullable(String.class)))
                 .thenReturn(Task.forResult(newUserState));
         ParseCorePlugins.getInstance().registerUserController(userController);
 
@@ -392,7 +396,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
 
         // Make sure we sign up the user
         verify(userController, times(1)).signUpAsync(
-                any(ParseUser.State.class), any(ParseOperationSet.class), anyString());
+                any(ParseUser.State.class), any(ParseOperationSet.class), nullable(String.class));
         // Make sure user's data is correct
         assertEquals("newSessionToken", user.getSessionToken());
         assertEquals("newValue", user.getString("newKey"));
@@ -416,7 +420,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
         ParseUserController userController = mock(ParseUserController.class);
         ParseException signUpException = new ParseException(ParseException.OTHER_CAUSE, "test");
         when(userController.signUpAsync(
-                any(ParseUser.State.class), any(ParseOperationSet.class), anyString()))
+                any(ParseUser.State.class), any(ParseOperationSet.class), nullable(String.class)))
                 .thenReturn(Task.<ParseUser.State>forError(signUpException));
         ParseCorePlugins.getInstance().registerUserController(userController);
 
@@ -429,7 +433,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
 
         // Make sure we sign up the user
         verify(userController, times(1)).signUpAsync(
-                any(ParseUser.State.class), any(ParseOperationSet.class), anyString());
+                any(ParseUser.State.class), any(ParseOperationSet.class), nullable(String.class));
         // Make sure user's data is correct
         assertEquals("value", user.getString("key"));
         // Make sure we never set the current user
@@ -1230,6 +1234,8 @@ public class ParseUserTest extends ResetPluginsParseTest {
             }
         });
 
+        shadowMainLooper().idle();
+
         assertTrue(done.tryAcquire(5, TimeUnit.SECONDS));
         // Make sure user is login
         verify(userController, times(1)).logInAsync("userName", "password");
@@ -1567,7 +1573,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
                 .grantPermissions(Manifest.permission.ACCESS_NETWORK_STATE);
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .applicationId(BuildConfig.APPLICATION_ID)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
                         .server("https://api.parse.com/1")
                         .enableLocalDataStore()
                         .build();

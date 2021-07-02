@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 
 // For Uri.encode
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class NetworkUserControllerTest {
 
     @Before

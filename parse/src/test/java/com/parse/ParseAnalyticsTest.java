@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.parse.boltsinternal.Task;
 
+import static android.os.Looper.getMainLooper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -40,10 +42,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 // For android.os.BaseBundle
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+@LooperMode(PAUSED)
 public class ParseAnalyticsTest {
 
     ParseAnalyticsController controller;
@@ -151,6 +156,8 @@ public class ParseAnalyticsTest {
                     }
                 });
 
+        shadowMainLooper().idle();
+
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
         verify(controller, times(1)).trackEventInBackground(
@@ -164,6 +171,8 @@ public class ParseAnalyticsTest {
                 doneAgain.release();
             }
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
@@ -231,6 +240,8 @@ public class ParseAnalyticsTest {
                 done.release();
             }
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));

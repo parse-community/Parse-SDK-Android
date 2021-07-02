@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -40,9 +41,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileTest {
 
     @Rule
@@ -187,9 +188,9 @@ public class ParseFileTest {
         when(controller.saveAsync(
                 any(ParseFile.State.class),
                 any(byte[].class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(state));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class))).thenReturn(Task.forResult(state));
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         ParseFile parseFile = new ParseFile(name, data, contentType);
@@ -201,9 +202,9 @@ public class ParseFileTest {
         verify(controller, times(1)).saveAsync(
                 stateCaptor.capture(),
                 dataCaptor.capture(),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any());
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class));
         assertNull(stateCaptor.getValue().url());
         assertEquals(name, stateCaptor.getValue().name());
         assertEquals(contentType, stateCaptor.getValue().mimeType());
@@ -225,9 +226,9 @@ public class ParseFileTest {
         when(controller.saveAsync(
                 any(ParseFile.State.class),
                 any(File.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(state));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class))).thenReturn(Task.forResult(state));
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         ParseFile parseFile = new ParseFile(file, contentType);
@@ -239,9 +240,9 @@ public class ParseFileTest {
         verify(controller, times(1)).saveAsync(
                 stateCaptor.capture(),
                 fileCaptor.capture(),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any());
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class));
         assertNull(stateCaptor.getValue().url());
         assertEquals(name, stateCaptor.getValue().name());
         assertEquals(contentType, stateCaptor.getValue().mimeType());
@@ -267,9 +268,9 @@ public class ParseFileTest {
         ParseFileController controller = mock(ParseFileController.class);
         when(controller.fetchAsync(
                 any(ParseFile.State.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(file));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class))).thenReturn(Task.forResult(file));
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         String url = "url";
@@ -284,9 +285,9 @@ public class ParseFileTest {
         ArgumentCaptor<ParseFile.State> stateCaptor = ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(1)).fetchAsync(
                 stateCaptor.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptor.getValue().url());
         // Verify the data we get is correct
@@ -300,9 +301,9 @@ public class ParseFileTest {
                 ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(2)).fetchAsync(
                 stateCaptorAgain.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptorAgain.getValue().url());
         // Verify the data we get is correct
@@ -317,9 +318,9 @@ public class ParseFileTest {
         ParseFileController controller = mock(ParseFileController.class);
         when(controller.fetchAsync(
                 any(ParseFile.State.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(file));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class))).thenReturn(Task.forResult(file));
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         String url = "url";
@@ -334,9 +335,9 @@ public class ParseFileTest {
         ArgumentCaptor<ParseFile.State> stateCaptor = ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(1)).fetchAsync(
                 stateCaptor.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptor.getValue().url());
         // Verify the data we get is correct
@@ -350,9 +351,9 @@ public class ParseFileTest {
                 ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(2)).fetchAsync(
                 stateCaptorAgain.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptorAgain.getValue().url());
         // Verify the data we get is correct
@@ -367,9 +368,9 @@ public class ParseFileTest {
         ParseFileController controller = mock(ParseFileController.class);
         when(controller.fetchAsync(
                 any(ParseFile.State.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(file));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class))).thenReturn(Task.forResult(file));
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         String url = "url";
@@ -384,9 +385,9 @@ public class ParseFileTest {
         ArgumentCaptor<ParseFile.State> stateCaptor = ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(1)).fetchAsync(
                 stateCaptor.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptor.getValue().url());
         // Verify the data we get is correct
@@ -400,9 +401,9 @@ public class ParseFileTest {
                 ArgumentCaptor.forClass(ParseFile.State.class);
         verify(controller, times(2)).fetchAsync(
                 stateCaptorAgain.capture(),
-                anyString(),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any()
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                any(Task.class)
         );
         assertEquals(url, stateCaptorAgain.getValue().url());
         // Verify the data we get is correct
@@ -420,20 +421,20 @@ public class ParseFileTest {
         when(controller.saveAsync(
                 any(ParseFile.State.class),
                 any(byte[].class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(state));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class))).thenReturn(Task.forResult(state));
         when(controller.saveAsync(
                 any(ParseFile.State.class),
-                any(File.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(state));
+                nullable(File.class),
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class))).thenReturn(Task.forResult(state));
         when(controller.fetchAsync(
                 any(ParseFile.State.class),
-                any(String.class),
-                any(ProgressCallback.class),
-                Matchers.<Task<Void>>any())).thenReturn(Task.forResult(cachedFile));
+                nullable(String.class),
+                nullable(ProgressCallback.class),
+                nullable(Task.class))).thenReturn(Task.forResult(cachedFile));
 
         ParseCorePlugins.getInstance().registerFileController(controller);
 

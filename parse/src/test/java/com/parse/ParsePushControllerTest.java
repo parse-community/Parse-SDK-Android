@@ -45,7 +45,6 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 // For SSLSessionCache
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParsePushControllerTest {
 
     private static boolean containsString(JSONArray array, String value) throws JSONException {

@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -36,7 +37,6 @@ import static org.mockito.Mockito.when;
 
 // For android.net.Uri
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseAnalyticsControllerTest {
 
     @Before
@@ -66,7 +66,7 @@ public class ParseAnalyticsControllerTest {
     public void testTrackEvent() throws Exception {
         // Mock eventually queue
         ParseEventuallyQueue queue = mock(ParseEventuallyQueue.class);
-        when(queue.enqueueEventuallyAsync(any(ParseRESTCommand.class), any(ParseObject.class)))
+        when(queue.enqueueEventuallyAsync(any(ParseRESTCommand.class), nullable(ParseObject.class)))
                 .thenReturn(Task.forResult(new JSONObject()));
 
         // Execute
@@ -100,7 +100,7 @@ public class ParseAnalyticsControllerTest {
     public void testTrackAppOpened() throws Exception {
         // Mock eventually queue
         ParseEventuallyQueue queue = mock(ParseEventuallyQueue.class);
-        when(queue.enqueueEventuallyAsync(any(ParseRESTCommand.class), any(ParseObject.class)))
+        when(queue.enqueueEventuallyAsync(any(ParseRESTCommand.class), nullable(ParseObject.class)))
                 .thenReturn(Task.forResult(new JSONObject()));
 
         // Execute

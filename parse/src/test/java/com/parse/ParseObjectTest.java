@@ -42,6 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -49,7 +50,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseObjectTest {
 
     @Rule
@@ -68,7 +68,7 @@ public class ParseObjectTest {
         ParseObjectController objectController = mock(ParseObjectController.class);
         when(objectController.saveAsync(
                 any(ParseObject.State.class), any(ParseOperationSet.class),
-                anyString(), any(ParseDecoder.class))
+                nullable(String.class), any(ParseDecoder.class))
         ).thenReturn(tcs.getTask());
         ParseCorePlugins.getInstance().registerObjectController(objectController);
         return tcs;

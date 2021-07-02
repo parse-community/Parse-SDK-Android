@@ -1,14 +1,16 @@
 buildscript {
-    ext.kotlin_version = "1.4.10"
+    ext.kotlin_version = "1.5.20"
+    ext.jacocoVersion = '0.8.7'
     repositories {
         google()
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.6.2"
+        classpath "com.android.tools.build:gradle:4.2.2"
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.3"
         classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
     }
 }
 
@@ -28,8 +30,8 @@ task clean(type: Delete) {
 }
 
 ext {
-    compileSdkVersion = 29
+    compileSdkVersion = 30
 
     minSdkVersion = 14
-    targetSdkVersion = 29
+    targetSdkVersion = 30
 }

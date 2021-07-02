@@ -30,7 +30,6 @@ import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseRelationTest {
 
     @Rule

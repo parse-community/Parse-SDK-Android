@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 
 // For android.util.Base64
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseDecoderTest extends ResetPluginsParseTest {
 
     @Rule

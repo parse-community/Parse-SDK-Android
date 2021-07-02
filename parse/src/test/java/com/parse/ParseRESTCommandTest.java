@@ -46,7 +46,6 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 // For org.json
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class ParseRESTCommandTest {
 

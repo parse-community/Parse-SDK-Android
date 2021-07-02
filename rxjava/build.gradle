@@ -29,9 +29,9 @@ android {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     api "io.reactivex.rxjava3:rxjava:3.0.4"
     implementation project(":parse")
 }
 
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

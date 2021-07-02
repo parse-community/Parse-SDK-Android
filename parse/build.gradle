@@ -12,6 +12,12 @@ android {
         consumerProguardFiles "release-proguard.pro"
     }
 
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
     packagingOptions {
         exclude '**/BuildConfig.class'
     }
@@ -33,14 +39,15 @@ ext {
 }
 
 dependencies {
-    api "androidx.annotation:annotation:1.1.0"
-    api "androidx.core:core:1.2.0"
+    api "androidx.annotation:annotation:1.2.0"
+    api "androidx.core:core:1.6.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
-    testImplementation "org.robolectric:robolectric:3.8"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.robolectric:robolectric:4.6"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
-    testImplementation "org.mockito:mockito-core:1.10.19"
+    testImplementation "org.mockito:mockito-core:3.6.28"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
 
@@ -48,34 +55,26 @@ dependencies {
 
 apply plugin: "jacoco"
 
-jacoco {
-    toolVersion "0.7.1.201405082137"
-}
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
 
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
-
-    classDirectories = fileTree(
-            dir: "${buildDir}/intermediates/classes/debug",
-            excludes: ['**/R.class',
-                       '**/R$*.class',
-                       '**/*$ViewInjector*.*',
-                       '**/BuildConfig.*',
-                       '**/Manifest*.*']
-    )
-
-    sourceDirectories = files("${buildDir.parent}/src/main/java")
-    additionalSourceDirs = files([
-            "${buildDir}/generated/source/buildConfig/debug",
-            "${buildDir}/generated/source/r/debug"
-    ])
-    executionData = files("${buildDir}/jacoco/testDebugUnitTest.exec")
 
     reports {
         xml.enabled = true
         html.enabled = true
     }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/code-coverage/connected/*coverage.ec"
+    ]))
 }
 
 //endregion
@@ -86,4 +85,4 @@ coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacoco
 
 //endregion
 
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

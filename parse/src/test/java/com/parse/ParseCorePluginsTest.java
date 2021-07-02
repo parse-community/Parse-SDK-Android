@@ -23,7 +23,6 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseCorePluginsTest extends ResetPluginsParseTest {
 
     @Before

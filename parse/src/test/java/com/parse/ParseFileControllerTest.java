@@ -43,7 +43,6 @@ import static org.mockito.Mockito.when;
 
 // For org.json
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileControllerTest {
 
     @Rule

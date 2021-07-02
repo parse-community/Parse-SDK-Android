@@ -21,9 +21,9 @@ android {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    api "com.google.android.gms:play-services-auth:18.0.0"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    api "com.google.android.gms:play-services-auth:19.0.0"
     implementation project(":parse")
 }
 
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"
