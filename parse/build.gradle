@@ -1,5 +1,4 @@
 apply plugin: "com.android.library"
-apply plugin: "com.github.kt3k.coveralls"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -53,35 +52,25 @@ dependencies {
 
 //region Code Coverage
 
-apply plugin: "jacoco"
+apply plugin: "com.dicedmelon.gradle.jacoco-android"
 
-task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+jacoco {
+    toolVersion = "0.8.6"
+}
 
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports"
-
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-
-    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
-    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
-    def mainSrc = "${project.projectDir}/src/main/java"
-
-    sourceDirectories.setFrom(files([mainSrc]))
-    classDirectories.setFrom(files([debugTree]))
-    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
-            "jacoco/testDebugUnitTest.exec",
-            "outputs/code-coverage/connected/*coverage.ec"
-    ]))
+jacocoAndroidUnitTestReport {
+    csv.enabled false
+    html.enabled true
+    xml.enabled true
 }
 
 //endregion
 
 //region Coveralls
 
-coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+apply plugin: "com.github.kt3k.coveralls"
+
+coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion
 
