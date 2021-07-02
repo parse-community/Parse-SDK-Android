@@ -31,7 +31,7 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 public class FileObjectStoreTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() {

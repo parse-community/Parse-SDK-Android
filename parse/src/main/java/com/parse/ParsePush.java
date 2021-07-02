@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,9 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParsePush} is a local representation of data that can be sent as a push notification.
@@ -28,8 +27,8 @@ import com.parse.boltsinternal.Task;
  */
 public class ParsePush {
 
+    /* package for test */ static final String KEY_DATA_MESSAGE = "alert";
     private static final String TAG = "com.parse.ParsePush";
-    /* package for test */ static String KEY_DATA_MESSAGE = "alert";
     /* package for test */ final State.Builder builder;
 
     /**
@@ -282,12 +281,9 @@ public class ParsePush {
     public Task<Void> sendInBackground() {
         // Since getCurrentSessionTokenAsync takes time, we build the state before it.
         final State state = builder.build();
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                return getPushController().sendInBackground(state, sessionToken);
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            return getPushController().sendInBackground(state, sessionToken);
         });
     }
 
@@ -320,6 +316,7 @@ public class ParsePush {
         private final Long expirationTimeInterval;
         private final Long pushTime;
         private final JSONObject data;
+
         private State(Builder builder) {
             this.channelSet = builder.channelSet == null ?
                     null : Collections.unmodifiableSet(new HashSet<>(builder.channelSet));
@@ -387,7 +384,7 @@ public class ParsePush {
                         : Collections.unmodifiableSet(new HashSet<>(state.channelSet()));
                 this.query = state.queryState() == null
                         ? null
-                        : new ParseQuery<>(new ParseQuery.State.Builder<ParseInstallation>(state.queryState()));
+                        : new ParseQuery<>(new ParseQuery.State.Builder<>(state.queryState()));
                 this.expirationTime = state.expirationTime();
                 this.expirationTimeInterval = state.expirationTimeInterval();
                 this.pushTime = state.pushTime();

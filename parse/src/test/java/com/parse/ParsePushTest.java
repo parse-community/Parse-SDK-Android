@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -15,7 +18,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -23,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import com.parse.boltsinternal.Capture;
-import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -275,12 +274,9 @@ public class ParsePushTest {
         ParsePush push = new ParsePush();
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.subscribeInBackground("test", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.subscribeInBackground("test", e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -314,12 +310,9 @@ public class ParsePushTest {
         ParsePush push = new ParsePush();
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.subscribeInBackground("test", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.subscribeInBackground("test", e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -351,12 +344,9 @@ public class ParsePushTest {
 
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.unsubscribeInBackground("test", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.unsubscribeInBackground("test", e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -392,12 +382,9 @@ public class ParsePushTest {
         ParsePush push = new ParsePush();
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.unsubscribeInBackground("test", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.unsubscribeInBackground("test", e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -485,12 +472,9 @@ public class ParsePushTest {
                 .channelSet(channels);
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        push.sendInBackground(new SendCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        push.sendInBackground(e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -563,12 +547,9 @@ public class ParsePushTest {
                 .channelSet(channels);
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        push.sendInBackground(new SendCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        push.sendInBackground(e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -693,12 +674,9 @@ public class ParsePushTest {
                 .whereEqualTo("foo", "bar");
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.sendMessageInBackground("test", query, new SendCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.sendMessageInBackground("test", query, e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -767,12 +745,9 @@ public class ParsePushTest {
                 .whereEqualTo("foo", "bar");
         final Semaphore done = new Semaphore(0);
         final Capture<Exception> exceptionCapture = new Capture<>();
-        ParsePush.sendDataInBackground(data, query, new SendCallback() {
-            @Override
-            public void done(ParseException e) {
-                exceptionCapture.set(e);
-                done.release();
-            }
+        ParsePush.sendDataInBackground(data, query, e -> {
+            exceptionCapture.set(e);
+            done.release();
         });
 
         shadowMainLooper().idle();

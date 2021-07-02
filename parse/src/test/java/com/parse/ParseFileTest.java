@@ -10,6 +10,8 @@ package com.parse;
 
 import android.os.Parcel;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,14 +21,11 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
-
-import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -35,19 +34,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseFileTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setup() {
@@ -77,12 +74,12 @@ public class ParseFileTest {
 
         parseFile = new ParseFile(data);
         assertEquals("file", parseFile.getName()); // Default
-        assertEquals(null, parseFile.getState().mimeType());
+        assertNull(parseFile.getState().mimeType());
         assertTrue(parseFile.isDirty());
 
         parseFile = new ParseFile(name, data);
         assertEquals("name", parseFile.getName());
-        assertEquals(null, parseFile.getState().mimeType());
+        assertNull(parseFile.getState().mimeType());
         assertTrue(parseFile.isDirty());
 
         parseFile = new ParseFile(data, contentType);
@@ -92,7 +89,7 @@ public class ParseFileTest {
 
         parseFile = new ParseFile(file);
         assertEquals(name, parseFile.getName()); // Default
-        assertEquals(null, parseFile.getState().mimeType());
+        assertNull(parseFile.getState().mimeType());
         assertTrue(parseFile.isDirty());
 
         parseFile = new ParseFile(file, contentType);

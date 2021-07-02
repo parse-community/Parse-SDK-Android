@@ -8,13 +8,13 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertTrue;
 
@@ -99,8 +99,8 @@ public class OfflineQueryControllerTest {
 
     private static class TestOfflineStore extends OfflineStore {
 
-        private AtomicBoolean findCalled = new AtomicBoolean();
-        private AtomicBoolean countCalled = new AtomicBoolean();
+        private final AtomicBoolean findCalled = new AtomicBoolean();
+        private final AtomicBoolean countCalled = new AtomicBoolean();
 
         TestOfflineStore() {
             super((OfflineSQLiteOpenHelper) null);
@@ -131,8 +131,8 @@ public class OfflineQueryControllerTest {
 
     private static class TestNetworkQueryController implements ParseQueryController {
 
-        private AtomicBoolean findCalled = new AtomicBoolean();
-        private AtomicBoolean countCalled = new AtomicBoolean();
+        private final AtomicBoolean findCalled = new AtomicBoolean();
+        private final AtomicBoolean countCalled = new AtomicBoolean();
 
         @Override
         public <T extends ParseObject> Task<List<T>> findAsync(

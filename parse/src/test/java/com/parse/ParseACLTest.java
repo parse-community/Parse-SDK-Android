@@ -17,7 +17,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -164,10 +163,10 @@ public class ParseACLTest {
         JSONObject aclJson = acl.toJSONObject(mockEncoder);
 
         assertEquals("unresolvedUserJson", aclJson.getString("unresolvedUser"));
-        assertEquals(aclJson.getJSONObject("userId").getBoolean("read"), true);
-        assertEquals(aclJson.getJSONObject("userId").has("write"), false);
-        assertEquals(aclJson.getJSONObject("*unresolved").getBoolean("read"), true);
-        assertEquals(aclJson.getJSONObject("*unresolved").has("write"), false);
+        assertTrue(aclJson.getJSONObject("userId").getBoolean("read"));
+        assertFalse(aclJson.getJSONObject("userId").has("write"));
+        assertTrue(aclJson.getJSONObject("*unresolved").getBoolean("read"));
+        assertFalse(aclJson.getJSONObject("*unresolved").has("write"));
         assertEquals(aclJson.length(), 3);
     }
 

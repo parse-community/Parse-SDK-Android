@@ -10,8 +10,12 @@ package com.parse;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
+
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,17 +23,12 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.parse.boltsinternal.Capture;
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * ParseCommandCache manages an on-disk cache of commands to be executed, and a thread with a
@@ -48,43 +47,42 @@ class ParseCommandCache extends ParseEventuallyQueue {
     private static final Object lock = new Object();
     // order.
     private static int filenameCounter = 0; // Appended to temp file names so we know their creation
+    final ConnectivityNotifier.ConnectivityListener listener = (context, intent) -> {
+        final boolean connectionLost =
+                intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+        final boolean isConnected = ConnectivityNotifier.isConnected(context);
+
+  /*
+   Hack to avoid blocking the UI thread with disk I/O
+
+   setConnected uses the same lock we use for synchronizing disk I/O, so there's a possibility
+   that we can block the UI thread on disk I/O, so we're going to bump the lock usage to a
+   different thread.
+
+   TODO(grantland): Convert to TaskQueue, similar to ParsePinningEventuallyQueue
+    */
+        Task.call((Callable<Void>) () -> {
+            if (connectionLost) {
+                setConnected(false);
+            } else {
+                setConnected(isConnected);
+            }
+            return null;
+        }, ParseExecutors.io());
+    };
     // Guards access to running. Gets a broadcast whenever running changes. A thread should only wait
     // on runningLock if it's sure the value of running is going to change. Only the run loop
     // (runLoop) thread should ever notify on runningLock. It's perfectly fine for a thread that has
     // runningLock to then also try to acquire the other lock.
     private final Object runningLock;
     private final ParseHttpClient httpClient;
+    private final File cachePath; // Where the cache is stored on disk.
+    // Map of filename to TaskCompletionSource, for all commands that are in the queue from this run
+    // of the program. This is necessary so that the original objects can be notified after their
+    // saves complete.
+    private final HashMap<File, TaskCompletionSource<JSONObject>> pendingTasks = new HashMap<>();
+    private final Logger log; // Why is there a custom logger? To prevent Mockito deadlock!
     ConnectivityNotifier notifier;
-    ConnectivityNotifier.ConnectivityListener listener = new ConnectivityNotifier.ConnectivityListener() {
-        @Override
-        public void networkConnectivityStatusChanged(Context context, Intent intent) {
-            final boolean connectionLost =
-                    intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-            final boolean isConnected = ConnectivityNotifier.isConnected(context);
-
-      /*
-       Hack to avoid blocking the UI thread with disk I/O
-
-       setConnected uses the same lock we use for synchronizing disk I/O, so there's a possibility
-       that we can block the UI thread on disk I/O, so we're going to bump the lock usage to a
-       different thread.
-
-       TODO(grantland): Convert to TaskQueue, similar to ParsePinningEventuallyQueue
-        */
-            Task.call(new Callable<Void>() {
-                @Override
-                public Void call() {
-                    if (connectionLost) {
-                        setConnected(false);
-                    } else {
-                        setConnected(isConnected);
-                    }
-                    return null;
-                }
-            }, ParseExecutors.io());
-        }
-    };
-    private File cachePath; // Where the cache is stored on disk.
     private int timeoutMaxRetries = 5; // Don't retry more than 5 times before assuming disconnection.
     private double timeoutRetryWaitSeconds = 600.0f; // Wait 10 minutes before retrying after network
     // timeout.
@@ -92,12 +90,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
     // processed by the run loop?
     private boolean shouldStop; // Should the run loop thread processing the disk cache continue?
     private boolean unprocessedCommandsExist; // Has a command been added which hasn't yet been
-    // Map of filename to TaskCompletionSource, for all commands that are in the queue from this run
-    // of the program. This is necessary so that the original objects can be notified after their
-    // saves complete.
-    private HashMap<File, TaskCompletionSource<JSONObject>> pendingTasks = new HashMap<>();
     private boolean running; // Is the run loop executing commands from the disk cache running?
-    private Logger log; // Why is there a custom logger? To prevent Mockito deadlock!
 
     public ParseCommandCache(Context context, ParseHttpClient client) {
         setConnected(false);
@@ -279,21 +272,13 @@ class ParseCommandCache extends ParseEventuallyQueue {
         Parse.requirePermission(Manifest.permission.ACCESS_NETWORK_STATE);
         TaskCompletionSource<JSONObject> tcs = new TaskCompletionSource<>();
         byte[] json;
-        try {
-            // If this object doesn't have an objectId yet, store the localId so we can remap it to the
-            // objectId after the save completes.
-            if (object != null && object.getObjectId() == null) {
-                command.setLocalId(object.getOrCreateLocalId());
-            }
-            JSONObject jsonObject = command.toJSONObject();
-            json = jsonObject.toString().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            if (Parse.LOG_LEVEL_WARNING >= Parse.getLogLevel()) {
-                log.log(Level.WARNING, "UTF-8 isn't supported.  This shouldn't happen.", e);
-            }
-            notifyTestHelper(TestHelper.COMMAND_NOT_ENQUEUED);
-            return Task.forResult(null);
+        // If this object doesn't have an objectId yet, store the localId so we can remap it to the
+        // objectId after the save completes.
+        if (object != null && object.getObjectId() == null) {
+            command.setLocalId(object.getOrCreateLocalId());
         }
+        JSONObject jsonObject = command.toJSONObject();
+        json = jsonObject.toString().getBytes(StandardCharsets.UTF_8);
 
         // If this object by itself is larger than the full disk cache, then don't
         // even bother trying.
@@ -425,15 +410,12 @@ class ParseCommandCache extends ParseEventuallyQueue {
     private <T> T waitForTaskWithoutLock(Task<T> task) throws ParseException {
         synchronized (lock) {
             final Capture<Boolean> finished = new Capture<>(false);
-            task.continueWith(new Continuation<T, Void>() {
-                @Override
-                public Void then(Task<T> task) {
-                    finished.set(true);
-                    synchronized (lock) {
-                        lock.notifyAll();
-                    }
-                    return null;
+            task.continueWith((Continuation<T, Void>) task1 -> {
+                finished.set(true);
+                synchronized (lock) {
+                    lock.notifyAll();
                 }
+                return null;
             }, Task.BACKGROUND_EXECUTOR);
             while (!finished.get()) {
                 try {
@@ -518,36 +500,33 @@ class ParseCommandCache extends ParseEventuallyQueue {
                         }
                         notifyTestHelper(TestHelper.COMMAND_OLD_FORMAT_DISCARDED);
                     } else {
-                        commandTask = command.executeAsync(httpClient).continueWithTask(new Continuation<JSONObject, Task<JSONObject>>() {
-                            @Override
-                            public Task<JSONObject> then(Task<JSONObject> task) {
-                                String localId = command.getLocalId();
-                                Exception error = task.getError();
-                                if (error != null) {
-                                    if (error instanceof ParseException
-                                            && ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
-                                        // do nothing
-                                    } else {
-                                        if (tcs != null) {
-                                            tcs.setError(error);
-                                        }
-                                    }
-                                    return task;
-                                }
-
-                                JSONObject json = task.getResult();
-                                if (tcs != null) {
-                                    tcs.setResult(json);
-                                } else if (localId != null) {
-                                    // If this command created a new objectId, add it to the map.
-                                    String objectId = json.optString("objectId", null);
-                                    if (objectId != null) {
-                                        ParseCorePlugins.getInstance()
-                                                .getLocalIdManager().setObjectId(localId, objectId);
+                        commandTask = command.executeAsync(httpClient).continueWithTask(task -> {
+                            String localId = command.getLocalId();
+                            Exception error = task.getError();
+                            if (error != null) {
+                                if (error instanceof ParseException
+                                        && ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
+                                    // do nothing
+                                } else {
+                                    if (tcs != null) {
+                                        tcs.setError(error);
                                     }
                                 }
                                 return task;
                             }
+
+                            JSONObject json1 = task.getResult();
+                            if (tcs != null) {
+                                tcs.setResult(json1);
+                            } else if (localId != null) {
+                                // If this command created a new objectId, add it to the map.
+                                String objectId = json1.optString("objectId", null);
+                                if (objectId != null) {
+                                    ParseCorePlugins.getInstance()
+                                            .getLocalIdManager().setObjectId(localId, objectId);
+                                }
+                            }
+                            return task;
                         });
                     }
 

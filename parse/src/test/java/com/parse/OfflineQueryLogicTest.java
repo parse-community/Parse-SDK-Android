@@ -10,6 +10,8 @@ package com.parse;
 
 import androidx.annotation.NonNull;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -26,8 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import com.parse.boltsinternal.Task;
 
 import static com.parse.ParseMatchers.hasParseErrorCode;
 import static org.junit.Assert.assertEquals;
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.when;
 public class OfflineQueryLogicTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     private static <T extends ParseObject> boolean matches(
             OfflineQueryLogic logic, ParseQuery.State<T> query, T object) throws ParseException {

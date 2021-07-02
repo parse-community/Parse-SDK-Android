@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,8 +19,6 @@ import org.junit.rules.TemporaryFolder;
 
 import java.util.Arrays;
 import java.util.Collections;
-
-import com.parse.boltsinternal.Task;
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertSame;
@@ -37,11 +37,10 @@ import static org.mockito.Mockito.when;
 public class OfflineObjectStoreTest {
 
     private static final String PIN_NAME = "test";
-
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder();
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {

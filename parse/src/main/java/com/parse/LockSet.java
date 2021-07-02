@@ -9,7 +9,6 @@
 package com.parse;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
@@ -22,13 +21,10 @@ class LockSet {
     private final Set<Lock> locks;
 
     public LockSet(Collection<Lock> locks) {
-        this.locks = new TreeSet<>(new Comparator<Lock>() {
-            @Override
-            public int compare(Lock lhs, Lock rhs) {
-                Long lhsId = getStableId(lhs);
-                Long rhsId = getStableId(rhs);
-                return lhsId.compareTo(rhsId);
-            }
+        this.locks = new TreeSet<>((lhs, rhs) -> {
+            Long lhsId = getStableId(lhs);
+            Long rhsId = getStableId(rhs);
+            return lhsId.compareTo(rhsId);
         });
         this.locks.addAll(locks);
     }

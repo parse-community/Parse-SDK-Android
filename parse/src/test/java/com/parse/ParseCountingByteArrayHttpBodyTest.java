@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -62,7 +63,7 @@ public class ParseCountingByteArrayHttpBodyTest {
         body.writeTo(output);
 
         // Check content
-        assertTrue(Arrays.equals(content, output.toByteArray()));
+        assertArrayEquals(content, output.toByteArray());
 
         // Check progress callback
         assertTrue(didReportIntermediateProgress.tryAcquire(5, TimeUnit.SECONDS));

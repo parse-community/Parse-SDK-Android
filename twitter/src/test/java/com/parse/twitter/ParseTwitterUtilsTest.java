@@ -12,6 +12,7 @@ import android.content.Context;
 
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
+import com.parse.boltsinternal.Task;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,8 +24,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

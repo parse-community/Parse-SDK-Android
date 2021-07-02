@@ -20,6 +20,7 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.parse.boltsinternal.Task;
 
 import org.junit.After;
 import org.junit.Before;
@@ -41,8 +42,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import com.parse.boltsinternal.Task;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -54,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class FacebookControllerTest {
 
@@ -92,7 +91,7 @@ public class FacebookControllerTest {
 
         FacebookController controller = new FacebookController(null);
         Calendar calendar = new GregorianCalendar(2015, 6, 3);
-        Set<String> permissions = new HashSet<String>();
+        Set<String> permissions = new HashSet<>();
         permissions.add("user_friends");
         permissions.add("profile");
 

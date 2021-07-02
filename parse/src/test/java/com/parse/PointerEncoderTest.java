@@ -18,7 +18,7 @@ import static org.junit.Assert.assertNotNull;
 public class PointerEncoderTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testEncodeRelatedObjectWithoutObjectId() {

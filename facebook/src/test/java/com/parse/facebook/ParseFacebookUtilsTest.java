@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
+import com.parse.boltsinternal.Task;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,8 +34,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import com.parse.boltsinternal.Task;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +42,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -53,7 +51,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ParseFacebookUtilsTest {
 
@@ -200,7 +198,7 @@ public class ParseFacebookUtilsTest {
         doLogInWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
@@ -277,7 +275,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -286,7 +284,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -304,7 +302,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 

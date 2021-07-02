@@ -8,11 +8,12 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 
 import java.util.Arrays;
@@ -20,8 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import com.parse.boltsinternal.Task;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
@@ -124,14 +123,11 @@ public class ParseCloudTest extends ResetPluginsParseTest {
         parameters.put("key2", "value1");
 
         final Semaphore done = new Semaphore(0);
-        ParseCloud.callFunctionInBackground("name", parameters, new FunctionCallback<Object>() {
-            @Override
-            public void done(Object result, ParseException e) {
-                assertNull(e);
-                assertThat(result, instanceOf(String.class));
-                assertEquals("result", result);
-                done.release();
-            }
+        ParseCloud.callFunctionInBackground("name", parameters, (result, e) -> {
+            assertNull(e);
+            assertThat(result, instanceOf(String.class));
+            assertEquals("result", result);
+            done.release();
         });
 
         shadowMainLooper().idle();

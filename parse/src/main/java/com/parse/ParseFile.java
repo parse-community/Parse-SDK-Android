@@ -11,6 +11,10 @@ package com.parse;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,10 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * {@code ParseFile} is a local representation of a file that is saved to the Parse cloud.
@@ -57,6 +57,8 @@ public class ParseFile implements Parcelable {
         }
     };
     /* package for tests */ final TaskQueue taskQueue = new TaskQueue();
+    private final Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
+            new HashSet<>());
     /**
      * Staging of {@code ParseFile}'s data is stored in memory until the {@code ParseFile} has been
      * successfully synced with the server.
@@ -64,8 +66,6 @@ public class ParseFile implements Parcelable {
     /* package for tests */ byte[] data;
     /* package for tests */ File file;
     private State state;
-    private Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
-            new HashSet<TaskCompletionSource<?>>());
 
     /**
      * Creates a new file from a file pointer.
@@ -75,6 +75,7 @@ public class ParseFile implements Parcelable {
     public ParseFile(File file) {
         this(file, null);
     }
+
     /**
      * Creates a new file from a file pointer, and content type. Content type will be used instead of
      * auto-detection by file extension.
@@ -186,18 +187,10 @@ public class ParseFile implements Parcelable {
             return null;
         }
 
-        return new ProgressCallback() {
-            @Override
-            public void done(final Integer percentDone) {
-                Task.call(new Callable<Void>() {
-                    @Override
-                    public Void call() {
-                        progressCallback.done(percentDone);
-                        return null;
-                    }
-                }, ParseExecutors.main());
-            }
-        };
+        return percentDone -> Task.call((Callable<Void>) () -> {
+            progressCallback.done(percentDone);
+            return null;
+        }, ParseExecutors.main());
     }
 
     /* package for tests */ State getState() {
@@ -259,45 +252,39 @@ public class ParseFile implements Parcelable {
         }
 
         // Wait for our turn in the queue, then check state to decide whether to no-op.
-        return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                if (!isDirty()) {
-                    return Task.forResult(null);
-                }
-                if (cancellationToken != null && cancellationToken.isCancelled()) {
-                    return Task.cancelled();
-                }
-
-                Task<ParseFile.State> saveTask;
-                if (data != null) {
-                    saveTask = getFileController().saveAsync(
-                            state,
-                            data,
-                            sessionToken,
-                            progressCallbackOnMainThread(uploadProgressCallback),
-                            cancellationToken);
-                } else {
-                    saveTask = getFileController().saveAsync(
-                            state,
-                            file,
-                            sessionToken,
-                            progressCallbackOnMainThread(uploadProgressCallback),
-                            cancellationToken);
-                }
-
-                return saveTask.onSuccessTask(new Continuation<State, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<State> task) {
-                        state = task.getResult();
-                        // Since we have successfully uploaded the file, we do not need to hold the file pointer
-                        // anymore.
-                        data = null;
-                        file = null;
-                        return task.makeVoid();
-                    }
-                });
+        return toAwait.continueWithTask(task -> {
+            if (!isDirty()) {
+                return Task.forResult(null);
             }
+            if (cancellationToken != null && cancellationToken.isCancelled()) {
+                return Task.cancelled();
+            }
+
+            Task<State> saveTask;
+            if (data != null) {
+                saveTask = getFileController().saveAsync(
+                        state,
+                        data,
+                        sessionToken,
+                        progressCallbackOnMainThread(uploadProgressCallback),
+                        cancellationToken);
+            } else {
+                saveTask = getFileController().saveAsync(
+                        state,
+                        file,
+                        sessionToken,
+                        progressCallbackOnMainThread(uploadProgressCallback),
+                        cancellationToken);
+            }
+
+            return saveTask.onSuccessTask(task1 -> {
+                state = task1.getResult();
+                // Since we have successfully uploaded the file, we do not need to hold the file pointer
+                // anymore.
+                data = null;
+                file = null;
+                return task1.makeVoid();
+            });
         });
     }
 
@@ -312,30 +299,19 @@ public class ParseFile implements Parcelable {
         final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
         currentTasks.add(cts);
 
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return saveAsync(sessionToken, uploadProgressCallback, cts.getTask());
-            }
-        }).continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                cts.trySetResult(null); // release
-                currentTasks.remove(cts);
-                return task;
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return saveAsync(sessionToken, uploadProgressCallback, cts.getTask());
+        }).continueWithTask(task -> {
+            cts.trySetResult(null); // release
+            currentTasks.remove(cts);
+            return task;
         });
     }
 
     /* package */ Task<Void> saveAsync(final String sessionToken,
                                        final ProgressCallback uploadProgressCallback, final Task<Void> cancellationToken) {
-        return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> toAwait) {
-                return saveAsync(sessionToken, uploadProgressCallback, toAwait, cancellationToken);
-            }
-        });
+        return taskQueue.enqueue(toAwait -> saveAsync(sessionToken, uploadProgressCallback, toAwait, cancellationToken));
     }
 
     /**
@@ -388,29 +364,18 @@ public class ParseFile implements Parcelable {
         final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
         currentTasks.add(cts);
 
-        return taskQueue.enqueue(new Continuation<Void, Task<byte[]>>() {
-            @Override
-            public Task<byte[]> then(Task<Void> toAwait) {
-                return fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(new Continuation<File, byte[]>() {
-                    @Override
-                    public byte[] then(Task<File> task) {
-                        File file = task.getResult();
-                        try {
-                            return ParseFileUtils.readFileToByteArray(file);
-                        } catch (IOException e) {
-                            // do nothing
-                        }
-                        return null;
-                    }
-                });
+        return taskQueue.enqueue(toAwait -> fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(task -> {
+            File file = task.getResult();
+            try {
+                return ParseFileUtils.readFileToByteArray(file);
+            } catch (IOException e) {
+                // do nothing
             }
-        }).continueWithTask(new Continuation<byte[], Task<byte[]>>() {
-            @Override
-            public Task<byte[]> then(Task<byte[]> task) {
-                cts.trySetResult(null); // release
-                currentTasks.remove(cts);
-                return task;
-            }
+            return null;
+        })).continueWithTask(task -> {
+            cts.trySetResult(null); // release
+            currentTasks.remove(cts);
+            return task;
         });
     }
 
@@ -470,18 +435,10 @@ public class ParseFile implements Parcelable {
         final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
         currentTasks.add(cts);
 
-        return taskQueue.enqueue(new Continuation<Void, Task<File>>() {
-            @Override
-            public Task<File> then(Task<Void> toAwait) {
-                return fetchInBackground(progressCallback, toAwait, cts.getTask());
-            }
-        }).continueWithTask(new Continuation<File, Task<File>>() {
-            @Override
-            public Task<File> then(Task<File> task) {
-                cts.trySetResult(null); // release
-                currentTasks.remove(cts);
-                return task;
-            }
+        return taskQueue.enqueue(toAwait -> fetchInBackground(progressCallback, toAwait, cts.getTask())).continueWithTask(task -> {
+            cts.trySetResult(null); // release
+            currentTasks.remove(cts);
+            return task;
         });
     }
 
@@ -548,23 +505,10 @@ public class ParseFile implements Parcelable {
         final TaskCompletionSource<Void> cts = new TaskCompletionSource<>();
         currentTasks.add(cts);
 
-        return taskQueue.enqueue(new Continuation<Void, Task<InputStream>>() {
-            @Override
-            public Task<InputStream> then(Task<Void> toAwait) {
-                return fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(new Continuation<File, InputStream>() {
-                    @Override
-                    public InputStream then(Task<File> task) throws Exception {
-                        return new FileInputStream(task.getResult());
-                    }
-                });
-            }
-        }).continueWithTask(new Continuation<InputStream, Task<InputStream>>() {
-            @Override
-            public Task<InputStream> then(Task<InputStream> task) {
-                cts.trySetResult(null); // release
-                currentTasks.remove(cts);
-                return task;
-            }
+        return taskQueue.enqueue((Continuation<Void, Task<InputStream>>) toAwait -> fetchInBackground(progressCallback, toAwait, cts.getTask()).onSuccess(task -> new FileInputStream(task.getResult()))).continueWithTask(task -> {
+            cts.trySetResult(null); // release
+            currentTasks.remove(cts);
+            return task;
         });
     }
 
@@ -614,18 +558,15 @@ public class ParseFile implements Parcelable {
             return Task.cancelled();
         }
 
-        return toAwait.continueWithTask(new Continuation<Void, Task<File>>() {
-            @Override
-            public Task<File> then(Task<Void> task) {
-                if (cancellationToken != null && cancellationToken.isCancelled()) {
-                    return Task.cancelled();
-                }
-                return getFileController().fetchAsync(
-                        state,
-                        null,
-                        progressCallbackOnMainThread(progressCallback),
-                        cancellationToken);
+        return toAwait.continueWithTask(task -> {
+            if (cancellationToken != null && cancellationToken.isCancelled()) {
+                return Task.cancelled();
             }
+            return getFileController().fetchAsync(
+                    state,
+                    null,
+                    progressCallbackOnMainThread(progressCallback),
+                    cancellationToken);
         });
     }
 
@@ -685,6 +626,7 @@ public class ParseFile implements Parcelable {
         private final String name;
         private final String contentType;
         private final String url;
+
         private State(Builder builder) {
             name = builder.name != null ? builder.name : "file";
             contentType = builder.mimeType;

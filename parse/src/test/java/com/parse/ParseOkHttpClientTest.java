@@ -14,7 +14,6 @@ import com.parse.http.ParseHttpResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,7 +40,7 @@ import static org.junit.Assert.assertNull;
 @RunWith(RobolectricTestRunner.class)
 public class ParseOkHttpClientTest {
 
-    private MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
     //region testTransferRequest/Response
 
@@ -74,7 +73,7 @@ public class ParseOkHttpClientTest {
                 .build();
         okHttpRequest = parseClient.getRequest(parseRequest);
         assertEquals(ParseHttpRequest.Method.DELETE.toString(), okHttpRequest.method());
-        assertEquals(null, okHttpRequest.body());
+        assertNull(okHttpRequest.body());
 
         // Put
         parseRequest = builder

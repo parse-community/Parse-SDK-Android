@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -215,7 +214,7 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testOrThrowsWithEmptyList() {
-        ParseQuery.State.Builder.or(new ArrayList<ParseQuery.State.Builder<ParseObject>>()).build();
+        ParseQuery.State.Builder.or(new ArrayList<>()).build();
     }
 
     @Test(expected = IllegalArgumentException.class)

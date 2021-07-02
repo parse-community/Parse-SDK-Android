@@ -8,8 +8,6 @@
  */
 package com.parse;
 
-import androidx.annotation.NonNull;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,13 +46,7 @@ class ParseJSONUtils {
      */
     public static Iterable<String> keys(JSONObject object) {
         final JSONObject finalObject = object;
-        return new Iterable<String>() {
-            @NonNull
-            @Override
-            public Iterator<String> iterator() {
-                return finalObject.keys();
-            }
-        };
+        return finalObject::keys;
     }
 
     /**

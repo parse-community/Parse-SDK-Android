@@ -27,7 +27,7 @@ import static org.junit.Assert.fail;
 public class ParseCountingFileHttpBodyTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private static String getData() {
         char[] chars = new char[64 << 14]; // 1MB

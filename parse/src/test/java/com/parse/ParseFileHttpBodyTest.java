@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNull;
 public class ParseFileHttpBodyTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     // Generate a test file used for create ParseFileHttpBody, if you change file's content, make sure
     // you also change the test file content in verifyTestFileContent().

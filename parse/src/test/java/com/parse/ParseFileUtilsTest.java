@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -33,7 +33,7 @@ public class ParseFileUtilsTest {
     private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testReadFileToString() throws Exception {
@@ -41,7 +41,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_STRING.getBytes("UTF-8"));
+            out.write(TEST_STRING.getBytes(StandardCharsets.UTF_8));
         } finally {
             ParseIOUtils.closeQuietly(out);
         }
@@ -60,7 +60,7 @@ public class ParseFileUtilsTest {
             in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ParseIOUtils.copy(in, out);
-            content = new String(out.toByteArray(), "UTF-8");
+            content = new String(out.toByteArray(), StandardCharsets.UTF_8);
         } finally {
             ParseIOUtils.closeQuietly(in);
         }
@@ -74,7 +74,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_JSON.getBytes("UTF-8"));
+            out.write(TEST_JSON.getBytes(StandardCharsets.UTF_8));
         } finally {
             ParseIOUtils.closeQuietly(out);
         }

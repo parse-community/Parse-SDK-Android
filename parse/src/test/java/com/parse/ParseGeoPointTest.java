@@ -13,11 +13,9 @@ import android.os.Parcel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseGeoPointTest {
@@ -45,13 +43,13 @@ public class ParseGeoPointTest {
         ParseGeoPoint pointB = new ParseGeoPoint(30d, 50d);
         ParseGeoPoint pointC = new ParseGeoPoint(45d, 45d);
 
-        assertTrue(pointA.equals(pointB));
-        assertTrue(pointA.equals(pointA));
-        assertTrue(pointB.equals(pointA));
+        assertEquals(pointA, pointB);
+        assertEquals(pointA, pointA);
+        assertEquals(pointB, pointA);
 
-        assertFalse(pointA.equals(null));
-        assertFalse(pointA.equals(true));
-        assertFalse(pointA.equals(pointC));
+        assertNotEquals(null, pointA);
+        assertNotEquals(true, pointA);
+        assertNotEquals(pointA, pointC);
     }
 
     @Test

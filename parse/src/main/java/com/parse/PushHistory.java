@@ -28,6 +28,7 @@ class PushHistory {
     private final PriorityQueue<Entry> entries;
     private final HashSet<String> pushIds;
     private String lastTime;
+
     /**
      * Creates a push history object from a JSON object that looks like this:
      * <p>
@@ -131,8 +132,8 @@ class PushHistory {
     }
 
     private static class Entry implements Comparable<Entry> {
-        public String pushId;
-        public String timestamp;
+        public final String pushId;
+        public final String timestamp;
 
         public Entry(String pushId, String timestamp) {
             this.pushId = pushId;

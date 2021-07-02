@@ -9,9 +9,7 @@
 package com.parse.fcm;
 
 import com.parse.PLog;
-import com.parse.ParseException;
 import com.parse.ParseInstallation;
-import com.parse.SaveCallback;
 
 public class ParseFCM {
 
@@ -32,14 +30,11 @@ public class ParseFCM {
             installation.setDeviceToken(token);
             //even though this is FCM, calling it gcm will work on the backend
             installation.setPushType(PUSH_TYPE);
-            installation.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e == null) {
-                        PLog.d(ParseFCM.TAG, "FCM token saved to installation");
-                    } else {
-                        PLog.e(ParseFCM.TAG, "FCM token upload failed", e);
-                    }
+            installation.saveInBackground(e -> {
+                if (e == null) {
+                    PLog.d(ParseFCM.TAG, "FCM token saved to installation");
+                } else {
+                    PLog.e(ParseFCM.TAG, "FCM token upload failed", e);
                 }
             });
         }

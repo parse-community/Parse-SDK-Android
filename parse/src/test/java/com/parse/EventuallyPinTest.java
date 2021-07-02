@@ -2,6 +2,8 @@ package com.parse;
 
 import android.database.sqlite.SQLiteException;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -9,9 +11,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import com.parse.boltsinternal.Task;
 
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.when;
 public class EventuallyPinTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() {

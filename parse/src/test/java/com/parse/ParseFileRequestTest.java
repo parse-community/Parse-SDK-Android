@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
@@ -15,8 +16,6 @@ import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-
-import com.parse.boltsinternal.Task;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;

@@ -12,22 +12,22 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import com.parse.boltsinternal.Task;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -279,7 +279,7 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
             assertEquals(zone, deviceZone);
         } else {
             // If it's not updated it's because it was not acceptable.
-            assertFalse(deviceZone.equals("GMT"));
+            assertNotEquals("GMT", deviceZone);
             assertFalse(deviceZone.indexOf("/") > 0);
         }
 

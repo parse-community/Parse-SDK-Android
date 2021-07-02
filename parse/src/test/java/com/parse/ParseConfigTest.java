@@ -8,13 +8,14 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.robolectric.annotation.LooperMode;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -26,8 +27,6 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.parse.boltsinternal.Task;
-
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +37,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -139,13 +137,10 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground(new ConfigCallback() {
-            @Override
-            public void done(ParseConfig config, ParseException e) {
-                assertEquals(1, config.params.size());
-                assertEquals("value", config.params.get("string"));
-                done.release();
-            }
+        ParseConfig.getInBackground((config1, e) -> {
+            assertEquals(1, config1.params.size());
+            assertEquals("value", config1.params.get("string"));
+            done.release();
         });
 
         shadowMainLooper().idle();
@@ -162,13 +157,10 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground(new ConfigCallback() {
-            @Override
-            public void done(ParseConfig config, ParseException e) {
-                assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
-                assertEquals("error", e.getMessage());
-                done.release();
-            }
+        ParseConfig.getInBackground((config, e) -> {
+            assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
+            assertEquals("error", e.getMessage());
+            done.release();
         });
 
         shadowMainLooper().idle();

@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -17,8 +19,6 @@ import org.mockito.Matchers;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.parse.boltsinternal.Task;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 public class ParseAuthenticationManagerTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     private ParseAuthenticationManager manager;
     private ParseCurrentUserController controller;

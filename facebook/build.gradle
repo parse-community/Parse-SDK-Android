@@ -25,7 +25,7 @@ dependencies {
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:3.6.28"
-    testImplementation "org.robolectric:robolectric:4.4"
+    testImplementation "org.robolectric:robolectric:4.6"
 }
 
 apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

@@ -19,28 +19,29 @@ class ParseCorePlugins {
     /* package */ static final String PIN_CURRENT_INSTALLATION = "_currentInstallation";
     /* package */ static final String FILENAME_CURRENT_CONFIG = "currentConfig";
     private static final ParseCorePlugins INSTANCE = new ParseCorePlugins();
-    private AtomicReference<ParseObjectController> objectController = new AtomicReference<>();
-    private AtomicReference<ParseUserController> userController = new AtomicReference<>();
-    private AtomicReference<ParseSessionController> sessionController = new AtomicReference<>();
+    private final AtomicReference<ParseObjectController> objectController = new AtomicReference<>();
+    private final AtomicReference<ParseUserController> userController = new AtomicReference<>();
+    private final AtomicReference<ParseSessionController> sessionController = new AtomicReference<>();
     // TODO(mengyan): Inject into ParseUserInstanceController
-    private AtomicReference<ParseCurrentUserController> currentUserController =
+    private final AtomicReference<ParseCurrentUserController> currentUserController =
             new AtomicReference<>();
     // TODO(mengyan): Inject into ParseInstallationInstanceController
-    private AtomicReference<ParseCurrentInstallationController> currentInstallationController =
+    private final AtomicReference<ParseCurrentInstallationController> currentInstallationController =
             new AtomicReference<>();
-    private AtomicReference<ParseAuthenticationManager> authenticationController =
+    private final AtomicReference<ParseAuthenticationManager> authenticationController =
             new AtomicReference<>();
-    private AtomicReference<ParseQueryController> queryController = new AtomicReference<>();
-    private AtomicReference<ParseFileController> fileController = new AtomicReference<>();
-    private AtomicReference<ParseAnalyticsController> analyticsController = new AtomicReference<>();
-    private AtomicReference<ParseCloudCodeController> cloudCodeController = new AtomicReference<>();
-    private AtomicReference<ParseConfigController> configController = new AtomicReference<>();
-    private AtomicReference<ParsePushController> pushController = new AtomicReference<>();
-    private AtomicReference<ParsePushChannelsController> pushChannelsController =
+    private final AtomicReference<ParseQueryController> queryController = new AtomicReference<>();
+    private final AtomicReference<ParseFileController> fileController = new AtomicReference<>();
+    private final AtomicReference<ParseAnalyticsController> analyticsController = new AtomicReference<>();
+    private final AtomicReference<ParseCloudCodeController> cloudCodeController = new AtomicReference<>();
+    private final AtomicReference<ParseConfigController> configController = new AtomicReference<>();
+    private final AtomicReference<ParsePushController> pushController = new AtomicReference<>();
+    private final AtomicReference<ParsePushChannelsController> pushChannelsController =
             new AtomicReference<>();
-    private AtomicReference<ParseDefaultACLController> defaultACLController = new AtomicReference<>();
-    private AtomicReference<LocalIdManager> localIdManager = new AtomicReference<>();
-    private AtomicReference<ParseObjectSubclassingController> subclassingController = new AtomicReference<>();
+    private final AtomicReference<ParseDefaultACLController> defaultACLController = new AtomicReference<>();
+    private final AtomicReference<LocalIdManager> localIdManager = new AtomicReference<>();
+    private final AtomicReference<ParseObjectSubclassingController> subclassingController = new AtomicReference<>();
+
     private ParseCorePlugins() {
         // do nothing
     }

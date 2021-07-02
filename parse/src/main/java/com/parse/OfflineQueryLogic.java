@@ -11,6 +11,7 @@ package com.parse;
 import com.parse.ParseQuery.KeyConstraints;
 import com.parse.ParseQuery.QueryConstraints;
 import com.parse.ParseQuery.RelationConstraint;
+import com.parse.boltsinternal.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +20,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 class OfflineQueryLogic {
     private final OfflineStore store;
@@ -214,19 +211,9 @@ class OfflineQueryLogic {
 
         Decider decider;
         if (isStartsWithRegex(constraint)) {
-            decider = new Decider() {
-                @Override
-                public boolean decide(Object constraint, Object value) {
-                    return ((String) value).matches(((KeyConstraints) constraint).get("$regex").toString());
-                }
-            };
+            decider = (constraint1, value1) -> ((String) value1).matches(((KeyConstraints) constraint1).get("$regex").toString());
         } else {
-            decider = new Decider() {
-                @Override
-                public boolean decide(Object constraint, Object value) {
-                    return constraint.equals(value);
-                }
-            };
+            decider = Object::equals;
         }
 
         return compare(constraint, value, decider);
@@ -243,14 +230,11 @@ class OfflineQueryLogic {
      * Matches $lt constraints.
      */
     private static boolean matchesLessThanConstraint(Object constraint, Object value) {
-        return compare(constraint, value, new Decider() {
-            @Override
-            public boolean decide(Object constraint, Object value) {
-                if (value == null || value == JSONObject.NULL) {
-                    return false;
-                }
-                return compareTo(constraint, value) > 0;
+        return compare(constraint, value, (constraint1, value1) -> {
+            if (value1 == null || value1 == JSONObject.NULL) {
+                return false;
             }
+            return compareTo(constraint1, value1) > 0;
         });
     }
 
@@ -258,14 +242,11 @@ class OfflineQueryLogic {
      * Matches $lte constraints.
      */
     private static boolean matchesLessThanOrEqualToConstraint(Object constraint, Object value) {
-        return compare(constraint, value, new Decider() {
-            @Override
-            public boolean decide(Object constraint, Object value) {
-                if (value == null || value == JSONObject.NULL) {
-                    return false;
-                }
-                return compareTo(constraint, value) >= 0;
+        return compare(constraint, value, (constraint1, value1) -> {
+            if (value1 == null || value1 == JSONObject.NULL) {
+                return false;
             }
+            return compareTo(constraint1, value1) >= 0;
         });
     }
 
@@ -273,14 +254,11 @@ class OfflineQueryLogic {
      * Matches $gt constraints.
      */
     private static boolean matchesGreaterThanConstraint(Object constraint, Object value) {
-        return compare(constraint, value, new Decider() {
-            @Override
-            public boolean decide(Object constraint, Object value) {
-                if (value == null || value == JSONObject.NULL) {
-                    return false;
-                }
-                return compareTo(constraint, value) < 0;
+        return compare(constraint, value, (constraint1, value1) -> {
+            if (value1 == null || value1 == JSONObject.NULL) {
+                return false;
             }
+            return compareTo(constraint1, value1) < 0;
         });
     }
 
@@ -288,14 +266,11 @@ class OfflineQueryLogic {
      * Matches $gte constraints.
      */
     private static boolean matchesGreaterThanOrEqualToConstraint(Object constraint, Object value) {
-        return compare(constraint, value, new Decider() {
-            @Override
-            public boolean decide(Object constraint, Object value) {
-                if (value == null || value == JSONObject.NULL) {
-                    return false;
-                }
-                return compareTo(constraint, value) <= 0;
+        return compare(constraint, value, (constraint1, value1) -> {
+            if (value1 == null || value1 == JSONObject.NULL) {
+                return false;
             }
+            return compareTo(constraint1, value1) <= 0;
         });
     }
 
@@ -711,55 +686,52 @@ class OfflineQueryLogic {
          * TODO(klimt): Test whether we allow dotting into objects for sorting.
          */
 
-        Collections.sort(results, new Comparator<T>() {
-            @Override
-            public int compare(T lhs, T rhs) {
-                if (nearSphereKey != null) {
-                    ParseGeoPoint lhsPoint;
-                    ParseGeoPoint rhsPoint;
-                    try {
-                        lhsPoint = (ParseGeoPoint) getValue(lhs, nearSphereKey);
-                        rhsPoint = (ParseGeoPoint) getValue(rhs, nearSphereKey);
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    // GeoPoints can't be null if there's a $nearSphere.
-                    double lhsDistance = lhsPoint.distanceInRadiansTo(nearSphereValue);
-                    double rhsDistance = rhsPoint.distanceInRadiansTo(nearSphereValue);
-                    if (lhsDistance != rhsDistance) {
-                        return (lhsDistance - rhsDistance > 0) ? 1 : -1;
-                    }
+        Collections.sort(results, (lhs, rhs) -> {
+            if (nearSphereKey != null) {
+                ParseGeoPoint lhsPoint;
+                ParseGeoPoint rhsPoint;
+                try {
+                    lhsPoint = (ParseGeoPoint) getValue(lhs, nearSphereKey);
+                    rhsPoint = (ParseGeoPoint) getValue(rhs, nearSphereKey);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
 
-                for (String key : keys) {
-                    boolean descending = false;
-                    if (key.startsWith("-")) {
-                        descending = true;
-                        key = key.substring(1);
-                    }
-
-                    Object lhsValue;
-                    Object rhsValue;
-                    try {
-                        lhsValue = getValue(lhs, key);
-                        rhsValue = getValue(rhs, key);
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    int result;
-                    try {
-                        result = compareTo(lhsValue, rhsValue);
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException(String.format("Unable to sort by key %s.", key), e);
-                    }
-                    if (result != 0) {
-                        return descending ? -result : result;
-                    }
+                // GeoPoints can't be null if there's a $nearSphere.
+                double lhsDistance = lhsPoint.distanceInRadiansTo(nearSphereValue);
+                double rhsDistance = rhsPoint.distanceInRadiansTo(nearSphereValue);
+                if (lhsDistance != rhsDistance) {
+                    return (lhsDistance - rhsDistance > 0) ? 1 : -1;
                 }
-                return 0;
             }
+
+            for (String key : keys) {
+                boolean descending = false;
+                if (key.startsWith("-")) {
+                    descending = true;
+                    key = key.substring(1);
+                }
+
+                Object lhsValue;
+                Object rhsValue;
+                try {
+                    lhsValue = getValue(lhs, key);
+                    rhsValue = getValue(rhs, key);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
+                int result;
+                try {
+                    result = compareTo(lhsValue, rhsValue);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException(String.format("Unable to sort by key %s.", key), e);
+                }
+                if (result != 0) {
+                    return descending ? -result : result;
+                }
+            }
+            return 0;
         });
     }
 
@@ -782,12 +754,7 @@ class OfflineQueryLogic {
             // We do the fetches in series because it makes it easier to fail on the first error.
             Task<Void> task = Task.forResult(null);
             for (final Object item : collection) {
-                task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        return fetchIncludeAsync(store, item, path, db);
-                    }
-                });
+                task = task.onSuccessTask(task1 -> fetchIncludeAsync(store, item, path, db));
             }
             return task;
         } else if (container instanceof JSONArray) {
@@ -796,12 +763,7 @@ class OfflineQueryLogic {
             Task<Void> task = Task.forResult(null);
             for (int i = 0; i < array.length(); ++i) {
                 final int index = i;
-                task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
-                        return fetchIncludeAsync(store, array.get(index), path, db);
-                    }
-                });
+                task = task.onSuccessTask(task12 -> fetchIncludeAsync(store, array.get(index), path, db));
             }
             return task;
         }
@@ -828,35 +790,22 @@ class OfflineQueryLogic {
         final String rest = (parts.length > 1 ? parts[1] : null);
 
         // Make sure the container is fetched.
-        return Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Object>>() {
-            @Override
-            public Task<Object> then(Task<Void> task) {
-                if (container instanceof ParseObject) {
-                    // Make sure this object is fetched before descending into it.
-                    return fetchIncludeAsync(store, container, null, db).onSuccess(new Continuation<Void, Object>() {
-                        @Override
-                        public Object then(Task<Void> task) {
-                            return ((ParseObject) container).get(key);
-                        }
-                    });
-                } else if (container instanceof Map) {
-                    return Task.forResult(((Map) container).get(key));
-                } else if (container instanceof JSONObject) {
-                    return Task.forResult(((JSONObject) container).opt(key));
-                } else if (JSONObject.NULL.equals(container)) {
-                    // Accept JSONObject.NULL value in included field. We swallow it silently instead of
-                    // throwing an exception.
-                    return null;
-                } else {
-                    return Task.forError(new IllegalStateException("include is invalid"));
-                }
+        return Task.<Void>forResult(null).continueWithTask(task -> {
+            if (container instanceof ParseObject) {
+                // Make sure this object is fetched before descending into it.
+                return fetchIncludeAsync(store, container, null, db).onSuccess(task13 -> ((ParseObject) container).get(key));
+            } else if (container instanceof Map) {
+                return Task.forResult(((Map) container).get(key));
+            } else if (container instanceof JSONObject) {
+                return Task.forResult(((JSONObject) container).opt(key));
+            } else if (JSONObject.NULL.equals(container)) {
+                // Accept JSONObject.NULL value in included field. We swallow it silently instead of
+                // throwing an exception.
+                return null;
+            } else {
+                return Task.forError(new IllegalStateException("include is invalid"));
             }
-        }).onSuccessTask(new Continuation<Object, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Object> task) {
-                return fetchIncludeAsync(store, task.getResult(), rest, db);
-            }
-        });
+        }).onSuccessTask(task -> fetchIncludeAsync(store, task.getResult(), rest, db));
     }
 
     /**
@@ -872,12 +821,7 @@ class OfflineQueryLogic {
         // We do the fetches in series because it makes it easier to fail on the first error.
         Task<Void> task = Task.forResult(null);
         for (final String include : includes) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return fetchIncludeAsync(store, object, include, db);
-                }
-            });
+            task = task.onSuccessTask(task1 -> fetchIncludeAsync(store, object, include, db));
         }
         return task;
     }
@@ -908,12 +852,7 @@ class OfflineQueryLogic {
         return new ConstraintMatcher<T>(user) {
             @Override
             public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
-                return inQueryMatcher.matchesAsync(object, db).onSuccess(new Continuation<Boolean, Boolean>() {
-                    @Override
-                    public Boolean then(Task<Boolean> task) {
-                        return !task.getResult();
-                    }
-                });
+                return inQueryMatcher.matchesAsync(object, db).onSuccess(task -> !task.getResult());
             }
         };
     }
@@ -952,12 +891,7 @@ class OfflineQueryLogic {
         return new ConstraintMatcher<T>(user) {
             @Override
             public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
-                return selectMatcher.matchesAsync(object, db).onSuccess(new Continuation<Boolean, Boolean>() {
-                    @Override
-                    public Boolean then(Task<Boolean> task) {
-                        return !task.getResult();
-                    }
-                });
+                return selectMatcher.matchesAsync(object, db).onSuccess(task -> !task.getResult());
             }
         };
     }
@@ -1019,14 +953,11 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(final T object, final ParseSQLiteDatabase db) {
                 Task<Boolean> task = Task.forResult(false);
                 for (final ConstraintMatcher<T> matcher : matchers) {
-                    task = task.onSuccessTask(new Continuation<Boolean, Task<Boolean>>() {
-                        @Override
-                        public Task<Boolean> then(Task<Boolean> task) {
-                            if (task.getResult()) {
-                                return task;
-                            }
-                            return matcher.matchesAsync(object, db);
+                    task = task.onSuccessTask(task1 -> {
+                        if (task1.getResult()) {
+                            return task1;
                         }
+                        return matcher.matchesAsync(object, db);
                     });
                 }
                 return task;
@@ -1107,14 +1038,11 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(final T object, final ParseSQLiteDatabase db) {
                 Task<Boolean> task = Task.forResult(true);
                 for (final ConstraintMatcher<T> matcher : matchers) {
-                    task = task.onSuccessTask(new Continuation<Boolean, Task<Boolean>>() {
-                        @Override
-                        public Task<Boolean> then(Task<Boolean> task) {
-                            if (!task.getResult()) {
-                                return task;
-                            }
-                            return matcher.matchesAsync(object, db);
+                    task = task.onSuccessTask(task1 -> {
+                        if (!task1.getResult()) {
+                            return task1;
                         }
+                        return matcher.matchesAsync(object, db);
                     });
                 }
                 return task;
@@ -1161,7 +1089,7 @@ class OfflineQueryLogic {
      * as $inQuery) are much more efficient if we can do some preprocessing. This makes some parts of
      * the query matching stateful.
      */
-    /* package */ abstract class ConstraintMatcher<T extends ParseObject> {
+    /* package */ abstract static class ConstraintMatcher<T extends ParseObject> {
 
         /* package */ final ParseUser user;
 
@@ -1193,12 +1121,7 @@ class OfflineQueryLogic {
                 // query on.
                 subQueryResults = store.findAsync(subQuery, user, null, db);
             }
-            return subQueryResults.onSuccess(new Continuation<List<T>, Boolean>() {
-                @Override
-                public Boolean then(Task<List<T>> task) throws ParseException {
-                    return matches(object, task.getResult());
-                }
-            });
+            return subQueryResults.onSuccess(task -> matches(object, task.getResult()));
         }
 
         protected abstract boolean matches(T object, List<T> results) throws ParseException;

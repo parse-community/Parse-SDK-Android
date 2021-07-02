@@ -8,14 +8,14 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.parse.boltsinternal.Task;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -217,7 +217,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     public void testGetAsyncAnonymousUser() throws Exception {
         ParseUser.State state = new ParseUser.State.Builder()
                 .objectId("fake")
-                .putAuthData(ParseAnonymousUtils.AUTH_TYPE, new HashMap<String, String>())
+                .putAuthData(ParseAnonymousUtils.AUTH_TYPE, new HashMap<>())
                 .build();
         ParseObjectStore<ParseUser> store =
                 (ParseObjectStore<ParseUser>) mock(ParseObjectStore.class);
@@ -233,7 +233,7 @@ public class CachedCurrentUserControllerTest extends ResetPluginsParseTest {
     @Test
     public void testGetAsyncLazyAnonymousUser() throws Exception {
         ParseUser.State state = new ParseUser.State.Builder()
-                .putAuthData(ParseAnonymousUtils.AUTH_TYPE, new HashMap<String, String>())
+                .putAuthData(ParseAnonymousUtils.AUTH_TYPE, new HashMap<>())
                 .build();
         ParseObjectStore<ParseUser> store =
                 (ParseObjectStore<ParseUser>) mock(ParseObjectStore.class);
