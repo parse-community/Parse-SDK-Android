@@ -77,7 +77,7 @@ public class FileObjectStoreTest {
                 .thenReturn(builder);
         FileObjectStore<ParseUser> store = new FileObjectStore<>(ParseUser.class, file, coder);
 
-        ParseUser user = ParseTaskUtils.wait(store.getAsync());
+        ParseUser user = ParseTaskUtils.wait(store.getGetAsync());
         assertEquals("bar", user.getState().get("foo"));
     }
 

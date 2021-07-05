@@ -90,7 +90,7 @@ public class OfflineObjectStoreTest {
         OfflineObjectStore<ParseUser> store =
                 new OfflineObjectStore<>(ParseUser.class, PIN_NAME, null);
 
-        ParseUser userAgain = ParseTaskUtils.wait(store.getAsync());
+        ParseUser userAgain = ParseTaskUtils.wait(store.getGetAsync());
         //noinspection unchecked
         verify(queryController, times(1))
                 .findAsync(any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
@@ -114,12 +114,12 @@ public class OfflineObjectStoreTest {
 
         @SuppressWarnings("unchecked")
         ParseObjectStore<ParseUser> legacy = mock(ParseObjectStore.class);
-        when(legacy.getAsync()).thenReturn(Task.<ParseUser>forResult(null));
+        when(legacy.getGetAsync()).thenReturn(Task.<ParseUser>forResult(null));
 
         OfflineObjectStore<ParseUser> store =
                 new OfflineObjectStore<>(ParseUser.class, PIN_NAME, legacy);
 
-        ParseUser user = ParseTaskUtils.wait(store.getAsync());
+        ParseUser user = ParseTaskUtils.wait(store.getGetAsync());
         //noinspection unchecked
         verify(queryController, times(1))
                 .findAsync(any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
@@ -150,17 +150,17 @@ public class OfflineObjectStoreTest {
         when(user.pinInBackground(anyString(), anyBoolean())).thenReturn(Task.<Void>forResult(null));
         @SuppressWarnings("unchecked")
         ParseObjectStore<ParseUser> legacy = mock(ParseObjectStore.class);
-        when(legacy.getAsync()).thenReturn(Task.forResult(user));
+        when(legacy.getGetAsync()).thenReturn(Task.forResult(user));
         when(legacy.deleteAsync()).thenReturn(Task.<Void>forResult(null));
 
         OfflineObjectStore<ParseUser> store =
                 new OfflineObjectStore<>(ParseUser.class, PIN_NAME, legacy);
 
-        ParseUser userAgain = ParseTaskUtils.wait(store.getAsync());
+        ParseUser userAgain = ParseTaskUtils.wait(store.getGetAsync());
         //noinspection unchecked
         verify(queryController, times(1))
                 .findAsync(any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
-        verify(legacy, times(1)).getAsync();
+        verify(legacy, times(1)).getGetAsync();
         verify(legacy, times(1)).deleteAsync();
         verify(lds, times(1)).unpinAllObjectsAsync(PIN_NAME);
         verify(user, times(1)).pinInBackground(PIN_NAME, false);

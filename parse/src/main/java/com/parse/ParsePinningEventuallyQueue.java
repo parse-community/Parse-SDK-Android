@@ -356,7 +356,7 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
 
         synchronized (taskQueueSyncLock) {
             if (operationSet != null && eventuallyPin == null) {
-                uuid = operationSet.getUUID();
+                uuid = operationSet.getUuid();
                 uuidToOperationSet.put(uuid, operationSet);
             } else if (operationSet == null && eventuallyPin != null) {
                 uuid = eventuallyPin.getOperationSetUUID();

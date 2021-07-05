@@ -105,7 +105,7 @@ public class CachedCurrentInstallationControllerTest {
         ParseObjectStore<ParseInstallation> store = mock(ParseObjectStore.class);
         ParseInstallation installation = mock(ParseInstallation.class);
         when(installation.getInstallationId()).thenReturn("testInstallationId");
-        when(store.getAsync()).thenReturn(Task.forResult(installation));
+        when(store.getGetAsync()).thenReturn(Task.forResult(installation));
 
         // Create test controller
         CachedCurrentInstallationController controller =
@@ -113,7 +113,7 @@ public class CachedCurrentInstallationControllerTest {
 
         ParseInstallation currentInstallation = ParseTaskUtils.wait(controller.getAsync());
 
-        verify(store, times(1)).getAsync();
+        verify(store, times(1)).getGetAsync();
         // Make sure installationId is updated
         verify(installationId, times(1)).set("testInstallationId");
         // Make sure controller state is update to date
@@ -129,7 +129,7 @@ public class CachedCurrentInstallationControllerTest {
         when(installationId.get()).thenReturn("testInstallationId");
         //noinspection unchecked
         ParseObjectStore<ParseInstallation> store = mock(ParseObjectStore.class);
-        when(store.getAsync()).thenReturn(Task.<ParseInstallation>forResult(null));
+        when(store.getGetAsync()).thenReturn(Task.<ParseInstallation>forResult(null));
 
         // Create test controller
         CachedCurrentInstallationController controller =
@@ -137,7 +137,7 @@ public class CachedCurrentInstallationControllerTest {
 
         ParseInstallation currentInstallation = ParseTaskUtils.wait(controller.getAsync());
 
-        verify(store, times(1)).getAsync();
+        verify(store, times(1)).getGetAsync();
         // Make sure controller state is update to date
         assertSame(controller.currentInstallation, currentInstallation);
         // Make sure device info is updated
@@ -153,7 +153,7 @@ public class CachedCurrentInstallationControllerTest {
         //noinspection unchecked
         ParseObjectStore<ParseInstallation> store = mock(ParseObjectStore.class);
         TaskCompletionSource<ParseInstallation> tcs = new TaskCompletionSource();
-        when(store.getAsync()).thenReturn(tcs.getTask());
+        when(store.getGetAsync()).thenReturn(tcs.getTask());
 
         // Create test controller
         CachedCurrentInstallationController controller =
@@ -166,7 +166,7 @@ public class CachedCurrentInstallationControllerTest {
         ParseInstallation installationA = ParseTaskUtils.wait(taskA);
         ParseInstallation installationB = ParseTaskUtils.wait(taskB);
 
-        verify(store, times(1)).getAsync();
+        verify(store, times(1)).getGetAsync();
         assertSame(controller.currentInstallation, installationA);
         assertSame(controller.currentInstallation, installationB);
         // Make sure device info is updated
