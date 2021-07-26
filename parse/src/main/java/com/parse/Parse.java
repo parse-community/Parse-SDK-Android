@@ -75,7 +75,8 @@ public class Parse {
      *   }
      * }
      * </pre>
-     *
+     * See <a href="https://github.com/parse-community/Parse-SDK-Android/issues/279">https://github.com/parse-community/Parse-SDK-Android/issues/279</a>
+     * for a discussion on performance of local datastore, and if it is right for your project.
      * @param context The active {@link Context} for your application.
      */
     public static void enableLocalDatastore(Context context) {
