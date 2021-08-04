@@ -11,7 +11,7 @@ assignees: ''
 <!--
     Check all of the following boxes [x] before submitting your issue.
     Click the "Preview" tab for better readability.
-    Thanks for contributing to Parse Swift!
+    Thanks for contributing to the Parse Android SDK!
 -->
 
 - [ ] I am not disclosing a [vulnerability](https://github.com/parse-community/Parse-SDK-Android/security/policy).
