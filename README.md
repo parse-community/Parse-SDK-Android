@@ -12,14 +12,15 @@ For more information about Parse and its features, see [the website](https://par
 
 ## Dependency
 
-Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
+Add the maven repository where this library is stored (jitpack.io) in your root `settings.gradle` file:
 
-```gradle
-allprojects {
-	repositories {
-		...
-		maven { url "https://jitpack.io" }
-	}
+```dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
 }
 ```
 
@@ -69,6 +70,23 @@ public class App extends Application {
         .server("https://your-server-address/parse/")
         .build()
       );
+    }
+}
+```
+```kotlin
+import android.app.Application
+import com.parse.Parse
+
+class App: Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Parse.initialize(
+            Parse.Configuration.Builder(this)
+                .applicationId("YOUR_APP_ID") // if desired
+                .clientKey("YOUR_CLIENT_KEY")
+                .server("https://your-server-address/parse/")
+                .build()
+        )
     }
 }
 ```
