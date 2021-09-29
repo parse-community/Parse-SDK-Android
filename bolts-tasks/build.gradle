@@ -3,8 +3,8 @@
 // This source code is licensed under the MIT license found in the/
 // LICENSE file in the root directory of this source tree.
 
-apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 configurations {
     provided
@@ -17,20 +17,20 @@ sourceSets {
 }
 
 dependencies {
-    provided 'com.google.android:android:4.1.1.4'
-    testImplementation 'junit:junit:4.12'
+    compileOnly 'com.google.android:android:4.1.1.4'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 
 javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set("sources")
     from sourceSets.main.allJava
 }
 
 task javadocJar (type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set("javadoc")
     from javadoc.destinationDir
 }
 
@@ -43,19 +43,40 @@ artifacts {
 
 //region Code Coverage
 
-apply plugin: 'jacoco'
-
-jacoco {
-    toolVersion = '0.7.1.201405082137'
-}
-
-jacocoTestReport {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports after running tests."
-    reports {
-        xml.enabled true
-        html.enabled true
-    }
-}
+//apply plugin: 'jacoco'
+//
+//jacoco {
+//    toolVersion = '0.8.7'
+//}
+//
+//jacocoTestReport {
+//    group = "Reporting"
+//    description = "Generate Jacoco coverage reports after running tests."
+//    reports {
+//        xml.enabled true
+//        html.enabled true
+//    }
+//}
 
 //endregion
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "moralisPublication".
+            moralisPublication(MavenPublication) {
+                from components.java
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = 'com.github.moralisweb3.sdk.android'
+                artifactId = 'bolts-tasks'
+                version = '0.1'
+            }
+        }
+    }
+}

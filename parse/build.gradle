@@ -1,5 +1,7 @@
 apply plugin: "com.android.library"
-apply plugin: "com.github.kt3k.coveralls"
+apply plugin: 'kotlin-android'
+//apply plugin: "com.github.kt3k.coveralls"
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -20,70 +22,91 @@ android {
         abortOnError false
     }
 
-    buildTypes {
+    buildTypes {ja
         debug {
             testCoverageEnabled = true
+        }
+        release {
+            testCoverageEnabled = false
         }
     }
 }
 
 ext {
-    // Note: Don't update past 3.12.x, as it sets the minSdk to Android 5.0
-    okhttpVersion = "3.12.10"
+    okhttpVersion = "4.9.1"
 }
 
 dependencies {
-    api "androidx.annotation:annotation:1.1.0"
-    api "androidx.core:core:1.2.0"
+    api "androidx.annotation:annotation:1.2.0"
+    api "androidx.core:core-ktx:1.6.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
-    testImplementation "org.robolectric:robolectric:3.8"
+    testImplementation "org.robolectric:robolectric:4.2.1"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
     testImplementation "org.mockito:mockito-core:1.10.19"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+    implementation "androidx.core:core-ktx:1.6.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 //region Code Coverage
 
-apply plugin: "jacoco"
-
-jacoco {
-    toolVersion "0.7.1.201405082137"
-}
-
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports"
-
-    classDirectories = fileTree(
-            dir: "${buildDir}/intermediates/classes/debug",
-            excludes: ['**/R.class',
-                       '**/R$*.class',
-                       '**/*$ViewInjector*.*',
-                       '**/BuildConfig.*',
-                       '**/Manifest*.*']
-    )
-
-    sourceDirectories = files("${buildDir.parent}/src/main/java")
-    additionalSourceDirs = files([
-            "${buildDir}/generated/source/buildConfig/debug",
-            "${buildDir}/generated/source/r/debug"
-    ])
-    executionData = files("${buildDir}/jacoco/testDebugUnitTest.exec")
-
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-}
+//apply plugin: "jacoco"
+//
+//jacoco {
+//    toolVersion "0.8.7"
+//}
+//
+//task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
+//    group = "Reporting"
+//    description = "Generate Jacoco coverage reports"
+//
+//    classDirectories.from = fileTree(
+//            dir: "${buildDir}/intermediates/classes/debug",
+//            excludes: ['**/R.class',
+//                       '**/R$*.class',
+//                       '**/*$ViewInjector*.*',
+//                       '**/BuildConfig.*',
+//                       '**/Manifest*.*']
+//    )
+//
+//    sourceDirectories.from = files("${buildDir.parent}/src/main/java")
+//    additionalSourceDirs.from = files([
+//            "${buildDir}/generated/source/buildConfig/debug",
+//            "${buildDir}/generated/source/r/debug"
+//    ])
+//    executionData.from = files("${buildDir}/jacoco/testDebugUnitTest.exec")
+//
+//    reports {
+//        xml.enabled = true
+//        html.enabled = true
+//    }
+//}
 
 //endregion
 
 //region Coveralls
 
-coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+//coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
 
 //endregion
 
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+//apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.release
+
+                groupId = 'com.github.moralisweb3.sdk.android'
+                artifactId = 'parse'
+                version = '0.1'
+            }
+        }
+    }
+}
+

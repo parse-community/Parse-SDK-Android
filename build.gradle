@@ -1,26 +1,18 @@
 buildscript {
-    ext.kotlin_version = "1.4.10"
+    ext.kotlin_version = '1.5.31'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.6.2"
-        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.3"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
+        classpath "com.android.tools.build:gradle:7.0.2"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        //classpath "gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.12.0"
     }
 }
 
 plugins {
-    id "com.github.ben-manes.versions" version "0.28.0"
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-    }
+    id "com.github.ben-manes.versions" version "0.39.0"
 }
 
 task clean(type: Delete) {
@@ -28,8 +20,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    compileSdkVersion = 29
-
-    minSdkVersion = 14
-    targetSdkVersion = 29
+    compileSdkVersion = 31
+    minSdkVersion = 28
+    targetSdkVersion = 31
 }

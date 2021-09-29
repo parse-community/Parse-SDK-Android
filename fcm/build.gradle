@@ -28,8 +28,8 @@ android {
 }
 
 dependencies {
-    api "com.google.firebase:firebase-messaging:20.1.5"
+    api "com.google.firebase:firebase-messaging:22.0.0"
     implementation project(":parse")
 }
 
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
+//apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"
