@@ -21,7 +21,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-
 javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 
 task sourcesJar(type: Jar) {
@@ -71,11 +70,6 @@ afterEvaluate {
             // Creates a Maven publication called "moralisPublication".
             moralisPublication(MavenPublication) {
                 from components.java
-
-                // You can then customize attributes of the publication as shown below.
-                groupId = 'com.github.moralisweb3.sdk.android'
-                artifactId = 'bolts-tasks'
-                version = '0.1'
             }
         }
     }
