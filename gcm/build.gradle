@@ -1,4 +1,6 @@
 apply plugin: "com.android.library"
+apply plugin: "io.freefair.android-javadoc-jar"
+apply plugin: "io.freefair.android-sources-jar"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -41,5 +43,3 @@ dependencies {
     api "com.firebase:firebase-jobdispatcher:0.8.6"
     implementation project(":parse")
 }
-
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

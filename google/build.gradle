@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: "io.freefair.android-javadoc-jar"
+apply plugin: "io.freefair.android-sources-jar"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -30,5 +32,3 @@ dependencies {
     api "com.google.android.gms:play-services-auth:19.0.0"
     implementation project(":parse")
 }
-
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

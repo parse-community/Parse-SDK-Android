@@ -1,5 +1,8 @@
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "io.freefair.android-javadoc-jar"
+apply plugin: "io.freefair.android-sources-jar"
+
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -33,5 +36,3 @@ dependencies {
     api "io.reactivex.rxjava3:rxjava:3.0.4"
     implementation project(":parse")
 }
-
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"

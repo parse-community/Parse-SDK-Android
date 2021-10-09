@@ -1,4 +1,6 @@
 apply plugin: "com.android.library"
+apply plugin: "io.freefair.android-javadoc-jar"
+apply plugin: "io.freefair.android-sources-jar"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -78,5 +80,3 @@ apply plugin: "com.github.kt3k.coveralls"
 coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion
-
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/2.0.0/gradle-android-javadocs.gradle"
