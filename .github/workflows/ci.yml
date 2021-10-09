@@ -18,11 +18,12 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      - name: Build with Gradle
-        run: ./gradlew build
-      - run: pip install --user codecov
+      - name: Validate Gradle wrapper
+        uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
+      - name: Setup codecov
+        run: pip install --user codecov
+      - name: Accept licences
       - run: mkdir "$ANDROID_HOME/licenses" || true
       - run: echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
-      - run: ./gradlew clean jacocoTestReport
+      - name: Build with Gradle
+        run: ./gradlew clean jacocoTestReport
