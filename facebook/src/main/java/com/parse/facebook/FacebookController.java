@@ -95,7 +95,7 @@ class FacebookController {
                     new RuntimeException("Unable to authenticate when another authentication is in process"));
         }
 
-        final TaskCompletionSource<Map<String, String>> tcs = new TaskCompletionSource<>();
+        final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
         LoginManager manager = facebookSdkDelegate.getLoginManager();
 
         callbackManager = facebookSdkDelegate.createCallbackManager();
