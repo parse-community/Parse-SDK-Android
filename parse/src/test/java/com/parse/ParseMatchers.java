@@ -8,11 +8,11 @@
  */
 package com.parse;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.internal.matchers.TypeSafeMatcher;
-
-import static org.hamcrest.CoreMatchers.equalTo;
 
 public class ParseMatchers {
     public static Matcher<Throwable> hasParseErrorCode(int code) {

@@ -8,6 +8,11 @@
  */
 package com.parse;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
 import com.parse.boltsinternal.Task;
 
 import org.junit.Before;
@@ -18,11 +23,6 @@ import org.mockito.Matchers;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 public class ParseAuthenticationManagerTest {
 

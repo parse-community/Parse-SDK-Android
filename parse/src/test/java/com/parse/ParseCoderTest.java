@@ -8,12 +8,12 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import static org.junit.Assert.assertEquals;
 
 // For android.util.Base64
 @RunWith(RobolectricTestRunner.class)

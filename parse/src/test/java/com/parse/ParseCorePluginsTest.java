@@ -8,6 +8,10 @@
  */
 package com.parse;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+
 import com.parse.boltsinternal.Task;
 
 import org.junit.Before;
@@ -16,10 +20,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
 import java.util.List;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseCorePluginsTest extends ResetPluginsParseTest {

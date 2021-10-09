@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,10 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseFileUtilsTest {
@@ -41,7 +40,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_STRING.getBytes(StandardCharsets.UTF_8));
+            out.write(TEST_STRING.getBytes());
         } finally {
             ParseIOUtils.closeQuietly(out);
         }
@@ -60,7 +59,7 @@ public class ParseFileUtilsTest {
             in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ParseIOUtils.copy(in, out);
-            content = new String(out.toByteArray(), StandardCharsets.UTF_8);
+            content = out.toString();
         } finally {
             ParseIOUtils.closeQuietly(in);
         }
@@ -74,7 +73,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_JSON.getBytes(StandardCharsets.UTF_8));
+            out.write(TEST_JSON.getBytes());
         } finally {
             ParseIOUtils.closeQuietly(out);
         }

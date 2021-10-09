@@ -8,14 +8,6 @@
  */
 package com.parse;
 
-import com.parse.boltsinternal.Task;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.lang.ref.WeakReference;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -27,6 +19,14 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.parse.boltsinternal.Task;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.lang.ref.WeakReference;
 
 public class ParseDefaultACLControllerTest {
 
