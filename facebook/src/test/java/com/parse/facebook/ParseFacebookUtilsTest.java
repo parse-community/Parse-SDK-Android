@@ -8,6 +8,23 @@
  */
 package com.parse.facebook;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +34,7 @@ import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
+import com.parse.boltsinternal.Task;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,24 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import com.parse.boltsinternal.Task;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@Config(manifest=Config.NONE)
+@Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ParseFacebookUtilsTest {
 
@@ -179,7 +180,7 @@ public class ParseFacebookUtilsTest {
         doLogInWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -188,7 +189,7 @@ public class ParseFacebookUtilsTest {
         doLogInWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -197,7 +198,7 @@ public class ParseFacebookUtilsTest {
         doLogInWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
@@ -206,7 +207,7 @@ public class ParseFacebookUtilsTest {
         doLogInWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
@@ -220,10 +221,10 @@ public class ParseFacebookUtilsTest {
 
         Map<String, String> authData = new HashMap<>();
         when(controller.authenticateAsync(
-                any(Activity.class),
-                any(Fragment.class),
+                nullable(Activity.class),
+                nullable(Fragment.class),
                 any(FacebookController.LoginAuthorizationType.class),
-                anyListOf(String.class))).thenReturn(Task.forResult(authData));
+                anyList())).thenReturn(Task.forResult(authData));
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
@@ -261,7 +262,7 @@ public class ParseFacebookUtilsTest {
 
         ParseUser user = mock(ParseUser.class);
         when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.<Void>forResult(null));
+                .thenReturn(Task.forResult(null));
         AccessToken token = TestUtils.newAccessToken();
         Task<Void> task = ParseFacebookUtils.linkInBackground(user, token);
         verify(controller).getAuthData(token);
@@ -274,7 +275,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -283,7 +284,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.READ);
     }
 
@@ -292,7 +293,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 mock(Activity.class),
                 null,
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
@@ -301,7 +302,7 @@ public class ParseFacebookUtilsTest {
         doLinkWith(
                 null,
                 mock(Fragment.class),
-                new LinkedList<String>(),
+                new LinkedList<>(),
                 FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
@@ -315,15 +316,15 @@ public class ParseFacebookUtilsTest {
 
         Map<String, String> authData = new HashMap<>();
         when(controller.authenticateAsync(
-                any(Activity.class),
-                any(Fragment.class),
+                nullable(Activity.class),
+                nullable(Fragment.class),
                 any(FacebookController.LoginAuthorizationType.class),
-                anyListOf(String.class))).thenReturn(Task.forResult(authData));
+                anyList())).thenReturn(Task.forResult(authData));
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.<Void>forResult(null));
+        when(user.linkWithInBackground(anyString(), anyMap()))
+                .thenReturn(Task.forResult(null));
         Task<Void> task;
         if (FacebookController.LoginAuthorizationType.PUBLISH.equals(type)) {
             if (activity != null) {
@@ -350,7 +351,7 @@ public class ParseFacebookUtilsTest {
     @Test
     public void testUnlinkInBackground() {
         ParseUser user = mock(ParseUser.class);
-        when(user.unlinkFromInBackground(anyString())).thenReturn(Task.<Void>forResult(null));
+        when(user.unlinkFromInBackground(anyString())).thenReturn(Task.forResult(null));
         ParseFacebookUtils.isInitialized = true;
 
         ParseFacebookUtils.unlinkInBackground(user);

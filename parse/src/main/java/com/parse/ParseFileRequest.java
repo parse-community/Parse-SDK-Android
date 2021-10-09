@@ -8,15 +8,13 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Task;
 
 /**
  * Request returns a byte array of the response and provides a callback the progress of the data
@@ -48,34 +46,31 @@ class ParseFileRequest extends ParseRequest<Void> {
             return null;
         }
 
-        return Task.call(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                long totalSize = response.getTotalSize();
-                long downloadedSize = 0;
-                InputStream responseStream = null;
-                FileOutputStream tempFileStream = null;
-                try {
-                    responseStream = response.getContent();
-                    tempFileStream = ParseFileUtils.openOutputStream(tempFile);
+        return Task.call(() -> {
+            long totalSize = response.getTotalSize();
+            long downloadedSize = 0;
+            InputStream responseStream = null;
+            FileOutputStream tempFileStream = null;
+            try {
+                responseStream = response.getContent();
+                tempFileStream = ParseFileUtils.openOutputStream(tempFile);
 
-                    int nRead;
-                    byte[] data = new byte[32 << 10]; // 32KB
+                int nRead;
+                byte[] data = new byte[32 << 10]; // 32KB
 
-                    while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
-                        tempFileStream.write(data, 0, nRead);
-                        downloadedSize += nRead;
-                        if (downloadProgressCallback != null && totalSize != -1) {
-                            int progressToReport =
-                                    Math.round((float) downloadedSize / (float) totalSize * 100.0f);
-                            downloadProgressCallback.done(progressToReport);
-                        }
+                while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
+                    tempFileStream.write(data, 0, nRead);
+                    downloadedSize += nRead;
+                    if (downloadProgressCallback != null && totalSize != -1) {
+                        int progressToReport =
+                                Math.round((float) downloadedSize / (float) totalSize * 100.0f);
+                        downloadProgressCallback.done(progressToReport);
                     }
-                    return null;
-                } finally {
-                    ParseIOUtils.closeQuietly(responseStream);
-                    ParseIOUtils.closeQuietly(tempFileStream);
                 }
+                return null;
+            } finally {
+                ParseIOUtils.closeQuietly(responseStream);
+                ParseIOUtils.closeQuietly(tempFileStream);
             }
         }, ParseExecutors.io());
     }

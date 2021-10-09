@@ -12,13 +12,10 @@ import android.content.Context;
 import android.os.Build;
 
 import java.io.File;
-import java.io.IOException;
 
 import okhttp3.Headers;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 /**
  * Public for LiveQuery. You probably don't need access
@@ -38,6 +35,7 @@ public class ParsePlugins {
     ParseHttpClient fileClient;
     private Context applicationContext;
     private InstallationId installationId;
+
     private ParsePlugins(Context context, Parse.Configuration configuration) {
         if (context != null) {
             applicationContext = context.getApplicationContext();
@@ -116,31 +114,28 @@ public class ParsePlugins {
                     clientBuilder = new OkHttpClient.Builder();
                 }
                 //add it as the first interceptor
-                clientBuilder.interceptors().add(0, new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request request = chain.request();
-                        Headers.Builder headersBuilder = request.headers().newBuilder()
-                                .set(ParseRESTCommand.HEADER_APPLICATION_ID, configuration.applicationId)
-                                .set(ParseRESTCommand.HEADER_APP_BUILD_VERSION,
-                                        String.valueOf(ManifestInfo.getVersionCode()))
-                                .set(ParseRESTCommand.HEADER_APP_DISPLAY_VERSION,
-                                        ManifestInfo.getVersionName())
-                                .set(ParseRESTCommand.HEADER_OS_VERSION, Build.VERSION.RELEASE)
-                                .set(ParseRESTCommand.USER_AGENT, userAgent());
-                        if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID) == null) {
-                            // We can do this synchronously since the caller is already on a background thread
-                            headersBuilder.set(ParseRESTCommand.HEADER_INSTALLATION_ID, installationId().get());
-                        }
-                        // client key can be null with self-hosted Parse Server
-                        if (configuration.clientKey != null) {
-                            headersBuilder.set(ParseRESTCommand.HEADER_CLIENT_KEY, configuration.clientKey);
-                        }
-                        request = request.newBuilder()
-                                .headers(headersBuilder.build())
-                                .build();
-                        return chain.proceed(request);
+                clientBuilder.interceptors().add(0, chain -> {
+                    Request request = chain.request();
+                    Headers.Builder headersBuilder = request.headers().newBuilder()
+                            .set(ParseRESTCommand.HEADER_APPLICATION_ID, configuration.applicationId)
+                            .set(ParseRESTCommand.HEADER_APP_BUILD_VERSION,
+                                    String.valueOf(ManifestInfo.getVersionCode()))
+                            .set(ParseRESTCommand.HEADER_APP_DISPLAY_VERSION,
+                                    ManifestInfo.getVersionName())
+                            .set(ParseRESTCommand.HEADER_OS_VERSION, Build.VERSION.RELEASE)
+                            .set(ParseRESTCommand.USER_AGENT, userAgent());
+                    if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID) == null) {
+                        // We can do this synchronously since the caller is already on a background thread
+                        headersBuilder.set(ParseRESTCommand.HEADER_INSTALLATION_ID, installationId().get());
                     }
+                    // client key can be null with self-hosted Parse Server
+                    if (configuration.clientKey != null) {
+                        headersBuilder.set(ParseRESTCommand.HEADER_CLIENT_KEY, configuration.clientKey);
+                    }
+                    request = request.newBuilder()
+                            .headers(headersBuilder.build())
+                            .build();
+                    return chain.proceed(request);
                 });
                 restClient = ParseHttpClient.createClient(clientBuilder);
             }

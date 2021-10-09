@@ -18,15 +18,6 @@ import java.util.concurrent.ScheduledExecutorService;
 /* package */ final class BoltsExecutors {
 
     private static final BoltsExecutors INSTANCE = new BoltsExecutors();
-
-    private static boolean isAndroidRuntime() {
-        String javaRuntimeName = System.getProperty("java.runtime.name");
-        if (javaRuntimeName == null) {
-            return false;
-        }
-        return javaRuntimeName.toLowerCase(Locale.US).contains("android");
-    }
-
     private final ExecutorService background;
     private final ScheduledExecutorService scheduled;
     private final Executor immediate;
@@ -37,6 +28,14 @@ import java.util.concurrent.ScheduledExecutorService;
                 : AndroidExecutors.newCachedThreadPool();
         scheduled = Executors.newSingleThreadScheduledExecutor();
         immediate = new ImmediateExecutor();
+    }
+
+    private static boolean isAndroidRuntime() {
+        String javaRuntimeName = System.getProperty("java.runtime.name");
+        if (javaRuntimeName == null) {
+            return false;
+        }
+        return javaRuntimeName.toLowerCase(Locale.US).contains("android");
     }
 
     /**
@@ -69,7 +68,7 @@ import java.util.concurrent.ScheduledExecutorService;
      */
     private static class ImmediateExecutor implements Executor {
         private static final int MAX_DEPTH = 15;
-        private ThreadLocal<Integer> executionDepth = new ThreadLocal<>();
+        private final ThreadLocal<Integer> executionDepth = new ThreadLocal<>();
 
         /**
          * Increments the depth.

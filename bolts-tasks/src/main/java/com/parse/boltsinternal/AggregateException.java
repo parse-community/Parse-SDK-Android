@@ -23,7 +23,7 @@ public class AggregateException extends Exception {
 
     private static final String DEFAULT_MESSAGE = "There were multiple errors.";
 
-    private List<Throwable> innerThrowables;
+    private final List<Throwable> innerThrowables;
 
     /**
      * Constructs a new {@code AggregateException} with the current stack trace, the specified detail
@@ -103,7 +103,7 @@ public class AggregateException extends Exception {
      */
     @Deprecated
     public List<Exception> getErrors() {
-        List<Exception> errors = new ArrayList<Exception>();
+        List<Exception> errors = new ArrayList<>();
         if (innerThrowables == null) {
             return errors;
         }
@@ -123,7 +123,7 @@ public class AggregateException extends Exception {
      */
     @Deprecated
     public Throwable[] getCauses() {
-        return innerThrowables.toArray(new Throwable[innerThrowables.size()]);
+        return innerThrowables.toArray(new Throwable[0]);
     }
 
 }

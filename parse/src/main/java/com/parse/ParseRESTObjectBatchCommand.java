@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
@@ -21,10 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 class ParseRESTObjectBatchCommand extends ParseRESTCommand {
     public final static int COMMAND_OBJECT_BATCH_MAX_SIZE = 50;
@@ -89,50 +88,47 @@ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
         ParseRESTCommand command = new ParseRESTObjectBatchCommand(
                 "batch", ParseHttpRequest.Method.POST, parameters, sessionToken);
 
-        command.executeAsync(client).continueWith(new Continuation<JSONObject, Void>() {
-            @Override
-            public Void then(Task<JSONObject> task) throws Exception {
-                TaskCompletionSource<JSONObject> tcs;
+        command.executeAsync(client).continueWith((Continuation<JSONObject, Void>) task -> {
+            TaskCompletionSource<JSONObject> tcs;
 
-                if (task.isFaulted() || task.isCancelled()) {
-                    // REST command failed or canceled, fail or cancel all tasks
-                    for (int i = 0; i < batchSize; i++) {
-                        tcs = tcss.get(i);
-                        if (task.isFaulted()) {
-                            tcs.setError(task.getError());
-                        } else {
-                            tcs.setCancelled();
-                        }
-                    }
-                }
-
-                JSONObject json = task.getResult();
-                JSONArray results = json.getJSONArray(KEY_RESULTS);
-
-                int resultLength = results.length();
-                if (resultLength != batchSize) {
-                    // Invalid response, fail all tasks
-                    for (int i = 0; i < batchSize; i++) {
-                        tcs = tcss.get(i);
-                        tcs.setError(new IllegalStateException(
-                                "Batch command result count expected: " + batchSize + " but was: " + resultLength));
-                    }
-                }
-
+            if (task.isFaulted() || task.isCancelled()) {
+                // REST command failed or canceled, fail or cancel all tasks
                 for (int i = 0; i < batchSize; i++) {
-                    JSONObject result = results.getJSONObject(i);
                     tcs = tcss.get(i);
-
-                    if (result.has("success")) {
-                        JSONObject success = result.getJSONObject("success");
-                        tcs.setResult(success);
-                    } else if (result.has("error")) {
-                        JSONObject error = result.getJSONObject("error");
-                        tcs.setError(new ParseException(error.getInt("code"), error.getString("error")));
+                    if (task.isFaulted()) {
+                        tcs.setError(task.getError());
+                    } else {
+                        tcs.setCancelled();
                     }
                 }
-                return null;
             }
+
+            JSONObject json = task.getResult();
+            JSONArray results = json.getJSONArray(KEY_RESULTS);
+
+            int resultLength = results.length();
+            if (resultLength != batchSize) {
+                // Invalid response, fail all tasks
+                for (int i = 0; i < batchSize; i++) {
+                    tcs = tcss.get(i);
+                    tcs.setError(new IllegalStateException(
+                            "Batch command result count expected: " + batchSize + " but was: " + resultLength));
+                }
+            }
+
+            for (int i = 0; i < batchSize; i++) {
+                JSONObject result = results.getJSONObject(i);
+                tcs = tcss.get(i);
+
+                if (result.has("success")) {
+                    JSONObject success = result.getJSONObject("success");
+                    tcs.setResult(success);
+                } else if (result.has("error")) {
+                    JSONObject error = result.getJSONObject("error");
+                    tcs.setError(new ParseException(error.getInt("code"), error.getString("error")));
+                }
+            }
+            return null;
         });
 
         return tasks;

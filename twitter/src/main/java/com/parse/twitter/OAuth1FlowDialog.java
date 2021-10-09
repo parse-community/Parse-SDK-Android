@@ -10,17 +10,17 @@ package com.parse.twitter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatDialog;
 import android.view.View;
 import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+
+import androidx.appcompat.app.AppCompatDialog;
 
 /**
  * For internal use.
@@ -41,12 +41,7 @@ class OAuth1FlowDialog extends AppCompatDialog {
         this.callbackUrl = callbackUrl;
         this.serviceUrlIdentifier = serviceUrlIdentifier;
         this.handler = resultHandler;
-        this.setOnCancelListener(new OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                handler.onCancel();
-            }
-        });
+        this.setOnCancelListener(dialog -> handler.onCancel());
     }
 
     @SuppressLint("SetJavaScriptEnabled")

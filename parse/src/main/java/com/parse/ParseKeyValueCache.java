@@ -14,11 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 
 /**
@@ -81,12 +79,7 @@ class ParseKeyValueCache {
 
     private static File getKeyValueCacheFile(String key) {
         final String suffix = '.' + key;
-        File[] matches = getKeyValueCacheDir().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String filename) {
-                return filename.endsWith(suffix);
-            }
-        });
+        File[] matches = getKeyValueCacheDir().listFiles((dir, filename) -> filename.endsWith(suffix));
         return (matches == null || matches.length == 0) ? null : matches[0];
     }
 
@@ -162,15 +155,12 @@ class ParseKeyValueCache {
             // Sometimes (i.e. tests) the time of lastModified isn't granular enough,
             // so we resort
             // to sorting by the file name which is always prepended with time in ms
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File f1, File f2) {
-                    int dateCompare = Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-                    if (dateCompare != 0) {
-                        return dateCompare;
-                    } else {
-                        return f1.getName().compareTo(f2.getName());
-                    }
+            Arrays.sort(files, (f1, f2) -> {
+                int dateCompare = Long.compare(f1.lastModified(), f2.lastModified());
+                if (dateCompare != 0) {
+                    return dateCompare;
+                } else {
+                    return f1.getName().compareTo(f2.getName());
                 }
             });
 

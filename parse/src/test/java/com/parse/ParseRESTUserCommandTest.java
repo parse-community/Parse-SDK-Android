@@ -8,6 +8,10 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
@@ -22,10 +26,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 public class ParseRESTUserCommandTest {
 

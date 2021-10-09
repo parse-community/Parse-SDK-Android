@@ -8,26 +8,6 @@
  */
 package com.parse;
 
-import android.content.Intent;
-import android.os.Bundle;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Matchers;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
-import com.parse.boltsinternal.Task;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -40,10 +20,32 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.parse.boltsinternal.Task;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Matchers;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.LooperMode;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 // For android.os.BaseBundle
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+@LooperMode(PAUSED)
 public class ParseAnalyticsTest {
 
     ParseAnalyticsController controller;
@@ -143,13 +145,12 @@ public class ParseAnalyticsTest {
         dimensions.put("key", "value");
         final Semaphore done = new Semaphore(0);
         ParseAnalytics.trackEventInBackground("test", dimensions,
-                new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        assertNull(e);
-                        done.release();
-                    }
+                e -> {
+                    assertNull(e);
+                    done.release();
                 });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
@@ -157,13 +158,12 @@ public class ParseAnalyticsTest {
                 eq("test"), eq(dimensions), isNull(String.class));
 
         final Semaphore doneAgain = new Semaphore(0);
-        ParseAnalytics.trackEventInBackground("test", new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                assertNull(e);
-                doneAgain.release();
-            }
+        ParseAnalytics.trackEventInBackground("test", e -> {
+            assertNull(e);
+            doneAgain.release();
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
@@ -224,13 +224,12 @@ public class ParseAnalyticsTest {
     public void testTrackAppOpenedInBackgroundNormalCallback() throws Exception {
         Intent intent = makeIntentWithParseData("test");
         final Semaphore done = new Semaphore(0);
-        ParseAnalytics.trackAppOpenedInBackground(intent, new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                assertNull(e);
-                done.release();
-            }
+        ParseAnalytics.trackAppOpenedInBackground(intent, e -> {
+            assertNull(e);
+            done.release();
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
@@ -245,7 +244,7 @@ public class ParseAnalyticsTest {
     public void testGetPushHashFromIntentNullIntent() {
         String pushHash = ParseAnalytics.getPushHashFromIntent(null);
 
-        assertEquals(null, pushHash);
+        assertNull(pushHash);
     }
 
     @Test
@@ -259,7 +258,7 @@ public class ParseAnalyticsTest {
 
         String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
 
-        assertEquals(null, pushHash);
+        assertNull(pushHash);
     }
 
     @Test
@@ -285,7 +284,7 @@ public class ParseAnalyticsTest {
 
         String pushHash = ParseAnalytics.getPushHashFromIntent(intent);
 
-        assertEquals(null, pushHash);
+        assertNull(pushHash);
     }
 
     @Test
