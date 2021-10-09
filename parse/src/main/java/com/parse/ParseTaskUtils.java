@@ -8,12 +8,12 @@
  */
 package com.parse;
 
-import java.util.concurrent.CancellationException;
-
 import com.parse.boltsinternal.AggregateException;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
+
+import java.util.concurrent.CancellationException;
 
 class ParseTaskUtils {
 
@@ -72,12 +72,7 @@ class ParseTaskUtils {
         if (callback == null) {
             return task;
         }
-        return callbackOnMainThreadAsync(task, new ParseCallback2<Void, ParseException>() {
-            @Override
-            public void done(Void aVoid, ParseException e) {
-                callback.done(e);
-            }
-        }, reportCancellation);
+        return callbackOnMainThreadAsync(task, (aVoid, e) -> callback.done(e), reportCancellation);
     }
 
 
@@ -103,35 +98,29 @@ class ParseTaskUtils {
             return task;
         }
         final TaskCompletionSource<T> tcs = new TaskCompletionSource();
-        task.continueWith(new Continuation<T, Void>() {
-            @Override
-            public Void then(final Task<T> task) {
-                if (task.isCancelled() && !reportCancellation) {
-                    tcs.setCancelled();
-                    return null;
-                }
-                ParseExecutors.main().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Exception error = task.getError();
-                            if (error != null && !(error instanceof ParseException)) {
-                                error = new ParseException(error);
-                            }
-                            callback.done(task.getResult(), (ParseException) error);
-                        } finally {
-                            if (task.isCancelled()) {
-                                tcs.setCancelled();
-                            } else if (task.isFaulted()) {
-                                tcs.setError(task.getError());
-                            } else {
-                                tcs.setResult(task.getResult());
-                            }
-                        }
-                    }
-                });
+        task.continueWith((Continuation<T, Void>) task1 -> {
+            if (task1.isCancelled() && !reportCancellation) {
+                tcs.setCancelled();
                 return null;
             }
+            ParseExecutors.main().execute(() -> {
+                try {
+                    Exception error = task1.getError();
+                    if (error != null && !(error instanceof ParseException)) {
+                        error = new ParseException(error);
+                    }
+                    callback.done(task1.getResult(), (ParseException) error);
+                } finally {
+                    if (task1.isCancelled()) {
+                        tcs.setCancelled();
+                    } else if (task1.isFaulted()) {
+                        tcs.setError(task1.getError());
+                    } else {
+                        tcs.setResult(task1.getResult());
+                    }
+                }
+            });
+            return null;
         });
         return tcs.getTask();
     }

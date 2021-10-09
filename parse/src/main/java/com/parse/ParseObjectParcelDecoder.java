@@ -14,7 +14,7 @@ import java.util.Map;
  */
 /* package */ class ParseObjectParcelDecoder extends ParseParcelDecoder {
 
-    private Map<String, ParseObject> objects = new HashMap<>();
+    private final Map<String, ParseObject> objects = new HashMap<>();
 
     public ParseObjectParcelDecoder() {
     }

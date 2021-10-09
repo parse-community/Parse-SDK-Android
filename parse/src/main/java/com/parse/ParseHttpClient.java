@@ -34,7 +34,7 @@ import okio.BufferedSink;
  */
 class ParseHttpClient {
 
-    private OkHttpClient okHttpClient;
+    private final OkHttpClient okHttpClient;
     private boolean hasExecuted;
 
     ParseHttpClient(@Nullable OkHttpClient.Builder builder) {
@@ -161,7 +161,7 @@ class ParseHttpClient {
 
     private static class ParseOkHttpRequestBody extends RequestBody {
 
-        private ParseHttpBody parseBody;
+        private final ParseHttpBody parseBody;
 
         ParseOkHttpRequestBody(ParseHttpBody parseBody) {
             this.parseBody = parseBody;

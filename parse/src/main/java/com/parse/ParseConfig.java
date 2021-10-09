@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -16,9 +18,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseConfig} is a local representation of configuration data that can be set from the
@@ -34,7 +33,7 @@ public class ParseConfig {
     }
 
     /* package */ ParseConfig() {
-        params = Collections.unmodifiableMap(new HashMap<String, Object>());
+        params = Collections.unmodifiableMap(new HashMap<>());
     }
 
     /* package for tests */
@@ -87,26 +86,13 @@ public class ParseConfig {
      * @return A Task that is resolved when the fetch completes.
      */
     public static Task<ParseConfig> getInBackground() {
-        return taskQueue.enqueue(new Continuation<Void, Task<ParseConfig>>() {
-            @Override
-            public Task<ParseConfig> then(Task<Void> toAwait) {
-                return getAsync(toAwait);
-            }
-        });
+        return taskQueue.enqueue(ParseConfig::getAsync);
     }
 
     private static Task<ParseConfig> getAsync(final Task<Void> toAwait) {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<ParseConfig>>() {
-            @Override
-            public Task<ParseConfig> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return toAwait.continueWithTask(new Continuation<Void, Task<ParseConfig>>() {
-                    @Override
-                    public Task<ParseConfig> then(Task<Void> task) {
-                        return getConfigController().getAsync(sessionToken);
-                    }
-                });
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return toAwait.continueWithTask(task1 -> getConfigController().getAsync(sessionToken));
         });
     }
 

@@ -15,7 +15,7 @@ import java.util.Map;
  * has been fetched instead of creating a new instance.
  */
 class KnownParseObjectDecoder extends ParseDecoder {
-    private Map<String, ParseObject> fetchedObjects;
+    private final Map<String, ParseObject> fetchedObjects;
 
     public KnownParseObjectDecoder(Map<String, ParseObject> fetchedObjects) {
         super();

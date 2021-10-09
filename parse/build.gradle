@@ -1,5 +1,6 @@
 apply plugin: "com.android.library"
-apply plugin: "com.github.kt3k.coveralls"
+apply plugin: "io.freefair.android-javadoc-jar"
+apply plugin: "io.freefair.android-sources-jar"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -10,6 +11,12 @@ android {
         versionCode 1
         versionName "1.0"
         consumerProguardFiles "release-proguard.pro"
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
     }
 
     packagingOptions {
@@ -25,6 +32,11 @@ android {
             testCoverageEnabled = true
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 ext {
@@ -33,57 +45,43 @@ ext {
 }
 
 dependencies {
-    api "androidx.annotation:annotation:1.1.0"
-    api "androidx.core:core:1.2.0"
+    api "androidx.annotation:annotation:1.2.0"
+    api "androidx.core:core:1.6.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
-    testImplementation "org.robolectric:robolectric:3.8"
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation "org.robolectric:robolectric:4.6"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
-    testImplementation "org.mockito:mockito-core:1.10.19"
+    testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
 
 //region Code Coverage
 
-apply plugin: "jacoco"
+apply plugin: "com.dicedmelon.gradle.jacoco-android"
 
 jacoco {
-    toolVersion "0.7.1.201405082137"
+    toolVersion = "0.8.7"
 }
 
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports"
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
 
-    classDirectories = fileTree(
-            dir: "${buildDir}/intermediates/classes/debug",
-            excludes: ['**/R.class',
-                       '**/R$*.class',
-                       '**/*$ViewInjector*.*',
-                       '**/BuildConfig.*',
-                       '**/Manifest*.*']
-    )
-
-    sourceDirectories = files("${buildDir.parent}/src/main/java")
-    additionalSourceDirs = files([
-            "${buildDir}/generated/source/buildConfig/debug",
-            "${buildDir}/generated/source/r/debug"
-    ])
-    executionData = files("${buildDir}/jacoco/testDebugUnitTest.exec")
-
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
+jacocoAndroidUnitTestReport {
+    csv.enabled false
+    html.enabled true
+    xml.enabled true
 }
 
 //endregion
 
 //region Coveralls
 
-coveralls.jacocoReportPath = "${buildDir}/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+apply plugin: "com.github.kt3k.coveralls"
+
+coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion
-
-apply from: "https://raw.githubusercontent.com/Commit451/gradle-android-javadocs/1.1.0/gradle-android-javadocs.gradle"

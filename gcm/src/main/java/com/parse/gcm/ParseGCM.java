@@ -10,6 +10,7 @@ package com.parse.gcm;
 
 import android.content.Context;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -31,7 +32,7 @@ public class ParseGCM {
     /**
      * Register your app to start receiving GCM pushes
      *
-     * @param context     context
+     * @param context context
      */
     public static void register(@NonNull Context context) {
         //kicks off the background job

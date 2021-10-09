@@ -31,12 +31,10 @@ public class Twitter {
     private static final String VERIFIER_PARAM = "oauth_verifier";
     private static final String USER_ID_PARAM = "user_id";
     private static final String SCREEN_NAME_PARAM = "screen_name";
-
+    private final String callbackUrl;
     // App configuration for enabling authentication.
     private String consumerKey;
     private String consumerSecret;
-    private String callbackUrl;
-
     // User information.
     private String authToken;
     private String authTokenSecret;

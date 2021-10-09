@@ -8,14 +8,13 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Task;
 
 class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
@@ -26,6 +25,7 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
     public FileObjectStore(Class<T> clazz, File file, ParseObjectCurrentCoder coder) {
         this(getSubclassingController().getClassName(clazz), file, coder);
     }
+
     public FileObjectStore(String className, File file, ParseObjectCurrentCoder coder) {
         this.className = className;
         this.file = file;
@@ -81,50 +81,36 @@ class FileObjectStore<T extends ParseObject> implements ParseObjectStore<T> {
 
     @Override
     public Task<Void> setAsync(final T object) {
-        return Task.call(new Callable<Void>() {
-            @Override
-            public Void call() {
-                saveToDisk(coder, object, file);
-                //TODO (grantland): check to see if this failed? We currently don't for legacy reasons.
-                return null;
-            }
+        return Task.call(() -> {
+            saveToDisk(coder, object, file);
+            //TODO (grantland): check to see if this failed? We currently don't for legacy reasons.
+            return null;
         }, ParseExecutors.io());
     }
 
     @Override
     public Task<T> getAsync() {
-        return Task.call(new Callable<T>() {
-            @Override
-            public T call() {
-                if (!file.exists()) {
-                    return null;
-                }
-                return getFromDisk(coder, file, ParseObject.State.newBuilder(className));
+        return Task.call(() -> {
+            if (!file.exists()) {
+                return null;
             }
+            return getFromDisk(coder, file, ParseObject.State.newBuilder(className));
         }, ParseExecutors.io());
     }
 
     @Override
     public Task<Boolean> existsAsync() {
-        return Task.call(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                return file.exists();
-            }
-        }, ParseExecutors.io());
+        return Task.call(file::exists, ParseExecutors.io());
     }
 
     @Override
     public Task<Void> deleteAsync() {
-        return Task.call(new Callable<Void>() {
-            @Override
-            public Void call() {
-                if (file.exists() && !ParseFileUtils.deleteQuietly(file)) {
-                    throw new RuntimeException("Unable to delete");
-                }
-
-                return null;
+        return Task.call(() -> {
+            if (file.exists() && !ParseFileUtils.deleteQuietly(file)) {
+                throw new RuntimeException("Unable to delete");
             }
+
+            return null;
         }, ParseExecutors.io());
     }
 }

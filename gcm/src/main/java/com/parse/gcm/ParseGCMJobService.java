@@ -20,10 +20,9 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.parse.PLog;
 import com.parse.ParseInstallation;
+import com.parse.boltsinternal.Task;
 
 import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Task;
 
 /**
  * Handles saving the GCM token to the Parse Installation
@@ -56,26 +55,23 @@ public class ParseGCMJobService extends JobService {
     public boolean onStartJob(final JobParameters job) {
         PLog.d(ParseGCM.TAG, "Updating GCM token");
 
-        Task.callInBackground(new Callable<Void>() {
-            @Override
-            public Void call() {
-                try {
-                    InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
-                    String senderId = job.getExtras().getString(KEY_GCM_SENDER_ID);
-                    String token = instanceID.getToken(senderId,
-                            GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-                    ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-                    installation.setDeviceToken(token);
-                    //even though this is FCM, calling it gcm will work on the backend
-                    installation.setPushType(PUSH_TYPE);
-                    installation.save();
-                    PLog.d(ParseGCM.TAG, "GCM registration success");
-                } catch (Exception e) {
-                    PLog.e(ParseGCM.TAG, "GCM registration failed", e);
-                    jobFinished(job, true);
-                }
-                return null;
+        Task.callInBackground((Callable<Void>) () -> {
+            try {
+                InstanceID instanceID = InstanceID.getInstance(getApplicationContext());
+                String senderId = job.getExtras().getString(KEY_GCM_SENDER_ID);
+                String token = instanceID.getToken(senderId,
+                        GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+                ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                installation.setDeviceToken(token);
+                //even though this is FCM, calling it gcm will work on the backend
+                installation.setPushType(PUSH_TYPE);
+                installation.save();
+                PLog.d(ParseGCM.TAG, "GCM registration success");
+            } catch (Exception e) {
+                PLog.e(ParseGCM.TAG, "GCM registration failed", e);
+                jobFinished(job, true);
             }
+            return null;
         });
         return true; // Answers the question: "Is there still work going on?"
     }

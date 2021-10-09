@@ -24,7 +24,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -40,6 +39,8 @@ import java.util.SimpleTimeZone;
 
 class FacebookController {
 
+    // Used as default activityCode. From FacebookSdk.java.
+    public static final int DEFAULT_AUTH_ACTIVITY_CODE = 0xface;
     /**
      * Precise date format required for auth expiration data.
      */
@@ -47,28 +48,18 @@ class FacebookController {
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
     private static final DateFormat IMPRECISE_DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
-
-    static {
-        PRECISE_DATE_FORMAT.setTimeZone(new SimpleTimeZone(0, "GMT"));
-        IMPRECISE_DATE_FORMAT.setTimeZone(new SimpleTimeZone(0, "GMT"));
-    }
-
-    // Used as default activityCode. From FacebookSdk.java.
-    public static final int DEFAULT_AUTH_ACTIVITY_CODE = 0xface;
-
     private static final String KEY_USER_ID = "id";
     private static final String KEY_ACCESS_TOKEN = "access_token";
     private static final String KEY_EXPIRATION_DATE = "expiration_date";
     private static final String KEY_REFRESH_DATE = "last_refresh_date";
     private static final String KEY_PERMISSIONS = "permissions";
 
-    // Mirrors com.facebook.internal.LoginAuthorizationType.java
-    public enum LoginAuthorizationType {
-        READ, PUBLISH
+    static {
+        PRECISE_DATE_FORMAT.setTimeZone(new SimpleTimeZone(0, "GMT"));
+        IMPRECISE_DATE_FORMAT.setTimeZone(new SimpleTimeZone(0, "GMT"));
     }
 
     private final FacebookSdkDelegate facebookSdkDelegate;
-
     private CallbackManager callbackManager;
 
     FacebookController(FacebookSdkDelegate facebookSdkDelegate) {
@@ -229,20 +220,6 @@ class FacebookController {
         facebookSdkDelegate.setCurrentAccessToken(accessToken);
     }
 
-    /* package */ interface FacebookSdkDelegate {
-        void initialize(Context context, int callbackRequestCodeOffset);
-
-        String getApplicationId();
-
-        AccessToken getCurrentAccessToken();
-
-        void setCurrentAccessToken(AccessToken token);
-
-        CallbackManager createCallbackManager();
-
-        LoginManager getLoginManager();
-    }
-
     /**
      * Convert String representation of a date into Date object.
      * <p>
@@ -260,6 +237,25 @@ class FacebookController {
         } catch (java.text.ParseException e) {
             return IMPRECISE_DATE_FORMAT.parse(source);
         }
+    }
+
+    // Mirrors com.facebook.internal.LoginAuthorizationType.java
+    public enum LoginAuthorizationType {
+        READ, PUBLISH
+    }
+
+    /* package */ interface FacebookSdkDelegate {
+        void initialize(Context context, int callbackRequestCodeOffset);
+
+        String getApplicationId();
+
+        AccessToken getCurrentAccessToken();
+
+        void setCurrentAccessToken(AccessToken token);
+
+        CallbackManager createCallbackManager();
+
+        LoginManager getLoginManager();
     }
 
     private static class FacebookSdkDelegateImpl implements FacebookSdkDelegate {

@@ -8,12 +8,11 @@
  */
 package com.parse;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Helper class to step through a {@link TaskQueue}.
@@ -37,12 +36,7 @@ public class TaskQueueTestHelper {
     public void enqueue() {
         synchronized (lock) {
             final TaskCompletionSource<Void> tcs = new TaskCompletionSource();
-            taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return tcs.getTask();
-                }
-            });
+            taskQueue.enqueue(task -> tcs.getTask());
             pendingTasks.add(tcs);
         }
     }

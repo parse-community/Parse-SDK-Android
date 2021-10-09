@@ -8,50 +8,43 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Task;
 
 class ParseCurrentConfigController {
 
     private final Object currentConfigMutex = new Object();
+    private final File currentConfigFile;
     /* package for test */ ParseConfig currentConfig;
-    private File currentConfigFile;
 
     public ParseCurrentConfigController(File currentConfigFile) {
         this.currentConfigFile = currentConfigFile;
     }
 
     public Task<Void> setCurrentConfigAsync(final ParseConfig config) {
-        return Task.call(new Callable<Void>() {
-            @Override
-            public Void call() {
-                synchronized (currentConfigMutex) {
-                    currentConfig = config;
-                    saveToDisk(config);
-                }
-                return null;
+        return Task.call(() -> {
+            synchronized (currentConfigMutex) {
+                currentConfig = config;
+                saveToDisk(config);
             }
+            return null;
         }, ParseExecutors.io());
     }
 
     public Task<ParseConfig> getCurrentConfigAsync() {
-        return Task.call(new Callable<ParseConfig>() {
-            @Override
-            public ParseConfig call() {
-                synchronized (currentConfigMutex) {
-                    if (currentConfig == null) {
-                        ParseConfig config = getFromDisk();
-                        currentConfig = (config != null) ? config : new ParseConfig();
-                    }
+        return Task.call(() -> {
+            synchronized (currentConfigMutex) {
+                if (currentConfig == null) {
+                    ParseConfig config = getFromDisk();
+                    currentConfig = (config != null) ? config : new ParseConfig();
                 }
-                return currentConfig;
             }
+            return currentConfig;
         }, ParseExecutors.io());
     }
 

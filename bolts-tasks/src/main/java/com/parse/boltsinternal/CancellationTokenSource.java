@@ -105,14 +105,11 @@ public class CancellationTokenSource implements Closeable {
             cancelScheduledCancellation();
 
             if (delay != -1) {
-                scheduledCancellation = executor.schedule(new Runnable() {
-                    @Override
-                    public void run() {
-                        synchronized (lock) {
-                            scheduledCancellation = null;
-                        }
-                        cancel();
+                scheduledCancellation = executor.schedule(() -> {
+                    synchronized (lock) {
+                        scheduledCancellation = null;
                     }
+                    cancel();
                 }, delay, timeUnit);
             }
         }
@@ -187,7 +184,7 @@ public class CancellationTokenSource implements Closeable {
         return String.format(Locale.US, "%s@%s[cancellationRequested=%s]",
                 getClass().getName(),
                 Integer.toHexString(hashCode()),
-                Boolean.toString(isCancellationRequested()));
+                isCancellationRequested());
     }
 
     // This method makes no attempt to perform any synchronization itself - you should ensure
