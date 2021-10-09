@@ -2,6 +2,8 @@
 
 # master
 
+# 2.0.0-alpha.1
+
 ### BREAKING CHANGES
 - Required minimum SDK version is 16
 
