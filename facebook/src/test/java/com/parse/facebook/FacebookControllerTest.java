@@ -92,7 +92,7 @@ public class FacebookControllerTest {
 
         FacebookController controller = new FacebookController(null);
         Calendar calendar = new GregorianCalendar(2015, 6, 3);
-        Set<String> permissions = new HashSet<String>();
+        Set<String> permissions = new HashSet<>();
         permissions.add("user_friends");
         permissions.add("profile");
 
