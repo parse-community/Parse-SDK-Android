@@ -23,6 +23,8 @@ import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,8 +37,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SimpleTimeZone;
-
-import com.parse.boltsinternal.Task;
 
 class FacebookController {
 
@@ -104,7 +104,7 @@ class FacebookController {
                     new RuntimeException("Unable to authenticate when another authentication is in process"));
         }
 
-        final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<Map<String, String>> tcs = new TaskCompletionSource<>();
         LoginManager manager = facebookSdkDelegate.getLoginManager();
 
         callbackManager = facebookSdkDelegate.createCallbackManager();
@@ -212,7 +212,7 @@ class FacebookController {
         String permissionsCommaDelineated = authData.get(KEY_PERMISSIONS);
         Set<String> permissions = null;
         if (permissionsCommaDelineated != null && !permissionsCommaDelineated.isEmpty()) {
-            String permissionsArray[] = permissionsCommaDelineated.split(",");
+            String[] permissionsArray = permissionsCommaDelineated.split(",");
             permissions = new HashSet<>(Arrays.asList(permissionsArray));
         }
 
