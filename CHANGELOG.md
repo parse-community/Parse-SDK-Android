@@ -7,6 +7,7 @@
 
 ### Feature
 - Update all dependencies and modernize the source base (Asen Lekov) [#1095](https://github.com/parse-community/Parse-SDK-Android/pull/1095)
+- Upgrade Facebook Login SDK to 8.2.0
 
 ### Internal Changes
   - SDK targets the latest Android version API 30
