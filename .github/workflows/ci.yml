@@ -20,10 +20,7 @@ jobs:
           distribution: 'adopt'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@e6e38bacfdf1a337459f332974bb2327a31aaf4b
-      - name: Setup codecov
-        run: pip install --user codecov
-      - name: Accept licences
+      - run: pip install --user codecov
       - run: mkdir "$ANDROID_HOME/licenses" || true
       - run: echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
-      - name: Build with Gradle
-        run: ./gradlew clean jacocoTestReport
+      - run: ./gradlew clean jacocoTestReport
