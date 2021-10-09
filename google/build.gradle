@@ -29,6 +29,6 @@ android {
 
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    api "com.google.android.gms:play-services-auth:19.0.0"
+    api "com.google.android.gms:play-services-auth:19.2.0"
     implementation project(":parse")
 }
