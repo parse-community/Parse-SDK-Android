@@ -127,7 +127,7 @@ class ParseKeyValueCache {
             }
             File f = createKeyValueCacheFile(key);
             try {
-                ParseFileUtils.writeByteArrayToFile(f, value.getBytes());
+                ParseFileUtils.writeByteArrayToFile(f, value.getBytes("UTF-8"));
             } catch (IOException e) {
                 // do nothing
             }
@@ -212,7 +212,7 @@ class ParseKeyValueCache {
                 byte[] bytes = new byte[(int) f.length()];
                 f.readFully(bytes);
                 f.close();
-                return new String(bytes);
+                return new String(bytes, "UTF-8");
             } catch (IOException e) {
                 PLog.e(TAG, "error reading from cache", e);
                 return null;

@@ -22,7 +22,7 @@ class ParseByteArrayHttpBody extends ParseHttpBody {
 
     public ParseByteArrayHttpBody(String content, String contentType)
             throws UnsupportedEncodingException {
-        this(content.getBytes(), contentType);
+        this(content.getBytes("UTF-8"), contentType);
     }
 
     public ParseByteArrayHttpBody(byte[] content, String contentType) {

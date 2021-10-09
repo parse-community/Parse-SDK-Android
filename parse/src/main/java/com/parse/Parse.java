@@ -359,7 +359,7 @@ public class Parse {
                         byte[] bytes = new byte[(int) f.length()];
                         f.readFully(bytes);
                         f.close();
-                        String diskApplicationId = new String(bytes);
+                        String diskApplicationId = new String(bytes, "UTF-8");
                         matches = diskApplicationId.equals(applicationId);
                     } catch (IOException e) {
                         // Hmm, the applicationId file was malformed or something. Assume it
@@ -380,7 +380,7 @@ public class Parse {
                 applicationIdFile = new File(dir, "applicationId");
                 try {
                     FileOutputStream out = new FileOutputStream(applicationIdFile);
-                    out.write(applicationId.getBytes());
+                    out.write(applicationId.getBytes("UTF-8"));
                     out.close();
                 } catch (IOException e) {
                     // Nothing we can really do about it.
