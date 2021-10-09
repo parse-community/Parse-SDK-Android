@@ -1,6 +1,35 @@
 ## Changelog
 
 ### master
+> __BREAKING CHANGES__
+> 
+> - Required MIN SDK Version now is 16 required by latest Firebase and Facebook SDKs
+
+> __NOTE__
+> 
+> This release mostly internal code base restructure and improvements. No noticeable features 
+> or bugfixes are introduced. @L3K0V
+
+- INTERNAL: Update all the codebase to advantage of Java 8 goodies
+    - Replace all anonymous classes with lambdas where possible. 
+    - Make all fields final where possible
+    - Internal classes as static where possible
+    - Replace test assertions with context ones
+    - Use diamond <> where possible
+    - Use method references where possible
+    - Imports re-arrange
+- INTERNAL: Updated Kotlin  and Coroutines version to `1.5.31`
+- INTERNAL: Update project from Android Studio `3.6` to `4.2`
+- INTERNAL: Update Gradle version from `5.6.4` to `6.8.3`
+- INTERNAL: Update Robolectric from `3.8` to `4.6` and adjust all tests
+- Now SDK is targeting latest Android version API 30
+- Update Play services up to their respective versions
+    - Google Play services auth from `18.0.0` to `19.0.0`
+    - Google Cloud Messaging from `12.0.1` to `17.0.0` (GCM module will be removed in flavor of Firebase)
+    - Firebase Messaging from `20.1.5` to `22.0.0`
+- INTERNAL: Update jacoco and fixed reporting of test coverage
+- INTERNAL: Migrated from Travis CI to GitHub Actions
+- INTERNAL: Migrate depricated dependency repository from `jcenter()` to `mavenCentral()`
 
 ### 1.25.0
 > __BREAKING CHANGES__
