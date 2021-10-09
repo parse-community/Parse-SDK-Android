@@ -28,7 +28,6 @@ import androidx.core.app.NotificationCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -399,7 +398,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
 
         String title = pushData.optString("title", ManifestInfo.getDisplayName(context));
         String alert = pushData.optString("alert", "Notification received.");
-        String tickerText = String.format(Locale.getDefault(), "%s: %s", title, alert);
+        String tickerText = String.format("%s: %s", title, alert);
 
         Bundle extras = intent.getExtras();
 

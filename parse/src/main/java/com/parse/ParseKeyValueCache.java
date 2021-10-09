@@ -16,7 +16,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -128,7 +127,7 @@ class ParseKeyValueCache {
             }
             File f = createKeyValueCacheFile(key);
             try {
-                ParseFileUtils.writeByteArrayToFile(f, value.getBytes(StandardCharsets.UTF_8));
+                ParseFileUtils.writeByteArrayToFile(f, value.getBytes());
             } catch (IOException e) {
                 // do nothing
             }
@@ -213,7 +212,7 @@ class ParseKeyValueCache {
                 byte[] bytes = new byte[(int) f.length()];
                 f.readFully(bytes);
                 f.close();
-                return new String(bytes, StandardCharsets.UTF_8);
+                return new String(bytes);
             } catch (IOException e) {
                 PLog.e(TAG, "error reading from cache", e);
                 return null;

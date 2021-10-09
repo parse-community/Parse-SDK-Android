@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 class ParseByteArrayHttpBody extends ParseHttpBody {
     /* package */ final byte[] content;
@@ -23,7 +22,7 @@ class ParseByteArrayHttpBody extends ParseHttpBody {
 
     public ParseByteArrayHttpBody(String content, String contentType)
             throws UnsupportedEncodingException {
-        this(content.getBytes(StandardCharsets.UTF_8), contentType);
+        this(content.getBytes(), contentType);
     }
 
     public ParseByteArrayHttpBody(byte[] content, String contentType) {

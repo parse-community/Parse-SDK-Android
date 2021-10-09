@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * General file manipulation utilities.
@@ -538,7 +537,7 @@ public class ParseFileUtils {
      * Writes a {@link JSONObject} to a file creating the file if it does not exist.
      */
     public static void writeJSONObjectToFile(File file, JSONObject json) throws IOException {
-        ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes(StandardCharsets.UTF_8));
+        ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes());
     }
 
     //endregion

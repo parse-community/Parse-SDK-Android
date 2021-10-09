@@ -23,7 +23,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
@@ -278,7 +277,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
             command.setLocalId(object.getOrCreateLocalId());
         }
         JSONObject jsonObject = command.toJSONObject();
-        json = jsonObject.toString().getBytes(Charset.forName("UTF-8"));
+        json = jsonObject.toString().getBytes();
 
         // If this object by itself is larger than the full disk cache, then don't
         // even bother trying.

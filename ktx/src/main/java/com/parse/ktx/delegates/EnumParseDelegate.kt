@@ -3,7 +3,6 @@
 package com.parse.ktx.delegates
 
 import com.parse.ParseObject
-import java.util.*
 import kotlin.reflect.KProperty
 
 /**
@@ -22,7 +21,7 @@ class EnumParseDelegate<T : Enum<T>>(
         return try {
             java.lang.Enum.valueOf(
                 enumClass,
-                parseObject.getString(name ?: property.name)!!.uppercase(Locale.getDefault())
+                parseObject.getString(name ?: property.name)!!.uppercase()
             )
         } catch (e: Exception) {
             default ?: throw e
@@ -30,7 +29,7 @@ class EnumParseDelegate<T : Enum<T>>(
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, t: T) {
-        parseObject.put(name ?: property.name, t.name.lowercase(Locale.getDefault()))
+        parseObject.put(name ?: property.name, t.name.lowercase())
     }
 
 }
