@@ -3,7 +3,7 @@ buildscript {
     ext.jacocoVersion = '0.8.7'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.2.2"
@@ -23,7 +23,7 @@ plugins {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
