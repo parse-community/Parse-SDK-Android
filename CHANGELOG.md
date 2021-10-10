@@ -2,6 +2,9 @@
 
 # master
 
+### BREAKING CHANGES
+- Remove `gcm` module since GCM is no longer supported by Google (John Carlson) [#1091](https://github.com/parse-community/Parse-SDK-Android/pull/1091)
+
 # 2.0.0-alpha.1
 
 ### BREAKING CHANGES
