@@ -8,15 +8,15 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONObject;
 
 import java.util.Map;
 
-import com.parse.boltsinternal.Task;
-
 class ParseAnalyticsController {
 
-    /* package for test */ ParseEventuallyQueue eventuallyQueue;
+    /* package for test */ final ParseEventuallyQueue eventuallyQueue;
 
     public ParseAnalyticsController(ParseEventuallyQueue eventuallyQueue) {
         this.eventuallyQueue = eventuallyQueue;

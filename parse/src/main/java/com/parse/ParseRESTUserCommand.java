@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
@@ -17,13 +18,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.parse.boltsinternal.Task;
-
 class ParseRESTUserCommand extends ParseRESTCommand {
 
     private static final String HEADER_REVOCABLE_SESSION = "X-Parse-Revocable-Session";
     private static final String HEADER_TRUE = "1";
-    private boolean isRevocableSessionEnabled;
+    private final boolean isRevocableSessionEnabled;
 
     //region Authentication
     private int statusCode;

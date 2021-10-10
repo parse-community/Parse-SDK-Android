@@ -8,13 +8,33 @@
  */
 package com.parse;
 
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
+import org.robolectric.annotation.LooperMode;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 import java.util.ArrayList;
@@ -25,28 +45,10 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.parse.boltsinternal.Task;
-
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-
 
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
+@LooperMode(PAUSED)
 public class ParseConfigTest extends ResetPluginsParseTest {
 
     @Before
@@ -103,7 +105,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseTaskUtils.wait(configTask);
         ParseConfig configAgain = configTask.getResult();
 
-        verify(controller, times(1)).getAsync(anyString());
+        verify(controller, times(1)).getAsync(nullable(String.class));
         assertEquals(1, configAgain.params.size());
         assertEquals("value", configAgain.params.get("string"));
     }
@@ -118,7 +120,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         Task<ParseConfig> configTask = ParseConfig.getInBackground();
         configTask.waitForCompletion();
 
-        verify(controller, times(1)).getAsync(anyString());
+        verify(controller, times(1)).getAsync(nullable(String.class));
         assertThat(configTask.getError(), instanceOf(ParseException.class));
         assertEquals(ParseException.CONNECTION_FAILED,
                 ((ParseException) configTask.getError()).getCode());
@@ -135,18 +137,17 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground(new ConfigCallback() {
-            @Override
-            public void done(ParseConfig config, ParseException e) {
-                assertEquals(1, config.params.size());
-                assertEquals("value", config.params.get("string"));
-                done.release();
-            }
+        ParseConfig.getInBackground((config1, e) -> {
+            assertEquals(1, config1.params.size());
+            assertEquals("value", config1.params.get("string"));
+            done.release();
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).getAsync(anyString());
+        verify(controller, times(1)).getAsync(nullable(String.class));
     }
 
     @Test
@@ -156,18 +157,17 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground(new ConfigCallback() {
-            @Override
-            public void done(ParseConfig config, ParseException e) {
-                assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
-                assertEquals("error", e.getMessage());
-                done.release();
-            }
+        ParseConfig.getInBackground((config, e) -> {
+            assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
+            assertEquals("error", e.getMessage());
+            done.release();
         });
+
+        shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).getAsync(anyString());
+        verify(controller, times(1)).getAsync(nullable(String.class));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig configAgain = ParseConfig.get();
 
-        verify(controller, times(1)).getAsync(anyString());
+        verify(controller, times(1)).getAsync(nullable(String.class));
         assertEquals(1, configAgain.params.size());
         assertEquals("value", configAgain.params.get("string"));
     }
@@ -196,7 +196,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
             ParseConfig.get();
             fail("Should throw an exception");
         } catch (ParseException e) {
-            verify(controller, times(1)).getAsync(anyString());
+            verify(controller, times(1)).getAsync(nullable(String.class));
             assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
             assertEquals("error", e.getMessage());
         }
@@ -1007,14 +1007,14 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
     private ParseConfigController mockParseConfigControllerWithResponse(final ParseConfig result) {
         ParseConfigController controller = mock(ParseConfigController.class);
-        when(controller.getAsync(anyString()))
+        when(controller.getAsync(nullable(String.class)))
                 .thenReturn(Task.forResult(result));
         return controller;
     }
 
     private ParseConfigController mockParseConfigControllerWithException(Exception exception) {
         ParseConfigController controller = mock(ParseConfigController.class);
-        when(controller.getAsync(anyString()))
+        when(controller.getAsync(nullable(String.class)))
                 .thenReturn(Task.<ParseConfig>forError(exception));
         return controller;
     }

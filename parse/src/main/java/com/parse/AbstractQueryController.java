@@ -8,9 +8,6 @@
  */
 package com.parse;
 
-import java.util.List;
-
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 
 /**
@@ -22,17 +19,14 @@ abstract class AbstractQueryController implements ParseQueryController {
     @Override
     public <T extends ParseObject> Task<T> getFirstAsync(ParseQuery.State<T> state, ParseUser user,
                                                          Task<Void> cancellationToken) {
-        return findAsync(state, user, cancellationToken).continueWith(new Continuation<List<T>, T>() {
-            @Override
-            public T then(Task<List<T>> task) throws Exception {
-                if (task.isFaulted()) {
-                    throw task.getError();
-                }
-                if (task.getResult() != null && task.getResult().size() > 0) {
-                    return task.getResult().get(0);
-                }
-                throw new ParseException(ParseException.OBJECT_NOT_FOUND, "no results found for query");
+        return findAsync(state, user, cancellationToken).continueWith(task -> {
+            if (task.isFaulted()) {
+                throw task.getError();
             }
+            if (task.getResult() != null && task.getResult().size() > 0) {
+                return task.getResult().get(0);
+            }
+            throw new ParseException(ParseException.OBJECT_NOT_FOUND, "no results found for query");
         });
     }
 }

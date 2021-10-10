@@ -18,10 +18,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import com.parse.boltsinternal.Task;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
-
-import com.parse.boltsinternal.Task;
 
 /**
  * Wrapper class to invoke {@link Cursor#close()} on a specific thread on Android versions below
@@ -32,8 +32,9 @@ import com.parse.boltsinternal.Task;
  */
 class ParseSQLiteCursor implements Cursor {
 
-    private Cursor cursor;
-    private Executor executor;
+    private final Cursor cursor;
+    private final Executor executor;
+
     private ParseSQLiteCursor(Cursor cursor, Executor executor) {
         this.cursor = cursor;
         this.executor = executor;
@@ -197,12 +198,9 @@ class ParseSQLiteCursor implements Cursor {
     @Override
     public void close() {
         // Basically close _eventually_.
-        Task.call(new Callable<Void>() {
-            @Override
-            public Void call() {
-                cursor.close();
-                return null;
-            }
+        Task.call((Callable<Void>) () -> {
+            cursor.close();
+            return null;
         }, executor);
     }
 

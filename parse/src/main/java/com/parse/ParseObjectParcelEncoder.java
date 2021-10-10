@@ -13,7 +13,7 @@ import java.util.Set;
  */
 /* package */ class ParseObjectParcelEncoder extends ParseParcelEncoder {
 
-    private Set<String> ids = new HashSet<>();
+    private final Set<String> ids = new HashSet<>();
 
     public ParseObjectParcelEncoder() {
     }

@@ -39,3 +39,5 @@ docs/
 # Jacoco
 jacoco.exec
 
+# VSC
+.project

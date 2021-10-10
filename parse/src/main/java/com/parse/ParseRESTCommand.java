@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
@@ -25,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.parse.boltsinternal.Task;
 
 /**
  * A helper object to send requests to the server.
@@ -55,6 +54,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     private String installationId;
     private String operationSetUUID;
     private String localId;
+
     public ParseRESTCommand(
             String httpPath,
             ParseHttpRequest.Method httpMethod,
@@ -74,6 +74,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
             String sessionToken) {
         this(httpPath, httpMethod, jsonParameters, null, sessionToken);
     }
+
     private ParseRESTCommand(
             String httpPath,
             ParseHttpRequest.Method httpMethod,

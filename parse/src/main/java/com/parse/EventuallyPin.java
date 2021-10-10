@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONException;
@@ -18,9 +19,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * Properties
@@ -98,12 +96,7 @@ class EventuallyPin extends ParseObject {
         if (command != null) {
             pin.put("command", command);
         }
-        return pin.pinInBackground(PIN_NAME).continueWith(new Continuation<Void, EventuallyPin>() {
-            @Override
-            public EventuallyPin then(Task<Void> task) {
-                return pin;
-            }
-        });
+        return pin.pinInBackground(PIN_NAME).continueWith(task -> pin);
     }
 
     public static Task<List<EventuallyPin>> findAllPinned() {
@@ -122,26 +115,18 @@ class EventuallyPin extends ParseObject {
 
         // We need pass in a null user because we don't want the query to fetch the current user
         // from LDS.
-        return query.findInBackground().onSuccessTask(new Continuation<List<EventuallyPin>, Task<List<EventuallyPin>>>() {
-            @Override
-            public Task<List<EventuallyPin>> then(Task<List<EventuallyPin>> task) {
-                final List<EventuallyPin> pins = task.getResult();
-                List<Task<Void>> tasks = new ArrayList<>();
+        return query.findInBackground().onSuccessTask(task -> {
+            final List<EventuallyPin> pins = task.getResult();
+            List<Task<Void>> tasks = new ArrayList<>();
 
-                for (EventuallyPin pin : pins) {
-                    ParseObject object = pin.getObject();
-                    if (object != null) {
-                        tasks.add(object.fetchFromLocalDatastoreAsync().makeVoid());
-                    }
+            for (EventuallyPin pin : pins) {
+                ParseObject object = pin.getObject();
+                if (object != null) {
+                    tasks.add(object.fetchFromLocalDatastoreAsync().makeVoid());
                 }
-
-                return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<List<EventuallyPin>>>() {
-                    @Override
-                    public Task<List<EventuallyPin>> then(Task<Void> task) {
-                        return Task.forResult(pins);
-                    }
-                });
             }
+
+            return Task.whenAll(tasks).continueWithTask(task1 -> Task.forResult(pins));
         });
     }
 
@@ -175,11 +160,10 @@ class EventuallyPin extends ParseObject {
         ParseRESTCommand command = null;
         if (ParseRESTCommand.isValidCommandJSONObject(json)) {
             command = ParseRESTCommand.fromJSONObject(json);
-        } else if (ParseRESTCommand.isValidOldFormatCommandJSONObject(json)) {
-            // do nothing
-        } else {
+        } else if (!ParseRESTCommand.isValidOldFormatCommandJSONObject(json)) {
             throw new JSONException("Failed to load command from JSON.");
         }
+
         return command;
     }
 }
