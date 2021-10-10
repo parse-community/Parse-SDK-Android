@@ -2,8 +2,35 @@
 
 # master
 
+# 2.0.0
+
 ### BREAKING CHANGES
+- Required minimum SDK version is 16 ([#1095](https://github.com/parse-community/Parse-SDK-Android/pull/1095))
+- Support for Google Cloud Messaging (GCM) is removed, use Firebase Cloud Messaging instead; see the [Google developer documentation](https://developers.google.com/cloud-messaging/faq) for more details and migration assistance ([#1105](https://github.com/parse-community/Parse-SDK-Android/pull/1105))
+
+### Feature
+- Update all dependencies and modernize the source base (Asen Lekov) [#1095](https://github.com/parse-community/Parse-SDK-Android/pull/1095)
+- Upgrade Facebook Login SDK to 8.2.0 (Somye Mahajan) [#1105](https://github.com/parse-community/Parse-SDK-Android/pull/1105)
+
+### Fix
 - Remove `gcm` module since GCM is no longer supported by Google (John Carlson) [#1091](https://github.com/parse-community/Parse-SDK-Android/pull/1091)
+
+### Internal Changes
+  - SDK targets the latest Android version API 30
+  - Update the codebase to advantage of Java 8 syntax
+  - Update Kotlin and Coroutines version to `1.5.31`
+  - Update project from Android Studio `3.6` to `4.2`
+  - Update Gradle version from `5.6.4` to `6.8.3`
+  - Update Robolectric from `3.8` to `4.6` and adjust all tests
+  - Update Play services
+    - Google Play services auth from `18.0.0` to `19.2.0`
+    - Google Cloud Messaging from `12.0.1` to `17.0.0`
+    - Firebase Messaging from `20.1.5` to `22.0.0`
+  - Update jacoco and fixed reporting of test coverage
+  - Migrate deprecated dependency repository from `jcenter()` to `mavenCentral()`
+
+### CI
+- Migrate from Travis CI to GitHub Actions (Asen Lekov) [#1095](https://github.com/parse-community/Parse-SDK-Android/pull/1095)
 
 # 2.0.0-alpha.1
 
