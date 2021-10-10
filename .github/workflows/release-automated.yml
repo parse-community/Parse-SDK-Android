@@ -22,7 +22,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
-          folder: build/docs/javadoc
+          folder: parse/build/docs/javadoc/release
           target-folder: api
           dry-run: true
   release:
