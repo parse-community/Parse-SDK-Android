@@ -1,7 +1,9 @@
-name: release
-on:
-  push:
-    branches: [ master ]
+# Trigger this workflow only to manually publish API docs; this should only be used
+# in extraordinary circumstances as this is done automatically as part of the
+# automated release workflow.
+
+name: release-manual-docs
+on: workflow_dispatch
 jobs:
   publish-docs:
     runs-on: ubuntu-latest
