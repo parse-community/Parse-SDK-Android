@@ -24,7 +24,7 @@ jobs:
           clean: true
           folder: parse/build/docs/javadoc/release
           target-folder: api
-          dry-run: true
+          dry-run: false
   release:
     runs-on: ubuntu-latest
     outputs:
