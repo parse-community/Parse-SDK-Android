@@ -1,3 +1,22 @@
+# [2.0.0](https://github.com/mtrezza/Parse-SDK-Android/compare/1.22.0...2.0.0) (2021-10-10)
+
+
+### Bug Fixes
+
+* remove GCM module ([#1091](https://github.com/mtrezza/Parse-SDK-Android/issues/1091)) ([aa16bcf](https://github.com/mtrezza/Parse-SDK-Android/commit/aa16bcfd9ef87319f032086f286e5768807f24a7))
+* upgrade Facebook SDK ([#1105](https://github.com/mtrezza/Parse-SDK-Android/issues/1105)) ([6f4bdb0](https://github.com/mtrezza/Parse-SDK-Android/commit/6f4bdb0495e31dfb7c568a0269dc3dd8dd6b30c3))
+
+### Features
+
+* update all dependencies and modernize the source base ([#1095](https://github.com/mtrezza/Parse-SDK-Android/issues/1095)) ([a977d11](https://github.com/mtrezza/Parse-SDK-Android/commit/a977d117b02de826981ce6c50e85a2204d989b66))
+
+
+### BREAKING CHANGES
+
+* CHANGE
+
+Support for Google Cloud Messaging (GCM) is removed, use Firebase Cloud Messaging instead. See the [Google developer documentation](https://developers.google.com/cloud-messaging/faq) for more details and migration assistance. ([aa16bcf](aa16bcf))
+
 # Changelog
 
 # 2.0.0
