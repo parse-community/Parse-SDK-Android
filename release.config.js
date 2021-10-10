@@ -28,7 +28,8 @@ async function config() {
   console.log(`Running on branch: ${branch}`);
   
   // Set changelog file
-  const changelogFile = `./changelogs/CHANGELOG_${branch}.md`;
+  //const changelogFile = `./changelogs/CHANGELOG_${branch}.md`;
+  const changelogFile = `./CHANGELOG.md`;
   console.log(`Changelog file output to: ${changelogFile}`);
 
   // Load template file contents
@@ -46,7 +47,7 @@ async function config() {
       // { name: 'release-3', range: '3.x.x', channel: '3.x' },
       // { name: 'release-4', range: '4.x.x', channel: '4.x' },
     ],
-    dryRun: true,
+    dryRun: false,
     debug: true,
     ci: true,
     tagFormat: '${version}',
