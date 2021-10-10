@@ -19,8 +19,9 @@ jobs:
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
           folder: build/docs/javadoc
-          target_folder: api
+          target-folder: api
+          dry-run: true
