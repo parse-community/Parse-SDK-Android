@@ -13,14 +13,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
+import com.parse.boltsinternal.Task;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseInstallation} is a local representation of installation data that can be saved
@@ -133,35 +132,27 @@ public class ParseInstallation extends ParseObject {
             } else {
                 result = Task.forResult(null);
             }
-            return result.onSuccessTask(new Continuation<Void, Task<T>>() {
-                @Override
-                public Task<T> then(Task<Void> task) {
-                    return ParseInstallation.super.fetchAsync(sessionToken, toAwait);
-                }
-            });
+            return result.onSuccessTask(task -> ParseInstallation.super.fetchAsync(sessionToken, toAwait));
         }
     }
 
     @Override
         /* package */ Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
-        return super.saveAsync(sessionToken, toAwait).continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                // Retry the fetch as a save operation because this Installation was deleted on the server.
-                if (task.getError() != null
-                        && task.getError() instanceof ParseException) {
-                    int errCode = ((ParseException) task.getError()).getCode();
-                    if (errCode == ParseException.OBJECT_NOT_FOUND
-                            || (errCode == ParseException.MISSING_REQUIRED_FIELD_ERROR && getObjectId() == null)) {
-                        synchronized (mutex) {
-                            setState(new State.Builder(getState()).objectId(null).build());
-                            markAllFieldsDirty();
-                            return ParseInstallation.super.saveAsync(sessionToken, toAwait);
-                        }
+        return super.saveAsync(sessionToken, toAwait).continueWithTask(task -> {
+            // Retry the fetch as a save operation because this Installation was deleted on the server.
+            if (task.getError() != null
+                    && task.getError() instanceof ParseException) {
+                int errCode = ((ParseException) task.getError()).getCode();
+                if (errCode == ParseException.OBJECT_NOT_FOUND
+                        || (errCode == ParseException.MISSING_REQUIRED_FIELD_ERROR && getObjectId() == null)) {
+                    synchronized (mutex) {
+                        setState(new State.Builder(getState()).objectId(null).build());
+                        markAllFieldsDirty();
+                        return ParseInstallation.super.saveAsync(sessionToken, toAwait);
                     }
                 }
-                return task;
             }
+            return task;
         });
     }
 
@@ -174,22 +165,12 @@ public class ParseInstallation extends ParseObject {
             return task;
         }
 
-        return task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                return getCurrentInstallationController().setAsync(ParseInstallation.this);
-            }
-        });
+        return task.onSuccessTask(task1 -> getCurrentInstallationController().setAsync(ParseInstallation.this));
     }
 
     @Override
         /* package */ Task<Void> handleFetchResultAsync(final ParseObject.State newState) {
-        return super.handleFetchResultAsync(newState).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                return getCurrentInstallationController().setAsync(ParseInstallation.this);
-            }
-        });
+        return super.handleFetchResultAsync(newState).onSuccessTask(task -> getCurrentInstallationController().setAsync(ParseInstallation.this));
     }
 
     // Android documentation states that getID may return one of many forms: America/LosAngeles,

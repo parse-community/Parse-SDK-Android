@@ -11,11 +11,10 @@ package com.parse.twitter;
 import android.content.Context;
 
 import com.parse.ParseException;
+import com.parse.boltsinternal.Task;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import com.parse.boltsinternal.Task;
 
 class TwitterController {
 

@@ -11,8 +11,14 @@ package com.parse;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,14 +38,8 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
-
-import com.parse.boltsinternal.Capture;
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * The {@code ParseObject} is a local representation of data that can be saved and retrieved from
@@ -61,15 +61,15 @@ public class ParseObject implements Parcelable {
      * @see #unpin()
      */
     public static final String DEFAULT_PIN = "_default";
-    static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
-    private static final String AUTO_CLASS_NAME = "_Automatic";
-    private static final String TAG = "ParseObject";
     /*
   REST JSON Keys
   */
     public static final String KEY_OBJECT_ID = "objectId";
     public static final String KEY_CREATED_AT = "createdAt";
     public static final String KEY_UPDATED_AT = "updatedAt";
+    static final String KEY_IS_DELETING_EVENTUALLY = "__isDeletingEventually";
+    private static final String AUTO_CLASS_NAME = "_Automatic";
+    private static final String TAG = "ParseObject";
     private static final String KEY_CLASS_NAME = "className";
     private static final String KEY_ACL = "ACL";
     /*
@@ -334,22 +334,16 @@ public class ParseObject implements Parcelable {
             // Add fullTask to each of the objects' queues.
             final List<Task<Void>> childTasks = new ArrayList<>();
             for (ParseObject obj : objects) {
-                obj.taskQueue.enqueue(new Continuation<Void, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<Void> task) {
-                        childTasks.add(task);
-                        return fullTask;
-                    }
+                obj.taskQueue.enqueue(task -> {
+                    childTasks.add(task);
+                    return fullTask;
                 });
             }
 
             // When all of the objects' queues are ready, signal fullTask that it's ready to go on.
-            Task.whenAll(childTasks).continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) {
-                    readyToStart.setResult(null);
-                    return null;
-                }
+            Task.whenAll(childTasks).continueWith((Continuation<Void, Void>) task -> {
+                readyToStart.setResult(null);
+                return null;
             });
             return fullTask;
         } finally {
@@ -475,46 +469,28 @@ public class ParseObject implements Parcelable {
             }
         }
 
-        return enqueueForAll(uniqueObjects, new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> toAwait) {
-                return deleteAllAsync(uniqueObjects, sessionToken, toAwait);
-            }
-        });
+        return enqueueForAll(uniqueObjects, toAwait -> deleteAllAsync(uniqueObjects, sessionToken, toAwait));
     }
 
     private static <T extends ParseObject> Task<Void> deleteAllAsync(
             final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
-        return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                int objectCount = uniqueObjects.size();
-                List<ParseObject.State> states = new ArrayList<>(objectCount);
-                for (int i = 0; i < objectCount; i++) {
-                    ParseObject object = uniqueObjects.get(i);
-                    object.validateDelete();
-                    states.add(object.getState());
-                }
-                List<Task<Void>> batchTasks = getObjectController().deleteAllAsync(states, sessionToken);
-
-                List<Task<Void>> tasks = new ArrayList<>(objectCount);
-                for (int i = 0; i < objectCount; i++) {
-                    Task<Void> batchTask = batchTasks.get(i);
-                    final T object = uniqueObjects.get(i);
-                    tasks.add(batchTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                        @Override
-                        public Task<Void> then(final Task<Void> batchTask) {
-                            return object.handleDeleteResultAsync().continueWithTask(new Continuation<Void, Task<Void>>() {
-                                @Override
-                                public Task<Void> then(Task<Void> task) {
-                                    return batchTask;
-                                }
-                            });
-                        }
-                    }));
-                }
-                return Task.whenAll(tasks);
+        return toAwait.continueWithTask(task -> {
+            int objectCount = uniqueObjects.size();
+            List<State> states = new ArrayList<>(objectCount);
+            for (int i = 0; i < objectCount; i++) {
+                ParseObject object = uniqueObjects.get(i);
+                object.validateDelete();
+                states.add(object.getState());
             }
+            List<Task<Void>> batchTasks = getObjectController().deleteAllAsync(states, sessionToken);
+
+            List<Task<Void>> tasks = new ArrayList<>(objectCount);
+            for (int i = 0; i < objectCount; i++) {
+                Task<Void> batchTask = batchTasks.get(i);
+                final T object = uniqueObjects.get(i);
+                tasks.add(batchTask.onSuccessTask(batchTask1 -> object.handleDeleteResultAsync().continueWithTask(task1 -> batchTask1)));
+            }
+            return Task.whenAll(tasks);
         });
     }
 
@@ -548,12 +524,9 @@ public class ParseObject implements Parcelable {
      * @return A {@link Task} that is resolved when deleteAll completes.
      */
     public static <T extends ParseObject> Task<Void> deleteAllInBackground(final List<T> objects) {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                return deleteAllAsync(objects, sessionToken);
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            return deleteAllAsync(objects, sessionToken);
         });
     }
 
@@ -648,8 +621,8 @@ public class ParseObject implements Parcelable {
     private static void collectDirtyChildren(Object node, Collection<ParseObject> dirtyChildren,
                                              Collection<ParseFile> dirtyFiles) {
         collectDirtyChildren(node, dirtyChildren, dirtyFiles,
-                new HashSet<ParseObject>(),
-                new HashSet<ParseObject>());
+                new HashSet<>(),
+                new HashSet<>());
     }
 
     /**
@@ -682,12 +655,9 @@ public class ParseObject implements Parcelable {
         for (ParseFile file : files) {
             tasks.add(file.saveAsync(sessionToken, null, null));
         }
-        Task<Void> filesTask = Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                filesComplete.set(true);
-                return null;
-            }
+        Task<Void> filesTask = Task.whenAll(tasks).continueWith(task -> {
+            filesComplete.set(true);
+            return null;
         });
 
         // objects will need to wait for users to be complete since they may be nested children.
@@ -696,55 +666,39 @@ public class ParseObject implements Parcelable {
         for (final ParseUser user : users) {
             tasks.add(user.saveAsync(sessionToken));
         }
-        Task<Void> usersTask = Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                usersComplete.set(true);
-                return null;
-            }
+        Task<Void> usersTask = Task.whenAll(tasks).continueWith(task -> {
+            usersComplete.set(true);
+            return null;
         });
 
         final Capture<Set<ParseObject>> remaining = new Capture<>(objects);
-        Task<Void> objectsTask = Task.forResult(null).continueWhile(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                return remaining.get().size() > 0;
+        Task<Void> objectsTask = Task.forResult(null).continueWhile(() -> remaining.get().size() > 0, task -> {
+            // Partition the objects into two sets: those that can be save immediately,
+            // and those that rely on other objects to be created first.
+            final List<ParseObject> current = new ArrayList<>();
+            final Set<ParseObject> nextBatch = new HashSet<>();
+            for (ParseObject obj : remaining.get()) {
+                if (obj.canBeSerialized()) {
+                    current.add(obj);
+                } else {
+                    nextBatch.add(obj);
+                }
             }
-        }, new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                // Partition the objects into two sets: those that can be save immediately,
-                // and those that rely on other objects to be created first.
-                final List<ParseObject> current = new ArrayList<>();
-                final Set<ParseObject> nextBatch = new HashSet<>();
-                for (ParseObject obj : remaining.get()) {
-                    if (obj.canBeSerialized()) {
-                        current.add(obj);
-                    } else {
-                        nextBatch.add(obj);
-                    }
-                }
-                remaining.set(nextBatch);
+            remaining.set(nextBatch);
 
-                if (current.size() == 0 && filesComplete.get() && usersComplete.get()) {
-                    // We do cycle-detection when building the list of objects passed to this function, so
-                    // this should never get called. But we should check for it anyway, so that we get an
-                    // exception instead of an infinite loop.
-                    throw new RuntimeException("Unable to save a ParseObject with a relation to a cycle.");
-                }
-
-                // Package all save commands together
-                if (current.size() == 0) {
-                    return Task.forResult(null);
-                }
-
-                return enqueueForAll(current, new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> toAwait) {
-                        return saveAllAsync(current, sessionToken, toAwait);
-                    }
-                });
+            if (current.size() == 0 && filesComplete.get() && usersComplete.get()) {
+                // We do cycle-detection when building the list of objects passed to this function, so
+                // this should never get called. But we should check for it anyway, so that we get an
+                // exception instead of an infinite loop.
+                throw new RuntimeException("Unable to save a ParseObject with a relation to a cycle.");
             }
+
+            // Package all save commands together
+            if (current.size() == 0) {
+                return Task.forResult(null);
+            }
+
+            return enqueueForAll(current, toAwait -> saveAllAsync(current, sessionToken, toAwait));
         });
 
         return Task.whenAll(Arrays.asList(filesTask, usersTask, objectsTask));
@@ -752,51 +706,42 @@ public class ParseObject implements Parcelable {
 
     private static <T extends ParseObject> Task<Void> saveAllAsync(
             final List<T> uniqueObjects, final String sessionToken, Task<Void> toAwait) {
-        return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                int objectCount = uniqueObjects.size();
-                List<ParseObject.State> states = new ArrayList<>(objectCount);
-                List<ParseOperationSet> operationsList = new ArrayList<>(objectCount);
-                List<ParseDecoder> decoders = new ArrayList<>(objectCount);
-                for (int i = 0; i < objectCount; i++) {
-                    ParseObject object = uniqueObjects.get(i);
-                    object.updateBeforeSave();
-                    object.validateSave();
+        return toAwait.continueWithTask(task -> {
+            int objectCount = uniqueObjects.size();
+            List<State> states = new ArrayList<>(objectCount);
+            List<ParseOperationSet> operationsList = new ArrayList<>(objectCount);
+            List<ParseDecoder> decoders = new ArrayList<>(objectCount);
+            for (int i = 0; i < objectCount; i++) {
+                ParseObject object = uniqueObjects.get(i);
+                object.updateBeforeSave();
+                object.validateSave();
 
-                    states.add(object.getState());
-                    operationsList.add(object.startSave());
-                    final Map<String, ParseObject> fetchedObjects = object.collectFetchedObjects();
-                    decoders.add(new KnownParseObjectDecoder(fetchedObjects));
-                }
-                List<Task<ParseObject.State>> batchTasks = getObjectController().saveAllAsync(
-                        states, operationsList, sessionToken, decoders);
-
-                List<Task<Void>> tasks = new ArrayList<>(objectCount);
-                for (int i = 0; i < objectCount; i++) {
-                    Task<ParseObject.State> batchTask = batchTasks.get(i);
-                    final T object = uniqueObjects.get(i);
-                    final ParseOperationSet operations = operationsList.get(i);
-                    tasks.add(batchTask.continueWithTask(new Continuation<ParseObject.State, Task<Void>>() {
-                        @Override
-                        public Task<Void> then(final Task<ParseObject.State> batchTask) {
-                            ParseObject.State result = batchTask.getResult(); // will be null on failure
-                            return object.handleSaveResultAsync(result, operations).continueWithTask(new Continuation<Void, Task<Void>>() {
-                                @Override
-                                public Task<Void> then(Task<Void> task) {
-                                    if (task.isFaulted() || task.isCancelled()) {
-                                        return task;
-                                    }
-
-                                    // We still want to propagate batchTask errors
-                                    return batchTask.makeVoid();
-                                }
-                            });
-                        }
-                    }));
-                }
-                return Task.whenAll(tasks);
+                states.add(object.getState());
+                operationsList.add(object.startSave());
+                final Map<String, ParseObject> fetchedObjects = object.collectFetchedObjects();
+                decoders.add(new KnownParseObjectDecoder(fetchedObjects));
             }
+            List<Task<State>> batchTasks = getObjectController().saveAllAsync(
+                    states, operationsList, sessionToken, decoders);
+
+            List<Task<Void>> tasks = new ArrayList<>(objectCount);
+            for (int i = 0; i < objectCount; i++) {
+                Task<State> batchTask = batchTasks.get(i);
+                final T object = uniqueObjects.get(i);
+                final ParseOperationSet operations = operationsList.get(i);
+                tasks.add(batchTask.continueWithTask(batchTask1 -> {
+                    State result = batchTask1.getResult(); // will be null on failure
+                    return object.handleSaveResultAsync(result, operations).continueWithTask(task1 -> {
+                        if (task1.isFaulted() || task1.isCancelled()) {
+                            return task1;
+                        }
+
+                        // We still want to propagate batchTask errors
+                        return batchTask1.makeVoid();
+                    });
+                }));
+            }
+            return Task.whenAll(tasks);
         });
     }
 
@@ -830,52 +775,43 @@ public class ParseObject implements Parcelable {
      * @return A {@link Task} that is resolved when saveAll completes.
      */
     public static <T extends ParseObject> Task<Void> saveAllInBackground(final List<T> objects) {
-        return ParseUser.getCurrentUserAsync().onSuccessTask(new Continuation<ParseUser, Task<String>>() {
-            @Override
-            public Task<String> then(Task<ParseUser> task) {
-                final ParseUser current = task.getResult();
-                if (current == null) {
-                    return Task.forResult(null);
-                }
-                if (!current.isLazy()) {
-                    return Task.forResult(current.getSessionToken());
-                }
-
-                // The current user is lazy/unresolved. If it is attached to any of the objects via ACL,
-                // we'll need to resolve/save it before proceeding.
-                for (ParseObject object : objects) {
-                    if (!object.isDataAvailable(KEY_ACL)) {
-                        continue;
-                    }
-                    final ParseACL acl = object.getACL(false);
-                    if (acl == null) {
-                        continue;
-                    }
-                    final ParseUser user = acl.getUnresolvedUser();
-                    if (user != null && user.isCurrentUser()) {
-                        // We only need to find one, since there's only one current user.
-                        return user.saveAsync(null).onSuccess(new Continuation<Void, String>() {
-                            @Override
-                            public String then(Task<Void> task) {
-                                if (acl.hasUnresolvedUser()) {
-                                    throw new IllegalStateException("ACL has an unresolved ParseUser. "
-                                            + "Save or sign up before attempting to serialize the ACL.");
-                                }
-                                return user.getSessionToken();
-                            }
-                        });
-                    }
-                }
-
-                // There were no objects with ACLs pointing to unresolved users.
+        return ParseUser.getCurrentUserAsync().onSuccessTask(task -> {
+            final ParseUser current = task.getResult();
+            if (current == null) {
                 return Task.forResult(null);
             }
-        }).onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return deepSaveAsync(objects, sessionToken);
+            if (!current.isLazy()) {
+                return Task.forResult(current.getSessionToken());
             }
+
+            // The current user is lazy/unresolved. If it is attached to any of the objects via ACL,
+            // we'll need to resolve/save it before proceeding.
+            for (ParseObject object : objects) {
+                if (!object.isDataAvailable(KEY_ACL)) {
+                    continue;
+                }
+                final ParseACL acl = object.getACL(false);
+                if (acl == null) {
+                    continue;
+                }
+                final ParseUser user = acl.getUnresolvedUser();
+                if (user != null && user.isCurrentUser()) {
+                    // We only need to find one, since there's only one current user.
+                    return user.saveAsync(null).onSuccess(task1 -> {
+                        if (acl.hasUnresolvedUser()) {
+                            throw new IllegalStateException("ACL has an unresolved ParseUser. "
+                                    + "Save or sign up before attempting to serialize the ACL.");
+                        }
+                        return user.getSessionToken();
+                    });
+                }
+            }
+
+            // There were no objects with ACLs pointing to unresolved users.
+            return Task.forResult(null);
+        }).onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return deepSaveAsync(objects, sessionToken);
         });
     }
 
@@ -917,17 +853,9 @@ public class ParseObject implements Parcelable {
 
     private static <T extends ParseObject> Task<List<T>> fetchAllAsync(
             final List<T> objects, final boolean onlyIfNeeded) {
-        return ParseUser.getCurrentUserAsync().onSuccessTask(new Continuation<ParseUser, Task<List<T>>>() {
-            @Override
-            public Task<List<T>> then(Task<ParseUser> task) {
-                final ParseUser user = task.getResult();
-                return enqueueForAll(objects, new Continuation<Void, Task<List<T>>>() {
-                    @Override
-                    public Task<List<T>> then(Task<Void> task) {
-                        return fetchAllAsync(objects, user, onlyIfNeeded, task);
-                    }
-                });
-            }
+        return ParseUser.getCurrentUserAsync().onSuccessTask(task -> {
+            final ParseUser user = task.getResult();
+            return enqueueForAll(objects, task1 -> fetchAllAsync(objects, user, onlyIfNeeded, task1));
         });
     }
 
@@ -970,37 +898,29 @@ public class ParseObject implements Parcelable {
         final ParseQuery<T> query = ParseQuery.<T>getQuery(className)
                 .whereContainedIn(KEY_OBJECT_ID, objectIds)
                 .setLimit(objectIds.size());
-        return toAwait.continueWithTask(new Continuation<Void, Task<List<T>>>() {
-            @Override
-            public Task<List<T>> then(Task<Void> task) {
-                return query.findAsync(query.getBuilder().build(), user, null);
+        return toAwait.continueWithTask(task -> query.findAsync(query.getBuilder().build(), user, null)).onSuccess(task -> {
+            Map<String, T> resultMap = new HashMap<>();
+            for (T o : task.getResult()) {
+                resultMap.put(o.getObjectId(), o);
             }
-        }).onSuccess(new Continuation<List<T>, List<T>>() {
-            @Override
-            public List<T> then(Task<List<T>> task) throws Exception {
-                Map<String, T> resultMap = new HashMap<>();
-                for (T o : task.getResult()) {
-                    resultMap.put(o.getObjectId(), o);
+            for (T object : objects) {
+                if (onlyIfNeeded && object.isDataAvailable()) {
+                    continue;
                 }
-                for (T object : objects) {
-                    if (onlyIfNeeded && object.isDataAvailable()) {
-                        continue;
-                    }
 
-                    T newObject = resultMap.get(object.getObjectId());
-                    if (newObject == null) {
-                        throw new ParseException(
-                                ParseException.OBJECT_NOT_FOUND,
-                                "Object id " + object.getObjectId() + " does not exist");
-                    }
-                    if (!Parse.isLocalDatastoreEnabled()) {
-                        // We only need to merge if LDS is disabled, since single instance will do the merging
-                        // for us.
-                        object.mergeFromObject(newObject);
-                    }
+                T newObject = resultMap.get(object.getObjectId());
+                if (newObject == null) {
+                    throw new ParseException(
+                            ParseException.OBJECT_NOT_FOUND,
+                            "Object id " + object.getObjectId() + " does not exist");
                 }
-                return objects;
+                if (!Parse.isLocalDatastoreEnabled()) {
+                    // We only need to merge if LDS is disabled, since single instance will do the merging
+                    // for us.
+                    object.mergeFromObject(newObject);
+                }
             }
+            return objects;
         });
     }
 
@@ -1110,55 +1030,44 @@ public class ParseObject implements Parcelable {
 
         // Resolve and persist unresolved users attached via ACL, similarly how we do in saveAsync
         for (final ParseObject object : objects) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    if (!object.isDataAvailable(KEY_ACL)) {
-                        return Task.forResult(null);
-                    }
-
-                    final ParseACL acl = object.getACL(false);
-                    if (acl == null) {
-                        return Task.forResult(null);
-                    }
-
-                    ParseUser user = acl.getUnresolvedUser();
-                    if (user == null || !user.isCurrentUser()) {
-                        return Task.forResult(null);
-                    }
-
-                    return ParseUser.pinCurrentUserIfNeededAsync(user);
+            task = task.onSuccessTask(task13 -> {
+                if (!object.isDataAvailable(KEY_ACL)) {
+                    return Task.forResult(null);
                 }
+
+                final ParseACL acl = object.getACL(false);
+                if (acl == null) {
+                    return Task.forResult(null);
+                }
+
+                ParseUser user = acl.getUnresolvedUser();
+                if (user == null || !user.isCurrentUser()) {
+                    return Task.forResult(null);
+                }
+
+                return ParseUser.pinCurrentUserIfNeededAsync(user);
             });
         }
 
-        return task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                return Parse.getLocalDatastore().pinAllObjectsAsync(
-                        name != null ? name : DEFAULT_PIN,
-                        objects,
-                        includeAllChildren);
+        return task.onSuccessTask(task12 -> Parse.getLocalDatastore().pinAllObjectsAsync(
+                name != null ? name : DEFAULT_PIN,
+                objects,
+                includeAllChildren)).onSuccessTask(task1 -> {
+            // Hack to emulate persisting current user on disk after a save like in ParseUser#saveAsync
+            // Note: This does not persist current user if it's a child object of `objects`, it probably
+            // should, but we can't unless we do something similar to #deepSaveAsync.
+            if (ParseCorePlugins.PIN_CURRENT_USER.equals(name)) {
+                return task1;
             }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                // Hack to emulate persisting current user on disk after a save like in ParseUser#saveAsync
-                // Note: This does not persist current user if it's a child object of `objects`, it probably
-                // should, but we can't unless we do something similar to #deepSaveAsync.
-                if (ParseCorePlugins.PIN_CURRENT_USER.equals(name)) {
-                    return task;
-                }
-                for (ParseObject object : objects) {
-                    if (object instanceof ParseUser) {
-                        final ParseUser user = (ParseUser) object;
-                        if (user.isCurrentUser()) {
-                            return ParseUser.pinCurrentUserIfNeededAsync(user);
-                        }
+            for (ParseObject object : objects) {
+                if (object instanceof ParseUser) {
+                    final ParseUser user = (ParseUser) object;
+                    if (user.isCurrentUser()) {
+                        return ParseUser.pinCurrentUserIfNeededAsync(user);
                     }
                 }
-                return task;
             }
+            return task1;
         });
     }
 
@@ -2088,12 +1997,7 @@ public class ParseObject implements Parcelable {
          */
         final OfflineStore store = Parse.getLocalDatastore();
         if (store != null) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return store.fetchLocallyAsync(ParseObject.this).makeVoid();
-                }
-            });
+            task = task.onSuccessTask(task15 -> store.fetchLocallyAsync(ParseObject.this).makeVoid());
         }
 
         final boolean success = result != null;
@@ -2110,14 +2014,11 @@ public class ParseObject implements Parcelable {
                 ParseOperationSet nextOperation = opIterator.next();
                 nextOperation.mergeFrom(operationsBeforeSave);
                 if (store != null) {
-                    task = task.continueWithTask(new Continuation<Void, Task<Void>>() {
-                        @Override
-                        public Task<Void> then(Task<Void> task) {
-                            if (task.isFaulted()) {
-                                return Task.forResult(null);
-                            } else {
-                                return store.updateDataForObjectAsync(ParseObject.this);
-                            }
+                    task = task.continueWithTask(task14 -> {
+                        if (task14.isFaulted()) {
+                            return Task.forResult(null);
+                        } else {
+                            return store.updateDataForObjectAsync(ParseObject.this);
                         }
                     });
                 }
@@ -2126,42 +2027,31 @@ public class ParseObject implements Parcelable {
         }
 
         // fetchLocallyAsync will return an error if this object isn't in the LDS yet and that's ok
-        task = task.continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                synchronized (mutex) {
-                    State newState;
-                    if (result.isComplete()) {
-                        // Result is complete, so just replace
-                        newState = result;
-                    } else {
-                        // Result is incomplete, so we'll need to apply it to the current state
-                        newState = getState().newBuilder()
-                                .apply(operationsBeforeSave)
-                                .apply(result)
-                                .build();
-                    }
-                    setState(newState);
+        task = task.continueWith(task13 -> {
+            synchronized (mutex) {
+                State newState;
+                if (result.isComplete()) {
+                    // Result is complete, so just replace
+                    newState = result;
+                } else {
+                    // Result is incomplete, so we'll need to apply it to the current state
+                    newState = getState().newBuilder()
+                            .apply(operationsBeforeSave)
+                            .apply(result)
+                            .build();
                 }
-                return null;
+                setState(newState);
             }
+            return null;
         });
 
         if (store != null) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return store.updateDataForObjectAsync(ParseObject.this);
-                }
-            });
+            task = task.onSuccessTask(task12 -> store.updateDataForObjectAsync(ParseObject.this));
         }
 
-        task = task.onSuccess(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                saveEvent.invoke(ParseObject.this, null);
-                return null;
-            }
+        task = task.onSuccess(task1 -> {
+            saveEvent.invoke(ParseObject.this, null);
+            return null;
         });
 
         return task;
@@ -2196,57 +2086,43 @@ public class ParseObject implements Parcelable {
      * @return A {@link Task} that is resolved when the save completes.
      */
     public final Task<Void> saveInBackground() {
-        return ParseUser.getCurrentUserAsync().onSuccessTask(new Continuation<ParseUser, Task<String>>() {
-            @Override
-            public Task<String> then(Task<ParseUser> task) {
-                final ParseUser current = task.getResult();
-                if (current == null) {
-                    return Task.forResult(null);
-                }
-                if (!current.isLazy()) {
-                    return Task.forResult(current.getSessionToken());
-                }
+        return ParseUser.getCurrentUserAsync().onSuccessTask(task -> {
+            final ParseUser current = task.getResult();
+            if (current == null) {
+                return Task.forResult(null);
+            }
+            if (!current.isLazy()) {
+                return Task.forResult(current.getSessionToken());
+            }
 
-                // The current user is lazy/unresolved. If it is attached to us via ACL, we'll need to
-                // resolve/save it before proceeding.
-                if (!isDataAvailable(KEY_ACL)) {
-                    return Task.forResult(null);
-                }
-                final ParseACL acl = getACL(false);
-                if (acl == null) {
-                    return Task.forResult(null);
-                }
-                final ParseUser user = acl.getUnresolvedUser();
-                if (user == null || !user.isCurrentUser()) {
-                    return Task.forResult(null);
-                }
-                return user.saveAsync(null).onSuccess(new Continuation<Void, String>() {
-                    @Override
-                    public String then(Task<Void> task) {
-                        if (acl.hasUnresolvedUser()) {
-                            throw new IllegalStateException("ACL has an unresolved ParseUser. "
-                                    + "Save or sign up before attempting to serialize the ACL.");
-                        }
-                        return user.getSessionToken();
-                    }
-                });
+            // The current user is lazy/unresolved. If it is attached to us via ACL, we'll need to
+            // resolve/save it before proceeding.
+            if (!isDataAvailable(KEY_ACL)) {
+                return Task.forResult(null);
             }
-        }).onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return saveAsync(sessionToken);
+            final ParseACL acl = getACL(false);
+            if (acl == null) {
+                return Task.forResult(null);
             }
+            final ParseUser user = acl.getUnresolvedUser();
+            if (user == null || !user.isCurrentUser()) {
+                return Task.forResult(null);
+            }
+            return user.saveAsync(null).onSuccess(task1 -> {
+                if (acl.hasUnresolvedUser()) {
+                    throw new IllegalStateException("ACL has an unresolved ParseUser. "
+                            + "Save or sign up before attempting to serialize the ACL.");
+                }
+                return user.getSessionToken();
+            });
+        }).onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return saveAsync(sessionToken);
         });
     }
 
     Task<Void> saveAsync(final String sessionToken) {
-        return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> toAwait) {
-                return saveAsync(sessionToken, toAwait);
-            }
-        });
+        return taskQueue.enqueue(toAwait -> saveAsync(sessionToken, toAwait));
     }
 
     Task<Void> saveAsync(final String sessionToken, final Task<Void> toAwait) {
@@ -2275,29 +2151,20 @@ public class ParseObject implements Parcelable {
 
         return task.onSuccessTask(
                 TaskQueue.<Void>waitFor(toAwait)
-        ).onSuccessTask(new Continuation<Void, Task<ParseObject.State>>() {
-            @Override
-            public Task<ParseObject.State> then(Task<Void> task) {
-                final Map<String, ParseObject> fetchedObjects = collectFetchedObjects();
-                ParseDecoder decoder = new KnownParseObjectDecoder(fetchedObjects);
-                return getObjectController().saveAsync(getState(), operations, sessionToken, decoder);
-            }
-        }).continueWithTask(new Continuation<ParseObject.State, Task<Void>>() {
-            @Override
-            public Task<Void> then(final Task<ParseObject.State> saveTask) {
-                ParseObject.State result = saveTask.getResult();
-                return handleSaveResultAsync(result, operations).continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        if (task.isFaulted() || task.isCancelled()) {
-                            return task;
-                        }
+        ).onSuccessTask(task12 -> {
+            final Map<String, ParseObject> fetchedObjects = collectFetchedObjects();
+            ParseDecoder decoder = new KnownParseObjectDecoder(fetchedObjects);
+            return getObjectController().saveAsync(getState(), operations, sessionToken, decoder);
+        }).continueWithTask(saveTask -> {
+            State result = saveTask.getResult();
+            return handleSaveResultAsync(result, operations).continueWithTask(task1 -> {
+                if (task1.isFaulted() || task1.isCancelled()) {
+                    return task1;
+                }
 
-                        // We still want to propagate saveTask errors
-                        return saveTask.makeVoid();
-                    }
-                });
-            }
+                // We still want to propagate saveTask errors
+                return saveTask.makeVoid();
+            });
         });
     }
 
@@ -2429,12 +2296,9 @@ public class ParseObject implements Parcelable {
             // ParsePinningEventuallyQueue calls handleSaveEventuallyResultAsync directly.
             handleSaveResultTask = runEventuallyTask.makeVoid();
         } else {
-            handleSaveResultTask = runEventuallyTask.onSuccessTask(new Continuation<JSONObject, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<JSONObject> task) {
-                    JSONObject json = task.getResult();
-                    return handleSaveEventuallyResultAsync(json, operationSet);
-                }
+            handleSaveResultTask = runEventuallyTask.onSuccessTask(task -> {
+                JSONObject json = task.getResult();
+                return handleSaveEventuallyResultAsync(json, operationSet);
             });
         }
         return handleSaveResultTask;
@@ -2449,18 +2313,10 @@ public class ParseObject implements Parcelable {
                     "This should only be used to enqueue saveEventually operation sets");
         }
 
-        taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> toAwait) {
-                return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        ParseEventuallyQueue cache = Parse.getEventuallyQueue();
-                        return cache.waitForOperationSetAndEventuallyPin(operationSet, null).makeVoid();
-                    }
-                });
-            }
-        });
+        taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> {
+            ParseEventuallyQueue cache = Parse.getEventuallyQueue();
+            return cache.waitForOperationSetAndEventuallyPin(operationSet, null).makeVoid();
+        }));
     }
 
     /**
@@ -2475,15 +2331,12 @@ public class ParseObject implements Parcelable {
         final boolean success = json != null;
         Task<Void> handleSaveResultTask = handleSaveResultAsync(json, operationSet);
 
-        return handleSaveResultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                if (success) {
-                    Parse.getEventuallyQueue()
-                            .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_UPDATED);
-                }
-                return task;
+        return handleSaveResultTask.onSuccessTask(task -> {
+            if (success) {
+                Parse.getEventuallyQueue()
+                        .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_UPDATED);
             }
+            return task;
         });
     }
 
@@ -2558,12 +2411,7 @@ public class ParseObject implements Parcelable {
             // ParsePinningEventuallyQueue calls handleDeleteEventuallyResultAsync directly.
             handleDeleteResultTask = runEventuallyTask.makeVoid();
         } else {
-            handleDeleteResultTask = runEventuallyTask.onSuccessTask(new Continuation<JSONObject, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<JSONObject> task) {
-                    return handleDeleteEventuallyResultAsync();
-                }
-            });
+            handleDeleteResultTask = runEventuallyTask.onSuccessTask(task -> handleDeleteEventuallyResultAsync());
         }
 
         return handleDeleteResultTask;
@@ -2580,13 +2428,10 @@ public class ParseObject implements Parcelable {
         }
         Task<Void> handleDeleteResultTask = handleDeleteResultAsync();
 
-        return handleDeleteResultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                Parse.getEventuallyQueue()
-                        .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_REMOVED);
-                return task;
-            }
+        return handleDeleteResultTask.onSuccessTask(task -> {
+            Parse.getEventuallyQueue()
+                    .notifyTestHelper(ParseCommandCache.TestHelper.OBJECT_REMOVED);
+            return task;
         });
     }
 
@@ -2604,58 +2449,39 @@ public class ParseObject implements Parcelable {
          */
         final OfflineStore store = Parse.getLocalDatastore();
         if (store != null) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return store.fetchLocallyAsync(ParseObject.this).makeVoid();
+            task = task.onSuccessTask(task15 -> store.fetchLocallyAsync(ParseObject.this).makeVoid()).continueWithTask(task14 -> {
+                // Catch CACHE_MISS
+                if (task14.getError() instanceof ParseException
+                        && ((ParseException) task14.getError()).getCode() == ParseException.CACHE_MISS) {
+                    return null;
                 }
-            }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    // Catch CACHE_MISS
-                    if (task.getError() instanceof ParseException
-                            && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
-                        return null;
-                    }
-                    return task;
-                }
+                return task14;
             });
         }
 
-        task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                synchronized (mutex) {
-                    State newState;
-                    if (result.isComplete()) {
-                        // Result is complete, so just replace
-                        newState = result;
-                    } else {
-                        // Result is incomplete, so we'll need to apply it to the current state
-                        newState = getState().newBuilder().apply(result).build();
-                    }
-                    setState(newState);
+        task = task.onSuccessTask(task13 -> {
+            synchronized (mutex) {
+                State newState;
+                if (result.isComplete()) {
+                    // Result is complete, so just replace
+                    newState = result;
+                } else {
+                    // Result is incomplete, so we'll need to apply it to the current state
+                    newState = getState().newBuilder().apply(result).build();
                 }
-                return null;
+                setState(newState);
             }
+            return null;
         });
 
         if (store != null) {
-            task = task.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return store.updateDataForObjectAsync(ParseObject.this);
+            task = task.onSuccessTask(task12 -> store.updateDataForObjectAsync(ParseObject.this)).continueWithTask(task1 -> {
+                // Catch CACHE_MISS
+                if (task1.getError() instanceof ParseException
+                        && ((ParseException) task1.getError()).getCode() == ParseException.CACHE_MISS) {
+                    return null;
                 }
-            }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    // Catch CACHE_MISS
-                    if (task.getError() instanceof ParseException
-                            && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
-                        return null;
-                    }
-                    return task;
-                }
+                return task1;
             });
         }
 
@@ -2676,30 +2502,19 @@ public class ParseObject implements Parcelable {
     @SuppressWarnings("unchecked")
     <T extends ParseObject> Task<T> fetchAsync(
             final String sessionToken, Task<Void> toAwait) {
-        return toAwait.onSuccessTask(new Continuation<Void, Task<ParseObject.State>>() {
-            @Override
-            public Task<ParseObject.State> then(Task<Void> task) {
-                State state;
-                Map<String, ParseObject> fetchedObjects;
-                synchronized (mutex) {
-                    state = getState();
-                    fetchedObjects = collectFetchedObjects();
-                }
-                ParseDecoder decoder = new KnownParseObjectDecoder(fetchedObjects);
-                return getObjectController().fetchAsync(state, sessionToken, decoder);
+        return toAwait.onSuccessTask(task -> {
+            State state;
+            Map<String, ParseObject> fetchedObjects;
+            synchronized (mutex) {
+                state = getState();
+                fetchedObjects = collectFetchedObjects();
             }
-        }).onSuccessTask(new Continuation<ParseObject.State, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParseObject.State> task) {
-                ParseObject.State result = task.getResult();
-                return handleFetchResultAsync(result);
-            }
-        }).onSuccess(new Continuation<Void, T>() {
-            @Override
-            public T then(Task<Void> task) {
-                return (T) ParseObject.this;
-            }
-        });
+            ParseDecoder decoder = new KnownParseObjectDecoder(fetchedObjects);
+            return getObjectController().fetchAsync(state, sessionToken, decoder);
+        }).onSuccessTask(task -> {
+            State result = task.getResult();
+            return handleFetchResultAsync(result);
+        }).onSuccess(task -> (T) ParseObject.this);
     }
 
     /**
@@ -2709,17 +2524,9 @@ public class ParseObject implements Parcelable {
      * @return A {@link Task} that is resolved when fetch completes.
      */
     public final <T extends ParseObject> Task<T> fetchInBackground() {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
-            @Override
-            public Task<T> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return taskQueue.enqueue(new Continuation<Void, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<Void> toAwait) {
-                        return fetchAsync(sessionToken, toAwait);
-                    }
-                });
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return taskQueue.enqueue(toAwait -> fetchAsync(sessionToken, toAwait));
         });
     }
 
@@ -2744,20 +2551,14 @@ public class ParseObject implements Parcelable {
         if (isDataAvailable()) {
             return Task.forResult((T) this);
         }
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
-            @Override
-            public Task<T> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return taskQueue.enqueue(new Continuation<Void, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<Void> toAwait) {
-                        if (isDataAvailable()) {
-                            return Task.forResult((T) ParseObject.this);
-                        }
-                        return fetchAsync(sessionToken, toAwait);
-                    }
-                });
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return taskQueue.enqueue(toAwait -> {
+                if (isDataAvailable()) {
+                    return Task.forResult((T) ParseObject.this);
+                }
+                return fetchAsync(sessionToken, toAwait);
+            });
         });
 
     }
@@ -2792,29 +2593,18 @@ public class ParseObject implements Parcelable {
     private Task<Void> deleteAsync(final String sessionToken, Task<Void> toAwait) {
         validateDelete();
 
-        return toAwait.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                isDeleting = true;
-                if (state.objectId() == null) {
-                    return task.cast(); // no reason to call delete since it doesn't exist
-                }
-                return deleteAsync(sessionToken);
+        return toAwait.onSuccessTask(task -> {
+            isDeleting = true;
+            if (state.objectId() == null) {
+                return task.cast(); // no reason to call delete since it doesn't exist
             }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                return handleDeleteResultAsync();
+            return deleteAsync(sessionToken);
+        }).onSuccessTask(task -> handleDeleteResultAsync()).continueWith(task -> {
+            isDeleting = false;
+            if (task.isFaulted()) {
+                throw task.getError();
             }
-        }).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) throws Exception {
-                isDeleting = false;
-                if (task.isFaulted()) {
-                    throw task.getError();
-                }
-                return null;
-            }
+            return null;
         });
     }
 
@@ -2838,16 +2628,13 @@ public class ParseObject implements Parcelable {
 
         final OfflineStore store = Parse.getLocalDatastore();
         if (store != null) {
-            task = task.continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    synchronized (mutex) {
-                        if (isDeleted) {
-                            store.unregisterObject(ParseObject.this);
-                            return store.deleteDataForObjectAsync(ParseObject.this);
-                        } else {
-                            return store.updateDataForObjectAsync(ParseObject.this);
-                        }
+            task = task.continueWithTask(task1 -> {
+                synchronized (mutex) {
+                    if (isDeleted) {
+                        store.unregisterObject(ParseObject.this);
+                        return store.deleteDataForObjectAsync(ParseObject.this);
+                    } else {
+                        return store.updateDataForObjectAsync(ParseObject.this);
                     }
                 }
             });
@@ -2863,17 +2650,9 @@ public class ParseObject implements Parcelable {
      * @return A {@link Task} that is resolved when delete completes.
      */
     public final Task<Void> deleteInBackground() {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                final String sessionToken = task.getResult();
-                return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> toAwait) {
-                        return deleteAsync(sessionToken, toAwait);
-                    }
-                });
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            final String sessionToken = task.getResult();
+            return taskQueue.enqueue(toAwait -> deleteAsync(sessionToken, toAwait));
         });
     }
 
@@ -4061,8 +3840,8 @@ public class ParseObject implements Parcelable {
 
         static abstract class Init<T extends Init> {
 
+            final Map<String, Object> serverData = new HashMap<>();
             private final String className;
-            Map<String, Object> serverData = new HashMap<>();
             private String objectId;
             private long createdAt = -1;
             private long updatedAt = -1;

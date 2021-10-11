@@ -8,7 +8,22 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.os.Parcel;
+
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,7 +36,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -34,26 +48,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseObjectTest {
 
     @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    public final ExpectedException thrown = ExpectedException.none();
 
     private static void mockCurrentUserController() {
         ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
@@ -68,7 +67,7 @@ public class ParseObjectTest {
         ParseObjectController objectController = mock(ParseObjectController.class);
         when(objectController.saveAsync(
                 any(ParseObject.State.class), any(ParseOperationSet.class),
-                anyString(), any(ParseDecoder.class))
+                nullable(String.class), any(ParseDecoder.class))
         ).thenReturn(tcs.getTask());
         ParseCorePlugins.getInstance().registerObjectController(objectController);
         return tcs;
@@ -117,8 +116,8 @@ public class ParseObjectTest {
         assertEquals("GameScore", parseObject.getClassName());
         assertEquals("TT1ZskATqS", parseObject.getObjectId());
         ParseDateFormat format = ParseDateFormat.getInstance();
-        assertTrue(parseObject.getCreatedAt().equals(format.parse("2015-06-22T21:23:41.733Z")));
-        assertTrue(parseObject.getUpdatedAt().equals(format.parse("2015-06-22T22:06:18.104Z")));
+        assertEquals(parseObject.getCreatedAt(), format.parse("2015-06-22T21:23:41.733Z"));
+        assertEquals(parseObject.getUpdatedAt(), format.parse("2015-06-22T22:06:18.104Z"));
 
         Set<String> keys = parseObject.getState().keySet();
         assertEquals(0, keys.size());

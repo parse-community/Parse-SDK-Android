@@ -8,10 +8,10 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
-
-import com.parse.boltsinternal.Task;
 
 class ParseExecutors {
 

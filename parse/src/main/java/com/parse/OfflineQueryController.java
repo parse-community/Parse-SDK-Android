@@ -8,9 +8,9 @@
  */
 package com.parse;
 
-import java.util.List;
-
 import com.parse.boltsinternal.Task;
+
+import java.util.List;
 
 class OfflineQueryController extends AbstractQueryController {
 

@@ -8,13 +8,13 @@
  */
 package com.parse;
 
+import static com.parse.ParseUser.State;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.Map;
-
-import static com.parse.ParseUser.State;
 
 /**
  * Handles encoding/decoding ParseUser to/from /2 format JSON. /2 format json is only used for

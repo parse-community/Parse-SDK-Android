@@ -10,15 +10,15 @@ import kotlin.reflect.KProperty
 /**
  * A generic property delegation for [ParseObject].
  */
-class ParseDelegate<T> {
+class ParseDelegate<T>(private val name: String?) {
 
     @Suppress("UNCHECKED_CAST")
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): T {
-        return parseObject.getAs(property.name)
+        return parseObject.getAs(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: T) {
-        parseObject.putOrIgnore(property.name, value)
+        parseObject.putOrIgnore(name ?: property.name, value)
     }
 
 }
@@ -27,4 +27,4 @@ class ParseDelegate<T> {
  * Returns a generic property delegate for [ParseObject]s. This uses [ParseObject.getAs]
  * and [ParseObject.putOrIgnore].
  */
-inline fun <T> attribute() = ParseDelegate<T>()
+inline fun <T> attribute(name: String? = null) = ParseDelegate<T>(name)

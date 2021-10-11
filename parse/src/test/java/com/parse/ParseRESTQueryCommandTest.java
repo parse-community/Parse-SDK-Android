@@ -8,6 +8,11 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+
 import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONArray;
@@ -22,11 +27,6 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 public class ParseRESTQueryCommandTest {
 

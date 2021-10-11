@@ -25,7 +25,7 @@ class ConnectivityNotifier extends BroadcastReceiver {
     private static final String TAG = "com.parse.ConnectivityNotifier";
     private static final ConnectivityNotifier singleton = new ConnectivityNotifier();
     private final Object lock = new Object();
-    private Set<ConnectivityListener> listeners = new HashSet<>();
+    private final Set<ConnectivityListener> listeners = new HashSet<>();
     private boolean hasRegisteredReceiver = false;
 
     public static ConnectivityNotifier getNotifier(Context context) {

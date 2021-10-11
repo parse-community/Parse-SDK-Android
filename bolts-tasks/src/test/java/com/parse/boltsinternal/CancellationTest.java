@@ -6,15 +6,15 @@
  */
 package com.parse.boltsinternal;
 
-import org.junit.Test;
-
-import java.util.concurrent.CancellationException;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import org.junit.Test;
+
+import java.util.concurrent.CancellationException;
 
 public class CancellationTest {
 
@@ -111,12 +111,7 @@ public class CancellationTest {
         CancellationToken token = cts.getToken();
         final Capture<Object> result = new Capture<>();
 
-        token.register(new Runnable() {
-            @Override
-            public void run() {
-                result.set("Run!");
-            }
-        });
+        token.register(() -> result.set("Run!"));
 
         assertNull(result.get());
 
@@ -133,12 +128,7 @@ public class CancellationTest {
 
         cts.cancel();
 
-        token.register(new Runnable() {
-            @Override
-            public void run() {
-                result.set("Run!");
-            }
-        });
+        token.register(() -> result.set("Run!"));
 
         assertNotNull(result.get());
     }
@@ -150,18 +140,8 @@ public class CancellationTest {
         final Capture<Object> result1 = new Capture<>();
         final Capture<Object> result2 = new Capture<>();
 
-        CancellationTokenRegistration registration1 = token.register(new Runnable() {
-            @Override
-            public void run() {
-                result1.set("Run!");
-            }
-        });
-        token.register(new Runnable() {
-            @Override
-            public void run() {
-                result2.set("Run!");
-            }
-        });
+        CancellationTokenRegistration registration1 = token.register(() -> result1.set("Run!"));
+        token.register(() -> result2.set("Run!"));
 
         registration1.close();
 
@@ -176,11 +156,8 @@ public class CancellationTest {
         CancellationTokenSource cts = new CancellationTokenSource();
         CancellationToken token = cts.getToken();
 
-        token.register(new Runnable() {
-            @Override
-            public void run() {
-                // Do nothing
-            }
+        token.register(() -> {
+            // Do nothing
         });
 
         cts.close();

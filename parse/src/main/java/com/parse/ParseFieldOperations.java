@@ -20,7 +20,7 @@ import java.util.Set;
  */
 /* package */ final class ParseFieldOperations {
     // A map of all known decoders.
-    private static Map<String, ParseFieldOperationFactory> opDecoderMap = new HashMap<>();
+    private static final Map<String, ParseFieldOperationFactory> opDecoderMap = new HashMap<>();
 
     private ParseFieldOperations() {
     }

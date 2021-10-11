@@ -537,7 +537,7 @@ public class ParseFileUtils {
      * Writes a {@link JSONObject} to a file creating the file if it does not exist.
      */
     public static void writeJSONObjectToFile(File file, JSONObject json) throws IOException {
-        ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes(Charset.forName("UTF-8")));
+        ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes("UTF-8"));
     }
 
     //endregion

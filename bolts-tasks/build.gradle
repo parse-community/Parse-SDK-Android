@@ -6,21 +6,10 @@
 apply plugin: 'java'
 apply plugin: 'maven'
 
-configurations {
-    provided
-}
-
-sourceSets {
-    main {
-        compileClasspath += configurations.provided
-    }
-}
-
 dependencies {
-    provided 'com.google.android:android:4.1.1.4'
-    testImplementation 'junit:junit:4.12'
+    compileOnly 'com.google.android:android:4.1.1.4'
+    testImplementation 'junit:junit:4.13.2'
 }
-
 
 javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 
@@ -29,7 +18,7 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
 }
 
-task javadocJar (type: Jar, dependsOn: javadoc) {
+task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
 }
@@ -45,10 +34,6 @@ artifacts {
 
 apply plugin: 'jacoco'
 
-jacoco {
-    toolVersion = '0.7.1.201405082137'
-}
-
 jacocoTestReport {
     group = "Reporting"
     description = "Generate Jacoco coverage reports after running tests."
@@ -59,3 +44,8 @@ jacocoTestReport {
 }
 
 //endregion
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
