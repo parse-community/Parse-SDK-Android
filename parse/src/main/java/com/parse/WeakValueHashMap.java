@@ -15,7 +15,7 @@ import java.util.HashMap;
  * A HashMap where all the values are weak.
  */
 class WeakValueHashMap<K, V> {
-    private HashMap<K, WeakReference<V>> map;
+    private final HashMap<K, WeakReference<V>> map;
 
     public WeakValueHashMap() {
         map = new HashMap<>();

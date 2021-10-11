@@ -8,17 +8,14 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 // TODO(grantland): Create ParseFileController interface
 class ParseFileController {
@@ -104,24 +101,21 @@ class ParseFileController {
                 uploadProgressCallback,
                 null,
                 cancellationToken
-        ).onSuccess(new Continuation<JSONObject, ParseFile.State>() {
-            @Override
-            public ParseFile.State then(Task<JSONObject> task) throws Exception {
-                JSONObject result = task.getResult();
-                ParseFile.State newState = new ParseFile.State.Builder(state)
-                        .name(result.getString("name"))
-                        .url(result.getString("url"))
-                        .build();
+        ).onSuccess(task -> {
+            JSONObject result = task.getResult();
+            ParseFile.State newState = new ParseFile.State.Builder(state)
+                    .name(result.getString("name"))
+                    .url(result.getString("url"))
+                    .build();
 
-                // Write data to cache
-                try {
-                    ParseFileUtils.writeByteArrayToFile(getCacheFile(newState), data);
-                } catch (IOException e) {
-                    // do nothing
-                }
-
-                return newState;
+            // Write data to cache
+            try {
+                ParseFileUtils.writeByteArrayToFile(getCacheFile(newState), data);
+            } catch (IOException e) {
+                // do nothing
             }
+
+            return newState;
         }, ParseExecutors.io());
     }
 
@@ -150,24 +144,21 @@ class ParseFileController {
                 uploadProgressCallback,
                 null,
                 cancellationToken
-        ).onSuccess(new Continuation<JSONObject, ParseFile.State>() {
-            @Override
-            public ParseFile.State then(Task<JSONObject> task) throws Exception {
-                JSONObject result = task.getResult();
-                ParseFile.State newState = new ParseFile.State.Builder(state)
-                        .name(result.getString("name"))
-                        .url(result.getString("url"))
-                        .build();
+        ).onSuccess(task -> {
+            JSONObject result = task.getResult();
+            ParseFile.State newState = new ParseFile.State.Builder(state)
+                    .name(result.getString("name"))
+                    .url(result.getString("url"))
+                    .build();
 
-                // Write data to cache
-                try {
-                    ParseFileUtils.copyFile(file, getCacheFile(newState));
-                } catch (IOException e) {
-                    // do nothing
-                }
-
-                return newState;
+            // Write data to cache
+            try {
+                ParseFileUtils.copyFile(file, getCacheFile(newState));
+            } catch (IOException e) {
+                // do nothing
             }
+
+            return newState;
         }, ParseExecutors.io());
     }
 
@@ -180,59 +171,48 @@ class ParseFileController {
             return Task.cancelled();
         }
         final File cacheFile = getCacheFile(state);
-        return Task.call(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                return cacheFile.exists();
+        return Task.call(cacheFile::exists, ParseExecutors.io()).continueWithTask(task -> {
+            boolean result = task.getResult();
+            if (result) {
+                return Task.forResult(cacheFile);
             }
-        }, ParseExecutors.io()).continueWithTask(new Continuation<Boolean, Task<File>>() {
-            @Override
-            public Task<File> then(Task<Boolean> task) {
-                boolean result = task.getResult();
-                if (result) {
-                    return Task.forResult(cacheFile);
-                }
+            if (cancellationToken != null && cancellationToken.isCancelled()) {
+                return Task.cancelled();
+            }
+
+            // Generate the temp file path for caching ParseFile content based on ParseFile's url
+            // The reason we do not write to the cacheFile directly is because there is no way we can
+            // verify if a cacheFile is complete or not. If download is interrupted in the middle, next
+            // time when we download the ParseFile, since cacheFile has already existed, we will return
+            // this incomplete cacheFile
+            final File tempFile = getTempFile(state);
+
+            // network
+            final ParseFileRequest request =
+                    new ParseFileRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
+
+            // We do not need to delete the temp file since we always try to overwrite it
+            return request.executeAsync(
+                    fileClient(),
+                    null,
+                    downloadProgressCallback,
+                    cancellationToken).continueWithTask(task1 -> {
+                // If the top-level task was cancelled, don't actually set the data -- just move on.
                 if (cancellationToken != null && cancellationToken.isCancelled()) {
-                    return Task.cancelled();
+                    throw new CancellationException();
+                }
+                if (task1.isFaulted()) {
+                    ParseFileUtils.deleteQuietly(tempFile);
+                    return task1.cast();
                 }
 
-                // Generate the temp file path for caching ParseFile content based on ParseFile's url
-                // The reason we do not write to the cacheFile directly is because there is no way we can
-                // verify if a cacheFile is complete or not. If download is interrupted in the middle, next
-                // time when we download the ParseFile, since cacheFile has already existed, we will return
-                // this incomplete cacheFile
-                final File tempFile = getTempFile(state);
-
-                // network
-                final ParseFileRequest request =
-                        new ParseFileRequest(ParseHttpRequest.Method.GET, state.url(), tempFile);
-
-                // We do not need to delete the temp file since we always try to overwrite it
-                return request.executeAsync(
-                        fileClient(),
-                        null,
-                        downloadProgressCallback,
-                        cancellationToken).continueWithTask(new Continuation<Void, Task<File>>() {
-                    @Override
-                    public Task<File> then(Task<Void> task) throws Exception {
-                        // If the top-level task was cancelled, don't actually set the data -- just move on.
-                        if (cancellationToken != null && cancellationToken.isCancelled()) {
-                            throw new CancellationException();
-                        }
-                        if (task.isFaulted()) {
-                            ParseFileUtils.deleteQuietly(tempFile);
-                            return task.cast();
-                        }
-
-                        // Since we give the cacheFile pointer to developers, it is not safe to guarantee
-                        // cacheFile always does not exist here, so it is better to delete it manually,
-                        // otherwise moveFile may throw an exception.
-                        ParseFileUtils.deleteQuietly(cacheFile);
-                        ParseFileUtils.moveFile(tempFile, cacheFile);
-                        return Task.forResult(cacheFile);
-                    }
-                }, ParseExecutors.io());
-            }
+                // Since we give the cacheFile pointer to developers, it is not safe to guarantee
+                // cacheFile always does not exist here, so it is better to delete it manually,
+                // otherwise moveFile may throw an exception.
+                ParseFileUtils.deleteQuietly(cacheFile);
+                ParseFileUtils.moveFile(tempFile, cacheFile);
+                return Task.forResult(cacheFile);
+            }, ParseExecutors.io());
         });
     }
 }

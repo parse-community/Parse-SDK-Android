@@ -21,6 +21,7 @@ class ParseRESTFileCommand extends ParseRESTCommand {
     private final byte[] data;
     private final String contentType;
     private final File file;
+
     public ParseRESTFileCommand(Builder builder) {
         super(builder);
         if (builder.file != null && builder.data != null) {

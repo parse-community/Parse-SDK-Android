@@ -22,6 +22,7 @@ public final class ParseHttpRequest {
     private final Method method;
     private final Map<String, String> headers;
     private final ParseHttpBody body;
+
     private ParseHttpRequest(Builder builder) {
         this.url = builder.url;
         this.method = builder.method;

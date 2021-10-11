@@ -8,14 +8,14 @@ import kotlin.reflect.KProperty
 /**
  * A [Double] property delegation for [ParseObject].
  */
-class DoubleParseDelegate {
+class DoubleParseDelegate(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): Double {
-        return parseObject.getDouble(property.name)
+        return parseObject.getDouble(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Double) {
-        parseObject.put(property.name, value)
+        parseObject.put(name ?: property.name, value)
     }
 
 }
@@ -24,4 +24,4 @@ class DoubleParseDelegate {
  * Returns a [Double] property delegate for [ParseObject]s. This uses [ParseObject.getDouble]
  * and [ParseObject.put].
  */
-inline fun doubleAttribute() = DoubleParseDelegate()
+inline fun doubleAttribute(name: String? = null) = DoubleParseDelegate(name)

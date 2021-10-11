@@ -8,14 +8,12 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 class CacheQueryController extends AbstractQueryController {
 
@@ -76,18 +74,15 @@ class CacheQueryController extends AbstractQueryController {
     private <T extends ParseObject> Task<List<T>> findFromCacheAsync(
             final ParseQuery.State<T> state, String sessionToken) {
         final String cacheKey = ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey();
-        return Task.call(new Callable<List<T>>() {
-            @Override
-            public List<T> call() throws Exception {
-                JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
-                if (cached == null) {
-                    throw new ParseException(ParseException.CACHE_MISS, "results not cached");
-                }
-                try {
-                    return networkController.convertFindResponse(state, cached);
-                } catch (JSONException e) {
-                    throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
-                }
+        return Task.call(() -> {
+            JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
+            if (cached == null) {
+                throw new ParseException(ParseException.CACHE_MISS, "results not cached");
+            }
+            try {
+                return networkController.convertFindResponse(state, cached);
+            } catch (JSONException e) {
+                throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
             }
         }, Task.BACKGROUND_EXECUTOR);
     }
@@ -103,18 +98,15 @@ class CacheQueryController extends AbstractQueryController {
     private <T extends ParseObject> Task<Integer> countFromCacheAsync(
             final ParseQuery.State<T> state, String sessionToken) {
         final String cacheKey = ParseRESTQueryCommand.countCommand(state, sessionToken).getCacheKey();
-        return Task.call(new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
-                if (cached == null) {
-                    throw new ParseException(ParseException.CACHE_MISS, "results not cached");
-                }
-                try {
-                    return cached.getInt("count");
-                } catch (JSONException e) {
-                    throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
-                }
+        return Task.call(() -> {
+            JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
+            if (cached == null) {
+                throw new ParseException(ParseException.CACHE_MISS, "results not cached");
+            }
+            try {
+                return cached.getInt("count");
+            } catch (JSONException e) {
+                throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
             }
         }, Task.BACKGROUND_EXECUTOR);
     }
@@ -128,30 +120,22 @@ class CacheQueryController extends AbstractQueryController {
             case CACHE_ONLY:
                 return c.runFromCacheAsync();
             case CACHE_ELSE_NETWORK:
-                return c.runFromCacheAsync().continueWithTask(new Continuation<TResult, Task<TResult>>() {
-                    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-                    @Override
-                    public Task<TResult> then(Task<TResult> task) {
-                        if (task.getError() instanceof ParseException) {
-                            return c.runOnNetworkAsync();
-                        }
-                        return task;
+                return c.runFromCacheAsync().continueWithTask(task -> {
+                    if (task.getError() instanceof ParseException) {
+                        return c.runOnNetworkAsync();
                     }
+                    return task;
                 });
             case NETWORK_ELSE_CACHE:
-                return c.runOnNetworkAsync().continueWithTask(new Continuation<TResult, Task<TResult>>() {
-                    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-                    @Override
-                    public Task<TResult> then(Task<TResult> task) {
-                        Exception error = task.getError();
-                        if (error instanceof ParseException &&
-                                ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
-                            return c.runFromCacheAsync();
-                        }
-                        // Either the query succeeded, or there was an an error with the query, not the
-                        // network
-                        return task;
+                return c.runOnNetworkAsync().continueWithTask(task -> {
+                    Exception error = task.getError();
+                    if (error instanceof ParseException &&
+                            ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
+                        return c.runFromCacheAsync();
                     }
+                    // Either the query succeeded, or there was an an error with the query, not the
+                    // network
+                    return task;
                 });
             case CACHE_THEN_NETWORK:
                 throw new RuntimeException(

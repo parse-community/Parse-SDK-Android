@@ -8,10 +8,9 @@
  */
 package com.parse;
 
-import org.json.JSONObject;
-
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+
+import org.json.JSONObject;
 
 class NetworkSessionController implements ParseSessionController {
 
@@ -28,14 +27,11 @@ class NetworkSessionController implements ParseSessionController {
         ParseRESTSessionCommand command =
                 ParseRESTSessionCommand.getCurrentSessionCommand(sessionToken);
 
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
-            @Override
-            public ParseObject.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
-                return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
-                        .isComplete(true)
-                        .build();
-            }
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
+            return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
+                    .isComplete(true)
+                    .build();
         });
     }
 
@@ -50,14 +46,11 @@ class NetworkSessionController implements ParseSessionController {
     public Task<ParseObject.State> upgradeToRevocable(String sessionToken) {
         ParseRESTSessionCommand command =
                 ParseRESTSessionCommand.upgradeToRevocableSessionCommand(sessionToken);
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseObject.State>() {
-            @Override
-            public ParseObject.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
-                return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
-                        .isComplete(true)
-                        .build();
-            }
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
+            return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
+                    .isComplete(true)
+                    .build();
         });
     }
 }

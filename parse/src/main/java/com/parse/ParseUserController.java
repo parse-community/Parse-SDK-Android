@@ -8,9 +8,9 @@
  */
 package com.parse;
 
-import java.util.Map;
-
 import com.parse.boltsinternal.Task;
+
+import java.util.Map;
 
 interface ParseUserController {
 

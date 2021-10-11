@@ -8,12 +8,16 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -24,13 +28,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test
@@ -216,7 +214,7 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testOrThrowsWithEmptyList() {
-        ParseQuery.State.Builder.or(new ArrayList<ParseQuery.State.Builder<ParseObject>>()).build();
+        ParseQuery.State.Builder.or(new ArrayList<>()).build();
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -8,6 +8,13 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import com.parse.boltsinternal.Task;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,19 +24,11 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-
-import com.parse.boltsinternal.Task;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class ParseKeyValueCacheTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
     private File keyValueCacheDir;
 
     @Before
@@ -57,12 +56,9 @@ public class ParseKeyValueCacheTest {
 
         List<Task<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            tasks.add(Task.call(new Callable<Void>() {
-                @Override
-                public Void call() {
-                    ParseKeyValueCache.saveToKeyValueCache("foo", "test");
-                    return null;
-                }
+            tasks.add(Task.call(() -> {
+                ParseKeyValueCache.saveToKeyValueCache("foo", "test");
+                return null;
             }, Task.BACKGROUND_EXECUTOR));
         }
         ParseTaskUtils.wait(Task.whenAll(tasks));

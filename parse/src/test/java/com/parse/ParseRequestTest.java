@@ -8,6 +8,16 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
@@ -26,23 +36,12 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.parse.boltsinternal.Task;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class ParseRequestTest {
 
     private static byte[] data;
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @BeforeClass
     public static void setUpClass() {
@@ -121,7 +120,7 @@ public class ParseRequestTest {
     }
 
     private static class TestProgressCallback implements ProgressCallback {
-        List<Integer> history = new LinkedList<>();
+        final List<Integer> history = new LinkedList<>();
 
         @Override
         public void done(Integer percentDone) {

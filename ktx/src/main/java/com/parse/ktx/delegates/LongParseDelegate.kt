@@ -8,14 +8,14 @@ import kotlin.reflect.KProperty
 /**
  * A [Long] property delegation for [ParseObject].
  */
-class LongParseDelegate {
+class LongParseDelegate(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): Long {
-        return parseObject.getLong(property.name)
+        return parseObject.getLong(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Long) {
-        parseObject.put(property.name, value)
+        parseObject.put(name ?: property.name, value)
     }
 
 }
@@ -24,4 +24,4 @@ class LongParseDelegate {
  * Returns a [Long] property delegate for [ParseObject]s. This uses [ParseObject.getLong]
  * and [ParseObject.put].
  */
-inline fun longAttribute() = LongParseDelegate()
+inline fun longAttribute(name: String? = null) = LongParseDelegate(name)

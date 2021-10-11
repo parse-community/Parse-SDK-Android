@@ -64,6 +64,6 @@ public class CancellationToken {
         return String.format(Locale.US, "%s@%s[cancellationRequested=%s]",
                 getClass().getName(),
                 Integer.toHexString(hashCode()),
-                Boolean.toString(tokenSource.isCancellationRequested()));
+                tokenSource.isCancellationRequested());
     }
 }

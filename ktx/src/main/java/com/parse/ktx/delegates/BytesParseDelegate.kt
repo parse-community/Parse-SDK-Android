@@ -9,14 +9,14 @@ import kotlin.reflect.KProperty
 /**
  * A [ByteArray] property delegation for [ParseObject].
  */
-class BytesParseDelegate {
+class BytesParseDelegate(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): ByteArray? {
-        return parseObject.getBytes(property.name)
+        return parseObject.getBytes(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: ByteArray?) {
-        parseObject.putOrIgnore(property.name, value)
+        parseObject.putOrIgnore(name ?: property.name, value)
     }
 
 }
@@ -25,4 +25,4 @@ class BytesParseDelegate {
  * Returns a [ByteArray] property delegate for [ParseObject]s. This uses [ParseObject.getBytes]
  * and [ParseObject.putOrIgnore].
  */
-inline fun bytesAttribute() = BytesParseDelegate()
+inline fun bytesAttribute(name: String? = null) = BytesParseDelegate(name)

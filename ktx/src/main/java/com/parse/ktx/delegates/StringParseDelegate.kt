@@ -9,15 +9,18 @@ import kotlin.reflect.KProperty
 /**
  * A [String] property delegation for [ParseObject].
  */
-class StringParseDelegate<S : String?>(private val filter: (String) -> String) {
+class StringParseDelegate<S : String?>(
+    private val name: String?,
+    private val filter: (String) -> String
+) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): S {
-        return parseObject.getAs(property.name)
+        return parseObject.getAs(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: S) {
         if (value != null) {
-            parseObject.put(property.name, filter.invoke(value))
+            parseObject.put(name ?: property.name, filter.invoke(value))
         }
     }
 
@@ -28,13 +31,15 @@ class StringParseDelegate<S : String?>(private val filter: (String) -> String) {
  * and a custom implementation for set.
  */
 inline fun nullableStringAttribute(
+    name: String? = null,
     noinline filter: (String) -> String = { it }
-) = StringParseDelegate<String?>(filter)
+) = StringParseDelegate<String?>(name, filter)
 
 /**
  * Returns a [String] property delegate for [ParseObject]s. This uses [ParseObject.getAs]
  * and a custom implementation for set.
  */
 inline fun stringAttribute(
+    name: String? = null,
     noinline filter: (String) -> String = { it }
-) = StringParseDelegate<String>(filter)
+) = StringParseDelegate<String>(name, filter)

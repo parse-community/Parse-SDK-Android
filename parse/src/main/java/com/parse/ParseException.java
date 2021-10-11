@@ -200,7 +200,7 @@ public class ParseException extends Exception {
      */
     public static final int UNSUPPORTED_SERVICE = 252;
     private static final long serialVersionUID = 1;
-    private int code;
+    private final int code;
 
     /**
      * Construct a new ParseException with a particular error code.

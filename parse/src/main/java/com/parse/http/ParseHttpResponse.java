@@ -25,6 +25,7 @@ public final class ParseHttpResponse {
     private final String reasonPhrase;
     private final Map<String, String> headers;
     private final String contentType;
+
     private ParseHttpResponse(Builder builder) {
         this.statusCode = builder.statusCode;
         this.content = builder.content;

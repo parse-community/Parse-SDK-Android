@@ -57,6 +57,7 @@ public class ParseACL implements Parcelable {
     public ParseACL() {
         // do nothing
     }
+
     /**
      * Creates a copy of {@code acl}.
      *
