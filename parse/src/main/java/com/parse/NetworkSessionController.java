@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
 import org.json.JSONObject;
 
 class NetworkSessionController implements ParseSessionController {
@@ -27,30 +26,38 @@ class NetworkSessionController implements ParseSessionController {
         ParseRESTSessionCommand command =
                 ParseRESTSessionCommand.getCurrentSessionCommand(sessionToken);
 
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
-            return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
-                    .isComplete(true)
-                    .build();
-        });
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
+                            return coder.decode(
+                                            new ParseObject.State.Builder("_Session"),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(true)
+                                    .build();
+                        });
     }
 
     @Override
     public Task<Void> revokeAsync(String sessionToken) {
-        return ParseRESTSessionCommand.revoke(sessionToken)
-                .executeAsync(client)
-                .makeVoid();
+        return ParseRESTSessionCommand.revoke(sessionToken).executeAsync(client).makeVoid();
     }
 
     @Override
     public Task<ParseObject.State> upgradeToRevocable(String sessionToken) {
         ParseRESTSessionCommand command =
                 ParseRESTSessionCommand.upgradeToRevocableSessionCommand(sessionToken);
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
-            return coder.decode(new ParseObject.State.Builder("_Session"), result, ParseDecoder.get())
-                    .isComplete(true)
-                    .build();
-        });
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
+                            return coder.decode(
+                                            new ParseObject.State.Builder("_Session"),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(true)
+                                    .build();
+                        });
     }
 }

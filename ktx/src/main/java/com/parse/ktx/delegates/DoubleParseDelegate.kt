@@ -17,7 +17,6 @@ class DoubleParseDelegate(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Double) {
         parseObject.put(name ?: property.name, value)
     }
-
 }
 
 /**

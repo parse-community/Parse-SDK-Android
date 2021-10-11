@@ -19,7 +19,6 @@ class JsonArrayParseDelegate(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: JSONArray?) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
-
 }
 
 /**

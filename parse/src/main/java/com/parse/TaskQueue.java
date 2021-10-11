@@ -10,14 +10,11 @@ package com.parse;
 
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
-
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * A helper class for enqueueing tasks
- */
+/** A helper class for enqueueing tasks */
 class TaskQueue {
     private final Lock lock = new ReentrantLock();
     /**
@@ -35,8 +32,8 @@ class TaskQueue {
     }
 
     /**
-     * Gets a task that can be safely awaited and is dependent on the current tail of the queue. This
-     * essentially gives us a proxy for the tail end of the queue that can be safely cancelled.
+     * Gets a task that can be safely awaited and is dependent on the current tail of the queue.
+     * This essentially gives us a proxy for the tail end of the queue that can be safely cancelled.
      *
      * @return A new task that should be awaited by enqueued tasks.
      */
@@ -53,9 +50,9 @@ class TaskQueue {
     /**
      * Enqueues a task created by taskStart.
      *
-     * @param taskStart A function given a task to await once state is snapshotted (e.g. after capturing
-     *                  session tokens at the time of the save call). Awaiting this task will wait for the
-     *                  created task's turn in the queue.
+     * @param taskStart A function given a task to await once state is snapshotted (e.g. after
+     *     capturing session tokens at the time of the save call). Awaiting this task will wait for
+     *     the created task's turn in the queue.
      * @return The task created by the taskStart function.
      */
     <T> Task<T> enqueue(Continuation<Void, Task<T>> taskStart) {
@@ -63,7 +60,8 @@ class TaskQueue {
         try {
             Task<T> task;
             Task<Void> oldTail = tail != null ? tail : Task.<Void>forResult(null);
-            // The task created by taskStart is responsible for waiting for the task passed into it before
+            // The task created by taskStart is responsible for waiting for the task passed into it
+            // before
             // doing its work (this gives it an opportunity to do startup work or save state before
             // waiting for its turn in the queue)
             try {
@@ -75,7 +73,8 @@ class TaskQueue {
                 throw new RuntimeException(e);
             }
 
-            // The tail task should be dependent on the old tail as well as the newly-created task. This
+            // The tail task should be dependent on the old tail as well as the newly-created task.
+            // This
             // prevents cancellation of the new task from causing the queue to run out of order.
             tail = Task.whenAll(Arrays.asList(oldTail, task));
             return task;

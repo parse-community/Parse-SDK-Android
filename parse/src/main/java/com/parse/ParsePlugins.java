@@ -10,16 +10,12 @@ package com.parse;
 
 import android.content.Context;
 import android.os.Build;
-
 import java.io.File;
-
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
-/**
- * Public for LiveQuery. You probably don't need access
- */
+/** Public for LiveQuery. You probably don't need access */
 public class ParsePlugins {
 
     private static final String INSTALLATION_ID_LOCATION = "installationId";
@@ -113,30 +109,52 @@ public class ParsePlugins {
                 if (clientBuilder == null) {
                     clientBuilder = new OkHttpClient.Builder();
                 }
-                //add it as the first interceptor
-                clientBuilder.interceptors().add(0, chain -> {
-                    Request request = chain.request();
-                    Headers.Builder headersBuilder = request.headers().newBuilder()
-                            .set(ParseRESTCommand.HEADER_APPLICATION_ID, configuration.applicationId)
-                            .set(ParseRESTCommand.HEADER_APP_BUILD_VERSION,
-                                    String.valueOf(ManifestInfo.getVersionCode()))
-                            .set(ParseRESTCommand.HEADER_APP_DISPLAY_VERSION,
-                                    ManifestInfo.getVersionName())
-                            .set(ParseRESTCommand.HEADER_OS_VERSION, Build.VERSION.RELEASE)
-                            .set(ParseRESTCommand.USER_AGENT, userAgent());
-                    if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID) == null) {
-                        // We can do this synchronously since the caller is already on a background thread
-                        headersBuilder.set(ParseRESTCommand.HEADER_INSTALLATION_ID, installationId().get());
-                    }
-                    // client key can be null with self-hosted Parse Server
-                    if (configuration.clientKey != null) {
-                        headersBuilder.set(ParseRESTCommand.HEADER_CLIENT_KEY, configuration.clientKey);
-                    }
-                    request = request.newBuilder()
-                            .headers(headersBuilder.build())
-                            .build();
-                    return chain.proceed(request);
-                });
+                // add it as the first interceptor
+                clientBuilder
+                        .interceptors()
+                        .add(
+                                0,
+                                chain -> {
+                                    Request request = chain.request();
+                                    Headers.Builder headersBuilder =
+                                            request.headers()
+                                                    .newBuilder()
+                                                    .set(
+                                                            ParseRESTCommand.HEADER_APPLICATION_ID,
+                                                            configuration.applicationId)
+                                                    .set(
+                                                            ParseRESTCommand
+                                                                    .HEADER_APP_BUILD_VERSION,
+                                                            String.valueOf(
+                                                                    ManifestInfo.getVersionCode()))
+                                                    .set(
+                                                            ParseRESTCommand
+                                                                    .HEADER_APP_DISPLAY_VERSION,
+                                                            ManifestInfo.getVersionName())
+                                                    .set(
+                                                            ParseRESTCommand.HEADER_OS_VERSION,
+                                                            Build.VERSION.RELEASE)
+                                                    .set(ParseRESTCommand.USER_AGENT, userAgent());
+                                    if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID)
+                                            == null) {
+                                        // We can do this synchronously since the caller is already
+                                        // on a background thread
+                                        headersBuilder.set(
+                                                ParseRESTCommand.HEADER_INSTALLATION_ID,
+                                                installationId().get());
+                                    }
+                                    // client key can be null with self-hosted Parse Server
+                                    if (configuration.clientKey != null) {
+                                        headersBuilder.set(
+                                                ParseRESTCommand.HEADER_CLIENT_KEY,
+                                                configuration.clientKey);
+                                    }
+                                    request =
+                                            request.newBuilder()
+                                                    .headers(headersBuilder.build())
+                                                    .build();
+                                    return chain.proceed(request);
+                                });
                 restClient = ParseHttpClient.createClient(clientBuilder);
             }
             return restClient;
@@ -151,7 +169,8 @@ public class ParsePlugins {
         synchronized (lock) {
             if (installationId == null) {
                 //noinspection deprecation
-                installationId = new InstallationId(new File(getParseDir(), INSTALLATION_ID_LOCATION));
+                installationId =
+                        new InstallationId(new File(getParseDir(), INSTALLATION_ID_LOCATION));
             }
             return installationId;
         }

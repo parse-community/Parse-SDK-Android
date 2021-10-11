@@ -10,8 +10,7 @@ package com.parse;
 
 import com.parse.boltsinternal.Task;
 
-class CachedCurrentInstallationController
-        implements ParseCurrentInstallationController {
+class CachedCurrentInstallationController implements ParseCurrentInstallationController {
 
     /* package */ static final String TAG = "com.parse.CachedCurrentInstallationController";
 
@@ -47,10 +46,15 @@ class CachedCurrentInstallationController
             return Task.forResult(null);
         }
 
-        return taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> store.setAsync(installation)).continueWithTask(task -> {
-            installationId.set(installation.getInstallationId());
-            return task;
-        }, ParseExecutors.io()));
+        return taskQueue.enqueue(
+                toAwait ->
+                        toAwait.continueWithTask(task -> store.setAsync(installation))
+                                .continueWithTask(
+                                        task -> {
+                                            installationId.set(installation.getInstallationId());
+                                            return task;
+                                        },
+                                        ParseExecutors.io()));
     }
 
     @Override
@@ -61,29 +65,43 @@ class CachedCurrentInstallationController
             }
         }
 
-        return taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> {
-            synchronized (mutex) {
-                if (currentInstallation != null) {
-                    return Task.forResult(currentInstallation);
-                }
-            }
+        return taskQueue.enqueue(
+                toAwait ->
+                        toAwait.continueWithTask(
+                                task -> {
+                                    synchronized (mutex) {
+                                        if (currentInstallation != null) {
+                                            return Task.forResult(currentInstallation);
+                                        }
+                                    }
 
-            return store.getAsync().continueWith(task1 -> {
-                ParseInstallation current = task1.getResult();
-                if (current == null) {
-                    current = ParseObject.create(ParseInstallation.class);
-                    current.updateDeviceInfo(installationId);
-                } else {
-                    installationId.set(current.getInstallationId());
-                    PLog.v(TAG, "Successfully deserialized Installation object");
-                }
+                                    return store.getAsync()
+                                            .continueWith(
+                                                    task1 -> {
+                                                        ParseInstallation current =
+                                                                task1.getResult();
+                                                        if (current == null) {
+                                                            current =
+                                                                    ParseObject.create(
+                                                                            ParseInstallation
+                                                                                    .class);
+                                                            current.updateDeviceInfo(
+                                                                    installationId);
+                                                        } else {
+                                                            installationId.set(
+                                                                    current.getInstallationId());
+                                                            PLog.v(
+                                                                    TAG,
+                                                                    "Successfully deserialized Installation object");
+                                                        }
 
-                synchronized (mutex) {
-                    currentInstallation = current;
-                }
-                return current;
-            }, ParseExecutors.io());
-        }));
+                                                        synchronized (mutex) {
+                                                            currentInstallation = current;
+                                                        }
+                                                        return current;
+                                                    },
+                                                    ParseExecutors.io());
+                                }));
     }
 
     @Override

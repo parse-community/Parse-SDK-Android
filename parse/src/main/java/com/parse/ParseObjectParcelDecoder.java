@@ -1,23 +1,21 @@
 package com.parse;
 
 import android.os.Parcel;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This is a stateful implementation of {@link ParseParcelDecoder} that remembers which
- * {@code ParseObject}s have been decoded. When a pointer is found and we have already decoded
- * an instance for the same object id, we use the decoded instance.
- * <p>
- * This is very similar to what {@link KnownParseObjectDecoder} does for JSON.
+ * This is a stateful implementation of {@link ParseParcelDecoder} that remembers which {@code
+ * ParseObject}s have been decoded. When a pointer is found and we have already decoded an instance
+ * for the same object id, we use the decoded instance.
+ *
+ * <p>This is very similar to what {@link KnownParseObjectDecoder} does for JSON.
  */
 /* package */ class ParseObjectParcelDecoder extends ParseParcelDecoder {
 
     private final Map<String, ParseObject> objects = new HashMap<>();
 
-    public ParseObjectParcelDecoder() {
-    }
+    public ParseObjectParcelDecoder() {}
 
     public void addKnownObject(ParseObject object) {
         objects.put(getObjectOrLocalId(object), object);

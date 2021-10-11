@@ -10,14 +10,12 @@ package com.parse;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@code ParseACL} is used to control which users can access or modify a particular object. Each
@@ -27,33 +25,30 @@ import java.util.Set;
  * only a particular set of users could write to that object.
  */
 public class ParseACL implements Parcelable {
-    public final static Creator<ParseACL> CREATOR = new Creator<ParseACL>() {
-        @Override
-        public ParseACL createFromParcel(Parcel source) {
-            return new ParseACL(source, new ParseObjectParcelDecoder());
-        }
+    public static final Creator<ParseACL> CREATOR =
+            new Creator<ParseACL>() {
+                @Override
+                public ParseACL createFromParcel(Parcel source) {
+                    return new ParseACL(source, new ParseObjectParcelDecoder());
+                }
 
-        @Override
-        public ParseACL[] newArray(int size) {
-            return new ParseACL[size];
-        }
-    };
+                @Override
+                public ParseACL[] newArray(int size) {
+                    return new ParseACL[size];
+                }
+            };
     private static final String PUBLIC_KEY = "*";
-    private final static String UNRESOLVED_KEY = "*unresolved";
+    private static final String UNRESOLVED_KEY = "*unresolved";
     private static final String KEY_ROLE_PREFIX = "role:";
     private static final String UNRESOLVED_USER_JSON_KEY = "unresolvedUser";
     // State
     private final Map<String, Permissions> permissionsById = new HashMap<>();
     private boolean shared;
-    /**
-     * A lazy user that hasn't been saved to Parse.
-     */
-    //TODO (grantland): This should be a list for multiple lazy users with read/write permissions.
+    /** A lazy user that hasn't been saved to Parse. */
+    // TODO (grantland): This should be a list for multiple lazy users with read/write permissions.
     private ParseUser unresolvedUser;
 
-    /**
-     * Creates an ACL with no permissions granted.
-     */
+    /** Creates an ACL with no permissions granted. */
     public ParseACL() {
         // do nothing
     }
@@ -105,15 +100,14 @@ public class ParseACL implements Parcelable {
     /**
      * Sets a default ACL that will be applied to all {@link ParseObject}s when they are created.
      *
-     * @param acl                      The ACL to use as a template for all {@link ParseObject}s created after setDefaultACL
-     *                                 has been called. This value will be copied and used as a template for the creation of
-     *                                 new ACLs, so changes to the instance after {@code setDefaultACL(ParseACL, boolean)}
-     *                                 has been called will not be reflected in new {@link ParseObject}s.
-     * @param withAccessForCurrentUser If {@code true}, the {@code ParseACL} that is applied to newly-created
-     *                                 {@link ParseObject}s will provide read and write access to the
-     *                                 {@link ParseUser#getCurrentUser()} at the time of creation. If {@code false}, the
-     *                                 provided ACL will be used without modification. If acl is {@code null}, this value is
-     *                                 ignored.
+     * @param acl The ACL to use as a template for all {@link ParseObject}s created after
+     *     setDefaultACL has been called. This value will be copied and used as a template for the
+     *     creation of new ACLs, so changes to the instance after {@code setDefaultACL(ParseACL,
+     *     boolean)} has been called will not be reflected in new {@link ParseObject}s.
+     * @param withAccessForCurrentUser If {@code true}, the {@code ParseACL} that is applied to
+     *     newly-created {@link ParseObject}s will provide read and write access to the {@link
+     *     ParseUser#getCurrentUser()} at the time of creation. If {@code false}, the provided ACL
+     *     will be used without modification. If acl is {@code null}, this value is ignored.
      */
     public static void setDefaultACL(ParseACL acl, boolean withAccessForCurrentUser) {
         getDefaultACLController().set(acl, withAccessForCurrentUser);
@@ -142,7 +136,8 @@ public class ParseACL implements Parcelable {
                 acl.unresolvedUser = (ParseUser) decoder.decode(unresolvedUser);
             } else {
                 try {
-                    Permissions permissions = Permissions.createPermissionsFromJSONObject(object.getJSONObject(key));
+                    Permissions permissions =
+                            Permissions.createPermissionsFromJSONObject(object.getJSONObject(key));
                     acl.permissionsById.put(key, permissions);
                 } catch (JSONException e) {
                     throw new RuntimeException("could not decode ACL: " + e.getMessage());
@@ -208,7 +203,8 @@ public class ParseACL implements Parcelable {
     }
 
     // Helper for setting stuff
-    private void setPermissionsIfNonEmpty(String userId, boolean readPermission, boolean writePermission) {
+    private void setPermissionsIfNonEmpty(
+            String userId, boolean readPermission, boolean writePermission) {
         if (!(readPermission || writePermission)) {
             permissionsById.remove(userId);
         } else {
@@ -216,37 +212,27 @@ public class ParseACL implements Parcelable {
         }
     }
 
-    /**
-     * Get whether the public is allowed to read this object.
-     */
+    /** Get whether the public is allowed to read this object. */
     public boolean getPublicReadAccess() {
         return getReadAccess(PUBLIC_KEY);
     }
 
-    /**
-     * Set whether the public is allowed to read this object.
-     */
+    /** Set whether the public is allowed to read this object. */
     public void setPublicReadAccess(boolean allowed) {
         setReadAccess(PUBLIC_KEY, allowed);
     }
 
-    /**
-     * Set whether the public is allowed to write this object.
-     */
+    /** Set whether the public is allowed to write this object. */
     public boolean getPublicWriteAccess() {
         return getWriteAccess(PUBLIC_KEY);
     }
 
-    /**
-     * Set whether the public is allowed to write this object.
-     */
+    /** Set whether the public is allowed to write this object. */
     public void setPublicWriteAccess(boolean allowed) {
         setWriteAccess(PUBLIC_KEY, allowed);
     }
 
-    /**
-     * Set whether the given user id is allowed to read this object.
-     */
+    /** Set whether the given user id is allowed to read this object. */
     public void setReadAccess(String userId, boolean allowed) {
         if (userId == null) {
             throw new IllegalArgumentException("cannot setReadAccess for null userId");
@@ -256,9 +242,9 @@ public class ParseACL implements Parcelable {
     }
 
     /**
-     * Get whether the given user id is *explicitly* allowed to read this object. Even if this returns
-     * {@code false}, the user may still be able to access it if getPublicReadAccess returns
-     * {@code true} or a role  that the user belongs to has read access.
+     * Get whether the given user id is *explicitly* allowed to read this object. Even if this
+     * returns {@code false}, the user may still be able to access it if getPublicReadAccess returns
+     * {@code true} or a role that the user belongs to has read access.
      */
     public boolean getReadAccess(String userId) {
         if (userId == null) {
@@ -268,9 +254,7 @@ public class ParseACL implements Parcelable {
         return permissions != null && permissions.getReadPermission();
     }
 
-    /**
-     * Set whether the given user id is allowed to write this object.
-     */
+    /** Set whether the given user id is allowed to write this object. */
     public void setWriteAccess(String userId, boolean allowed) {
         if (userId == null) {
             throw new IllegalArgumentException("cannot setWriteAccess for null userId");
@@ -292,9 +276,7 @@ public class ParseACL implements Parcelable {
         return permissions != null && permissions.getWritePermission();
     }
 
-    /**
-     * Set whether the given user is allowed to read this object.
-     */
+    /** Set whether the given user is allowed to read this object. */
     public void setReadAccess(ParseUser user, boolean allowed) {
         if (user.getObjectId() == null) {
             if (user.isLazy()) {
@@ -327,15 +309,17 @@ public class ParseACL implements Parcelable {
     }
 
     private boolean isUnresolvedUser(ParseUser other) {
-        // This might be a different instance, but if they have the same local id, assume it's correct.
+        // This might be a different instance, but if they have the same local id, assume it's
+        // correct.
         if (other == null || unresolvedUser == null) return false;
-        return other == unresolvedUser || (other.getObjectId() == null &&
-                other.getOrCreateLocalId().equals(unresolvedUser.getOrCreateLocalId()));
+        return other == unresolvedUser
+                || (other.getObjectId() == null
+                        && other.getOrCreateLocalId().equals(unresolvedUser.getOrCreateLocalId()));
     }
 
     /**
-     * Get whether the given user id is *explicitly* allowed to read this object. Even if this returns
-     * {@code false}, the user may still be able to access it if getPublicReadAccess returns
+     * Get whether the given user id is *explicitly* allowed to read this object. Even if this
+     * returns {@code false}, the user may still be able to access it if getPublicReadAccess returns
      * {@code true} or a role that the user belongs to has read access.
      */
     public boolean getReadAccess(ParseUser user) {
@@ -351,9 +335,7 @@ public class ParseACL implements Parcelable {
         return getReadAccess(user.getObjectId());
     }
 
-    /**
-     * Set whether the given user is allowed to write this object.
-     */
+    /** Set whether the given user is allowed to write this object. */
     public void setWriteAccess(ParseUser user, boolean allowed) {
         if (user.getObjectId() == null) {
             if (user.isLazy()) {
@@ -400,7 +382,7 @@ public class ParseACL implements Parcelable {
      * object.
      *
      * @param roleName The name of the role.
-     * @param allowed  Whether the given role can read this object.
+     * @param allowed Whether the given role can read this object.
      */
     public void setRoleReadAccess(String roleName, boolean allowed) {
         setReadAccess(KEY_ROLE_PREFIX + roleName, allowed);
@@ -408,8 +390,8 @@ public class ParseACL implements Parcelable {
 
     /**
      * Get whether users belonging to the role with the given roleName are allowed to write this
-     * object. Even if this returns {@code false}, the role may still be able to write it if a parent
-     * role has write access.
+     * object. Even if this returns {@code false}, the role may still be able to write it if a
+     * parent role has write access.
      *
      * @param roleName The name of the role.
      * @return {@code true} if the role has write access. {@code false} otherwise.
@@ -423,7 +405,7 @@ public class ParseACL implements Parcelable {
      * object.
      *
      * @param roleName The name of the role.
-     * @param allowed  Whether the given role can write this object.
+     * @param allowed Whether the given role can write this object.
      */
     public void setRoleWriteAccess(String roleName, boolean allowed) {
         setWriteAccess(KEY_ROLE_PREFIX + roleName, allowed);
@@ -431,9 +413,9 @@ public class ParseACL implements Parcelable {
 
     /**
      * Get whether users belonging to the given role are allowed to read this object. Even if this
-     * returns {@code false}, the role may still be able to read it if a parent role has read access.
-     * The role must already be saved on the server and its data must have been fetched in order to
-     * use this method.
+     * returns {@code false}, the role may still be able to read it if a parent role has read
+     * access. The role must already be saved on the server and its data must have been fetched in
+     * order to use this method.
      *
      * @param role The role to check for access.
      * @return {@code true} if the role has read access. {@code false} otherwise.
@@ -445,9 +427,10 @@ public class ParseACL implements Parcelable {
 
     /**
      * Set whether users belonging to the given role are allowed to read this object. The role must
-     * already be saved on the server and its data must have been fetched in order to use this method.
+     * already be saved on the server and its data must have been fetched in order to use this
+     * method.
      *
-     * @param role    The role to assign access.
+     * @param role The role to assign access.
      * @param allowed Whether the given role can read this object.
      */
     public void setRoleReadAccess(ParseRole role, boolean allowed) {
@@ -471,9 +454,10 @@ public class ParseACL implements Parcelable {
 
     /**
      * Set whether users belonging to the given role are allowed to write this object. The role must
-     * already be saved on the server and its data must have been fetched in order to use this method.
+     * already be saved on the server and its data must have been fetched in order to use this
+     * method.
      *
-     * @param role    The role to assign access.
+     * @param role The role to assign access.
      * @param allowed Whether the given role can write this object.
      */
     public void setRoleWriteAccess(ParseRole role, boolean allowed) {
@@ -590,6 +574,5 @@ public class ParseACL implements Parcelable {
                 object.unregisterSaveListener(this);
             }
         }
-
     }
 }

@@ -17,7 +17,6 @@ class FloatParseDelegate(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Float) {
         parseObject.put(name ?: property.name, value)
     }
-
 }
 
 /**

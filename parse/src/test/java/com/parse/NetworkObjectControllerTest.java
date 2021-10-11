@@ -18,7 +18,11 @@ import static org.mockito.Mockito.when;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
+import java.io.ByteArrayInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -29,18 +33,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.ByteArrayInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
 // For Uri.encode
 @RunWith(RobolectricTestRunner.class)
 public class NetworkObjectControllerTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     @Before
     public void setUp() throws MalformedURLException {
@@ -52,7 +49,7 @@ public class NetworkObjectControllerTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testFetchAsync
+    // region testFetchAsync
 
     @Test
     public void testFetchAsync() throws Exception {
@@ -69,13 +66,13 @@ public class NetworkObjectControllerTest {
         ParseHttpClient restClient =
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
         // Make test state
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .objectId("testObjectId")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("Test").objectId("testObjectId").build();
 
         NetworkObjectController controller = new NetworkObjectController(restClient);
         ParseObject.State newState =
-                ParseTaskUtils.wait(controller.fetchAsync(state, "sessionToken", ParseDecoder.get()));
+                ParseTaskUtils.wait(
+                        controller.fetchAsync(state, "sessionToken", ParseDecoder.get()));
 
         assertEquals(createAtLong, newState.createdAt());
         assertEquals(updateAtLong, newState.updatedAt());
@@ -84,9 +81,9 @@ public class NetworkObjectControllerTest {
         assertTrue(newState.isComplete());
     }
 
-    //endregion
+    // endregion
 
-    //region testSaveAsync
+    // region testSaveAsync
 
     @Test
     public void testSaveAsync() throws Exception {
@@ -106,11 +103,13 @@ public class NetworkObjectControllerTest {
         object.put("key", "value");
 
         NetworkObjectController controller = new NetworkObjectController(restClient);
-        ParseObject.State newState = ParseTaskUtils.wait(controller.saveAsync(
-                object.getState(),
-                object.startSave(),
-                "sessionToken",
-                ParseDecoder.get()));
+        ParseObject.State newState =
+                ParseTaskUtils.wait(
+                        controller.saveAsync(
+                                object.getState(),
+                                object.startSave(),
+                                "sessionToken",
+                                ParseDecoder.get()));
 
         assertEquals(createAtLong, newState.createdAt());
         assertEquals(updateAtLong, newState.updatedAt());
@@ -118,9 +117,9 @@ public class NetworkObjectControllerTest {
         assertFalse(newState.isComplete());
     }
 
-    //endregion
+    // endregion
 
-    //region testDeleteAsync
+    // region testDeleteAsync
 
     @Test
     public void testDeleteAsync() throws Exception {
@@ -129,18 +128,17 @@ public class NetworkObjectControllerTest {
         ParseHttpClient restClient =
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
         // Make test state
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .objectId("testObjectId")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("Test").objectId("testObjectId").build();
 
         NetworkObjectController controller = new NetworkObjectController(restClient);
         // We just need to verify task is finished since sever returns an empty json here
         ParseTaskUtils.wait(controller.deleteAsync(state, "sessionToken"));
     }
 
-    //endregion
+    // endregion
 
-    //region testFailingDeleteAsync
+    // region testFailingDeleteAsync
 
     @Test
     public void testFailingDeleteAsync() throws Exception {
@@ -151,9 +149,8 @@ public class NetworkObjectControllerTest {
         ParseHttpClient restClient =
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 400, "Bad Request");
         // Make test state
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .objectId("testObjectId")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("Test").objectId("testObjectId").build();
 
         NetworkObjectController controller = new NetworkObjectController(restClient);
 
@@ -163,9 +160,9 @@ public class NetworkObjectControllerTest {
         ParseTaskUtils.wait(controller.deleteAsync(state, "sessionToken"));
     }
 
-    //endregion
+    // endregion
 
-    //region testFailingSaveAsync
+    // region testFailingSaveAsync
 
     @Test
     public void testFailingSaveAsync() throws Exception {
@@ -185,16 +182,14 @@ public class NetworkObjectControllerTest {
         thrown.expect(ParseException.class);
         thrown.expectMessage("Save is not allowed");
 
-        ParseTaskUtils.wait(controller.saveAsync(
-                object.getState(),
-                object.startSave(),
-                "sessionToken",
-                ParseDecoder.get()));
+        ParseTaskUtils.wait(
+                controller.saveAsync(
+                        object.getState(), object.startSave(), "sessionToken", ParseDecoder.get()));
     }
 
-    //endregion
+    // endregion
 
-    //region testSaveAllAsync
+    // region testSaveAllAsync
 
     @Test
     public void testSaveAllAsync() throws Exception {
@@ -220,12 +215,13 @@ public class NetworkObjectControllerTest {
         mockResponse.put(objectResponseAgain);
         // Make mock response
         byte[] contentBytes = mockResponse.toString().getBytes();
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(contentBytes))
-                .setStatusCode(200)
-                .setTotalSize(contentBytes.length)
-                .setContentType("application/json")
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(contentBytes))
+                        .setStatusCode(200)
+                        .setTotalSize(contentBytes.length)
+                        .setContentType("application/json")
+                        .build();
         // Mock http client
         ParseHttpClient client = mock(ParseHttpClient.class);
         when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
@@ -264,9 +260,9 @@ public class NetworkObjectControllerTest {
         assertEquals("Error", parseException.getMessage());
     }
 
-    //endregion
+    // endregion
 
-    //region testDeleteAsync
+    // region testDeleteAsync
 
     @Test
     public void testDeleteAllAsync() throws Exception {
@@ -284,31 +280,29 @@ public class NetworkObjectControllerTest {
         mockResponse.put(objectResponseAgain);
         // Make mock response
         byte[] contentBytes = mockResponse.toString().getBytes();
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(contentBytes))
-                .setStatusCode(200)
-                .setTotalSize(contentBytes.length)
-                .setContentType("application/json")
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(contentBytes))
+                        .setStatusCode(200)
+                        .setTotalSize(contentBytes.length)
+                        .setContentType("application/json")
+                        .build();
         // Mock http client
         ParseHttpClient client = mock(ParseHttpClient.class);
         when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
         // Make test state, operations and decoder
         List<ParseObject.State> states = new ArrayList<>();
         // Make test state
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .objectId("testObjectId")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("Test").objectId("testObjectId").build();
         states.add(state);
-        ParseObject.State stateAgain = new ParseObject.State.Builder("Test")
-                .objectId("testObjectIdAgain")
-                .build();
+        ParseObject.State stateAgain =
+                new ParseObject.State.Builder("Test").objectId("testObjectIdAgain").build();
         states.add(stateAgain);
 
         // Test
         NetworkObjectController controller = new NetworkObjectController(client);
-        List<Task<Void>> deleteTaskList =
-                controller.deleteAllAsync(states, "sessionToken");
+        List<Task<Void>> deleteTaskList = controller.deleteAllAsync(states, "sessionToken");
         Task.whenAll(deleteTaskList).waitForCompletion();
 
         // Verify success result
@@ -321,5 +315,5 @@ public class NetworkObjectControllerTest {
         assertEquals("Error", parseException.getMessage());
     }
 
-    //endregion
+    // endregion
 }

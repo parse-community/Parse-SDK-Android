@@ -9,10 +9,8 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-
 import java.util.Map;
+import org.json.JSONObject;
 
 class NetworkUserController implements ParseUserController {
 
@@ -34,88 +32,111 @@ class NetworkUserController implements ParseUserController {
 
     @Override
     public Task<ParseUser.State> signUpAsync(
-            final ParseObject.State state,
-            ParseOperationSet operations,
-            String sessionToken) {
+            final ParseObject.State state, ParseOperationSet operations, String sessionToken) {
         JSONObject objectJSON = coder.encode(state, operations, PointerEncoder.get());
-        ParseRESTCommand command = ParseRESTUserCommand.signUpUserCommand(
-                objectJSON, sessionToken, revocableSession);
+        ParseRESTCommand command =
+                ParseRESTUserCommand.signUpUserCommand(objectJSON, sessionToken, revocableSession);
 
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
-            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                    .isComplete(false)
-                    .isNew(true)
-                    .build();
-        });
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
+                            return coder.decode(
+                                            new ParseUser.State.Builder(),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(false)
+                                    .isNew(true)
+                                    .build();
+                        });
     }
 
-    //region logInAsync
+    // region logInAsync
 
     @Override
-    public Task<ParseUser.State> logInAsync(
-            String username, String password) {
-        ParseRESTCommand command = ParseRESTUserCommand.logInUserCommand(
-                username, password, revocableSession);
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
+    public Task<ParseUser.State> logInAsync(String username, String password) {
+        ParseRESTCommand command =
+                ParseRESTUserCommand.logInUserCommand(username, password, revocableSession);
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
 
-            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                    .isComplete(true)
-                    .build();
-        });
+                            return coder.decode(
+                                            new ParseUser.State.Builder(),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(true)
+                                    .build();
+                        });
     }
 
     @Override
-    public Task<ParseUser.State> logInAsync(
-            ParseUser.State state, ParseOperationSet operations) {
+    public Task<ParseUser.State> logInAsync(ParseUser.State state, ParseOperationSet operations) {
         JSONObject objectJSON = coder.encode(state, operations, PointerEncoder.get());
-        final ParseRESTUserCommand command = ParseRESTUserCommand.serviceLogInUserCommand(
-                objectJSON, state.sessionToken(), revocableSession);
+        final ParseRESTUserCommand command =
+                ParseRESTUserCommand.serviceLogInUserCommand(
+                        objectJSON, state.sessionToken(), revocableSession);
 
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
 
-            // TODO(grantland): Does the server really respond back with complete object data if the
-            // object isn't new?
-            boolean isNew = command.getStatusCode() == STATUS_CODE_CREATED;
-            boolean isComplete = !isNew;
+                            // TODO(grantland): Does the server really respond back with complete
+                            // object data if the
+                            // object isn't new?
+                            boolean isNew = command.getStatusCode() == STATUS_CODE_CREATED;
+                            boolean isComplete = !isNew;
 
-            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                    .isComplete(isComplete)
-                    .isNew(isNew)
-                    .build();
-        });
+                            return coder.decode(
+                                            new ParseUser.State.Builder(),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(isComplete)
+                                    .isNew(isNew)
+                                    .build();
+                        });
     }
 
     @Override
     public Task<ParseUser.State> logInAsync(
             final String authType, final Map<String, String> authData) {
-        final ParseRESTUserCommand command = ParseRESTUserCommand.serviceLogInUserCommand(
-                authType, authData, revocableSession);
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
+        final ParseRESTUserCommand command =
+                ParseRESTUserCommand.serviceLogInUserCommand(authType, authData, revocableSession);
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
 
-            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                    .isComplete(true)
-                    .isNew(command.getStatusCode() == STATUS_CODE_CREATED)
-                    .putAuthData(authType, authData)
-                    .build();
-        });
+                            return coder.decode(
+                                            new ParseUser.State.Builder(),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(true)
+                                    .isNew(command.getStatusCode() == STATUS_CODE_CREATED)
+                                    .putAuthData(authType, authData)
+                                    .build();
+                        });
     }
 
-    //endregion
+    // endregion
 
     @Override
     public Task<ParseUser.State> getUserAsync(String sessionToken) {
         ParseRESTCommand command = ParseRESTUserCommand.getCurrentUserCommand(sessionToken);
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
 
-            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                    .isComplete(true)
-                    .build();
-        });
+                            return coder.decode(
+                                            new ParseUser.State.Builder(),
+                                            result,
+                                            ParseDecoder.get())
+                                    .isComplete(true)
+                                    .build();
+                        });
     }
 
     @Override

@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.http.ParseHttpRequest;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,8 @@ class ParseRESTConfigCommand extends ParseRESTCommand {
     }
 
     public static ParseRESTConfigCommand fetchConfigCommand(String sessionToken) {
-        return new ParseRESTConfigCommand("config", ParseHttpRequest.Method.GET, null, sessionToken);
+        return new ParseRESTConfigCommand(
+                "config", ParseHttpRequest.Method.GET, null, sessionToken);
     }
 
     public static ParseRESTConfigCommand updateConfigCommand(

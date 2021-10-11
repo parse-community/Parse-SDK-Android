@@ -12,10 +12,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.parse.boltsinternal.AggregateException;
 import com.parse.boltsinternal.Task;
-
-import org.junit.Test;
-
 import java.util.ArrayList;
+import org.junit.Test;
 
 public class ParseTaskUtilsTest {
     /**
@@ -29,13 +27,15 @@ public class ParseTaskUtilsTest {
         final ArrayList<Task<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < 20; i++) {
             final int number = i;
-            Task<Void> task = Task.callInBackground(() -> {
-                Thread.sleep((long) (Math.random() * 100));
-                if (number == 10 || number == 11) {
-                    throw error;
-                }
-                return null;
-            });
+            Task<Void> task =
+                    Task.callInBackground(
+                            () -> {
+                                Thread.sleep((long) (Math.random() * 100));
+                                if (number == 10 || number == 11) {
+                                    throw error;
+                                }
+                                return null;
+                            });
             tasks.add(task);
         }
 

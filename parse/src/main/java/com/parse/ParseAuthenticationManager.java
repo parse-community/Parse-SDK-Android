@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +29,11 @@ class ParseAuthenticationManager {
 
         synchronized (lock) {
             if (this.callbacks.containsKey(authType)) {
-                throw new IllegalStateException("Callback already registered for <" + authType + ">: "
-                        + this.callbacks.get(authType));
+                throw new IllegalStateException(
+                        "Callback already registered for <"
+                                + authType
+                                + ">: "
+                                + this.callbacks.get(authType));
             }
             this.callbacks.put(authType, callback);
         }
@@ -42,16 +44,20 @@ class ParseAuthenticationManager {
         }
 
         // Synchronize the current user with the auth callback.
-        controller.getAsync(false).onSuccessTask(task -> {
-            ParseUser user = task.getResult();
-            if (user != null) {
-                return user.synchronizeAuthDataAsync(authType);
-            }
-            return null;
-        });
+        controller
+                .getAsync(false)
+                .onSuccessTask(
+                        task -> {
+                            ParseUser user = task.getResult();
+                            if (user != null) {
+                                return user.synchronizeAuthDataAsync(authType);
+                            }
+                            return null;
+                        });
     }
 
-    public Task<Boolean> restoreAuthenticationAsync(String authType, final Map<String, String> authData) {
+    public Task<Boolean> restoreAuthenticationAsync(
+            String authType, final Map<String, String> authData) {
         final AuthenticationCallback callback;
         synchronized (lock) {
             callback = this.callbacks.get(authType);
@@ -68,10 +74,12 @@ class ParseAuthenticationManager {
             callback = this.callbacks.get(authType);
         }
         if (callback != null) {
-            return Task.call(() -> {
-                callback.onRestore(null);
-                return null;
-            }, ParseExecutors.io());
+            return Task.call(
+                    () -> {
+                        callback.onRestore(null);
+                        return null;
+                    },
+                    ParseExecutors.io());
         }
         return Task.forResult(null);
     }

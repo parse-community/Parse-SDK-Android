@@ -9,19 +9,15 @@
 package com.parse;
 
 import android.content.Context;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * Used for ParseQuery caching.
- */
+/** Used for ParseQuery caching. */
 class ParseKeyValueCache {
 
     // We limit the cache to 2MB because that's about what the default browser
@@ -32,9 +28,7 @@ class ParseKeyValueCache {
     /* package */ static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES = 1000;
     private static final String TAG = "ParseKeyValueCache";
     private static final String DIR_NAME = "ParseKeyValueCache";
-    /**
-     * Prevent multiple threads from modifying the cache at the same time.
-     */
+    /** Prevent multiple threads from modifying the cache at the same time. */
     private static final Object MUTEX_IO = new Object();
 
     /* package */ static int maxKeyValueCacheBytes = DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
@@ -65,9 +59,7 @@ class ParseKeyValueCache {
         return directory;
     }
 
-    /**
-     * How many files are in the key-value cache.
-     */
+    /** How many files are in the key-value cache. */
     /* package */
     static int size() {
         File[] files = getKeyValueCacheDir().listFiles();
@@ -79,7 +71,8 @@ class ParseKeyValueCache {
 
     private static File getKeyValueCacheFile(String key) {
         final String suffix = '.' + key;
-        File[] matches = getKeyValueCacheDir().listFiles((dir, filename) -> filename.endsWith(suffix));
+        File[] matches =
+                getKeyValueCacheDir().listFiles((dir, filename) -> filename.endsWith(suffix));
         return (matches == null || matches.length == 0) ? null : matches[0];
     }
 
@@ -155,14 +148,16 @@ class ParseKeyValueCache {
             // Sometimes (i.e. tests) the time of lastModified isn't granular enough,
             // so we resort
             // to sorting by the file name which is always prepended with time in ms
-            Arrays.sort(files, (f1, f2) -> {
-                int dateCompare = Long.compare(f1.lastModified(), f2.lastModified());
-                if (dateCompare != 0) {
-                    return dateCompare;
-                } else {
-                    return f1.getName().compareTo(f2.getName());
-                }
-            });
+            Arrays.sort(
+                    files,
+                    (f1, f2) -> {
+                        int dateCompare = Long.compare(f1.lastModified(), f2.lastModified());
+                        if (dateCompare != 0) {
+                            return dateCompare;
+                        } else {
+                            return f1.getName().compareTo(f2.getName());
+                        }
+                    });
 
             for (File file : files) {
                 numFiles--;

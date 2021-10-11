@@ -12,11 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
-import org.json.JSONObject;
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONObject;
+import org.junit.Test;
 
 public class ParseUserCurrentCoderTest {
 
@@ -31,11 +30,12 @@ public class ParseUserCurrentCoderTest {
         Map<String, String> twitterAuthData = new HashMap<>();
         twitterAuthData.put("id", "twitterId");
         twitterAuthData.put("access_token", "twitterAccessToken");
-        ParseUser.State state = new ParseUser.State.Builder()
-                .sessionToken("sessionToken")
-                .putAuthData("facebook", facebookAuthData)
-                .putAuthData("twitter", twitterAuthData)
-                .build();
+        ParseUser.State state =
+                new ParseUser.State.Builder()
+                        .sessionToken("sessionToken")
+                        .putAuthData("facebook", facebookAuthData)
+                        .putAuthData("twitter", twitterAuthData)
+                        .build();
 
         ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
         JSONObject objectJson = coder.encode(state, null, PointerEncoder.get());
@@ -52,8 +52,7 @@ public class ParseUserCurrentCoderTest {
 
     @Test
     public void testEncodeSuccessWithEmptyState() {
-        ParseUser.State state = new ParseUser.State.Builder()
-                .build();
+        ParseUser.State state = new ParseUser.State.Builder().build();
 
         ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
         JSONObject objectJson = coder.encode(state, null, PointerEncoder.get());
@@ -64,18 +63,18 @@ public class ParseUserCurrentCoderTest {
 
     @Test
     public void testDecodeSuccessWithSessionTokenAndAuthData() throws Exception {
-        JSONObject facebookAuthDataJson = new JSONObject()
-                .put("id", "facebookId")
-                .put("access_token", "facebookAccessToken");
-        JSONObject twitterAuthDataJson = new JSONObject()
-                .put("id", "twitterId")
-                .put("access_token", "twitterAccessToken");
-        JSONObject authDataJson = new JSONObject()
-                .put("facebook", facebookAuthDataJson)
-                .put("twitter", twitterAuthDataJson);
-        JSONObject objectJson = new JSONObject()
-                .put(KEY_SESSION_TOKEN, "sessionToken")
-                .put(KEY_AUTH_DATA, authDataJson);
+        JSONObject facebookAuthDataJson =
+                new JSONObject().put("id", "facebookId").put("access_token", "facebookAccessToken");
+        JSONObject twitterAuthDataJson =
+                new JSONObject().put("id", "twitterId").put("access_token", "twitterAccessToken");
+        JSONObject authDataJson =
+                new JSONObject()
+                        .put("facebook", facebookAuthDataJson)
+                        .put("twitter", twitterAuthDataJson);
+        JSONObject objectJson =
+                new JSONObject()
+                        .put(KEY_SESSION_TOKEN, "sessionToken")
+                        .put(KEY_AUTH_DATA, authDataJson);
 
         ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
         ParseUser.State.Builder builder =
@@ -110,10 +109,8 @@ public class ParseUserCurrentCoderTest {
 
     @Test
     public void testEncodeDecodeWithNullValues() {
-        ParseUser.State state = new ParseUser.State.Builder()
-                .sessionToken(null)
-                .authData(null)
-                .build();
+        ParseUser.State state =
+                new ParseUser.State.Builder().sessionToken(null).authData(null).build();
         ParseUserCurrentCoder coder = ParseUserCurrentCoder.get();
         JSONObject object = coder.encode(state, null, PointerEncoder.get());
         ParseUser.State.Builder builder =

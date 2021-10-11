@@ -10,11 +10,10 @@ package com.parse;
 
 import static com.parse.ParseUser.State;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Iterator;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Handles encoding/decoding ParseUser to/from /2 format JSON. /2 format json is only used for
@@ -37,7 +36,9 @@ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
 
     /**
      * Converts a ParseUser state to /2/ JSON representation suitable for saving to disk.
+     *
      * <p>
+     *
      * <pre>
      * {
      *   data: {
@@ -47,9 +48,9 @@ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
      *   operations: { } // operations per field
      * }
      * </pre>
-     * <p>
-     * All keys are included, regardless of whether they are dirty.
-     * We also add sessionToken and authData to the json.
+     *
+     * <p>All keys are included, regardless of whether they are dirty. We also add sessionToken and
+     * authData to the json.
      *
      * @see #decode(ParseObject.State.Init, JSONObject, ParseDecoder)
      */
@@ -58,8 +59,10 @@ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
             T state, ParseOperationSet operations, ParseEncoder encoder) {
 
         // FYI we'll be double writing sessionToken and authData for now...
-        // This is important. super.encode() has no notion of sessionToken and authData, so it treats them
-        // like objects (simply passed to the encoder). This means that a null sessionToken will become
+        // This is important. super.encode() has no notion of sessionToken and authData, so it
+        // treats them
+        // like objects (simply passed to the encoder). This means that a null sessionToken will
+        // become
         // JSONObject.NULL. This must be accounted in #decode().
         JSONObject objectJSON = super.encode(state, operations, encoder);
 
@@ -86,10 +89,9 @@ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
 
     /**
      * Merges from JSON in /2/ format.
-     * <p>
-     * This is only used to read ParseUser state stored on disk in JSON.
-     * Since in encode we add sessionToken and authData to the json, we need remove them from json
-     * to generate state.
+     *
+     * <p>This is only used to read ParseUser state stored on disk in JSON. Since in encode we add
+     * sessionToken and authData to the json, we need remove them from json to generate state.
      *
      * @see #encode(ParseObject.State, ParseOperationSet, ParseEncoder)
      */
@@ -115,8 +117,10 @@ class ParseUserCurrentCoder extends ParseObjectCurrentCoder {
                 while (i.hasNext()) {
                     String key = (String) i.next();
                     if (!newAuthData.isNull(key)) {
-                        userBuilder.putAuthData(key,
-                                (Map<String, String>) ParseDecoder.get().decode(newAuthData.getJSONObject(key)));
+                        userBuilder.putAuthData(
+                                key,
+                                (Map<String, String>)
+                                        ParseDecoder.get().decode(newAuthData.getJSONObject(key)));
                     }
                 }
             } catch (JSONException e) {

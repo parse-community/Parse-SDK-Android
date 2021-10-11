@@ -18,7 +18,6 @@ class BytesParseDelegate(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: ByteArray?) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
-
 }
 
 /**

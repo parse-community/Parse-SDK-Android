@@ -14,7 +14,6 @@ class ParseRelationDelegate<T : ParseObject>(private val name: String?) {
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): ParseRelation<T> {
         return parseObject.getRelation(name ?: property.name)
     }
-
 }
 
 /**

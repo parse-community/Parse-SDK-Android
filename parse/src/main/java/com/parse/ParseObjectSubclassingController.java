@@ -15,16 +15,20 @@ import java.util.Map;
 
 /* package */ class ParseObjectSubclassingController {
     private final Object mutex = new Object();
-    private final Map<String, Constructor<? extends ParseObject>> registeredSubclasses = new HashMap<>();
+    private final Map<String, Constructor<? extends ParseObject>> registeredSubclasses =
+            new HashMap<>();
 
-    private static Constructor<? extends ParseObject> getConstructor(Class<? extends ParseObject> clazz) throws NoSuchMethodException, IllegalAccessException {
+    private static Constructor<? extends ParseObject> getConstructor(
+            Class<? extends ParseObject> clazz)
+            throws NoSuchMethodException, IllegalAccessException {
         Constructor<? extends ParseObject> constructor = clazz.getDeclaredConstructor();
         if (constructor == null) {
             throw new NoSuchMethodException();
         }
         int modifiers = constructor.getModifiers();
-        if (Modifier.isPublic(modifiers) || (clazz.getPackage().getName().equals("com.parse") &&
-                !(Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers)))) {
+        if (Modifier.isPublic(modifiers)
+                || (clazz.getPackage().getName().equals("com.parse")
+                        && !(Modifier.isProtected(modifiers) || Modifier.isPrivate(modifiers)))) {
             return constructor;
         }
         throw new IllegalAccessException();
@@ -52,7 +56,8 @@ import java.util.Map;
 
     /* package */ void registerSubclass(Class<? extends ParseObject> clazz) {
         if (!ParseObject.class.isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("Cannot register a type that is not a subclass of ParseObject");
+            throw new IllegalArgumentException(
+                    "Cannot register a type that is not a subclass of ParseObject");
         }
 
         String className = getClassName(clazz);
@@ -61,7 +66,8 @@ import java.util.Map;
         synchronized (mutex) {
             previousConstructor = registeredSubclasses.get(className);
             if (previousConstructor != null) {
-                Class<? extends ParseObject> previousClass = previousConstructor.getDeclaringClass();
+                Class<? extends ParseObject> previousClass =
+                        previousConstructor.getDeclaringClass();
                 if (clazz.isAssignableFrom(previousClass)) {
                     // Previous subclass is more specific or equal to the current type, do nothing.
                     return;
@@ -71,10 +77,15 @@ import java.util.Map;
                     /* Do nothing */
                 } else {
                     throw new IllegalArgumentException(
-                            "Tried to register both " + previousClass.getName() + " and " + clazz.getName() +
-                                    " as the ParseObject subclass of " + className + ". " + "Cannot determine the right " +
-                                    "class to use because neither inherits from the other."
-                    );
+                            "Tried to register both "
+                                    + previousClass.getName()
+                                    + " and "
+                                    + clazz.getName()
+                                    + " as the ParseObject subclass of "
+                                    + className
+                                    + ". "
+                                    + "Cannot determine the right "
+                                    + "class to use because neither inherits from the other.");
                 }
             }
 
@@ -82,17 +93,16 @@ import java.util.Map;
                 registeredSubclasses.put(className, getConstructor(clazz));
             } catch (NoSuchMethodException ex) {
                 throw new IllegalArgumentException(
-                        "Cannot register a type that does not implement the default constructor!"
-                );
+                        "Cannot register a type that does not implement the default constructor!");
             } catch (IllegalAccessException ex) {
                 throw new IllegalArgumentException(
-                        "Default constructor for " + clazz + " is not accessible."
-                );
+                        "Default constructor for " + clazz + " is not accessible.");
             }
         }
 
         if (previousConstructor != null) {
-            // TODO: This is super tightly coupled. Let's remove it when automatic registration is in.
+            // TODO: This is super tightly coupled. Let's remove it when automatic registration is
+            // in.
             // NOTE: Perform this outside of the mutex, to prevent any potential deadlocks.
             if (className.equals(getClassName(ParseUser.class))) {
                 ParseUser.getCurrentUserController().clearFromMemory();
@@ -118,9 +128,7 @@ import java.util.Map;
         }
 
         try {
-            return constructor != null
-                    ? constructor.newInstance()
-                    : new ParseObject(className);
+            return constructor != null ? constructor.newInstance() : new ParseObject(className);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

@@ -12,16 +12,12 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.webkit.CookieSyncManager;
-
 import com.parse.twitter.OAuth1FlowDialog.FlowResultHandler;
-
 import oauth.signpost.http.HttpParameters;
 import se.akerfeldt.okhttp.signpost.OkHttpOAuthConsumer;
 import se.akerfeldt.okhttp.signpost.OkHttpOAuthProvider;
 
-/**
- * Provides access to Twitter info as it relates to Parse
- */
+/** Provides access to Twitter info as it relates to Parse */
 public class Twitter {
 
     private static final String REQUEST_TOKEN_URL = "https://api.twitter.com/oauth/request_token";
@@ -98,97 +94,127 @@ public class Twitter {
     }
 
     public void authorize(final Context context, final AsyncCallback callback) {
-        if (getConsumerKey() == null || getConsumerKey().length() == 0 || getConsumerSecret() == null
+        if (getConsumerKey() == null
+                || getConsumerKey().length() == 0
+                || getConsumerSecret() == null
                 || getConsumerSecret().length() == 0) {
             throw new IllegalStateException(
                     "Twitter must be initialized with a consumer key and secret before authorization.");
         }
 
-        final OkHttpOAuthProvider provider = new OkHttpOAuthProvider(REQUEST_TOKEN_URL, ACCESS_TOKEN_URL, AUTHORIZE_URL);
-        final OkHttpOAuthConsumer consumer = new OkHttpOAuthConsumer(getConsumerKey(), getConsumerSecret());
+        final OkHttpOAuthProvider provider =
+                new OkHttpOAuthProvider(REQUEST_TOKEN_URL, ACCESS_TOKEN_URL, AUTHORIZE_URL);
+        final OkHttpOAuthConsumer consumer =
+                new OkHttpOAuthConsumer(getConsumerKey(), getConsumerSecret());
 
-        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-            private Throwable error;
-
-            @Override
-            protected String doInBackground(Void... params) {
-                try {
-                    return provider.retrieveRequestToken(consumer, callbackUrl);
-                } catch (Throwable e) {
-                    error = e;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-                super.onPostExecute(result);
-                if (error != null) {
-                    callback.onFailure(error);
-                    return;
-                }
-                CookieSyncManager.createInstance(context);
-                OAuth1FlowDialog dialog = new OAuth1FlowDialog(context, result, callbackUrl,
-                        "api.twitter", new FlowResultHandler() {
+        AsyncTask<Void, Void, String> task =
+                new AsyncTask<Void, Void, String>() {
+                    private Throwable error;
 
                     @Override
-                    public void onError(int errorCode, String description, String failingUrl) {
-                        callback.onFailure(new OAuth1FlowException(errorCode, description, failingUrl));
+                    protected String doInBackground(Void... params) {
+                        try {
+                            return provider.retrieveRequestToken(consumer, callbackUrl);
+                        } catch (Throwable e) {
+                            error = e;
+                        }
+                        return null;
                     }
 
                     @Override
-                    public void onComplete(String callbackUrl) {
-                        CookieSyncManager.getInstance().sync();
-                        Uri uri = Uri.parse(callbackUrl);
-                        final String verifier = uri.getQueryParameter(VERIFIER_PARAM);
-                        if (verifier == null) {
-                            callback.onCancel();
+                    protected void onPostExecute(String result) {
+                        super.onPostExecute(result);
+                        if (error != null) {
+                            callback.onFailure(error);
                             return;
                         }
-                        AsyncTask<Void, Void, HttpParameters> getTokenTask = new AsyncTask<Void, Void, HttpParameters>() {
-                            private Throwable error;
+                        CookieSyncManager.createInstance(context);
+                        OAuth1FlowDialog dialog =
+                                new OAuth1FlowDialog(
+                                        context,
+                                        result,
+                                        callbackUrl,
+                                        "api.twitter",
+                                        new FlowResultHandler() {
 
-                            @Override
-                            protected HttpParameters doInBackground(Void... params) {
-                                try {
-                                    provider.retrieveAccessToken(consumer, verifier);
-                                } catch (Throwable e) {
-                                    error = e;
-                                }
-                                return provider.getResponseParameters();
-                            }
+                                            @Override
+                                            public void onError(
+                                                    int errorCode,
+                                                    String description,
+                                                    String failingUrl) {
+                                                callback.onFailure(
+                                                        new OAuth1FlowException(
+                                                                errorCode,
+                                                                description,
+                                                                failingUrl));
+                                            }
 
-                            @Override
-                            protected void onPostExecute(HttpParameters result) {
-                                super.onPostExecute(result);
-                                if (error != null) {
-                                    callback.onFailure(error);
-                                    return;
-                                }
-                                try {
-                                    setAuthToken(consumer.getToken());
-                                    setAuthTokenSecret(consumer.getTokenSecret());
-                                    setScreenName(result.getFirst(SCREEN_NAME_PARAM));
-                                    setUserId(result.getFirst(USER_ID_PARAM));
-                                } catch (Throwable e) {
-                                    callback.onFailure(e);
-                                    return;
-                                }
-                                callback.onSuccess(Twitter.this);
-                            }
-                        };
-                        getTokenTask.execute();
+                                            @Override
+                                            public void onComplete(String callbackUrl) {
+                                                CookieSyncManager.getInstance().sync();
+                                                Uri uri = Uri.parse(callbackUrl);
+                                                final String verifier =
+                                                        uri.getQueryParameter(VERIFIER_PARAM);
+                                                if (verifier == null) {
+                                                    callback.onCancel();
+                                                    return;
+                                                }
+                                                AsyncTask<Void, Void, HttpParameters> getTokenTask =
+                                                        new AsyncTask<
+                                                                Void, Void, HttpParameters>() {
+                                                            private Throwable error;
+
+                                                            @Override
+                                                            protected HttpParameters doInBackground(
+                                                                    Void... params) {
+                                                                try {
+                                                                    provider.retrieveAccessToken(
+                                                                            consumer, verifier);
+                                                                } catch (Throwable e) {
+                                                                    error = e;
+                                                                }
+                                                                return provider
+                                                                        .getResponseParameters();
+                                                            }
+
+                                                            @Override
+                                                            protected void onPostExecute(
+                                                                    HttpParameters result) {
+                                                                super.onPostExecute(result);
+                                                                if (error != null) {
+                                                                    callback.onFailure(error);
+                                                                    return;
+                                                                }
+                                                                try {
+                                                                    setAuthToken(
+                                                                            consumer.getToken());
+                                                                    setAuthTokenSecret(
+                                                                            consumer
+                                                                                    .getTokenSecret());
+                                                                    setScreenName(
+                                                                            result.getFirst(
+                                                                                    SCREEN_NAME_PARAM));
+                                                                    setUserId(
+                                                                            result.getFirst(
+                                                                                    USER_ID_PARAM));
+                                                                } catch (Throwable e) {
+                                                                    callback.onFailure(e);
+                                                                    return;
+                                                                }
+                                                                callback.onSuccess(Twitter.this);
+                                                            }
+                                                        };
+                                                getTokenTask.execute();
+                                            }
+
+                                            @Override
+                                            public void onCancel() {
+                                                callback.onCancel();
+                                            }
+                                        });
+                        dialog.show();
                     }
-
-                    @Override
-                    public void onCancel() {
-                        callback.onCancel();
-                    }
-                });
-                dialog.show();
-            }
-        };
+                };
         task.execute();
     }
-
 }

@@ -12,9 +12,9 @@ dependencies {
 
 ## Use Parse Coroutines
 
-### ParseQuery 
+### ParseQuery
 
-Now we can call a parse query using a synchronous style, this is possible when we use coroutines. We need to use a regular coroutine builder: 
+Now we can call a parse query using a synchronous style, this is possible when we use coroutines. We need to use a regular coroutine builder:
 
 ```kotlin
 launch { // Coroutine builder
@@ -28,11 +28,11 @@ We can also, use a function like a coroutine builder, it will be provider us a f
 
 ````kotlin
 launchQuery(query) {
-	// doing operations like find, get, first and count
+    // doing operations like find, get, first and count
 }
 ````
 
-It uses a a regular coroutine builder `launch` and pass as receiver a `ParseQueryOperation`` 
+It uses a a regular coroutine builder `launch` and pass as receiver a `ParseQueryOperation``
 
 ### ParseCloud
 
@@ -60,7 +60,7 @@ launch { // Coroutine builder
     }
 }
 ```
-Login: 
+Login:
 
 ```kotlin
 launch { // Coroutine builder

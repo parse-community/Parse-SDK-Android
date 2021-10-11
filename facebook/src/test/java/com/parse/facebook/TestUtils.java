@@ -11,9 +11,7 @@ package com.parse.facebook;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 
-/**
- * package
- */
+/** package */
 class TestUtils {
     static AccessToken newAccessToken() {
         return new AccessToken(
@@ -26,7 +24,6 @@ class TestUtils {
                 AccessTokenSource.DEVICE_AUTH,
                 null,
                 null,
-                null
-        );
+                null);
     }
 }

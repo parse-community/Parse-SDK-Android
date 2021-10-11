@@ -21,11 +21,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
 import com.parse.boltsinternal.Task;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,16 +34,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RunWith(MockitoJUnitRunner.class)
 public class ParseTwitterUtilsTest {
 
-    @Mock
-    private TwitterController controller;
-    @Mock
-    private ParseTwitterUtils.ParseUserDelegate userDelegate;
+    @Mock private TwitterController controller;
+    @Mock private ParseTwitterUtils.ParseUserDelegate userDelegate;
 
     @Before
     public void setUp() {
@@ -67,7 +62,7 @@ public class ParseTwitterUtilsTest {
                 .registerAuthenticationCallback(eq("twitter"), any(AuthenticationCallback.class));
     }
 
-    //region testRestoreAuthentication
+    // region testRestoreAuthentication
 
     @Test
     public void testRestoreAuthentication() {
@@ -98,7 +93,7 @@ public class ParseTwitterUtilsTest {
         verify(controller).setAuthData(authData);
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testIsLinked() {
@@ -109,7 +104,7 @@ public class ParseTwitterUtilsTest {
         verify(user).isLinked("twitter");
     }
 
-    //region testLogIn
+    // region testLogIn
 
     @Test
     @SuppressWarnings("unchecked")
@@ -123,10 +118,11 @@ public class ParseTwitterUtilsTest {
         String screenName = "test_screen_name";
         String authToken = "test_token";
         String authSecret = "test_secret";
-        Task<ParseUser> task = ParseTwitterUtils.logInInBackground(
-                twitterId, screenName, authToken, authSecret);
+        Task<ParseUser> task =
+                ParseTwitterUtils.logInInBackground(twitterId, screenName, authToken, authSecret);
         verify(controller).getAuthData(twitterId, screenName, authToken, authSecret);
-        verify(userDelegate).logInWithInBackground(eq("twitter"), anyMapOf(String.class, String.class));
+        verify(userDelegate)
+                .logInWithInBackground(eq("twitter"), anyMapOf(String.class, String.class));
         assertTrue(task.isCompleted());
     }
 
@@ -147,9 +143,9 @@ public class ParseTwitterUtilsTest {
         assertTrue(task.isCompleted());
     }
 
-    //endregion
+    // endregion
 
-    //region testLink
+    // region testLink
 
     @Test
     @SuppressWarnings("unchecked")
@@ -163,8 +159,9 @@ public class ParseTwitterUtilsTest {
         String screenName = "test_screen_name";
         String authToken = "test_token";
         String authSecret = "test_secret";
-        Task<Void> task = ParseTwitterUtils.linkInBackground(
-                user, twitterId, screenName, authToken, authSecret);
+        Task<Void> task =
+                ParseTwitterUtils.linkInBackground(
+                        user, twitterId, screenName, authToken, authSecret);
         verify(controller).getAuthData(twitterId, screenName, authToken, authSecret);
         verify(user).linkWithInBackground(eq("twitter"), anyMapOf(String.class, String.class));
         assertTrue(task.isCompleted());
@@ -187,7 +184,7 @@ public class ParseTwitterUtilsTest {
         assertTrue(task.isCompleted());
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testUnlink() {

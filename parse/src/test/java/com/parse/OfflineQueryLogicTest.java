@@ -22,16 +22,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
-
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,21 +32,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-/**
- * Unit tests for OfflineQueryLogic.
- */
+/** Unit tests for OfflineQueryLogic. */
 public class OfflineQueryLogicTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     private static <T extends ParseObject> boolean matches(
             OfflineQueryLogic logic, ParseQuery.State<T> query, T object) throws ParseException {
         return matches(logic, query, object, null);
     }
 
-    //region hasReadAccess
+    // region hasReadAccess
 
     private static <T extends ParseObject> boolean matches(
             OfflineQueryLogic logic, ParseQuery.State<T> query, T object, ParseUser user)
@@ -64,8 +58,7 @@ public class OfflineQueryLogicTest {
         return ParseTaskUtils.wait(task);
     }
 
-    private static List<ParseObject> generateParseObjects(
-            String key, Object[] values) {
+    private static List<ParseObject> generateParseObjects(String key, Object[] values) {
         List<ParseObject> objects = new ArrayList<>();
         int i = 0;
         for (Object value : values) {
@@ -102,9 +95,9 @@ public class OfflineQueryLogicTest {
         assertTrue(OfflineQueryLogic.hasReadAccess(null, object));
     }
 
-    //endregion
+    // endregion
 
-    //region hasWriteAccess
+    // region hasWriteAccess
 
     @Test
     public void testHasReadAccessWithPublicReadAccess() {
@@ -159,9 +152,9 @@ public class OfflineQueryLogicTest {
         assertTrue(OfflineQueryLogic.hasWriteAccess(null, object));
     }
 
-    //endregion
+    // endregion
 
-    //region createMatcher
+    // region createMatcher
 
     @Test
     public void testHasWriteAccessWithPublicWriteAccess() {
@@ -202,8 +195,7 @@ public class OfflineQueryLogicTest {
     public void testMatcherWithNoReadAccess() throws ParseException {
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject").build();
 
         ParseACL acl = new ParseACL();
         acl.setPublicReadAccess(false);
@@ -218,9 +210,9 @@ public class OfflineQueryLogicTest {
 
     // TODO(grantland): testRelationMatcher()
 
-    //endregion
+    // endregion
 
-    //region matchesEquals
+    // region matchesEquals
 
     @Test
     public void testSimpleMatcher() throws ParseException {
@@ -234,10 +226,11 @@ public class OfflineQueryLogicTest {
         objectB.put("value", "B");
         objectB.put("foo", "bar");
 
-        ParseQuery.State<ParseObject> queryA = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", "A")
-                .whereEqualTo("foo", "bar")
-                .build();
+        ParseQuery.State<ParseObject> queryA =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", "A")
+                        .whereEqualTo("foo", "bar")
+                        .build();
 
         assertTrue(matches(logic, queryA, objectA));
         assertFalse(matches(logic, queryA, objectB));
@@ -251,12 +244,14 @@ public class OfflineQueryLogicTest {
         ParseObject objectB = new ParseObject("TestObject");
         objectB.put("value", "B");
 
-        ParseQuery.State<ParseObject> query = ParseQuery.State.Builder.or(Arrays.asList(
-                new ParseQuery.State.Builder<>("TestObject")
-                        .whereEqualTo("value", "A"),
-                new ParseQuery.State.Builder<>("TestObject")
-                        .whereEqualTo("value", "B")
-        )).build();
+        ParseQuery.State<ParseObject> query =
+                ParseQuery.State.Builder.or(
+                                Arrays.asList(
+                                        new ParseQuery.State.Builder<>("TestObject")
+                                                .whereEqualTo("value", "A"),
+                                        new ParseQuery.State.Builder<>("TestObject")
+                                                .whereEqualTo("value", "B")))
+                        .build();
 
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
         assertTrue(matches(logic, query, objectA));
@@ -271,10 +266,11 @@ public class OfflineQueryLogicTest {
         ParseObject objectB = new ParseObject("TestObject");
         objectB.put("baz", "qux");
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$ne", "bar")
-                .addCondition("baz", "$ne", "qux")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("foo", "$ne", "bar")
+                        .addCondition("baz", "$ne", "qux")
+                        .build();
 
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
         assertFalse(matches(logic, query, objectA));
@@ -290,21 +286,21 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("point", point)
-                .build();
+        query = new ParseQuery.State.Builder<>("TestObject").whereEqualTo("point", point).build();
         assertTrue(matches(logic, query, object));
 
         // Test lat
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("point", new ParseGeoPoint(37.774929f, -74.005941f))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("point", new ParseGeoPoint(37.774929f, -74.005941f))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Test lng
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("point", new ParseGeoPoint(40.712784f, -122.419416f))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("point", new ParseGeoPoint(40.712784f, -122.419416f))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Not GeoPoint
@@ -313,7 +309,7 @@ public class OfflineQueryLogicTest {
         assertFalse(matches(logic, query, object));
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testMatchesEqualsWithPolygon() throws Exception {
@@ -330,9 +326,10 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("polygon", polygon)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("polygon", polygon)
+                        .build();
         assertTrue(matches(logic, query, object));
 
         List<ParseGeoPoint> diff = new ArrayList<>();
@@ -342,9 +339,10 @@ public class OfflineQueryLogicTest {
         diff.add(new ParseGeoPoint(10, 0));
         diff.add(new ParseGeoPoint(0, 0));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("polygon", new ParsePolygon(diff))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("polygon", new ParsePolygon(diff))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Not Polygon
@@ -357,9 +355,10 @@ public class OfflineQueryLogicTest {
     public void testMatchesEqualsWithNumbers() throws ParseException {
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        ParseQuery.State<ParseObject> iQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", /* (int) */ 5)
-                .build();
+        ParseQuery.State<ParseObject> iQuery =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", /* (int) */ 5)
+                        .build();
 
         ParseObject iObject = new ParseObject("TestObject");
         iObject.put("value", /* (int) */ 5);
@@ -383,13 +382,11 @@ public class OfflineQueryLogicTest {
 
         ParseObject nullObject = new ParseObject("TestObject");
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", "test")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").whereEqualTo("value", "test").build();
 
-        ParseQuery.State<ParseObject> nullQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", null)
-                .build();
+        ParseQuery.State<ParseObject> nullQuery =
+                new ParseQuery.State.Builder<>("TestObject").whereEqualTo("value", null).build();
 
         assertTrue(matches(logic, query, object));
         assertFalse(matches(logic, query, nullObject));
@@ -406,14 +403,16 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$in", Arrays.asList("bar", "baz"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("foo", "$in", Arrays.asList("bar", "baz"))
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$in", Collections.singletonList("qux"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("foo", "$in", Collections.singletonList("qux"))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Non-existant key
@@ -431,14 +430,16 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all", Arrays.asList("foo", "bar"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("foo", "$all", Arrays.asList("foo", "bar"))
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all", Arrays.asList("foo", "bar", "qux"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("foo", "$all", Arrays.asList("foo", "bar", "qux"))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Non-existant key
@@ -460,29 +461,38 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("foo"),
-                                buildStartsWithRegexKeyConstraint("bar")))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(
+                                        buildStartsWithRegexKeyConstraint("foo"),
+                                        buildStartsWithRegexKeyConstraint("bar")))
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("fo"),
-                                buildStartsWithRegexKeyConstraint("b")))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(
+                                        buildStartsWithRegexKeyConstraint("fo"),
+                                        buildStartsWithRegexKeyConstraint("b")))
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("foo"),
-                                buildStartsWithRegexKeyConstraint("bar"),
-                                buildStartsWithRegexKeyConstraint("qux")))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(
+                                        buildStartsWithRegexKeyConstraint("foo"),
+                                        buildStartsWithRegexKeyConstraint("bar"),
+                                        buildStartsWithRegexKeyConstraint("qux")))
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Non-existant key
@@ -504,35 +514,42 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("foo"),
-                                buildStartsWithRegexKeyConstraint("bar")))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(
+                                        buildStartsWithRegexKeyConstraint("foo"),
+                                        buildStartsWithRegexKeyConstraint("bar")))
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("fo"),
-                                buildStartsWithRegex("ba"),
-                                "b"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(
+                                        buildStartsWithRegexKeyConstraint("fo"),
+                                        buildStartsWithRegex("ba"),
+                                        "b"))
+                        .build();
         thrown.expect(IllegalArgumentException.class);
         assertFalse(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("foo", "$all",
-                        Arrays.asList(
-                                buildStartsWithRegexKeyConstraint("fo"),
-                                "b"))
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition(
+                                "foo",
+                                "$all",
+                                Arrays.asList(buildStartsWithRegexKeyConstraint("fo"), "b"))
+                        .build();
         thrown.expect(IllegalArgumentException.class);
         assertFalse(matches(logic, query, object));
     }
 
-    //region matchesWithin
+    // region matchesWithin
 
     /**
      * Helper method to convert a string to a key constraint to match strings that starts with given
@@ -570,21 +587,21 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereNear("point", fb)
-                .build();
+        query = new ParseQuery.State.Builder<>("TestObject").whereNear("point", fb).build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereNear("point", sf)
-                .maxDistance("point", 0.00628)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereNear("point", sf)
+                        .maxDistance("point", 0.00628)
+                        .build();
         assertFalse(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereNear("point", sf)
-                .maxDistance("point", 0.00629)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereNear("point", sf)
+                        .maxDistance("point", 0.00629)
+                        .build();
         assertTrue(matches(logic, query, object));
 
         // Non-existant key
@@ -607,9 +624,7 @@ public class OfflineQueryLogicTest {
         thrown.expect(ParseException.class);
         thrown.expect(hasParseErrorCode(ParseException.INVALID_QUERY));
         thrown.expectMessage("whereWithinGeoBox queries cannot cross the International Date Line.");
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereWithin("point", sj, sf)
-                .build();
+        query = new ParseQuery.State.Builder<>("TestObject").whereWithin("point", sj, sf).build();
         matches(logic, query, object);
     }
 
@@ -629,9 +644,7 @@ public class OfflineQueryLogicTest {
         thrown.expect(hasParseErrorCode(ParseException.INVALID_QUERY));
         thrown.expectMessage(
                 "The southwest corner of a geo box must be south of the northeast corner.");
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereWithin("point", sf, sj)
-                .build();
+        query = new ParseQuery.State.Builder<>("TestObject").whereWithin("point", sf, sj).build();
         matches(logic, query, object);
     }
 
@@ -649,17 +662,19 @@ public class OfflineQueryLogicTest {
 
         thrown.expect(ParseException.class);
         thrown.expect(hasParseErrorCode(ParseException.INVALID_QUERY));
-        thrown.expectMessage("Geo box queries larger than 180 degrees in longitude are not supported. "
-                + "Please check point order.");
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereWithin("point", sf, beijing)
-                .build();
+        thrown.expectMessage(
+                "Geo box queries larger than 180 degrees in longitude are not supported. "
+                        + "Please check point order.");
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereWithin("point", sf, beijing)
+                        .build();
         matches(logic, query, object);
     }
 
-    //endregion
+    // endregion
 
-    //region compare
+    // region compare
 
     @Test
     public void testMatchesWithin() throws ParseException {
@@ -675,9 +690,10 @@ public class OfflineQueryLogicTest {
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
         object.put("point", twinPeaks);
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereWithin("point", sunset, soma)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereWithin("point", sunset, soma)
+                        .build();
         assertTrue(matches(logic, query, object));
 
         object.put("point", fb);
@@ -706,14 +722,16 @@ public class OfflineQueryLogicTest {
 
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereGeoIntersects("polygon", inside)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereGeoIntersects("polygon", inside)
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereGeoIntersects("polygon", outside)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereGeoIntersects("polygon", outside)
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Non-existant key
@@ -721,9 +739,9 @@ public class OfflineQueryLogicTest {
         assertFalse(matches(logic, query, object));
     }
 
-    //endregion
+    // endregion
 
-    //region compareTo
+    // region compareTo
 
     @Test
     public void testMatchesGeoWithin() throws ParseException {
@@ -741,21 +759,23 @@ public class OfflineQueryLogicTest {
 
         ParseGeoPoint point = new ParseGeoPoint(5, 5);
 
-        //ParsePolygon polygon = new ParsePolygon(points);
+        // ParsePolygon polygon = new ParsePolygon(points);
 
         ParseObject object = new ParseObject("TestObject");
         object.put("point", point);
 
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereGeoWithin("point", largeBox)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereGeoWithin("point", largeBox)
+                        .build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereGeoWithin("point", smallBox)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereGeoWithin("point", smallBox)
+                        .build();
         assertFalse(matches(logic, query, object));
 
         // Non-existant key
@@ -775,20 +795,16 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("SomeObject")
-                .whereEqualTo("list", 2)
-                .build();
+        query = new ParseQuery.State.Builder<>("SomeObject").whereEqualTo("list", 2).build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("SomeObject")
-                .whereEqualTo("list", 4)
-                .build();
+        query = new ParseQuery.State.Builder<>("SomeObject").whereEqualTo("list", 4).build();
         assertFalse(matches(logic, query, object));
     }
 
-    //endregion
+    // endregion
 
-    //region Sort
+    // region Sort
 
     @Test
     public void testCompareJSONArray() throws Exception {
@@ -802,14 +818,10 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("SomeObject")
-                .whereEqualTo("array", 2)
-                .build();
+        query = new ParseQuery.State.Builder<>("SomeObject").whereEqualTo("array", 2).build();
         assertTrue(matches(logic, query, object));
 
-        query = new ParseQuery.State.Builder<>("SomeObject")
-                .whereEqualTo("array", 4)
-                .build();
+        query = new ParseQuery.State.Builder<>("SomeObject").whereEqualTo("array", 4).build();
         assertFalse(matches(logic, query, object));
     }
 
@@ -821,25 +833,28 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", /* (int) */ 5)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", /* (int) */ 5)
+                        .build();
         assertTrue(matches(logic, query, object));
         object.put("value", 6);
         assertFalse(matches(logic, query, object));
         object.put("value", 5);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("value", "$lt", 6)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("value", "$lt", 6)
+                        .build();
         assertTrue(matches(logic, query, object));
         object.put("value", 6);
         assertFalse(matches(logic, query, object));
         object.put("value", 5);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("value", "$gt", 4)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("value", "$gt", 4)
+                        .build();
         assertTrue(matches(logic, query, object));
         object.put("value", 4);
         assertFalse(matches(logic, query, object));
@@ -859,21 +874,25 @@ public class OfflineQueryLogicTest {
         ParseObject lObject = new ParseObject("TestObject");
         lObject.put("value", (long) 5);
 
-        ParseQuery.State<ParseObject> iQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", /* (int) */ 5)
-                .build();
+        ParseQuery.State<ParseObject> iQuery =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", /* (int) */ 5)
+                        .build();
 
-        ParseQuery.State<ParseObject> dQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", /* (double) */ 5.0)
-                .build();
+        ParseQuery.State<ParseObject> dQuery =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", /* (double) */ 5.0)
+                        .build();
 
-        ParseQuery.State<ParseObject> fQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", /* (float) */ 5.0f)
-                .build();
+        ParseQuery.State<ParseObject> fQuery =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", /* (float) */ 5.0f)
+                        .build();
 
-        ParseQuery.State<ParseObject> lQuery = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("value", (long) 5)
-                .build();
+        ParseQuery.State<ParseObject> lQuery =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .whereEqualTo("value", (long) 5)
+                        .build();
 
         assertTrue(matches(logic, iQuery, iObject));
         assertTrue(matches(logic, iQuery, dObject));
@@ -908,25 +927,25 @@ public class OfflineQueryLogicTest {
         ParseQuery.State<ParseObject> query;
         OfflineQueryLogic logic = new OfflineQueryLogic(null);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .whereEqualTo("date", date)
-                .build();
+        query = new ParseQuery.State.Builder<>("TestObject").whereEqualTo("date", date).build();
         assertTrue(matches(logic, query, object));
         object.put("date", after);
         assertFalse(matches(logic, query, object));
         object.put("date", date);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("date", "$lt", after)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("date", "$lt", after)
+                        .build();
         assertTrue(matches(logic, query, object));
         object.put("date", after);
         assertFalse(matches(logic, query, object));
         object.put("date", date);
 
-        query = new ParseQuery.State.Builder<>("TestObject")
-                .addCondition("date", "$gt", before)
-                .build();
+        query =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .addCondition("date", "$gt", before)
+                        .build();
         assertTrue(matches(logic, query, object));
         object.put("date", before);
         assertFalse(matches(logic, query, object));
@@ -935,9 +954,8 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testSortInvalidKey() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addAscendingOrder("_test")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").addAscendingOrder("_test").build();
 
         thrown.expect(ParseException.class);
         OfflineQueryLogic.sort(null, query);
@@ -945,8 +963,7 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testSortWithNoOrder() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject").build();
 
         OfflineQueryLogic.sort(null, query);
     }
@@ -955,9 +972,8 @@ public class OfflineQueryLogicTest {
     public void testSortWithGeoQuery() throws ParseException {
         ParseGeoPoint fb = new ParseGeoPoint(37.481689f, -122.154949f);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .whereNear("point", fb)
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").whereNear("point", fb).build();
 
         List<ParseObject> objects = new ArrayList<>();
         ParseObject object;
@@ -985,9 +1001,8 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testSortDescending() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addDescendingOrder("name")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").addDescendingOrder("name").build();
 
         List<ParseObject> objects = new ArrayList<>();
         ParseObject object;
@@ -1008,22 +1023,21 @@ public class OfflineQueryLogicTest {
         assertEquals("grantland", objects.get(2).getString("name"));
     }
 
-    //endregion
+    // endregion
 
-    //region fetchIncludes
+    // region fetchIncludes
 
     @Test
     public void testQuerySortNumber() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addAscendingOrder("key")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").addAscendingOrder("key").build();
 
-        List<ParseObject> results = generateParseObjects("key", new Object[]{
-                /* (int) */ 8,
-                /* (double) */ 7.0,
-                /* (float) */ 6.0f,
-                (long) 5
-        });
+        List<ParseObject> results =
+                generateParseObjects(
+                        "key",
+                        new Object[] {
+                            /* (int) */ 8, /* (double) */ 7.0, /* (float) */ 6.0f, (long) 5
+                        });
 
         OfflineQueryLogic.sort(results, query);
 
@@ -1037,15 +1051,10 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testQuerySortNull() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addAscendingOrder("key")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").addAscendingOrder("key").build();
 
-        List<ParseObject> results = generateParseObjects("key", new Object[]{
-                null,
-                "value",
-                null
-        });
+        List<ParseObject> results = generateParseObjects("key", new Object[] {null, "value", null});
 
         OfflineQueryLogic.sort(results, query);
 
@@ -1056,14 +1065,10 @@ public class OfflineQueryLogicTest {
 
     @Test
     public void testQuerySortDifferentTypes() throws ParseException {
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .addAscendingOrder("key")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").addAscendingOrder("key").build();
 
-        List<ParseObject> results = generateParseObjects("key", new Object[]{
-                "string",
-                5
-        });
+        List<ParseObject> results = generateParseObjects("key", new Object[] {"string", 5});
 
         thrown.expect(IllegalArgumentException.class);
         OfflineQueryLogic.sort(results, query);
@@ -1077,9 +1082,8 @@ public class OfflineQueryLogicTest {
 
         ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = new ParseObject("TestObject");
         ParseObject unfetchedObject = new ParseObject("TestObject");
@@ -1099,9 +1103,8 @@ public class OfflineQueryLogicTest {
 
         ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = mock(ParseObject.class);
         ParseObject unfetchedObject = mock(ParseObject.class);
@@ -1123,9 +1126,8 @@ public class OfflineQueryLogicTest {
 
         ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = mock(ParseObject.class);
         ParseObject unfetchedObject = mock(ParseObject.class);
@@ -1147,9 +1149,8 @@ public class OfflineQueryLogicTest {
 
         ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo.bar")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo.bar").build();
 
         ParseObject object = mock(ParseObject.class);
         ParseObject unfetchedObject = mock(ParseObject.class);
@@ -1171,9 +1172,8 @@ public class OfflineQueryLogicTest {
 
         ParseSQLiteDatabase db = mock(ParseSQLiteDatabase.class);
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo.bar")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo.bar").build();
 
         ParseObject object = mock(ParseObject.class);
         ParseObject unfetchedObject = mock(ParseObject.class);
@@ -1193,9 +1193,8 @@ public class OfflineQueryLogicTest {
         when(store.fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class)))
                 .thenReturn(Task.<ParseObject>forResult(null));
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = new ParseObject("TestObject");
         object.put("foo", JSONObject.NULL);
@@ -1212,9 +1211,8 @@ public class OfflineQueryLogicTest {
         when(store.fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class)))
                 .thenReturn(Task.<ParseObject>forResult(null));
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = new ParseObject("TestObject");
         object.put("foo", 1);
@@ -1226,7 +1224,7 @@ public class OfflineQueryLogicTest {
                 .fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class));
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testFetchIncludesDoesNotExist() throws ParseException {
@@ -1234,9 +1232,8 @@ public class OfflineQueryLogicTest {
         when(store.fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class)))
                 .thenReturn(Task.<ParseObject>forResult(null));
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo").build();
 
         ParseObject object = new ParseObject("TestObject");
 
@@ -1252,9 +1249,8 @@ public class OfflineQueryLogicTest {
         when(store.fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class)))
                 .thenReturn(Task.<ParseObject>forResult(null));
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo.bar")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo.bar").build();
 
         ParseObject object = new ParseObject("TestObject");
         object.put("foo", JSONObject.NULL);
@@ -1271,9 +1267,8 @@ public class OfflineQueryLogicTest {
         when(store.fetchLocallyAsync(any(ParseObject.class), nullable(ParseSQLiteDatabase.class)))
                 .thenReturn(Task.<ParseObject>forResult(null));
 
-        ParseQuery.State<ParseObject> query = new ParseQuery.State.Builder<>("TestObject")
-                .include("foo.bar")
-                .build();
+        ParseQuery.State<ParseObject> query =
+                new ParseQuery.State.Builder<>("TestObject").include("foo.bar").build();
 
         ParseObject object = new ParseObject("TestObject");
         object.put("foo", 1);

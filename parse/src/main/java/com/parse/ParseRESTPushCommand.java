@@ -9,22 +9,20 @@
 package com.parse;
 
 import com.parse.http.ParseHttpRequest;
-
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Set;
-
 class ParseRESTPushCommand extends ParseRESTCommand {
 
-    /* package */ final static String KEY_CHANNELS = "channels";
-    /* package */ final static String KEY_WHERE = "where";
-    /* package */ final static String KEY_DEVICE_TYPE = "deviceType";
-    /* package */ final static String KEY_EXPIRATION_TIME = "expiration_time";
-    /* package */ final static String KEY_EXPIRATION_INTERVAL = "expiration_interval";
-    /* package */ final static String KEY_PUSH_TIME = "push_time";
-    /* package */ final static String KEY_DATA = "data";
+    /* package */ static final String KEY_CHANNELS = "channels";
+    /* package */ static final String KEY_WHERE = "where";
+    /* package */ static final String KEY_DEVICE_TYPE = "deviceType";
+    /* package */ static final String KEY_EXPIRATION_TIME = "expiration_time";
+    /* package */ static final String KEY_EXPIRATION_INTERVAL = "expiration_interval";
+    /* package */ static final String KEY_PUSH_TIME = "push_time";
+    /* package */ static final String KEY_DATA = "data";
 
     public ParseRESTPushCommand(
             String httpPath,
@@ -34,9 +32,14 @@ class ParseRESTPushCommand extends ParseRESTCommand {
         super(httpPath, httpMethod, parameters, sessionToken);
     }
 
-    public static ParseRESTPushCommand sendPushCommand(ParseQuery.State<ParseInstallation> query,
-                                                       Set<String> targetChannels, Long expirationTime,
-                                                       Long expirationInterval, Long pushTime, JSONObject payload, String sessionToken) {
+    public static ParseRESTPushCommand sendPushCommand(
+            ParseQuery.State<ParseInstallation> query,
+            Set<String> targetChannels,
+            Long expirationTime,
+            Long expirationInterval,
+            Long pushTime,
+            JSONObject payload,
+            String sessionToken) {
         JSONObject parameters = new JSONObject();
         try {
             if (targetChannels != null) {
@@ -48,7 +51,8 @@ class ParseRESTPushCommand extends ParseRESTCommand {
                     whereJSON = (JSONObject) PointerEncoder.get().encode(where);
                 }
                 if (whereJSON == null) {
-                    // If there are no conditions set, then push to everyone by specifying empty query conditions.
+                    // If there are no conditions set, then push to everyone by specifying empty
+                    // query conditions.
                     whereJSON = new JSONObject();
                 }
                 parameters.put(KEY_WHERE, whereJSON);
@@ -71,6 +75,7 @@ class ParseRESTPushCommand extends ParseRESTCommand {
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }
-        return new ParseRESTPushCommand("push", ParseHttpRequest.Method.POST, parameters, sessionToken);
+        return new ParseRESTPushCommand(
+                "push", ParseHttpRequest.Method.POST, parameters, sessionToken);
     }
 }

@@ -1,22 +1,20 @@
 package com.parse;
 
 import android.os.Parcel;
-
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This is a stateful implementation of {@link ParseParcelEncoder} that remembers which
- * {@code ParseObject}s have been encoded. If an object is found again in the object tree,
- * it is encoded as a pointer rather than a full object, to avoid {@code StackOverflowError}s
- * due to circular references.
+ * This is a stateful implementation of {@link ParseParcelEncoder} that remembers which {@code
+ * ParseObject}s have been encoded. If an object is found again in the object tree, it is encoded as
+ * a pointer rather than a full object, to avoid {@code StackOverflowError}s due to circular
+ * references.
  */
 /* package */ class ParseObjectParcelEncoder extends ParseParcelEncoder {
 
     private final Set<String> ids = new HashSet<>();
 
-    public ParseObjectParcelEncoder() {
-    }
+    public ParseObjectParcelEncoder() {}
 
     public ParseObjectParcelEncoder(ParseObject root) {
         ids.add(getObjectOrLocalId(root));
