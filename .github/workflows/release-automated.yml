@@ -15,14 +15,14 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Generate Javadoc
-        run: ./gradlew javadocRelease
+        run: javadoc @.javadoc
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           clean: true
-          folder: parse/build/docs/javadoc/release
+          folder: doc
           target-folder: api
           dry-run: false
   release:
