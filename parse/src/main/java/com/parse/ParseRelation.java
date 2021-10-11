@@ -37,6 +37,8 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
         }
     };
     private final Object mutex = new Object();
+    // For offline caching, we keep track of every object we've known to be in the relation.
+    private final Set<ParseObject> knownObjects = new HashSet<>();
     // The owning object of this ParseRelation.
     private WeakReference<ParseObject> parent;
     // The object Id of the parent.
@@ -47,8 +49,6 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
     private String key;
     // The className of the target objects.
     private String targetClass;
-    // For offline caching, we keep track of every object we've known to be in the relation.
-    private Set<ParseObject> knownObjects = new HashSet<>();
 
     /* package */ ParseRelation(ParseObject parent, String key) {
         this.parent = new WeakReference<>(parent);

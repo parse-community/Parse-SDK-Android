@@ -8,6 +8,9 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 
@@ -16,9 +19,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 public class ParseHttpRequestTest {
 

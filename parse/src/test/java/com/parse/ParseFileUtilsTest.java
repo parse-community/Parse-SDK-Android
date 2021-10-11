@@ -8,13 +8,15 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,18 +25,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = TestHelper.ROBOLECTRIC_SDK_VERSION)
 public class ParseFileUtilsTest {
 
     private static final String TEST_STRING = "this is a test string";
     private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testReadFileToString() throws Exception {
@@ -42,7 +40,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_STRING.getBytes("UTF-8"));
+            out.write(TEST_STRING.getBytes());
         } finally {
             ParseIOUtils.closeQuietly(out);
         }
@@ -61,7 +59,7 @@ public class ParseFileUtilsTest {
             in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             ParseIOUtils.copy(in, out);
-            content = new String(out.toByteArray(), "UTF-8");
+            content = out.toString();
         } finally {
             ParseIOUtils.closeQuietly(in);
         }
@@ -75,7 +73,7 @@ public class ParseFileUtilsTest {
         BufferedOutputStream out = null;
         try {
             out = new BufferedOutputStream(new FileOutputStream(file));
-            out.write(TEST_JSON.getBytes("UTF-8"));
+            out.write(TEST_JSON.getBytes());
         } finally {
             ParseIOUtils.closeQuietly(out);
         }

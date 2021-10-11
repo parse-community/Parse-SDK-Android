@@ -8,20 +8,21 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-
 public class InstallationIdTest {
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testGetGeneratesInstallationIdAndFile() throws Exception {
@@ -78,7 +79,7 @@ public class InstallationIdTest {
 
         String installationIdString = new InstallationId(installationIdFile).get();
         ParseFileUtils.deleteQuietly(installationIdFile);
-        assertFalse(installationIdString.equals(new InstallationId(installationIdFile).get()));
+        assertNotEquals(installationIdString, new InstallationId(installationIdFile).get());
     }
 
     @Test

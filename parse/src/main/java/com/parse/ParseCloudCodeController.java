@@ -8,12 +8,11 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONObject;
 
 import java.util.Map;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 class ParseCloudCodeController {
 
@@ -29,13 +28,10 @@ class ParseCloudCodeController {
                 name,
                 params,
                 sessionToken);
-        return command.executeAsync(restClient).onSuccess(new Continuation<JSONObject, T>() {
-            @Override
-            public T then(Task<JSONObject> task) {
-                @SuppressWarnings("unchecked")
-                T result = (T) convertCloudResponse(task.getResult());
-                return result;
-            }
+        return command.executeAsync(restClient).onSuccess(task -> {
+            @SuppressWarnings("unchecked")
+            T result = (T) convertCloudResponse(task.getResult());
+            return result;
         });
     }
 

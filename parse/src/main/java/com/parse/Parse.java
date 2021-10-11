@@ -11,10 +11,13 @@ package com.parse;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import android.util.Log;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,8 +30,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 import okhttp3.OkHttpClient;
 
 /**
@@ -76,7 +77,8 @@ public class Parse {
      *   }
      * }
      * </pre>
-     *
+     * See <a href="https://github.com/parse-community/Parse-SDK-Android/issues/279">https://github.com/parse-community/Parse-SDK-Android/issues/279</a>
+     * for a discussion on performance of local datastore, and if it is right for your project.
      * @param context The active {@link Context} for your application.
      */
     public static void enableLocalDatastore(Context context) {
@@ -164,12 +166,9 @@ public class Parse {
         // application.
         checkCacheApplicationId();
         final Context context = configuration.context;
-        Task.callInBackground(new Callable<Void>() {
-            @Override
-            public Void call() {
-                getEventuallyQueue(context);
-                return null;
-            }
+        Task.callInBackground((Callable<Void>) () -> {
+            getEventuallyQueue(context);
+            return null;
         });
 
         ParseFieldOperations.registerDefaultDecoders();
@@ -181,13 +180,10 @@ public class Parse {
                     "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
         }
 
-        ParseUser.getCurrentUserAsync().makeVoid().continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                // Prime config in the background
-                ParseConfig.getCurrentConfig();
-                return null;
-            }
+        ParseUser.getCurrentUserAsync().makeVoid().continueWith((Continuation<Void, Void>) task -> {
+            // Prime config in the background
+            ParseConfig.getCurrentConfig();
+            return null;
         }, Task.BACKGROUND_EXECUTOR);
 
         dispatchOnParseInitialized();
@@ -201,6 +197,15 @@ public class Parse {
     //region Server URL
 
     /**
+     * Returns the current server URL.
+     */
+    public static @Nullable
+    String getServer() {
+        URL server = ParseRESTCommand.server;
+        return server == null ? null : server.toString();
+    }
+
+    /**
      * Sets the server URL. The local client cache is not cleared.
      * <p/>
      * This can be used to update the server URL after this client has been initialized, without
@@ -211,6 +216,7 @@ public class Parse {
      * The new server URL must point to a Parse Server that connects to the same database.
      * Otherwise, issues may arise related to locally cached data or delayed methods such as
      * {@link ParseObject#saveEventually()}.
+     *
      * @param server The server URL to set.
      */
     public static void setServer(@NonNull String server) {
@@ -222,19 +228,13 @@ public class Parse {
     }
 
     /**
-     * Returns the current server URL.
-     */
-    public static @Nullable String getServer() {
-        URL server = ParseRESTCommand.server;
-        return server == null ? null : server.toString();
-    }
-
-    /**
      * Validates the server URL.
+     *
      * @param server The server URL to validate.
      * @return The validated server URL.
      */
-    private static @Nullable String validateServerUrl(@Nullable String server) {
+    private static @Nullable
+    String validateServerUrl(@Nullable String server) {
 
         // Add an extra trailing slash so that Parse REST commands include
         // the path as part of the server URL (i.e. http://api.myhost.com/parse)
@@ -572,6 +572,7 @@ public class Parse {
         final boolean allowCustomObjectId;
         final OkHttpClient.Builder clientBuilder;
         final int maxRetries;
+
         private Configuration(Builder builder) {
             this.context = builder.context;
             this.applicationId = builder.applicationId;
@@ -587,7 +588,7 @@ public class Parse {
          * Allows for simple constructing of a {@code Configuration} object.
          */
         public static final class Builder {
-            private Context context;
+            private final Context context;
             private String applicationId;
             private String clientKey;
             private String server;

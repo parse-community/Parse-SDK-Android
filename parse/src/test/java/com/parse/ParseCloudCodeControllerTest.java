@@ -8,6 +8,19 @@
  */
 package com.parse;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
 
@@ -23,20 +36,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-
-import com.parse.boltsinternal.Task;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class ParseCloudCodeControllerTest {
 
@@ -131,7 +130,7 @@ public class ParseCloudCodeControllerTest {
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
         Task<String> cloudCodeTask = controller.callFunctionInBackground(
-                "test", new HashMap<String, Object>(), "sessionToken");
+                "test", new HashMap<>(), "sessionToken");
         ParseTaskUtils.wait(cloudCodeTask);
 
         verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
@@ -153,7 +152,7 @@ public class ParseCloudCodeControllerTest {
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
         Task<String> cloudCodeTask = controller.callFunctionInBackground(
-                "test", new HashMap<String, Object>(), "sessionToken");
+                "test", new HashMap<>(), "sessionToken");
         ParseTaskUtils.wait(cloudCodeTask);
 
         verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
@@ -171,7 +170,7 @@ public class ParseCloudCodeControllerTest {
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
         Task<String> cloudCodeTask =
-                controller.callFunctionInBackground("test", new HashMap<String, Object>(), "sessionToken");
+                controller.callFunctionInBackground("test", new HashMap<>(), "sessionToken");
         // Do not use ParseTaskUtils.wait() since we do not want to throw the exception
         cloudCodeTask.waitForCompletion();
 
@@ -199,12 +198,12 @@ public class ParseCloudCodeControllerTest {
         ParseCloudCodeController controller = new ParseCloudCodeController(restClient);
 
         Task<String> cloudCodeTask = controller.callFunctionInBackground(
-                "test", new HashMap<String, Object>(), "sessionToken");
+                "test", new HashMap<>(), "sessionToken");
         ParseTaskUtils.wait(cloudCodeTask);
 
         verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
         String result = cloudCodeTask.getResult();
-        assertEquals(null, result);
+        assertNull(result);
     }
 
     private ParseHttpClient mockParseHttpClientWithReponse(ParseHttpResponse response)

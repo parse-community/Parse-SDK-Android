@@ -10,6 +10,8 @@ package com.parse;
 
 import android.util.SparseArray;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-
-import com.parse.boltsinternal.Task;
 
 /* package */ abstract class ParseEventuallyQueue {
 
@@ -140,7 +140,7 @@ import com.parse.boltsinternal.Task;
         public static final int NETWORK_DOWN = 7;
         public static final int COMMAND_OLD_FORMAT_DISCARDED = 8;
         private static final int MAX_EVENTS = 1000;
-        private SparseArray<Semaphore> events = new SparseArray<>();
+        private final SparseArray<Semaphore> events = new SparseArray<>();
 
         private TestHelper() {
             clear();

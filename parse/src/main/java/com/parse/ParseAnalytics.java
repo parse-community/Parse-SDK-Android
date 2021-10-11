@@ -10,6 +10,9 @@ package com.parse;
 
 import android.content.Intent;
 
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,10 +20,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import com.parse.boltsinternal.Capture;
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseAnalytics} class provides an interface to Parse's logging and analytics backend.
@@ -66,12 +65,9 @@ public class ParseAnalytics {
                 }
             }
         }
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                return getAnalyticsController().trackAppOpenedInBackground(pushHash.get(), sessionToken);
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            return getAnalyticsController().trackAppOpenedInBackground(pushHash.get(), sessionToken);
         });
     }
 
@@ -171,12 +167,9 @@ public class ParseAnalytics {
                 ? Collections.unmodifiableMap(new HashMap<>(dimensions))
                 : null;
 
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                return getAnalyticsController().trackEventInBackground(name, dimensionsCopy, sessionToken);
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            return getAnalyticsController().trackEventInBackground(name, dimensionsCopy, sessionToken);
         });
     }
 

@@ -10,11 +10,10 @@ package com.parse;
 
 import androidx.annotation.NonNull;
 
+import com.parse.boltsinternal.Task;
+
 import java.util.List;
 import java.util.Map;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The ParseCloud class defines provides methods for interacting with Parse Cloud Functions. A Cloud
@@ -61,12 +60,9 @@ public final class ParseCloud {
      */
     public static <T> Task<T> callFunctionInBackground(@NonNull final String name,
                                                        @NonNull final Map<String, ?> params) {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<T>>() {
-            @Override
-            public Task<T> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                return getCloudCodeController().callFunctionInBackground(name, params, sessionToken);
-            }
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            return getCloudCodeController().callFunctionInBackground(name, params, sessionToken);
         });
     }
 

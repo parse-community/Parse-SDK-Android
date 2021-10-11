@@ -15,7 +15,7 @@ class IntParseDelegate(private val name: String?) {
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Int) {
-        parseObject.put(name ?:property.name, value)
+        parseObject.put(name ?: property.name, value)
     }
 
 }

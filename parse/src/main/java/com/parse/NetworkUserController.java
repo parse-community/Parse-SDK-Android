@@ -8,12 +8,11 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONObject;
 
 import java.util.Map;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 class NetworkUserController implements ParseUserController {
 
@@ -42,15 +41,12 @@ class NetworkUserController implements ParseUserController {
         ParseRESTCommand command = ParseRESTUserCommand.signUpUserCommand(
                 objectJSON, sessionToken, revocableSession);
 
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
-            @Override
-            public ParseUser.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
-                return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                        .isComplete(false)
-                        .isNew(true)
-                        .build();
-            }
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
+            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
+                    .isComplete(false)
+                    .isNew(true)
+                    .build();
         });
     }
 
@@ -61,15 +57,12 @@ class NetworkUserController implements ParseUserController {
             String username, String password) {
         ParseRESTCommand command = ParseRESTUserCommand.logInUserCommand(
                 username, password, revocableSession);
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
-            @Override
-            public ParseUser.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
 
-                return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                        .isComplete(true)
-                        .build();
-            }
+            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
+                    .isComplete(true)
+                    .build();
         });
     }
 
@@ -80,21 +73,18 @@ class NetworkUserController implements ParseUserController {
         final ParseRESTUserCommand command = ParseRESTUserCommand.serviceLogInUserCommand(
                 objectJSON, state.sessionToken(), revocableSession);
 
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
-            @Override
-            public ParseUser.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
 
-                // TODO(grantland): Does the server really respond back with complete object data if the
-                // object isn't new?
-                boolean isNew = command.getStatusCode() == STATUS_CODE_CREATED;
-                boolean isComplete = !isNew;
+            // TODO(grantland): Does the server really respond back with complete object data if the
+            // object isn't new?
+            boolean isNew = command.getStatusCode() == STATUS_CODE_CREATED;
+            boolean isComplete = !isNew;
 
-                return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                        .isComplete(isComplete)
-                        .isNew(isNew)
-                        .build();
-            }
+            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
+                    .isComplete(isComplete)
+                    .isNew(isNew)
+                    .build();
         });
     }
 
@@ -103,17 +93,14 @@ class NetworkUserController implements ParseUserController {
             final String authType, final Map<String, String> authData) {
         final ParseRESTUserCommand command = ParseRESTUserCommand.serviceLogInUserCommand(
                 authType, authData, revocableSession);
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
-            @Override
-            public ParseUser.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
 
-                return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                        .isComplete(true)
-                        .isNew(command.getStatusCode() == STATUS_CODE_CREATED)
-                        .putAuthData(authType, authData)
-                        .build();
-            }
+            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
+                    .isComplete(true)
+                    .isNew(command.getStatusCode() == STATUS_CODE_CREATED)
+                    .putAuthData(authType, authData)
+                    .build();
         });
     }
 
@@ -122,15 +109,12 @@ class NetworkUserController implements ParseUserController {
     @Override
     public Task<ParseUser.State> getUserAsync(String sessionToken) {
         ParseRESTCommand command = ParseRESTUserCommand.getCurrentUserCommand(sessionToken);
-        return command.executeAsync(client).onSuccess(new Continuation<JSONObject, ParseUser.State>() {
-            @Override
-            public ParseUser.State then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
+        return command.executeAsync(client).onSuccess(task -> {
+            JSONObject result = task.getResult();
 
-                return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
-                        .isComplete(true)
-                        .build();
-            }
+            return coder.decode(new ParseUser.State.Builder(), result, ParseDecoder.get())
+                    .isComplete(true)
+                    .build();
         });
     }
 

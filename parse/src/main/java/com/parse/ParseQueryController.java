@@ -8,9 +8,9 @@
  */
 package com.parse;
 
-import java.util.List;
-
 import com.parse.boltsinternal.Task;
+
+import java.util.List;
 
 /**
  * A {@code ParseQueryController} defines how a {@link ParseQuery} is executed.

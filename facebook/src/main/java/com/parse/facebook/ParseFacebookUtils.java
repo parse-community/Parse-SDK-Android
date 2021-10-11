@@ -20,13 +20,12 @@ import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * Provides a set of utilities for using Parse with Facebook.
@@ -80,6 +79,10 @@ public final class ParseFacebookUtils {
     static FacebookController controller;
     static ParseUserDelegate userDelegate = new ParseUserDelegateImpl();
 
+    private ParseFacebookUtils() {
+        // do nothing
+    }
+
     /**
      * @param user A {@link com.parse.ParseUser} object.
      * @return {@code true} if the user is linked to a Facebook account.
@@ -113,15 +116,12 @@ public final class ParseFacebookUtils {
     public static void initialize(Context context, int callbackRequestCodeOffset) {
         synchronized (lock) {
             getController().initialize(context, callbackRequestCodeOffset);
-            userDelegate.registerAuthenticationCallback(AUTH_TYPE, new AuthenticationCallback() {
-                @Override
-                public boolean onRestore(Map<String, String> authData) {
-                    try {
-                        getController().setAuthData(authData);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
+            userDelegate.registerAuthenticationCallback(AUTH_TYPE, authData -> {
+                try {
+                    getController().setAuthData(authData);
+                    return true;
+                } catch (Exception e) {
+                    return false;
                 }
             });
             isInitialized = true;
@@ -146,6 +146,8 @@ public final class ParseFacebookUtils {
         }
     }
 
+    //region Log In
+
     /**
      * The method that should be called from the Activity's or Fragment's onActivityResult method.
      *
@@ -162,8 +164,6 @@ public final class ParseFacebookUtils {
             return false;
         }
     }
-
-    //region Log In
 
     /**
      * Log in using a Facebook account using authorization credentials that have already been
@@ -293,6 +293,10 @@ public final class ParseFacebookUtils {
                 logInWithPublishPermissionsInBackground(fragment, permissions), callback, true);
     }
 
+    //endregion
+
+    //region Link
+
     private static Task<ParseUser> logInAsync(Activity activity, Fragment fragment,
                                               Collection<String> permissions, FacebookController.LoginAuthorizationType authorizationType) {
         checkInitialization();
@@ -301,17 +305,8 @@ public final class ParseFacebookUtils {
         }
 
         return getController().authenticateAsync(
-                activity, fragment, authorizationType, permissions).onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
-            @Override
-            public Task<ParseUser> then(Task<Map<String, String>> task) throws Exception {
-                return userDelegate.logInWithInBackground(AUTH_TYPE, task.getResult());
-            }
-        });
+                activity, fragment, authorizationType, permissions).onSuccessTask(task -> userDelegate.logInWithInBackground(AUTH_TYPE, task.getResult()));
     }
-
-    //endregion
-
-    //region Link
 
     /**
      * Link an existing Parse user with a Facebook account using authorization credentials that have
@@ -452,6 +447,10 @@ public final class ParseFacebookUtils {
                 linkWithPublishPermissionsInBackground(user, fragment, permissions), callback, true);
     }
 
+    //endregion
+
+    //region Unlink
+
     private static Task<Void> linkAsync(final ParseUser user, Activity activity, Fragment fragment,
                                         Collection<String> permissions, FacebookController.LoginAuthorizationType authorizationType) {
         checkInitialization();
@@ -460,17 +459,8 @@ public final class ParseFacebookUtils {
         }
 
         return getController().authenticateAsync(
-                activity, fragment, authorizationType, permissions).onSuccessTask(new Continuation<Map<String, String>, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Map<String, String>> task) throws Exception {
-                return user.linkWithInBackground(AUTH_TYPE, task.getResult());
-            }
-        });
+                activity, fragment, authorizationType, permissions).onSuccessTask(task -> user.linkWithInBackground(AUTH_TYPE, task.getResult()));
     }
-
-    //endregion
-
-    //region Unlink
 
     /**
      * Unlink a user from a Facebook account. This will save the user's data.
@@ -483,6 +473,10 @@ public final class ParseFacebookUtils {
         return user.unlinkFromInBackground(AUTH_TYPE);
     }
 
+    //endregion
+
+    //region TaskUtils
+
     /**
      * Unlink a user from a Facebook account. This will save the user's data.
      *
@@ -493,10 +487,6 @@ public final class ParseFacebookUtils {
     public static Task<Void> unlinkInBackground(ParseUser user, SaveCallback callback) {
         return callbackOnMainThreadAsync(unlinkInBackground(user), callback, false);
     }
-
-    //endregion
-
-    //region TaskUtils
 
     /**
      * Calls the callback after a task completes on the main thread, returning a Task that completes
@@ -516,6 +506,8 @@ public final class ParseFacebookUtils {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation);
     }
 
+    //endregion
+
     /**
      * Calls the callback after a task completes on the main thread, returning a Task that completes
      * with the same result as the input task after the callback has been run. If reportCancellation
@@ -527,48 +519,36 @@ public final class ParseFacebookUtils {
             return task;
         }
         final Task<T>.TaskCompletionSource tcs = Task.create();
-        task.continueWith(new Continuation<T, Void>() {
-            @Override
-            public Void then(final Task<T> task) throws Exception {
-                if (task.isCancelled() && !reportCancellation) {
-                    tcs.setCancelled();
-                    return null;
-                }
-                Task.UI_THREAD_EXECUTOR.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Exception error = task.getError();
-                            if (error != null && !(error instanceof ParseException)) {
-                                error = new ParseException(error);
-                            }
-                            if (callback instanceof SaveCallback) {
-                                ((SaveCallback) callback).done((ParseException) error);
-                            } else if (callback instanceof LogInCallback) {
-                                ((LogInCallback) callback).done(
-                                        (ParseUser) task.getResult(), (ParseException) error);
-                            }
-                        } finally {
-                            if (task.isCancelled()) {
-                                tcs.setCancelled();
-                            } else if (task.isFaulted()) {
-                                tcs.setError(task.getError());
-                            } else {
-                                tcs.setResult(task.getResult());
-                            }
-                        }
-                    }
-                });
+        task.continueWith((Continuation<T, Void>) task1 -> {
+            if (task1.isCancelled() && !reportCancellation) {
+                tcs.setCancelled();
                 return null;
             }
+            Task.UI_THREAD_EXECUTOR.execute(() -> {
+                try {
+                    Exception error = task1.getError();
+                    if (error != null && !(error instanceof ParseException)) {
+                        error = new ParseException(error);
+                    }
+                    if (callback instanceof SaveCallback) {
+                        ((SaveCallback) callback).done((ParseException) error);
+                    } else if (callback instanceof LogInCallback) {
+                        ((LogInCallback) callback).done(
+                                (ParseUser) task1.getResult(), (ParseException) error);
+                    }
+                } finally {
+                    if (task1.isCancelled()) {
+                        tcs.setCancelled();
+                    } else if (task1.isFaulted()) {
+                        tcs.setError(task1.getError());
+                    } else {
+                        tcs.setResult(task1.getResult());
+                    }
+                }
+            });
+            return null;
         });
         return tcs.getTask();
-    }
-
-    //endregion
-
-    private ParseFacebookUtils() {
-        // do nothing
     }
 
     interface ParseUserDelegate {

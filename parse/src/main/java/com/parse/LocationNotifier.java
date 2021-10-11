@@ -15,12 +15,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
 import com.parse.boltsinternal.Capture;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
+
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * LocationNotifier is a wrapper around fetching the current device's location. It looks for the GPS
@@ -86,12 +86,9 @@ class LocationNotifier {
             }
         };
 
-        timeoutFuture.set(ParseExecutors.scheduled().schedule(new Runnable() {
-            @Override
-            public void run() {
-                tcs.trySetError(new ParseException(ParseException.TIMEOUT, "Location fetch timed out."));
-                manager.removeUpdates(listener);
-            }
+        timeoutFuture.set(ParseExecutors.scheduled().schedule(() -> {
+            tcs.trySetError(new ParseException(ParseException.TIMEOUT, "Location fetch timed out."));
+            manager.removeUpdates(listener);
         }, timeout, TimeUnit.MILLISECONDS));
 
         String provider = manager.getBestProvider(criteria, true);

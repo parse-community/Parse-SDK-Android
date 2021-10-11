@@ -15,13 +15,12 @@ import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
-
-import java.util.Map;
-import java.util.concurrent.CancellationException;
-
 import com.parse.boltsinternal.AggregateException;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+
+import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 /**
  * Provides a set of utilities for using Parse with Twitter.
@@ -35,6 +34,10 @@ public final class ParseTwitterUtils {
     static boolean isInitialized;
     static TwitterController controller;
     static ParseUserDelegate userDelegate = new ParseUserDelegateImpl();
+
+    private ParseTwitterUtils() {
+        // do nothing
+    }
 
     private static TwitterController getTwitterController() {
         synchronized (lock) {
@@ -86,15 +89,12 @@ public final class ParseTwitterUtils {
                 controller.initialize(consumerKey, consumerSecret);
             }
 
-            userDelegate.registerAuthenticationCallback(AUTH_TYPE, new AuthenticationCallback() {
-                @Override
-                public boolean onRestore(Map<String, String> authData) {
-                    try {
-                        getTwitterController().setAuthData(authData);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
+            userDelegate.registerAuthenticationCallback(AUTH_TYPE, authData -> {
+                try {
+                    getTwitterController().setAuthData(authData);
+                    return true;
+                } catch (Exception e) {
+                    return false;
                 }
             });
 
@@ -127,12 +127,7 @@ public final class ParseTwitterUtils {
      */
     public static Task<Void> linkInBackground(Context context, final ParseUser user) {
         checkInitialization();
-        return getTwitterController().authenticateAsync(context).onSuccessTask(new Continuation<Map<String, String>, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Map<String, String>> task) {
-                return user.linkWithInBackground(AUTH_TYPE, task.getResult());
-            }
-        });
+        return getTwitterController().authenticateAsync(context).onSuccessTask(task -> user.linkWithInBackground(AUTH_TYPE, task.getResult()));
     }
 
     /**
@@ -268,12 +263,7 @@ public final class ParseTwitterUtils {
      */
     public static Task<ParseUser> logInInBackground(Context context) {
         checkInitialization();
-        return getTwitterController().authenticateAsync(context).onSuccessTask(new Continuation<Map<String, String>, Task<ParseUser>>() {
-            @Override
-            public Task<ParseUser> then(Task<Map<String, String>> task) {
-                return userDelegate.logInWithInBackground(AUTH_TYPE, task.getResult());
-            }
-        });
+        return getTwitterController().authenticateAsync(context).onSuccessTask(task -> userDelegate.logInWithInBackground(AUTH_TYPE, task.getResult()));
     }
 
     /**
@@ -311,6 +301,8 @@ public final class ParseTwitterUtils {
         return user.unlinkFromInBackground(AUTH_TYPE);
     }
 
+    //region TaskUtils
+
     /**
      * Unlinks a user from a Twitter account in the background. Unlinking a user will save the user's
      * data.
@@ -322,8 +314,6 @@ public final class ParseTwitterUtils {
     public static void unlinkInBackground(ParseUser user, SaveCallback callback) {
         callbackOnMainThreadAsync(unlinkInBackground(user), callback, false);
     }
-
-    //region TaskUtils
 
     /**
      * Converts a task execution into a synchronous action.
@@ -375,6 +365,8 @@ public final class ParseTwitterUtils {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation);
     }
 
+    //endregion
+
     /**
      * Calls the callback after a task completes on the main thread, returning a Task that completes
      * with the same result as the input task after the callback has been run. If reportCancellation
@@ -386,48 +378,36 @@ public final class ParseTwitterUtils {
             return task;
         }
         final Task<T>.TaskCompletionSource tcs = Task.create();
-        task.continueWith(new Continuation<T, Void>() {
-            @Override
-            public Void then(final Task<T> task) throws Exception {
-                if (task.isCancelled() && !reportCancellation) {
-                    tcs.setCancelled();
-                    return null;
-                }
-                Task.UI_THREAD_EXECUTOR.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Exception error = task.getError();
-                            if (error != null && !(error instanceof ParseException)) {
-                                error = new ParseException(error);
-                            }
-                            if (callback instanceof SaveCallback) {
-                                ((SaveCallback) callback).done((ParseException) error);
-                            } else if (callback instanceof LogInCallback) {
-                                ((LogInCallback) callback).done(
-                                        (ParseUser) task.getResult(), (ParseException) error);
-                            }
-                        } finally {
-                            if (task.isCancelled()) {
-                                tcs.setCancelled();
-                            } else if (task.isFaulted()) {
-                                tcs.setError(task.getError());
-                            } else {
-                                tcs.setResult(task.getResult());
-                            }
-                        }
-                    }
-                });
+        task.continueWith((Continuation<T, Void>) task1 -> {
+            if (task1.isCancelled() && !reportCancellation) {
+                tcs.setCancelled();
                 return null;
             }
+            Task.UI_THREAD_EXECUTOR.execute(() -> {
+                try {
+                    Exception error = task1.getError();
+                    if (error != null && !(error instanceof ParseException)) {
+                        error = new ParseException(error);
+                    }
+                    if (callback instanceof SaveCallback) {
+                        ((SaveCallback) callback).done((ParseException) error);
+                    } else if (callback instanceof LogInCallback) {
+                        ((LogInCallback) callback).done(
+                                (ParseUser) task1.getResult(), (ParseException) error);
+                    }
+                } finally {
+                    if (task1.isCancelled()) {
+                        tcs.setCancelled();
+                    } else if (task1.isFaulted()) {
+                        tcs.setError(task1.getError());
+                    } else {
+                        tcs.setResult(task1.getResult());
+                    }
+                }
+            });
+            return null;
         });
         return tcs.getTask();
-    }
-
-    //endregion
-
-    private ParseTwitterUtils() {
-        // do nothing
     }
 
     interface ParseUserDelegate {

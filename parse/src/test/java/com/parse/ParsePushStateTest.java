@@ -8,6 +8,15 @@
  */
 package com.parse;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -20,14 +29,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class ParsePushStateTest {
 
@@ -51,12 +52,12 @@ public class ParsePushStateTest {
                 .data(data)
                 .build();
 
-        assertEquals(null, state.expirationTime());
-        assertEquals(null, state.expirationTimeInterval());
-        assertEquals(null, state.pushTime());
-        assertEquals(null, state.channelSet());
+        assertNull(state.expirationTime());
+        assertNull(state.expirationTimeInterval());
+        assertNull(state.pushTime());
+        assertNull(state.channelSet());
         JSONAssert.assertEquals(data, state.data(), JSONCompareMode.NON_EXTENSIBLE);
-        assertEquals(null, state.queryState());
+        assertNull(state.queryState());
     }
 
     //endregion
@@ -102,7 +103,7 @@ public class ParsePushStateTest {
                 .data(new JSONObject())
                 .build();
 
-        assertEquals(null, state.expirationTime());
+        assertNull(state.expirationTime());
     }
 
     @Test
@@ -130,7 +131,7 @@ public class ParsePushStateTest {
                 .data(new JSONObject())
                 .build();
 
-        assertEquals(null, state.expirationTimeInterval());
+        assertNull(state.expirationTimeInterval());
     }
 
     @Test
@@ -158,7 +159,7 @@ public class ParsePushStateTest {
                 .data(new JSONObject())
                 .build();
 
-        assertEquals(null, state.pushTime());
+        assertNull(state.pushTime());
     }
 
     @Test
@@ -315,7 +316,7 @@ public class ParsePushStateTest {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         ParsePush.State state = builder
-                .query(new ParseQuery<ParseInstallation>("test"))
+                .query(new ParseQuery<>("test"))
                 .data(new JSONObject())
                 .build();
     }

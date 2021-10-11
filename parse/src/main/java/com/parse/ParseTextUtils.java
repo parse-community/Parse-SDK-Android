@@ -16,6 +16,8 @@
 
 package com.parse;
 
+import java.util.Objects;
+
 /* package */ class ParseTextUtils {
 
     private ParseTextUtils() {
@@ -63,6 +65,6 @@ package com.parse;
      * @return true if a and b are equal
      */
     public static boolean equals(CharSequence a, CharSequence b) {
-        return (a == b) || (a != null && a.equals(b));
+        return Objects.equals(a, b);
     }
 }

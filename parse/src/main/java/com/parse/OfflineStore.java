@@ -16,6 +16,10 @@ import android.text.TextUtils;
 import android.util.Pair;
 
 import com.parse.OfflineQueryLogic.ConstraintMatcher;
+import com.parse.boltsinternal.Capture;
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,11 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.WeakHashMap;
-
-import com.parse.boltsinternal.Capture;
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 class OfflineStore {
 
@@ -97,12 +96,7 @@ class OfflineStore {
             // The object doesn't have a UUID yet, so we're gonna have to make one.
             objectToUuidMap.put(object, tcs.getTask());
             uuidToObjectMap.put(newUUID, object);
-            fetchedObjects.put(object, tcs.getTask().onSuccess(new Continuation<String, ParseObject>() {
-                @Override
-                public ParseObject then(Task<String> task) {
-                    return object;
-                }
-            }));
+            fetchedObjects.put(object, tcs.getTask().onSuccess(task -> object));
         }
 
         /*
@@ -114,13 +108,10 @@ class OfflineStore {
         values.put(OfflineSQLiteOpenHelper.KEY_UUID, newUUID);
         values.put(OfflineSQLiteOpenHelper.KEY_CLASS_NAME, object.getClassName());
         db.insertOrThrowAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, values).continueWith(
-                new Continuation<Void, Void>() {
-                    @Override
-                    public Void then(Task<Void> task) {
-                        // This will signal that the UUID does represent a row in the database.
-                        tcs.setResult(newUUID);
-                        return null;
-                    }
+                (Continuation<Void, Void>) task -> {
+                    // This will signal that the UUID does represent a row in the database.
+                    tcs.setResult(newUUID);
+                    return null;
                 });
 
         return tcs.getTask();
@@ -155,42 +146,39 @@ class OfflineStore {
         String where = OfflineSQLiteOpenHelper.KEY_UUID + " = ?";
         String[] args = {uuid};
         return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args).onSuccess(
-                new Continuation<Cursor, T>() {
-                    @Override
-                    public T then(Task<Cursor> task) {
-                        Cursor cursor = task.getResult();
-                        cursor.moveToFirst();
-                        if (cursor.isAfterLast()) {
-                            cursor.close();
-                            throw new IllegalStateException("Attempted to find non-existent uuid " + uuid);
+                task -> {
+                    Cursor cursor = task.getResult();
+                    cursor.moveToFirst();
+                    if (cursor.isAfterLast()) {
+                        cursor.close();
+                        throw new IllegalStateException("Attempted to find non-existent uuid " + uuid);
+                    }
+
+                    synchronized (lock) {
+                        // We need to check again since another task might have come around and added it to
+                        // the map.
+                        //TODO (grantland): Maybe we should insert a Task that is resolved when the query
+                        // completes like we do in getOrCreateUUIDAsync?
+                        @SuppressWarnings("unchecked")
+                        T existing = (T) uuidToObjectMap.get(uuid);
+                        if (existing != null) {
+                            return existing;
                         }
 
-                        synchronized (lock) {
-                            // We need to check again since another task might have come around and added it to
-                            // the map.
-                            //TODO (grantland): Maybe we should insert a Task that is resolved when the query
-                            // completes like we do in getOrCreateUUIDAsync?
-                            @SuppressWarnings("unchecked")
-                            T existing = (T) uuidToObjectMap.get(uuid);
-                            if (existing != null) {
-                                return existing;
-                            }
-
-                            String className = cursor.getString(0);
-                            String objectId = cursor.getString(1);
-                            cursor.close();
-                            @SuppressWarnings("unchecked")
-                            T pointer = (T) ParseObject.createWithoutData(className, objectId);
-                            /*
-                             * If it doesn't have an objectId, we don't really need the UUID, and this simplifies
-                             * some other logic elsewhere if we only update the map for new objects.
-                             */
-                            if (objectId == null) {
-                                uuidToObjectMap.put(uuid, pointer);
-                                objectToUuidMap.put(pointer, Task.forResult(uuid));
-                            }
-                            return pointer;
+                        String className = cursor.getString(0);
+                        String objectId = cursor.getString(1);
+                        cursor.close();
+                        @SuppressWarnings("unchecked")
+                        T pointer = (T) ParseObject.createWithoutData(className, objectId);
+                        /*
+                         * If it doesn't have an objectId, we don't really need the UUID, and this simplifies
+                         * some other logic elsewhere if we only update the map for new objects.
+                         */
+                        if (objectId == null) {
+                            uuidToObjectMap.put(uuid, pointer);
+                            objectToUuidMap.put(pointer, Task.forResult(uuid));
                         }
+                        return pointer;
                     }
                 });
     }
@@ -255,115 +243,82 @@ class OfflineStore {
                 return Task.forResult(results);
             }
 
-            queryTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
-                @Override
-                public Task<Cursor> then(Task<String> task) {
-                    String uuid = task.getResult();
+            queryTask = uuidTask.onSuccessTask(task -> {
+                String uuid = task.getResult();
 
-                    String table = OfflineSQLiteOpenHelper.TABLE_OBJECTS + " A " +
-                            " INNER JOIN " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES + " B " +
-                            " ON A." + OfflineSQLiteOpenHelper.KEY_UUID + "=B." + OfflineSQLiteOpenHelper.KEY_UUID;
-                    String[] select = {"A." + OfflineSQLiteOpenHelper.KEY_UUID};
-                    String where = OfflineSQLiteOpenHelper.KEY_CLASS_NAME + "=?" +
-                            " AND " + OfflineSQLiteOpenHelper.KEY_KEY + "=?";
-                    if (!includeIsDeletingEventually) {
-                        where += " AND " + OfflineSQLiteOpenHelper.KEY_IS_DELETING_EVENTUALLY + "=0";
-                    }
-                    String[] args = {query.className(), uuid};
-
-                    return db.queryAsync(table, select, where, args);
+                String table = OfflineSQLiteOpenHelper.TABLE_OBJECTS + " A " +
+                        " INNER JOIN " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES + " B " +
+                        " ON A." + OfflineSQLiteOpenHelper.KEY_UUID + "=B." + OfflineSQLiteOpenHelper.KEY_UUID;
+                String[] select = {"A." + OfflineSQLiteOpenHelper.KEY_UUID};
+                String where = OfflineSQLiteOpenHelper.KEY_CLASS_NAME + "=?" +
+                        " AND " + OfflineSQLiteOpenHelper.KEY_KEY + "=?";
+                if (!includeIsDeletingEventually) {
+                    where += " AND " + OfflineSQLiteOpenHelper.KEY_IS_DELETING_EVENTUALLY + "=0";
                 }
+                String[] args = {query.className(), uuid};
+
+                return db.queryAsync(table, select, where, args);
             });
         }
 
-        return queryTask.onSuccessTask(new Continuation<Cursor, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Cursor> task) {
-                Cursor cursor = task.getResult();
-                List<String> uuids = new ArrayList<>();
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    uuids.add(cursor.getString(0));
-                }
-                cursor.close();
-
-                // Find objects that match the where clause.
-                final ConstraintMatcher<T> matcher = queryLogic.createMatcher(query, user);
-
-                Task<Void> checkedAllObjects = Task.forResult(null);
-                for (final String uuid : uuids) {
-                    final Capture<T> object = new Capture<>();
-
-                    checkedAllObjects = checkedAllObjects.onSuccessTask(new Continuation<Void, Task<T>>() {
-                        @Override
-                        public Task<T> then(Task<Void> task) {
-                            return getPointerAsync(uuid, db);
-                        }
-                    }).onSuccessTask(new Continuation<T, Task<T>>() {
-                        @Override
-                        public Task<T> then(Task<T> task) {
-                            object.set(task.getResult());
-                            return fetchLocallyAsync(object.get(), db);
-                        }
-                    }).onSuccessTask(new Continuation<T, Task<Boolean>>() {
-                        @Override
-                        public Task<Boolean> then(Task<T> task) {
-                            if (!object.get().isDataAvailable()) {
-                                return Task.forResult(false);
-                            }
-                            return matcher.matchesAsync(object.get(), db);
-                        }
-                    }).onSuccess(new Continuation<Boolean, Void>() {
-                        @Override
-                        public Void then(Task<Boolean> task) {
-                            if (task.getResult()) {
-                                results.add(object.get());
-                            }
-                            return null;
-                        }
-                    });
-                }
-
-                return checkedAllObjects;
+        return queryTask.onSuccessTask(task -> {
+            Cursor cursor = task.getResult();
+            List<String> uuids = new ArrayList<>();
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                uuids.add(cursor.getString(0));
             }
-        }).onSuccessTask(new Continuation<Void, Task<List<T>>>() {
-            @Override
-            public Task<List<T>> then(Task<Void> task) throws Exception {
-                // Sort by any sort operators.
-                OfflineQueryLogic.sort(results, query);
+            cursor.close();
 
-                // Apply the skip.
-                List<T> trimmedResults = results;
-                int skip = query.skip();
-                if (!isCount && skip >= 0) {
-                    skip = Math.min(query.skip(), trimmedResults.size());
-                    trimmedResults = trimmedResults.subList(skip, trimmedResults.size());
-                }
+            // Find objects that match the where clause.
+            final ConstraintMatcher<T> matcher = queryLogic.createMatcher(query, user);
 
-                // Trim to the limit.
-                int limit = query.limit();
-                if (!isCount && limit >= 0 && trimmedResults.size() > limit) {
-                    trimmedResults = trimmedResults.subList(0, limit);
-                }
+            Task<Void> checkedAllObjects = Task.forResult(null);
+            for (final String uuid : uuids) {
+                final Capture<T> object = new Capture<>();
 
-                // Fetch the includes.
-                Task<Void> fetchedIncludesTask = Task.forResult(null);
-                for (final T object : trimmedResults) {
-                    fetchedIncludesTask = fetchedIncludesTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                        @Override
-                        public Task<Void> then(Task<Void> task) {
-                            return OfflineQueryLogic.fetchIncludesAsync(OfflineStore.this, object, query, db);
-                        }
-                    });
-                }
-
-                final List<T> finalTrimmedResults = trimmedResults;
-                return fetchedIncludesTask.onSuccess(new Continuation<Void, List<T>>() {
-                    @Override
-                    public List<T> then(Task<Void> task) {
-                        return finalTrimmedResults;
+                checkedAllObjects = checkedAllObjects.onSuccessTask((Continuation<Void, Task<T>>) task16 -> getPointerAsync(uuid, db)).onSuccessTask(task15 -> {
+                    object.set(task15.getResult());
+                    return fetchLocallyAsync(object.get(), db);
+                }).onSuccessTask(task14 -> {
+                    if (!object.get().isDataAvailable()) {
+                        return Task.forResult(false);
                     }
+                    return matcher.matchesAsync(object.get(), db);
+                }).onSuccess(task13 -> {
+                    if (task13.getResult()) {
+                        results.add(object.get());
+                    }
+                    return null;
                 });
             }
+
+            return checkedAllObjects;
+        }).onSuccessTask(task -> {
+            // Sort by any sort operators.
+            OfflineQueryLogic.sort(results, query);
+
+            // Apply the skip.
+            List<T> trimmedResults = results;
+            int skip = query.skip();
+            if (!isCount && skip >= 0) {
+                skip = Math.min(query.skip(), trimmedResults.size());
+                trimmedResults = trimmedResults.subList(skip, trimmedResults.size());
+            }
+
+            // Trim to the limit.
+            int limit = query.limit();
+            if (!isCount && limit >= 0 && trimmedResults.size() > limit) {
+                trimmedResults = trimmedResults.subList(0, limit);
+            }
+
+            // Fetch the includes.
+            Task<Void> fetchedIncludesTask = Task.forResult(null);
+            for (final T object : trimmedResults) {
+                fetchedIncludesTask = fetchedIncludesTask.onSuccessTask(task12 -> OfflineQueryLogic.fetchIncludesAsync(OfflineStore.this, object, query, db));
+            }
+
+            final List<T> finalTrimmedResults = trimmedResults;
+            return fetchedIncludesTask.onSuccess(task1 -> finalTrimmedResults);
         });
     }
 
@@ -429,27 +384,21 @@ class OfflineStore {
                 final String[] select = {OfflineSQLiteOpenHelper.KEY_JSON};
                 final String where = OfflineSQLiteOpenHelper.KEY_UUID + " = ?";
                 final Capture<String> uuid = new Capture<>();
-                jsonStringTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
-                    @Override
-                    public Task<Cursor> then(Task<String> task) {
-                        uuid.set(task.getResult());
-                        String[] args = {uuid.get()};
-                        return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args);
-                    }
-                }).onSuccess(new Continuation<Cursor, String>() {
-                    @Override
-                    public String then(Task<Cursor> task) {
-                        Cursor cursor = task.getResult();
-                        cursor.moveToFirst();
-                        if (cursor.isAfterLast()) {
-                            cursor.close();
-                            throw new IllegalStateException("Attempted to find non-existent uuid " + uuid.get());
-                        }
-                        String json = cursor.getString(0);
+                jsonStringTask = uuidTask.onSuccessTask(task -> {
+                    uuid.set(task.getResult());
+                    String[] args = {uuid.get()};
+                    return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args);
+                }).onSuccess(task -> {
+                    Cursor cursor = task.getResult();
+                    cursor.moveToFirst();
+                    if (cursor.isAfterLast()) {
                         cursor.close();
-
-                        return json;
+                        throw new IllegalStateException("Attempted to find non-existent uuid " + uuid.get());
                     }
+                    String json = cursor.getString(0);
+                    cursor.close();
+
+                    return json;
                 });
             }
         } else {
@@ -480,102 +429,90 @@ class OfflineStore {
             String[] args = {className, objectId};
             jsonStringTask =
                     db.queryAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, select, where, args).onSuccess(
-                            new Continuation<Cursor, String>() {
-                                @Override
-                                public String then(Task<Cursor> task) throws Exception {
-                                    Cursor cursor = task.getResult();
-                                    cursor.moveToFirst();
-                                    if (cursor.isAfterLast()) {
-                                        /*
-                                         * This is a pointer that came from Parse that references an object that has
-                                         * never been saved in the offline store before. This just means there's no data
-                                         * in the store that needs to be merged into the object.
-                                         */
-                                        cursor.close();
-                                        throw new ParseException(ParseException.CACHE_MISS,
-                                                "This object is not available in the offline cache.");
-                                    }
-
-                                    // we should fetch its data and record its UUID for future reference.
-                                    String jsonString = cursor.getString(0);
-                                    String newUUID = cursor.getString(1);
+                            task -> {
+                                Cursor cursor = task.getResult();
+                                cursor.moveToFirst();
+                                if (cursor.isAfterLast()) {
+                                    /*
+                                     * This is a pointer that came from Parse that references an object that has
+                                     * never been saved in the offline store before. This just means there's no data
+                                     * in the store that needs to be merged into the object.
+                                     */
                                     cursor.close();
-
-                                    synchronized (lock) {
-                                        /*
-                                         * It's okay to put this object into the uuid map. No one will try to fetch
-                                         * it, because it's already in the fetchedObjects map. And no one will try to
-                                         * save to it without fetching it first, so everything should be just fine.
-                                         */
-                                        objectToUuidMap.put(object, Task.forResult(newUUID));
-                                        uuidToObjectMap.put(newUUID, object);
-                                    }
-
-                                    return jsonString;
+                                    throw new ParseException(ParseException.CACHE_MISS,
+                                            "This object is not available in the offline cache.");
                                 }
+
+                                // we should fetch its data and record its UUID for future reference.
+                                String jsonString = cursor.getString(0);
+                                String newUUID = cursor.getString(1);
+                                cursor.close();
+
+                                synchronized (lock) {
+                                    /*
+                                     * It's okay to put this object into the uuid map. No one will try to fetch
+                                     * it, because it's already in the fetchedObjects map. And no one will try to
+                                     * save to it without fetching it first, so everything should be just fine.
+                                     */
+                                    objectToUuidMap.put(object, Task.forResult(newUUID));
+                                    uuidToObjectMap.put(newUUID, object);
+                                }
+
+                                return jsonString;
                             });
         }
 
-        return jsonStringTask.onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String jsonString = task.getResult();
-                if (jsonString == null) {
-                    /*
-                     * This means we tried to fetch an object from the database that was never actually saved
-                     * locally. This probably means that its parent object was saved locally and we just
-                     * created a pointer to this object. This should be considered a cache miss.
-                     */
-                    return Task.forError(new ParseException(ParseException.CACHE_MISS,
-                            "Attempted to fetch an object offline which was never saved to the offline cache."));
-                }
-                final JSONObject json;
-                try {
-                    /*
-                     * We can assume that whatever is in the database is the last known server state. The only
-                     * things to maintain from the in-memory object are any changes since the object was last
-                     * put in the database.
-                     */
-                    json = new JSONObject(jsonString);
-                } catch (JSONException e) {
-                    return Task.forError(e);
-                }
-
-                // Fetch all the offline objects before we decode.
-                final Map<String, Task<ParseObject>> offlineObjects = new HashMap<>();
-
-                (new ParseTraverser() {
-                    @Override
-                    protected boolean visit(Object object) {
-                        if (object instanceof JSONObject
-                                && ((JSONObject) object).optString("__type").equals("OfflineObject")) {
-                            String uuid = ((JSONObject) object).optString("uuid");
-                            offlineObjects.put(uuid, getPointerAsync(uuid, db));
-                        }
-                        return true;
-                    }
-                }).setTraverseParseObjects(false).setYieldRoot(false).traverse(json);
-
-                return Task.whenAll(offlineObjects.values()).onSuccess(new Continuation<Void, Void>() {
-                    @Override
-                    public Void then(Task<Void> task) {
-                        object.mergeREST(object.getState(), json, new OfflineDecoder(offlineObjects));
-                        return null;
-                    }
-                });
+        return jsonStringTask.onSuccessTask((Continuation<String, Task<Void>>) task -> {
+            String jsonString = task.getResult();
+            if (jsonString == null) {
+                /*
+                 * This means we tried to fetch an object from the database that was never actually saved
+                 * locally. This probably means that its parent object was saved locally and we just
+                 * created a pointer to this object. This should be considered a cache miss.
+                 */
+                return Task.forError(new ParseException(ParseException.CACHE_MISS,
+                        "Attempted to fetch an object offline which was never saved to the offline cache."));
             }
-        }).continueWithTask(new Continuation<Void, Task<T>>() {
-            @Override
-            public Task<T> then(Task<Void> task) {
-                if (task.isCancelled()) {
-                    tcs.setCancelled();
-                } else if (task.isFaulted()) {
-                    tcs.setError(task.getError());
-                } else {
-                    tcs.setResult(object);
-                }
-                return tcs.getTask();
+            final JSONObject json;
+            try {
+                /*
+                 * We can assume that whatever is in the database is the last known server state. The only
+                 * things to maintain from the in-memory object are any changes since the object was last
+                 * put in the database.
+                 */
+                json = new JSONObject(jsonString);
+            } catch (JSONException e) {
+                return Task.forError(e);
             }
+
+            // Fetch all the offline objects before we decode.
+            final Map<String, Task<ParseObject>> offlineObjects = new HashMap<>();
+
+            (new ParseTraverser() {
+                @Override
+                protected boolean visit(Object object1) {
+                    if (object1 instanceof JSONObject
+                            && ((JSONObject) object1).optString("__type").equals("OfflineObject")) {
+                        String uuid = ((JSONObject) object1).optString("uuid");
+                        offlineObjects.put(uuid, getPointerAsync(uuid, db));
+                    }
+                    return true;
+                }
+            }).setTraverseParseObjects(false).setYieldRoot(false).traverse(json);
+
+            return Task.whenAll(offlineObjects.values()).onSuccess(task1 -> {
+                object.mergeREST(object.getState(), json, new OfflineDecoder(offlineObjects));
+                return null;
+            });
+        }).continueWithTask(task -> {
+            if (task.isCancelled()) {
+                tcs.setCancelled();
+            } else if (task.isFaulted()) {
+                tcs.setError(task.getError());
+            } else {
+                tcs.setResult(object);
+            }
+            return tcs.getTask();
         });
     }
 
@@ -587,12 +524,7 @@ class OfflineStore {
      * @param object The object to fetch.
      */
     /* package */ <T extends ParseObject> Task<T> fetchLocallyAsync(final T object) {
-        return runWithManagedConnection(new SQLiteDatabaseCallable<Task<T>>() {
-            @Override
-            public Task<T> call(ParseSQLiteDatabase db) {
-                return fetchLocallyAsync(object, db);
-            }
-        });
+        return runWithManagedConnection(db -> fetchLocallyAsync(object, db));
     }
 
     /**
@@ -613,22 +545,16 @@ class OfflineStore {
         final Capture<String> uuidCapture = new Capture<>();
 
         // Make sure we have a UUID for the object to be saved.
-        return getOrCreateUUIDAsync(object, db).onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String uuid = task.getResult();
-                uuidCapture.set(uuid);
-                return updateDataForObjectAsync(uuid, object, db);
-            }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                final ContentValues values = new ContentValues();
-                values.put(OfflineSQLiteOpenHelper.KEY_KEY, key);
-                values.put(OfflineSQLiteOpenHelper.KEY_UUID, uuidCapture.get());
-                return db.insertWithOnConflict(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, values,
-                        SQLiteDatabase.CONFLICT_IGNORE);
-            }
+        return getOrCreateUUIDAsync(object, db).onSuccessTask(task -> {
+            String uuid = task.getResult();
+            uuidCapture.set(uuid);
+            return updateDataForObjectAsync(uuid, object, db);
+        }).onSuccessTask(task -> {
+            final ContentValues values = new ContentValues();
+            values.put(OfflineSQLiteOpenHelper.KEY_KEY, key);
+            values.put(OfflineSQLiteOpenHelper.KEY_UUID, uuidCapture.get());
+            return db.insertWithOnConflict(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, values,
+                    SQLiteDatabase.CONFLICT_IGNORE);
         });
     }
 
@@ -673,7 +599,7 @@ class OfflineStore {
             final ParseObject object, List<ParseObject> children, final ParseSQLiteDatabase db) {
         final List<ParseObject> objects = children != null
                 ? new ArrayList<>(children)
-                : new ArrayList<ParseObject>();
+                : new ArrayList<>();
         if (!objects.contains(object)) {
             objects.add(object);
         }
@@ -684,42 +610,26 @@ class OfflineStore {
             tasks.add(fetchLocallyAsync(obj, db).makeVoid());
         }
 
-        return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<String>>() {
-            @Override
-            public Task<String> then(Task<Void> task) {
-                return objectToUuidMap.get(object);
+        return Task.whenAll(tasks).continueWithTask(task -> objectToUuidMap.get(object)).onSuccessTask(task -> {
+            String uuid = task.getResult();
+            if (uuid == null) {
+                // The root object was never stored in the offline store, so nothing to unpin.
+                return null;
             }
-        }).onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String uuid = task.getResult();
-                if (uuid == null) {
-                    // The root object was never stored in the offline store, so nothing to unpin.
-                    return null;
-                }
 
-                // Delete all objects locally corresponding to the key we're trying to use in case it was
-                // used before (overwrite)
-                return unpinAsync(uuid, db);
-            }
-        }).onSuccessTask(new Continuation<Void, Task<String>>() {
-            @Override
-            public Task<String> then(Task<Void> task) {
-                return getOrCreateUUIDAsync(object, db);
-            }
-        }).onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String uuid = task.getResult();
+            // Delete all objects locally corresponding to the key we're trying to use in case it was
+            // used before (overwrite)
+            return unpinAsync(uuid, db);
+        }).onSuccessTask(task -> getOrCreateUUIDAsync(object, db)).onSuccessTask(task -> {
+            String uuid = task.getResult();
 
-                // Call saveLocallyAsync for each of them individually.
-                final List<Task<Void>> tasks = new ArrayList<>();
-                for (ParseObject obj : objects) {
-                    tasks.add(saveLocallyAsync(uuid, obj, db));
-                }
-
-                return Task.whenAll(tasks);
+            // Call saveLocallyAsync for each of them individually.
+            final List<Task<Void>> tasks1 = new ArrayList<>();
+            for (ParseObject obj : objects) {
+                tasks1.add(saveLocallyAsync(uuid, obj, db));
             }
+
+            return Task.whenAll(tasks1);
         });
     }
 
@@ -729,71 +639,56 @@ class OfflineStore {
             // The root object was never stored in the offline store, so nothing to unpin.
             return Task.forResult(null);
         }
-        return uuidTask.continueWithTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                final String uuid = task.getResult();
-                if (uuid == null) {
-                    // The root object was never stored in the offline store, so nothing to unpin.
-                    return Task.forResult(null);
-                }
-                return unpinAsync(uuid, db);
+        return uuidTask.continueWithTask(task -> {
+            final String uuid = task.getResult();
+            if (uuid == null) {
+                // The root object was never stored in the offline store, so nothing to unpin.
+                return Task.forResult(null);
             }
+            return unpinAsync(uuid, db);
         });
     }
 
     private Task<Void> unpinAsync(final String key, final ParseSQLiteDatabase db) {
         final List<String> uuidsToDelete = new LinkedList<>();
         // A continueWithTask that ends with "return task" is essentially a try-finally.
-        return Task.forResult((Void) null).continueWithTask(new Continuation<Void, Task<Cursor>>() {
-            @Override
-            public Task<Cursor> then(Task<Void> task) {
-                // Fetch all uuids from Dependencies for key=? grouped by uuid having a count of 1
-                String sql = "SELECT " + OfflineSQLiteOpenHelper.KEY_UUID + " FROM " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES +
-                        " WHERE " + OfflineSQLiteOpenHelper.KEY_KEY + "=? AND " + OfflineSQLiteOpenHelper.KEY_UUID + " IN (" +
-                        " SELECT " + OfflineSQLiteOpenHelper.KEY_UUID + " FROM " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES +
-                        " GROUP BY " + OfflineSQLiteOpenHelper.KEY_UUID +
-                        " HAVING COUNT(" + OfflineSQLiteOpenHelper.KEY_UUID + ")=1" +
-                        ")";
-                String[] args = {key};
-                return db.rawQueryAsync(sql, args);
-            }
-        }).onSuccessTask(new Continuation<Cursor, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Cursor> task) {
-                // DELETE FROM Objects
+        return Task.forResult((Void) null).continueWithTask(task -> {
+            // Fetch all uuids from Dependencies for key=? grouped by uuid having a count of 1
+            String sql = "SELECT " + OfflineSQLiteOpenHelper.KEY_UUID + " FROM " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES +
+                    " WHERE " + OfflineSQLiteOpenHelper.KEY_KEY + "=? AND " + OfflineSQLiteOpenHelper.KEY_UUID + " IN (" +
+                    " SELECT " + OfflineSQLiteOpenHelper.KEY_UUID + " FROM " + OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES +
+                    " GROUP BY " + OfflineSQLiteOpenHelper.KEY_UUID +
+                    " HAVING COUNT(" + OfflineSQLiteOpenHelper.KEY_UUID + ")=1" +
+                    ")";
+            String[] args = {key};
+            return db.rawQueryAsync(sql, args);
+        }).onSuccessTask(task -> {
+            // DELETE FROM Objects
 
-                Cursor cursor = task.getResult();
-                while (cursor.moveToNext()) {
-                    uuidsToDelete.add(cursor.getString(0));
-                }
-                cursor.close();
+            Cursor cursor = task.getResult();
+            while (cursor.moveToNext()) {
+                uuidsToDelete.add(cursor.getString(0));
+            }
+            cursor.close();
 
-                return deleteObjects(uuidsToDelete, db);
-            }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                // DELETE FROM Dependencies
-                String where = OfflineSQLiteOpenHelper.KEY_KEY + "=?";
-                String[] args = {key};
-                return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, where, args);
-            }
-        }).onSuccess(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                synchronized (lock) {
-                    // Remove uuids from memory
-                    for (String uuid : uuidsToDelete) {
-                        ParseObject object = uuidToObjectMap.get(uuid);
-                        if (object != null) {
-                            objectToUuidMap.remove(object);
-                            uuidToObjectMap.remove(uuid);
-                        }
+            return deleteObjects(uuidsToDelete, db);
+        }).onSuccessTask(task -> {
+            // DELETE FROM Dependencies
+            String where = OfflineSQLiteOpenHelper.KEY_KEY + "=?";
+            String[] args = {key};
+            return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, where, args);
+        }).onSuccess(task -> {
+            synchronized (lock) {
+                // Remove uuids from memory
+                for (String uuid : uuidsToDelete) {
+                    ParseObject object = uuidToObjectMap.get(uuid);
+                    if (object != null) {
+                        objectToUuidMap.remove(object);
+                        uuidToObjectMap.remove(uuid);
                     }
                 }
-                return null;
             }
+            return null;
         });
     }
 
@@ -805,12 +700,7 @@ class OfflineStore {
         // SQLite has a max 999 SQL variables in a statement, so we need to split it up into manageable
         // chunks. We can do this because we're already in a transaction.
         if (uuids.size() > MAX_SQL_VARIABLES) {
-            return deleteObjects(uuids.subList(0, MAX_SQL_VARIABLES), db).onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return deleteObjects(uuids.subList(MAX_SQL_VARIABLES, uuids.size()), db);
-                }
-            });
+            return deleteObjects(uuids.subList(0, MAX_SQL_VARIABLES), db).onSuccessTask(task -> deleteObjects(uuids.subList(MAX_SQL_VARIABLES, uuids.size()), db));
         }
 
         String[] placeholders = new String[uuids.size()];
@@ -819,7 +709,7 @@ class OfflineStore {
         }
         String where = OfflineSQLiteOpenHelper.KEY_UUID + " IN (" + TextUtils.join(",", placeholders) + ")";
         // dynamic args
-        String[] args = uuids.toArray(new String[uuids.size()]);
+        String[] args = uuids.toArray(new String[0]);
         return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, where, args);
     }
 
@@ -838,45 +728,28 @@ class OfflineStore {
                         "An object cannot be updated if it wasn't fetched."));
             }
         }
-        return fetched.continueWithTask(new Continuation<ParseObject, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParseObject> task) {
-                if (task.isFaulted()) {
-                    // Catch CACHE_MISS
-                    //noinspection ThrowableResultOfMethodCallIgnored
-                    if (task.getError() instanceof ParseException
-                            && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
-                        return Task.forResult(null);
-                    }
-                    return task.makeVoid();
+        return fetched.continueWithTask(task -> {
+            if (task.isFaulted()) {
+                // Catch CACHE_MISS
+                //noinspection ThrowableResultOfMethodCallIgnored
+                if (task.getError() instanceof ParseException
+                        && ((ParseException) task.getError()).getCode() == ParseException.CACHE_MISS) {
+                    return Task.forResult(null);
                 }
-
-                return helper.getWritableDatabaseAsync().continueWithTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<ParseSQLiteDatabase> task) {
-                        final ParseSQLiteDatabase db = task.getResult();
-                        return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
-                            @Override
-                            public Task<Void> then(Task<Void> task) {
-                                return updateDataForObjectAsync(object, db).onSuccessTask(new Continuation<Void, Task<Void>>() {
-                                    @Override
-                                    public Task<Void> then(Task<Void> task) {
-                                        return db.setTransactionSuccessfulAsync();
-                                    }
-                                }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                                    // } finally {
-                                    @Override
-                                    public Task<Void> then(Task<Void> task) {
-                                        db.endTransactionAsync();
-                                        db.closeAsync();
-                                        return task;
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                return task.makeVoid();
             }
+
+            return helper.getWritableDatabaseAsync().continueWithTask(task14 -> {
+                final ParseSQLiteDatabase db = task14.getResult();
+                return db.beginTransactionAsync().onSuccessTask(task13 -> {
+                    // } finally {
+                    return updateDataForObjectAsync(object, db).onSuccessTask(task12 -> db.setTransactionSuccessfulAsync()).continueWithTask(task1 -> {
+                        db.endTransactionAsync();
+                        db.closeAsync();
+                        return task1;
+                    });
+                });
+            });
         });
     }
 
@@ -892,12 +765,9 @@ class OfflineStore {
                 return Task.forResult(null);
             }
         }
-        return uuidTask.onSuccessTask(new Continuation<String, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<String> task) {
-                String uuid = task.getResult();
-                return updateDataForObjectAsync(uuid, object, db);
-            }
+        return uuidTask.onSuccessTask(task -> {
+            String uuid = task.getResult();
+            return updateDataForObjectAsync(uuid, object, db);
         });
     }
 
@@ -909,53 +779,36 @@ class OfflineStore {
         OfflineEncoder encoder = new OfflineEncoder(db);
         final JSONObject json = object.toRest(encoder);
 
-        return encoder.whenFinished().onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
-                // Put the JSON in the database.
-                String className = object.getClassName();
-                String objectId = object.getObjectId();
-                int isDeletingEventually = json.getInt(ParseObject.KEY_IS_DELETING_EVENTUALLY);
+        return encoder.whenFinished().onSuccessTask(task -> {
+            // Put the JSON in the database.
+            String className = object.getClassName();
+            String objectId = object.getObjectId();
+            int isDeletingEventually = json.getInt(ParseObject.KEY_IS_DELETING_EVENTUALLY);
 
-                final ContentValues values = new ContentValues();
-                values.put(OfflineSQLiteOpenHelper.KEY_CLASS_NAME, className);
-                values.put(OfflineSQLiteOpenHelper.KEY_JSON, json.toString());
-                if (objectId != null) {
-                    values.put(OfflineSQLiteOpenHelper.KEY_OBJECT_ID, objectId);
-                }
-                values.put(OfflineSQLiteOpenHelper.KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
-                String where = OfflineSQLiteOpenHelper.KEY_UUID + " = ?";
-                String[] args = {uuid};
-                return db.updateAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, values, where, args).makeVoid();
+            final ContentValues values = new ContentValues();
+            values.put(OfflineSQLiteOpenHelper.KEY_CLASS_NAME, className);
+            values.put(OfflineSQLiteOpenHelper.KEY_JSON, json.toString());
+            if (objectId != null) {
+                values.put(OfflineSQLiteOpenHelper.KEY_OBJECT_ID, objectId);
             }
+            values.put(OfflineSQLiteOpenHelper.KEY_IS_DELETING_EVENTUALLY, isDeletingEventually);
+            String where = OfflineSQLiteOpenHelper.KEY_UUID + " = ?";
+            String[] args = {uuid};
+            return db.updateAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, values, where, args).makeVoid();
         });
     }
 
     /* package */ Task<Void> deleteDataForObjectAsync(final ParseObject object) {
-        return helper.getWritableDatabaseAsync().continueWithTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParseSQLiteDatabase> task) {
-                final ParseSQLiteDatabase db = task.getResult();
-                return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        return deleteDataForObjectAsync(object, db).onSuccessTask(new Continuation<Void, Task<Void>>() {
-                            @Override
-                            public Task<Void> then(Task<Void> task) {
-                                return db.setTransactionSuccessfulAsync();
-                            }
-                        }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                            // } finally {
-                            @Override
-                            public Task<Void> then(Task<Void> task) {
-                                db.endTransactionAsync();
-                                db.closeAsync();
-                                return task;
-                            }
-                        });
-                    }
+        return helper.getWritableDatabaseAsync().continueWithTask(task -> {
+            final ParseSQLiteDatabase db = task.getResult();
+            return db.beginTransactionAsync().onSuccessTask(task13 -> {
+                // } finally {
+                return deleteDataForObjectAsync(object, db).onSuccessTask(task12 -> db.setTransactionSuccessfulAsync()).continueWithTask(task1 -> {
+                    db.endTransactionAsync();
+                    db.closeAsync();
+                    return task1;
                 });
-            }
+            });
         });
     }
 
@@ -971,95 +824,71 @@ class OfflineStore {
                 return Task.forResult(null);
             }
         }
-        uuidTask = uuidTask.onSuccessTask(new Continuation<String, Task<String>>() {
-            @Override
-            public Task<String> then(Task<String> task) {
-                uuid.set(task.getResult());
-                return task;
-            }
+        uuidTask = uuidTask.onSuccessTask(task -> {
+            uuid.set(task.getResult());
+            return task;
         });
 
         // If the object was the root of a pin, unpin it.
-        Task<Void> unpinTask = uuidTask.onSuccessTask(new Continuation<String, Task<Cursor>>() {
-            @Override
-            public Task<Cursor> then(Task<String> task) {
-                // Find all the roots for this object.
-                String[] select = {OfflineSQLiteOpenHelper.KEY_KEY};
-                String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
-                String[] args = {uuid.get()};
-                return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, select, where, args);
+        Task<Void> unpinTask = uuidTask.onSuccessTask(task -> {
+            // Find all the roots for this object.
+            String[] select = {OfflineSQLiteOpenHelper.KEY_KEY};
+            String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
+            String[] args = {uuid.get()};
+            return db.queryAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, select, where, args);
+        }).onSuccessTask(task -> {
+            // Try to unpin this object from the pin label if it's a root of the ParsePin.
+            Cursor cursor = task.getResult();
+            List<String> uuids = new ArrayList<>();
+            for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+                uuids.add(cursor.getString(0));
             }
-        }).onSuccessTask(new Continuation<Cursor, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Cursor> task) {
-                // Try to unpin this object from the pin label if it's a root of the ParsePin.
-                Cursor cursor = task.getResult();
-                List<String> uuids = new ArrayList<>();
-                for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-                    uuids.add(cursor.getString(0));
-                }
-                cursor.close();
+            cursor.close();
 
-                List<Task<Void>> tasks = new ArrayList<>();
-                for (final String uuid : uuids) {
-                    Task<Void> unpinTask = getPointerAsync(uuid, db).onSuccessTask(new Continuation<ParseObject, Task<ParsePin>>() {
-                        @Override
-                        public Task<ParsePin> then(Task<ParseObject> task) {
-                            ParsePin pin = (ParsePin) task.getResult();
-                            return fetchLocallyAsync(pin, db);
-                        }
-                    }).continueWithTask(new Continuation<ParsePin, Task<Void>>() {
-                        @Override
-                        public Task<Void> then(Task<ParsePin> task) {
-                            ParsePin pin = task.getResult();
+            List<Task<Void>> tasks = new ArrayList<>();
+            for (final String uuid1 : uuids) {
+                Task<Void> unpinTask1 = getPointerAsync(uuid1, db).onSuccessTask(task12 -> {
+                    ParsePin pin = (ParsePin) task12.getResult();
+                    return fetchLocallyAsync(pin, db);
+                }).continueWithTask(task1 -> {
+                    ParsePin pin = task1.getResult();
 
-                            List<ParseObject> modified = pin.getObjects();
-                            if (modified == null || !modified.contains(object)) {
-                                return task.makeVoid();
-                            }
+                    List<ParseObject> modified = pin.getObjects();
+                    if (modified == null || !modified.contains(object)) {
+                        return task1.makeVoid();
+                    }
 
-                            modified.remove(object);
-                            if (modified.size() == 0) {
-                                return unpinAsync(uuid, db);
-                            }
+                    modified.remove(object);
+                    if (modified.size() == 0) {
+                        return unpinAsync(uuid1, db);
+                    }
 
-                            pin.setObjects(modified);
-                            return saveLocallyAsync(pin, true, db);
-                        }
-                    });
-                    tasks.add(unpinTask);
-                }
-
-                return Task.whenAll(tasks);
+                    pin.setObjects(modified);
+                    return saveLocallyAsync(pin, true, db);
+                });
+                tasks.add(unpinTask1);
             }
+
+            return Task.whenAll(tasks);
         });
 
         // Delete the object from the Local Datastore in case it wasn't the root of a pin.
-        return unpinTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
-                String[] args = {uuid.get()};
-                return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, where, args);
+        return unpinTask.onSuccessTask(task -> {
+            String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
+            String[] args = {uuid.get()};
+            return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_DEPENDENCIES, where, args);
+        }).onSuccessTask(task -> {
+            String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
+            String[] args = {uuid.get()};
+            return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, where, args);
+        }).onSuccessTask(task -> {
+            synchronized (lock) {
+                // Clean up
+                //TODO (grantland): we should probably clean up uuidToObjectMap and objectToUuidMap, but
+                // getting the uuid requires a task and things might get a little funky...
+                fetchedObjects.remove(object);
             }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                String where = OfflineSQLiteOpenHelper.KEY_UUID + "=?";
-                String[] args = {uuid.get()};
-                return db.deleteAsync(OfflineSQLiteOpenHelper.TABLE_OBJECTS, where, args);
-            }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                synchronized (lock) {
-                    // Clean up
-                    //TODO (grantland): we should probably clean up uuidToObjectMap and objectToUuidMap, but
-                    // getting the uuid requires a task and things might get a little funky...
-                    fetchedObjects.remove(object);
-                }
-                return task;
-            }
+            return task;
         });
     }
 
@@ -1071,22 +900,19 @@ class OfflineStore {
         /* We need to call directly to the OfflineStore since we don't want/need a user to query for
          * ParsePins
          */
-        return findAsync(query, null, null, db).onSuccess(new Continuation<List<ParsePin>, ParsePin>() {
-            @Override
-            public ParsePin then(Task<List<ParsePin>> task) {
-                ParsePin pin = null;
-                if (task.getResult() != null && task.getResult().size() > 0) {
-                    pin = task.getResult().get(0);
-                }
-
-                //TODO (grantland): What do we do if there are more than 1 result?
-
-                if (pin == null) {
-                    pin = ParseObject.create(ParsePin.class);
-                    pin.setName(name);
-                }
-                return pin;
+        return findAsync(query, null, null, db).onSuccess(task -> {
+            ParsePin pin = null;
+            if (task.getResult() != null && task.getResult().size() > 0) {
+                pin = task.getResult().get(0);
             }
+
+            //TODO (grantland): What do we do if there are more than 1 result?
+
+            if (pin == null) {
+                pin = ParseObject.create(ParsePin.class);
+                pin.setName(name);
+            }
+            return pin;
         });
     }
 
@@ -1096,12 +922,7 @@ class OfflineStore {
             final String name,
             final List<T> objects,
             final boolean includeChildren) {
-        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
-            @Override
-            public Task<Void> call(ParseSQLiteDatabase db) {
-                return pinAllObjectsAsync(name, objects, includeChildren, db);
-            }
-        });
+        return runWithManagedTransaction(db -> pinAllObjectsAsync(name, objects, includeChildren, db));
     }
 
     private <T extends ParseObject> Task<Void> pinAllObjectsAsync(
@@ -1113,46 +934,38 @@ class OfflineStore {
             return Task.forResult(null);
         }
 
-        return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParsePin> task) {
-                ParsePin pin = task.getResult();
+        return getParsePin(name, db).onSuccessTask(task -> {
+            ParsePin pin = task.getResult();
 
-                //TODO (grantland): change to use relations. currently the related PO are only getting saved
-                // offline as pointers.
+            //TODO (grantland): change to use relations. currently the related PO are only getting saved
+            // offline as pointers.
 //        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
 //        relation.add(object);
 
-                // Hack to store collections in a pin
-                List<ParseObject> modified = pin.getObjects();
-                if (modified == null) {
-                    modified = new ArrayList<ParseObject>(objects);
-                } else {
-                    for (ParseObject object : objects) {
-                        if (!modified.contains(object)) {
-                            modified.add(object);
-                        }
+            // Hack to store collections in a pin
+            List<ParseObject> modified = pin.getObjects();
+            if (modified == null) {
+                modified = new ArrayList<>(objects);
+            } else {
+                for (ParseObject object : objects) {
+                    if (!modified.contains(object)) {
+                        modified.add(object);
                     }
                 }
-                pin.setObjects(modified);
-
-                if (includeChildren) {
-                    return saveLocallyAsync(pin, true, db);
-                }
-                return saveLocallyAsync(pin, pin.getObjects(), db);
             }
+            pin.setObjects(modified);
+
+            if (includeChildren) {
+                return saveLocallyAsync(pin, true, db);
+            }
+            return saveLocallyAsync(pin, pin.getObjects(), db);
         });
     }
 
     /* package */ <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
             final String name,
             final List<T> objects) {
-        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
-            @Override
-            public Task<Void> call(ParseSQLiteDatabase db) {
-                return unpinAllObjectsAsync(name, objects, db);
-            }
-        });
+        return runWithManagedTransaction(db -> unpinAllObjectsAsync(name, objects, db));
     }
 
     private <T extends ParseObject> Task<Void> unpinAllObjectsAsync(
@@ -1163,53 +976,42 @@ class OfflineStore {
             return Task.forResult(null);
         }
 
-        return getParsePin(name, db).onSuccessTask(new Continuation<ParsePin, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParsePin> task) {
-                ParsePin pin = task.getResult();
+        return getParsePin(name, db).onSuccessTask(task -> {
+            ParsePin pin = task.getResult();
 
-                //TODO (grantland): change to use relations. currently the related PO are only getting saved
-                // offline as pointers.
+            //TODO (grantland): change to use relations. currently the related PO are only getting saved
+            // offline as pointers.
 //        ParseRelation<ParseObject> relation = pin.getRelation(KEY_OBJECTS);
 //        relation.remove(object);
 
-                // Hack to store collections in a pin
-                List<ParseObject> modified = pin.getObjects();
-                if (modified == null) {
-                    // Unpin a pin that doesn't exist. Wat?
-                    return Task.forResult(null);
-                }
-
-                modified.removeAll(objects);
-                if (modified.size() == 0) {
-                    return unpinAsync(pin, db);
-                }
-                pin.setObjects(modified);
-
-                return saveLocallyAsync(pin, true, db);
+            // Hack to store collections in a pin
+            List<ParseObject> modified = pin.getObjects();
+            if (modified == null) {
+                // Unpin a pin that doesn't exist. Wat?
+                return Task.forResult(null);
             }
+
+            modified.removeAll(objects);
+            if (modified.size() == 0) {
+                return unpinAsync(pin, db);
+            }
+            pin.setObjects(modified);
+
+            return saveLocallyAsync(pin, true, db);
         });
     }
 
     /* package */ Task<Void> unpinAllObjectsAsync(final String name) {
-        return runWithManagedTransaction(new SQLiteDatabaseCallable<Task<Void>>() {
-            @Override
-            public Task<Void> call(ParseSQLiteDatabase db) {
-                return unpinAllObjectsAsync(name, db);
-            }
-        });
+        return runWithManagedTransaction(db -> unpinAllObjectsAsync(name, db));
     }
 
     private Task<Void> unpinAllObjectsAsync(final String name, final ParseSQLiteDatabase db) {
-        return getParsePin(name, db).continueWithTask(new Continuation<ParsePin, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParsePin> task) {
-                if (task.isFaulted()) {
-                    return task.makeVoid();
-                }
-                ParsePin pin = task.getResult();
-                return unpinAsync(pin, db);
+        return getParsePin(name, db).continueWithTask(task -> {
+            if (task.isFaulted()) {
+                return task.makeVoid();
             }
+            ParsePin pin = task.getResult();
+            return unpinAsync(pin, db);
         });
     }
 
@@ -1217,12 +1019,7 @@ class OfflineStore {
             final String name,
             final ParseQuery.State<T> state,
             final ParseUser user) {
-        return runWithManagedConnection(new SQLiteDatabaseCallable<Task<List<T>>>() {
-            @Override
-            public Task<List<T>> call(ParseSQLiteDatabase db) {
-                return findFromPinAsync(name, state, user, db);
-            }
-        });
+        return runWithManagedConnection(db -> findFromPinAsync(name, state, user, db));
     }
 
     private <T extends ParseObject> Task<List<T>> findFromPinAsync(
@@ -1236,12 +1033,9 @@ class OfflineStore {
         } else {
             task = Task.forResult(null);
         }
-        return task.onSuccessTask(new Continuation<ParsePin, Task<List<T>>>() {
-            @Override
-            public Task<List<T>> then(Task<ParsePin> task) {
-                ParsePin pin = task.getResult();
-                return findAsync(state, user, pin, false, db);
-            }
+        return task.onSuccessTask(task1 -> {
+            ParsePin pin = task1.getResult();
+            return findAsync(state, user, pin, false, db);
         });
     }
 
@@ -1249,12 +1043,7 @@ class OfflineStore {
             final String name,
             final ParseQuery.State<T> state,
             final ParseUser user) {
-        return runWithManagedConnection(new SQLiteDatabaseCallable<Task<Integer>>() {
-            @Override
-            public Task<Integer> call(ParseSQLiteDatabase db) {
-                return countFromPinAsync(name, state, user, db);
-            }
-        });
+        return runWithManagedConnection(db -> countFromPinAsync(name, state, user, db));
     }
 
     private <T extends ParseObject> Task<Integer> countFromPinAsync(
@@ -1268,17 +1057,9 @@ class OfflineStore {
         } else {
             task = Task.forResult(null);
         }
-        return task.onSuccessTask(new Continuation<ParsePin, Task<Integer>>() {
-            @Override
-            public Task<Integer> then(Task<ParsePin> task) {
-                ParsePin pin = task.getResult();
-                return findAsync(state, user, pin, true, db).onSuccess(new Continuation<List<T>, Integer>() {
-                    @Override
-                    public Integer then(Task<List<T>> task) {
-                        return task.getResult().size();
-                    }
-                });
-            }
+        return task.onSuccessTask(task12 -> {
+            ParsePin pin = task12.getResult();
+            return findAsync(state, user, pin, true, db).onSuccess(task1 -> task1.getResult().size());
         });
     }
 
@@ -1372,18 +1153,12 @@ class OfflineStore {
      * Wraps SQLite operations with a managed SQLite connection.
      */
     private <T> Task<T> runWithManagedConnection(final SQLiteDatabaseCallable<Task<T>> callable) {
-        return helper.getWritableDatabaseAsync().onSuccessTask(new Continuation<ParseSQLiteDatabase, Task<T>>() {
-            @Override
-            public Task<T> then(Task<ParseSQLiteDatabase> task) {
-                final ParseSQLiteDatabase db = task.getResult();
-                return callable.call(db).continueWithTask(new Continuation<T, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<T> task) {
-                        db.closeAsync();
-                        return task;
-                    }
-                });
-            }
+        return helper.getWritableDatabaseAsync().onSuccessTask(task -> {
+            final ParseSQLiteDatabase db = task.getResult();
+            return callable.call(db).continueWithTask(task1 -> {
+                db.closeAsync();
+                return task1;
+            });
         });
     }
 
@@ -1391,29 +1166,13 @@ class OfflineStore {
      * Wraps SQLite operations with a managed SQLite connection and transaction.
      */
     private Task<Void> runWithManagedTransaction(final SQLiteDatabaseCallable<Task<Void>> callable) {
-        return helper.getWritableDatabaseAsync().onSuccessTask(new Continuation<ParseSQLiteDatabase, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<ParseSQLiteDatabase> task) {
-                final ParseSQLiteDatabase db = task.getResult();
-                return db.beginTransactionAsync().onSuccessTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        return callable.call(db).onSuccessTask(new Continuation<Void, Task<Void>>() {
-                            @Override
-                            public Task<Void> then(Task<Void> task) {
-                                return db.setTransactionSuccessfulAsync();
-                            }
-                        }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                            @Override
-                            public Task<Void> then(Task<Void> task) {
-                                db.endTransactionAsync();
-                                db.closeAsync();
-                                return task;
-                            }
-                        });
-                    }
-                });
-            }
+        return helper.getWritableDatabaseAsync().onSuccessTask(task -> {
+            final ParseSQLiteDatabase db = task.getResult();
+            return db.beginTransactionAsync().onSuccessTask(task13 -> callable.call(db).onSuccessTask(task12 -> db.setTransactionSuccessfulAsync()).continueWithTask(task1 -> {
+                db.endTransactionAsync();
+                db.closeAsync();
+                return task1;
+            }));
         });
     }
 
@@ -1450,10 +1209,10 @@ class OfflineStore {
      * Extends the normal JSON -> ParseObject decoding to also deal with placeholders for new objects
      * that have been saved offline.
      */
-    private class OfflineDecoder extends ParseDecoder {
+    private static class OfflineDecoder extends ParseDecoder {
         // A map of UUID -> Task that will be finished once the given ParseObject is loaded.
         // The Tasks should all be finished before decode is called.
-        private Map<String, Task<ParseObject>> offlineObjects;
+        private final Map<String, Task<ParseObject>> offlineObjects;
 
         private OfflineDecoder(Map<String, Task<ParseObject>> offlineObjects) {
             this.offlineObjects = offlineObjects;
@@ -1483,8 +1242,8 @@ class OfflineStore {
      */
     private class OfflineEncoder extends ParseEncoder {
         private final Object tasksLock = new Object();
-        private ParseSQLiteDatabase db;
-        private ArrayList<Task<Void>> tasks = new ArrayList<>();
+        private final ParseSQLiteDatabase db;
+        private final ArrayList<Task<Void>> tasks = new ArrayList<>();
 
         /**
          * Creates an encoder.
@@ -1500,19 +1259,16 @@ class OfflineStore {
          * by this method is finished.
          */
         public Task<Void> whenFinished() {
-            return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> ignore) {
-                    synchronized (tasksLock) {
-                        // It might be better to return an aggregate error here.
-                        for (Task<Void> task : tasks) {
-                            if (task.isFaulted() || task.isCancelled()) {
-                                return task;
-                            }
+            return Task.whenAll(tasks).continueWithTask(ignore -> {
+                synchronized (tasksLock) {
+                    // It might be better to return an aggregate error here.
+                    for (Task<Void> task : tasks) {
+                        if (task.isFaulted() || task.isCancelled()) {
+                            return task;
                         }
-                        tasks.clear();
-                        return Task.forResult(null);
                     }
+                    tasks.clear();
+                    return Task.forResult(null);
                 }
             });
         }
@@ -1534,12 +1290,9 @@ class OfflineStore {
                 final JSONObject result = new JSONObject();
                 result.put("__type", "OfflineObject");
                 synchronized (tasksLock) {
-                    tasks.add(getOrCreateUUIDAsync(object, db).onSuccess(new Continuation<String, Void>() {
-                        @Override
-                        public Void then(Task<String> task) throws Exception {
-                            result.put("uuid", task.getResult());
-                            return null;
-                        }
+                    tasks.add(getOrCreateUUIDAsync(object, db).onSuccess(task -> {
+                        result.put("uuid", task.getResult());
+                        return null;
                     }));
                 }
                 return result;
