@@ -15,7 +15,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Generate Javadoc
-        run: javadoc @.javadoc
+        run: javadoc @.javadoc || true
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
