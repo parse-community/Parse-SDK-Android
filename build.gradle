@@ -68,3 +68,13 @@ ext {
     minSdkVersion = 16
     targetSdkVersion = 30
 }
+
+task createSpotlessPreCommitHook() {
+    def gitHooksDirectory = new File("$project.rootDir/.git/hooks/")
+    if (!gitHooksDirectory.exists()) gitHooksDirectory.mkdirs()
+    new File("$project.rootDir/.git/hooks", "pre-commit").text = """#!/bin/bash
+    echo "Running spotless check"
+    ./gradlew spotlessApply
+"""
+    "bash chmod +x .git/hooks/pre-commit".execute()
+}
