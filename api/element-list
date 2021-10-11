@@ -1,2 +1,5 @@
 com.parse
+com.parse.facebook
+com.parse.fcm
 com.parse.http
+com.parse.twitter
