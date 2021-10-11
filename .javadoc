@@ -1,0 +1,6 @@
+-d doc
+-sourcepath parse/src/main/java/:fcm/src/main/java/:facebook/src/main/java/:twitter/src/main/java/ com.parse
+-subpackages com.parse.fcm:com.parse.http:com.parse.facebook:com.parse.twitter
+-public
+--ignore-source-errors
+-Xmaxerrs 1
