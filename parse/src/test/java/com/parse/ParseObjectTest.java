@@ -8,10 +8,14 @@
  */
 package com.parse;
 
+import static org.hamcrest.core.Is.is;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
@@ -166,7 +170,6 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .applicationId(BuildConfig.APPLICATION_ID)
                         .server("https://api.parse.com/1")
                         .allowCustomObjectId()
                         .build();
@@ -190,7 +193,6 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .applicationId(BuildConfig.APPLICATION_ID)
                         .server("https://api.parse.com/1")
                         .allowCustomObjectId()
                         .build();
@@ -217,7 +219,6 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .applicationId(BuildConfig.APPLICATION_ID)
                         .server("https://api.parse.com/1")
                         .enableLocalDataStore()
                         .allowCustomObjectId()
@@ -247,7 +248,6 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .applicationId(BuildConfig.APPLICATION_ID)
                         .server("https://api.parse.com/1")
                         .enableLocalDataStore()
                         .allowCustomObjectId()
