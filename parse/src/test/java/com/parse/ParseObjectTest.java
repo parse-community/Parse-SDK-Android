@@ -164,7 +164,7 @@ public class ParseObjectTest {
     //endregion
 
     @Test
-    public void testSaveCustomObjectIdMissing(){
+    public void testSaveCustomObjectIdMissing() {
         // Mocked to let save work
         mockCurrentUserController();
 
@@ -188,7 +188,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testSaveCustomObjectIdNotMissing() throws ParseException{
+    public void testSaveCustomObjectIdNotMissing() {
         // Mocked to let save work
         mockCurrentUserController();
 
@@ -204,11 +204,18 @@ public class ParseObjectTest {
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
-        object.save();
+
+        ParseException exception = null;
+        try {
+            object.save();
+        } catch (ParseException e) {
+            exception = e;
+        }
+        assertNull(exception);
     }
 
     @Test
-    public void testSaveEventuallyCustomObjectIdMissing(){
+    public void testSaveEventuallyCustomObjectIdMissing() {
         // Mocked to let save work
         mockCurrentUserController();
 
@@ -238,7 +245,7 @@ public class ParseObjectTest {
     }
 
     @Test
-    public void testSaveEventuallyCustomObjectIdNotMissing() throws ParseException{
+    public void testSaveEventuallyCustomObjectIdNotMissing() throws ParseException {
         // Mocked to let save work
         mockCurrentUserController();
 

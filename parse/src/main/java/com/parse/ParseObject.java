@@ -2253,7 +2253,7 @@ public class ParseObject implements Parcelable {
             return Task.forResult(null);
         }
 
-        if(Parse.isAllowCustomObjectId() && getObjectId() == null){
+        if (Parse.isAllowCustomObjectId() && getObjectId() == null) {
             return Task.forError(new ParseException(104, "ObjectId must not be null"));
         }
 
@@ -2369,7 +2369,7 @@ public class ParseObject implements Parcelable {
             return Task.forResult(null);
         }
 
-        if(Parse.isAllowCustomObjectId() && getObjectId() == null){
+        if (Parse.isAllowCustomObjectId() && getObjectId() == null) {
             return Task.forError(new ParseException(104, "ObjectId must not be null"));
         }
 
