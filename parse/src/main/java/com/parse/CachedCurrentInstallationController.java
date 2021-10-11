@@ -8,7 +8,6 @@
  */
 package com.parse;
 
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 
 class CachedCurrentInstallationController
@@ -48,23 +47,10 @@ class CachedCurrentInstallationController
             return Task.forResult(null);
         }
 
-        return taskQueue.enqueue(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> toAwait) {
-                return toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        return store.setAsync(installation);
-                    }
-                }).continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        installationId.set(installation.getInstallationId());
-                        return task;
-                    }
-                }, ParseExecutors.io());
-            }
-        });
+        return taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> store.setAsync(installation)).continueWithTask(task -> {
+            installationId.set(installation.getInstallationId());
+            return task;
+        }, ParseExecutors.io()));
     }
 
     @Override
@@ -75,40 +61,29 @@ class CachedCurrentInstallationController
             }
         }
 
-        return taskQueue.enqueue(new Continuation<Void, Task<ParseInstallation>>() {
-            @Override
-            public Task<ParseInstallation> then(Task<Void> toAwait) {
-                return toAwait.continueWithTask(new Continuation<Void, Task<ParseInstallation>>() {
-                    @Override
-                    public Task<ParseInstallation> then(Task<Void> task) {
-                        synchronized (mutex) {
-                            if (currentInstallation != null) {
-                                return Task.forResult(currentInstallation);
-                            }
-                        }
-
-                        return store.getAsync().continueWith(new Continuation<ParseInstallation, ParseInstallation>() {
-                            @Override
-                            public ParseInstallation then(Task<ParseInstallation> task) {
-                                ParseInstallation current = task.getResult();
-                                if (current == null) {
-                                    current = ParseObject.create(ParseInstallation.class);
-                                    current.updateDeviceInfo(installationId);
-                                } else {
-                                    installationId.set(current.getInstallationId());
-                                    PLog.v(TAG, "Successfully deserialized Installation object");
-                                }
-
-                                synchronized (mutex) {
-                                    currentInstallation = current;
-                                }
-                                return current;
-                            }
-                        }, ParseExecutors.io());
-                    }
-                });
+        return taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> {
+            synchronized (mutex) {
+                if (currentInstallation != null) {
+                    return Task.forResult(currentInstallation);
+                }
             }
-        });
+
+            return store.getAsync().continueWith(task1 -> {
+                ParseInstallation current = task1.getResult();
+                if (current == null) {
+                    current = ParseObject.create(ParseInstallation.class);
+                    current.updateDeviceInfo(installationId);
+                } else {
+                    installationId.set(current.getInstallationId());
+                    PLog.v(TAG, "Successfully deserialized Installation object");
+                }
+
+                synchronized (mutex) {
+                    currentInstallation = current;
+                }
+                return current;
+            }, ParseExecutors.io());
+        }));
     }
 
     @Override
@@ -119,17 +94,7 @@ class CachedCurrentInstallationController
             }
         }
 
-        return taskQueue.enqueue(new Continuation<Void, Task<Boolean>>() {
-            @Override
-            public Task<Boolean> then(Task<Void> toAwait) {
-                return toAwait.continueWithTask(new Continuation<Void, Task<Boolean>>() {
-                    @Override
-                    public Task<Boolean> then(Task<Void> task) {
-                        return store.existsAsync();
-                    }
-                });
-            }
-        });
+        return taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task -> store.existsAsync()));
     }
 
     @Override

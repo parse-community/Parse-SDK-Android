@@ -8,12 +8,12 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+
 import java.util.Arrays;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * A helper class for enqueueing tasks
@@ -31,17 +31,7 @@ class TaskQueue {
      * continuations.
      */
     static <T> Continuation<T, Task<T>> waitFor(final Task<Void> toAwait) {
-        return new Continuation<T, Task<T>>() {
-            @Override
-            public Task<T> then(final Task<T> task) {
-                return toAwait.continueWithTask(new Continuation<Void, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<Void> ignored) {
-                        return task;
-                    }
-                });
-            }
-        };
+        return task -> toAwait.continueWithTask(ignored -> task);
     }
 
     /**
@@ -54,12 +44,7 @@ class TaskQueue {
         lock.lock();
         try {
             Task<Void> toAwait = tail != null ? tail : Task.<Void>forResult(null);
-            return toAwait.continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) {
-                    return null;
-                }
-            });
+            return toAwait.continueWith(task -> null);
         } finally {
             lock.unlock();
         }

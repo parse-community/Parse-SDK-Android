@@ -8,7 +8,25 @@
  */
 package com.parse;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import androidx.annotation.NonNull;
+
+import com.parse.boltsinternal.Continuation;
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 
 import org.junit.After;
 import org.junit.Before;
@@ -23,24 +41,6 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class ParseQueryTest {
 
@@ -854,12 +854,7 @@ public class ParseQueryTest {
         private Task<Void> toAwait = Task.forResult(null);
 
         public Task<Void> await(final Task<Void> task) {
-            toAwait = toAwait.continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> ignored) {
-                    return task;
-                }
-            });
+            toAwait = toAwait.continueWithTask(ignored -> task);
             return toAwait;
         }
 
@@ -867,21 +862,15 @@ public class ParseQueryTest {
         public <T extends ParseObject> Task<List<T>> findAsync(ParseQuery.State<T> state,
                                                                ParseUser user, Task<Void> cancellationToken) {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
-            cancellationToken.continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) {
-                    cancelled.set(true);
-                    return null;
-                }
+            cancellationToken.continueWith((Continuation<Void, Void>) task -> {
+                cancelled.set(true);
+                return null;
             });
-            return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    if (cancelled.get()) {
-                        return Task.cancelled();
-                    }
-                    return task;
+            return await(Task.<Void>forResult(null).continueWithTask(task -> {
+                if (cancelled.get()) {
+                    return Task.cancelled();
                 }
+                return task;
             })).cast();
         }
 
@@ -889,21 +878,15 @@ public class ParseQueryTest {
         public <T extends ParseObject> Task<Integer> countAsync(ParseQuery.State<T> state,
                                                                 ParseUser user, Task<Void> cancellationToken) {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
-            cancellationToken.continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) {
-                    cancelled.set(true);
-                    return null;
-                }
+            cancellationToken.continueWith((Continuation<Void, Void>) task -> {
+                cancelled.set(true);
+                return null;
             });
-            return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    if (cancelled.get()) {
-                        return Task.cancelled();
-                    }
-                    return task;
+            return await(Task.<Void>forResult(null).continueWithTask(task -> {
+                if (cancelled.get()) {
+                    return Task.cancelled();
                 }
+                return task;
             })).cast();
         }
 
@@ -911,21 +894,15 @@ public class ParseQueryTest {
         public <T extends ParseObject> Task<T> getFirstAsync(ParseQuery.State<T> state,
                                                              ParseUser user, Task<Void> cancellationToken) {
             final AtomicBoolean cancelled = new AtomicBoolean(false);
-            cancellationToken.continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) {
-                    cancelled.set(true);
-                    return null;
-                }
+            cancellationToken.continueWith((Continuation<Void, Void>) task -> {
+                cancelled.set(true);
+                return null;
             });
-            return await(Task.<Void>forResult(null).continueWithTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    if (cancelled.get()) {
-                        return Task.cancelled();
-                    }
-                    return task;
+            return await(Task.<Void>forResult(null).continueWithTask(task -> {
+                if (cancelled.get()) {
+                    return Task.cancelled();
                 }
+                return task;
             })).cast();
         }
     }

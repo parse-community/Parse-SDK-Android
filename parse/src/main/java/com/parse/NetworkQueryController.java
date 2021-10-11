@@ -8,15 +8,14 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 class NetworkQueryController extends AbstractQueryController {
 
@@ -56,34 +55,31 @@ class NetworkQueryController extends AbstractQueryController {
         final ParseRESTCommand command = ParseRESTQueryCommand.findCommand(state, sessionToken);
 
         final long querySent = System.nanoTime();
-        return command.executeAsync(restClient, ct).onSuccess(new Continuation<JSONObject, List<T>>() {
-            @Override
-            public List<T> then(Task<JSONObject> task) throws Exception {
-                JSONObject json = task.getResult();
-                // Cache the results, unless we are ignoring the cache
-                ParseQuery.CachePolicy policy = state.cachePolicy();
-                if (policy != null && (policy != ParseQuery.CachePolicy.IGNORE_CACHE)) {
-                    ParseKeyValueCache.saveToKeyValueCache(command.getCacheKey(), json.toString());
-                }
-
-                long queryReceived = System.nanoTime();
-
-                List<T> response = convertFindResponse(state, task.getResult());
-
-                long objectsParsed = System.nanoTime();
-
-                if (json.has("trace")) {
-                    Object serverTrace = json.get("trace");
-                    PLog.d("ParseQuery",
-                            String.format("Query pre-processing took %f seconds\n" +
-                                            "%s\n" +
-                                            "Client side parsing took %f seconds\n",
-                                    (querySent - queryStart) / (1000.0f * 1000.0f),
-                                    serverTrace,
-                                    (objectsParsed - queryReceived) / (1000.0f * 1000.0f)));
-                }
-                return response;
+        return command.executeAsync(restClient, ct).onSuccess(task -> {
+            JSONObject json = task.getResult();
+            // Cache the results, unless we are ignoring the cache
+            ParseQuery.CachePolicy policy = state.cachePolicy();
+            if (policy != null && (policy != ParseQuery.CachePolicy.IGNORE_CACHE)) {
+                ParseKeyValueCache.saveToKeyValueCache(command.getCacheKey(), json.toString());
             }
+
+            long queryReceived = System.nanoTime();
+
+            List<T> response = convertFindResponse(state, task.getResult());
+
+            long objectsParsed = System.nanoTime();
+
+            if (json.has("trace")) {
+                Object serverTrace = json.get("trace");
+                PLog.d("ParseQuery",
+                        String.format("Query pre-processing took %f seconds\n" +
+                                        "%s\n" +
+                                        "Client side parsing took %f seconds\n",
+                                (querySent - queryStart) / (1000.0f * 1000.0f),
+                                serverTrace,
+                                (objectsParsed - queryReceived) / (1000.0f * 1000.0f)));
+            }
+            return response;
         }, Task.BACKGROUND_EXECUTOR);
     }
 
@@ -93,23 +89,17 @@ class NetworkQueryController extends AbstractQueryController {
             Task<Void> ct) {
         final ParseRESTCommand command = ParseRESTQueryCommand.countCommand(state, sessionToken);
 
-        return command.executeAsync(restClient, ct).onSuccessTask(new Continuation<JSONObject, Task<JSONObject>>() {
-            @Override
-            public Task<JSONObject> then(Task<JSONObject> task) {
-                // Cache the results, unless we are ignoring the cache
-                ParseQuery.CachePolicy policy = state.cachePolicy();
-                if (policy != null && policy != ParseQuery.CachePolicy.IGNORE_CACHE) {
-                    JSONObject result = task.getResult();
-                    ParseKeyValueCache.saveToKeyValueCache(command.getCacheKey(), result.toString());
-                }
-                return task;
+        return command.executeAsync(restClient, ct).onSuccessTask(task -> {
+            // Cache the results, unless we are ignoring the cache
+            ParseQuery.CachePolicy policy = state.cachePolicy();
+            if (policy != null && policy != ParseQuery.CachePolicy.IGNORE_CACHE) {
+                JSONObject result = task.getResult();
+                ParseKeyValueCache.saveToKeyValueCache(command.getCacheKey(), result.toString());
             }
-        }, Task.BACKGROUND_EXECUTOR).onSuccess(new Continuation<JSONObject, Integer>() {
-            @Override
-            public Integer then(Task<JSONObject> task) {
-                // Convert response
-                return task.getResult().optInt("count");
-            }
+            return task;
+        }, Task.BACKGROUND_EXECUTOR).onSuccess(task -> {
+            // Convert response
+            return task.getResult().optInt("count");
         });
     }
 
@@ -118,7 +108,7 @@ class NetworkQueryController extends AbstractQueryController {
     /* package */ <T extends ParseObject> List<T> convertFindResponse(ParseQuery.State<T> state,
                                                                       JSONObject response) throws JSONException {
         ArrayList<T> answer = new ArrayList<>();
-        JSONArray results = response.getJSONArray("results");
+        JSONArray results = response.optJSONArray("results");
         if (results == null) {
             PLog.d(TAG, "null results in find response");
         } else {

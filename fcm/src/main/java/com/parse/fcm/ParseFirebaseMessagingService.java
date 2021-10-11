@@ -1,5 +1,7 @@
 package com.parse.fcm;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.parse.PLog;
@@ -11,13 +13,13 @@ import org.json.JSONObject;
 public class ParseFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
         ParseFCM.register(token);
     }
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         PLog.d(ParseFCM.TAG, "onMessageReceived");
 

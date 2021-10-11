@@ -11,12 +11,13 @@ import kotlin.reflect.KProperty
  * A generic property delegation for [ParseObject], and give some checks to avoid throw some
  * exceptions.
  */
-class SafeParseDelegate<T> {
+class SafeParseDelegate<T>(private val name: String?) {
 
     @Suppress("UNCHECKED_CAST")
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): T? {
-        val value = if (parseObject.has(property.name)) {
-            parseObject.get(property.name)
+        val name = name ?: property.name
+        val value = if (parseObject.has(name)) {
+            parseObject.get(name)
         } else {
             null
         }
@@ -37,4 +38,4 @@ class SafeParseDelegate<T> {
  * Returns a generic property delegate for [ParseObject]s. This uses a custom get implementation
  * and [ParseObject.putOrRemove].
  */
-inline fun <T> safeAttribute() = SafeParseDelegate<T>()
+inline fun <T> safeAttribute(name: String? = null) = SafeParseDelegate<T>(name)

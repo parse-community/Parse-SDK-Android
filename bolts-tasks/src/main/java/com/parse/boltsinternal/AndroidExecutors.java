@@ -34,14 +34,8 @@ import java.util.concurrent.TimeUnit;
  */
 /* package */ final class AndroidExecutors {
 
+    /* package */ static final long KEEP_ALIVE_TIME = 1L;
     private static final AndroidExecutors INSTANCE = new AndroidExecutors();
-
-    private final Executor uiThread;
-
-    private AndroidExecutors() {
-        uiThread = new UIThreadExecutor();
-    }
-
     /**
      * Nexus 5: Quad-Core
      * Moto X: Dual-Core
@@ -55,7 +49,11 @@ import java.util.concurrent.TimeUnit;
     private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
     /* package */ static final int CORE_POOL_SIZE = CPU_COUNT + 1;
     /* package */ static final int MAX_POOL_SIZE = CPU_COUNT * 2 + 1;
-    /* package */ static final long KEEP_ALIVE_TIME = 1L;
+    private final Executor uiThread;
+
+    private AndroidExecutors() {
+        uiThread = new UIThreadExecutor();
+    }
 
     /**
      * Creates a proper Cached Thread Pool. Tasks will reuse cached threads if available
@@ -72,7 +70,7 @@ import java.util.concurrent.TimeUnit;
                 CORE_POOL_SIZE,
                 MAX_POOL_SIZE,
                 KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>());
+                new LinkedBlockingQueue<>());
 
         allowCoreThreadTimeout(executor, true);
 
@@ -95,7 +93,7 @@ import java.util.concurrent.TimeUnit;
                 CORE_POOL_SIZE,
                 MAX_POOL_SIZE,
                 KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
+                new LinkedBlockingQueue<>(),
                 threadFactory);
 
         allowCoreThreadTimeout(executor, true);

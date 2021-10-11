@@ -3,8 +3,6 @@ package com.parse.google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import com.parse.boltsinternal.Continuation
-import com.parse.boltsinternal.Task
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -13,6 +11,8 @@ import com.parse.LogInCallback
 import com.parse.ParseException
 import com.parse.ParseUser
 import com.parse.SaveCallback
+import com.parse.boltsinternal.Continuation
+import com.parse.boltsinternal.Task
 
 /**
  * Provides a set of utilities for using Parse with Google.
@@ -67,7 +67,10 @@ object ParseGoogleUtils {
         this.currentCallback = callback
         val googleSignInClient = buildGoogleSignInClient(activity)
         this.googleSignInClient = googleSignInClient
-        activity.startActivityForResult(googleSignInClient.signInIntent, REQUEST_CODE_GOOGLE_SIGN_IN)
+        activity.startActivityForResult(
+            googleSignInClient.signInIntent,
+            REQUEST_CODE_GOOGLE_SIGN_IN
+        )
     }
 
     /**
@@ -138,32 +141,32 @@ object ParseGoogleUtils {
 
     private fun handleSignInResult(result: Intent) {
         GoogleSignIn.getSignedInAccountFromIntent(result)
-                .addOnSuccessListener { googleAccount ->
-                    onSignedIn(googleAccount)
-                }
-                .addOnFailureListener { exception ->
-                    onSignInCallbackResult(null, exception)
-                }
+            .addOnSuccessListener { googleAccount ->
+                onSignedIn(googleAccount)
+            }
+            .addOnFailureListener { exception ->
+                onSignInCallbackResult(null, exception)
+            }
     }
 
     private fun onSignedIn(account: GoogleSignInAccount) {
         googleSignInClient?.signOut()?.addOnCompleteListener {}
         val authData: Map<String, String> = getAuthData(account)
         ParseUser.logInWithInBackground(AUTH_TYPE, authData)
-                .continueWith { task ->
-                    when {
-                        task.isCompleted -> {
-                            val user = task.result
-                            onSignInCallbackResult(user, null)
-                        }
-                        task.isFaulted -> {
-                            onSignInCallbackResult(null, task.error)
-                        }
-                        else -> {
-                            onSignInCallbackResult(null, null)
-                        }
+            .continueWith { task ->
+                when {
+                    task.isCompleted -> {
+                        val user = task.result
+                        onSignInCallbackResult(user, null)
+                    }
+                    task.isFaulted -> {
+                        onSignInCallbackResult(null, task.error)
+                    }
+                    else -> {
+                        onSignInCallbackResult(null, null)
                     }
                 }
+            }
     }
 
     private fun getAuthData(account: GoogleSignInAccount): Map<String, String> {
@@ -186,10 +189,10 @@ object ParseGoogleUtils {
 
     private fun buildGoogleSignInClient(context: Context): GoogleSignInClient {
         val signInOptions = GoogleSignInOptions.Builder()
-                .requestId()
-                .requestEmail()
-                .requestIdToken(clientId)
-                .build()
+            .requestId()
+            .requestEmail()
+            .requestIdToken(clientId)
+            .build()
         return GoogleSignIn.getClient(context, signInOptions)
     }
 
@@ -198,7 +201,8 @@ object ParseGoogleUtils {
      * with the same result as the input task after the callback has been run.
      */
     private fun <T> callbackOnMainThreadAsync(
-            task: Task<T>, callback: SaveCallback, reportCancellation: Boolean): Task<T> {
+        task: Task<T>, callback: SaveCallback, reportCancellation: Boolean
+    ): Task<T> {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation)
     }
 
@@ -208,7 +212,8 @@ object ParseGoogleUtils {
      * is false, the callback will not be called if the task was cancelled.
      */
     private fun <T> callbackOnMainThreadInternalAsync(
-            task: Task<T>, callback: Any?, reportCancellation: Boolean): Task<T> {
+        task: Task<T>, callback: Any?, reportCancellation: Boolean
+    ): Task<T> {
         if (callback == null) {
             return task
         }
@@ -225,10 +230,11 @@ object ParseGoogleUtils {
                         error = ParseException(error)
                     }
                     if (callback is SaveCallback) {
-                        callback.done(error as ParseException)
+                        callback.done(error as? ParseException)
                     } else if (callback is LogInCallback) {
                         callback.done(
-                                task.result as ParseUser, error as ParseException)
+                            task.result as? ParseUser, error as? ParseException
+                        )
                     }
                 } finally {
                     when {

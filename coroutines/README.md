@@ -18,11 +18,11 @@ Now we can call a parse query using a synchronous style, this is possible when w
 
 ```kotlin
 launch { // Coroutine builder
-    val cat = ParseQuery.getQuery(...).find()
+    val cat = ParseQuery.getQuery(...).coroutineFind()
     // get cats without callback
 }
 ```
-We use a coroutine builder because `find()` is a suspend function.
+We use a coroutine builder because `coroutineFind()` is a suspend function.
 
 We can also, use a function like a coroutine builder, it will be provider us a flexibility call our query without any extensions function.
 
@@ -56,7 +56,7 @@ launch { // Coroutine builder
         setPassword("my pass")
         setEmail("email@example.com")
     }.also {
-        signUp()
+        coroutineSignUp()
     }
 }
 ```
@@ -71,6 +71,33 @@ launch { // Coroutine builder
 ### Parse Object
 
 We can save, pinning and fetch parse objects use coroutines as well.
+
+## Task Wrapper
+Coroutine support can be provided as an extension method on any `Task`. For example:
+```kotlin
+suspend fun anonymousLogin() {
+    try {
+        val user = ParseAnonymousUtils.logInInBackground().suspendGet()
+        Timber.d("Logged in with user ${user.objectId}")
+    } catch (e: ParseException) {
+        Timber.e(e)
+    }
+}
+```
+Tasks with a Void results, ie. `Task<Void>` can be made into a `Completable`.
+For example:
+```kotlin
+suspend fun updateUserLastLogIn() {
+    val user = ParseUser.getCurrentUser()
+    user.put("lastLoggedIn", System.currentTimeMillis())
+    try {
+        user.saveInBackground().suspendRun()
+        Timber.d("user saved")
+    } catch (e: ParseException) {
+        Timber.e(it)
+    }
+}
+```
 
 ## Contributing
 When contributing to the `coroutines` module, please first consider if the extension function you are wanting to add would potentially be better suited in the main `parse` module. If it is something specific to Kotlin users or only useful in a Kotlin project, feel free to make a PR adding it to this module. Otherwise, consider adding the addition to the `parse` module itself, so that it is still usable in Java.

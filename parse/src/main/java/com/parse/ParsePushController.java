@@ -23,7 +23,7 @@ class ParsePushController {
     }
 
     ParseRESTCommand buildRESTSendPushCommand(ParsePush.State state,
-                                                                     String sessionToken) {
+                                              String sessionToken) {
         return ParseRESTPushCommand.sendPushCommand(state.queryState(), state.channelSet(),
                 state.expirationTime(), state.expirationTimeInterval(), state.pushTime(), state.data(),
                 sessionToken);

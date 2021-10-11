@@ -8,15 +8,14 @@
  */
 package com.parse;
 
-import org.json.JSONObject;
-
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+
+import org.json.JSONObject;
 
 class ParseConfigController {
 
     private final ParseHttpClient restClient;
-    private ParseCurrentConfigController currentConfigController;
+    private final ParseCurrentConfigController currentConfigController;
 
     public ParseConfigController(ParseHttpClient restClient,
                                  ParseCurrentConfigController currentConfigController) {
@@ -30,19 +29,11 @@ class ParseConfigController {
 
     public Task<ParseConfig> getAsync(String sessionToken) {
         final ParseRESTCommand command = ParseRESTConfigCommand.fetchConfigCommand(sessionToken);
-        return command.executeAsync(restClient).onSuccessTask(new Continuation<JSONObject, Task<ParseConfig>>() {
-            @Override
-            public Task<ParseConfig> then(Task<JSONObject> task) {
-                JSONObject result = task.getResult();
+        return command.executeAsync(restClient).onSuccessTask(task -> {
+            JSONObject result = task.getResult();
 
-                final ParseConfig config = ParseConfig.decode(result, ParseDecoder.get());
-                return currentConfigController.setCurrentConfigAsync(config).continueWith(new Continuation<Void, ParseConfig>() {
-                    @Override
-                    public ParseConfig then(Task<Void> task) {
-                        return config;
-                    }
-                });
-            }
+            final ParseConfig config = ParseConfig.decode(result, ParseDecoder.get());
+            return currentConfigController.setCurrentConfigAsync(config).continueWith(task1 -> config);
         });
     }
 }

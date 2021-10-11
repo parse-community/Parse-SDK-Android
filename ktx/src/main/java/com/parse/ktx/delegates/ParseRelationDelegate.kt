@@ -9,10 +9,10 @@ import kotlin.reflect.KProperty
 /**
  * A [ParseRelation] property delegation for [ParseObject].
  */
-class ParseRelationDelegate<T : ParseObject> {
+class ParseRelationDelegate<T : ParseObject>(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): ParseRelation<T> {
-        return parseObject.getRelation<T>(property.name)
+        return parseObject.getRelation(name ?: property.name)
     }
 
 }
@@ -21,4 +21,5 @@ class ParseRelationDelegate<T : ParseObject> {
  * Returns a [ParseRelation] property delegate for [ParseObject]s.
  * This uses [ParseObject.getRelation].
  */
-inline fun <T : ParseObject> relationAttribute() = ParseRelationDelegate<T>()
+inline fun <T : ParseObject> relationAttribute(name: String? = null) =
+    ParseRelationDelegate<T>(name)

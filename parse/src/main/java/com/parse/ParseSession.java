@@ -8,12 +8,11 @@
  */
 package com.parse;
 
+import com.parse.boltsinternal.Task;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
 
 /**
  * The {@code ParseSession} is a local representation of session data that can be saved
@@ -44,21 +43,15 @@ public class ParseSession extends ParseObject {
      * logged in.
      */
     public static Task<ParseSession> getCurrentSessionInBackground() {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(new Continuation<String, Task<ParseSession>>() {
-            @Override
-            public Task<ParseSession> then(Task<String> task) {
-                String sessionToken = task.getResult();
-                if (sessionToken == null) {
-                    return Task.forResult(null);
-                }
-                return getSessionController().getSessionAsync(sessionToken).onSuccess(new Continuation<ParseObject.State, ParseSession>() {
-                    @Override
-                    public ParseSession then(Task<ParseObject.State> task) {
-                        ParseObject.State result = task.getResult();
-                        return ParseObject.from(result);
-                    }
-                });
+        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
+            String sessionToken = task.getResult();
+            if (sessionToken == null) {
+                return Task.forResult(null);
             }
+            return getSessionController().getSessionAsync(sessionToken).onSuccess(task1 -> {
+                State result = task1.getResult();
+                return ParseObject.from(result);
+            });
         });
     }
 
@@ -86,12 +79,9 @@ public class ParseSession extends ParseObject {
             return Task.forResult(sessionToken);
         }
 
-        return getSessionController().upgradeToRevocable(sessionToken).onSuccess(new Continuation<ParseObject.State, String>() {
-            @Override
-            public String then(Task<ParseObject.State> task) {
-                ParseObject.State result = task.getResult();
-                return ParseObject.<ParseSession>from(result).getSessionToken();
-            }
+        return getSessionController().upgradeToRevocable(sessionToken).onSuccess(task -> {
+            State result = task.getResult();
+            return ParseObject.<ParseSession>from(result).getSessionToken();
         });
     }
 

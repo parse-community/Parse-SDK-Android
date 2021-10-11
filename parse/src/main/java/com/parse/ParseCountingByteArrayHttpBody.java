@@ -8,10 +8,10 @@
  */
 package com.parse;
 
+import static java.lang.Math.min;
+
 import java.io.IOException;
 import java.io.OutputStream;
-
-import static java.lang.Math.min;
 
 class ParseCountingByteArrayHttpBody extends ParseByteArrayHttpBody {
     private static final int DEFAULT_CHUNK_SIZE = 4096;

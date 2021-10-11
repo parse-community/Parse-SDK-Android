@@ -10,14 +10,14 @@ import kotlin.reflect.KProperty
 /**
  * A [JSONArray] property delegation for [ParseObject].
  */
-class JsonArrayParseDelegate {
+class JsonArrayParseDelegate(private val name: String?) {
 
     operator fun getValue(parseObject: ParseObject, property: KProperty<*>): JSONArray? {
-        return parseObject.getJSONArray(property.name)
+        return parseObject.getJSONArray(name ?: property.name)
     }
 
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: JSONArray?) {
-        parseObject.putOrIgnore(property.name, value)
+        parseObject.putOrIgnore(name ?: property.name, value)
     }
 
 }
@@ -26,4 +26,4 @@ class JsonArrayParseDelegate {
  * Returns a [JSONArray] property delegate for [ParseObject]s. This uses [ParseObject.getDouble]
  * and [ParseObject.putOrIgnore].
  */
-inline fun jsonArrayAttribute() = JsonArrayParseDelegate()
+inline fun jsonArrayAttribute(name: String? = null) = JsonArrayParseDelegate(name)

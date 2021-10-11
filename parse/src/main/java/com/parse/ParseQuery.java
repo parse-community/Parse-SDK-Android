@@ -10,6 +10,9 @@ package com.parse;
 
 import androidx.annotation.NonNull;
 
+import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,10 +27,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-
-import com.parse.boltsinternal.Continuation;
-import com.parse.boltsinternal.Task;
-import com.parse.boltsinternal.TaskCompletionSource;
 
 /**
  * The {@code ParseQuery} class defines a query that is used to fetch {@link ParseObject}s. The most
@@ -95,10 +94,10 @@ public class ParseQuery<T extends ParseObject> {
     public static final int MAX_LIMIT = 1000;
 
     private final State.Builder<T> builder;
-    private ParseUser user;
     // Just like ParseFile
-    private Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
-            new HashSet<TaskCompletionSource<?>>());
+    private final Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
+            new HashSet<>());
+    private ParseUser user;
 
     /**
      * Constructs a query for a {@link ParseObject} subclass type. A default query with no further
@@ -117,7 +116,7 @@ public class ParseQuery<T extends ParseObject> {
      * @param theClassName The name of the class to retrieve {@link ParseObject}s for.
      */
     public ParseQuery(String theClassName) {
-        this(new State.Builder<T>(theClassName));
+        this(new State.Builder<>(theClassName));
     }
 
     /**
@@ -404,13 +403,10 @@ public class ParseQuery<T extends ParseObject> {
         } catch (Exception e) {
             task = Task.forError(e);
         }
-        return task.continueWithTask(new Continuation<TResult, Task<TResult>>() {
-            @Override
-            public Task<TResult> then(Task<TResult> task) {
-                tcs.trySetResult(null); // release
-                currentTasks.remove(tcs);
-                return task;
-            }
+        return task.continueWithTask(task1 -> {
+            tcs.trySetResult(null); // release
+            currentTasks.remove(tcs);
+            return task1;
         });
     }
 
@@ -444,30 +440,17 @@ public class ParseQuery<T extends ParseObject> {
                 state.isFromLocalDatastore()) {
             task = findAsync(state);
         } else {
-            task = doCacheThenNetwork(state, callback, new CacheThenNetworkCallable<T, Task<List<T>>>() {
-                @Override
-                public Task<List<T>> call(State<T> state, ParseUser user, Task<Void> cancellationToken) {
-                    return findAsync(state, user, cancellationToken);
-                }
-            });
+            task = doCacheThenNetwork(state, callback, this::findAsync);
         }
         ParseTaskUtils.callbackOnMainThreadAsync(task, callback);
     }
 
     private Task<List<T>> findAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(new Callable<Task<List<T>>>() {
-            @Override
-            public Task<List<T>> call() {
-                return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<List<T>>>() {
-                    @Override
-                    public Task<List<T>> then(Task<ParseUser> task) {
-                        final ParseUser user = task.getResult();
-                        return findAsync(state, user, tcs.getTask());
-                    }
-                });
-            }
-        }, tcs);
+        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
+            final ParseUser user = task.getResult();
+            return findAsync(state, user, tcs.getTask());
+        }), tcs);
     }
 
     /* package */ Task<List<T>> findAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -511,30 +494,17 @@ public class ParseQuery<T extends ParseObject> {
                 state.isFromLocalDatastore()) {
             task = getFirstAsync(state);
         } else {
-            task = doCacheThenNetwork(state, callback, new CacheThenNetworkCallable<T, Task<T>>() {
-                @Override
-                public Task<T> call(State<T> state, ParseUser user, Task<Void> cancellationToken) {
-                    return getFirstAsync(state, user, cancellationToken);
-                }
-            });
+            task = doCacheThenNetwork(state, callback, this::getFirstAsync);
         }
         ParseTaskUtils.callbackOnMainThreadAsync(task, callback);
     }
 
     private Task<T> getFirstAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(new Callable<Task<T>>() {
-            @Override
-            public Task<T> call() {
-                return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<T>>() {
-                    @Override
-                    public Task<T> then(Task<ParseUser> task) {
-                        final ParseUser user = task.getResult();
-                        return getFirstAsync(state, user, tcs.getTask());
-                    }
-                });
-            }
-        }, tcs);
+        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
+            final ParseUser user = task.getResult();
+            return getFirstAsync(state, user, tcs.getTask());
+        }), tcs);
     }
 
     private Task<T> getFirstAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -574,12 +544,7 @@ public class ParseQuery<T extends ParseObject> {
 
         // Hack to workaround CountCallback's non-uniform signature.
         final ParseCallback2<Integer, ParseException> c = callback != null
-                ? new ParseCallback2<Integer, ParseException>() {
-            @Override
-            public void done(Integer integer, ParseException e) {
-                callback.done(e == null ? integer : -1, e);
-            }
-        }
+                ? (integer, e) -> callback.done(e == null ? integer : -1, e)
                 : null;
 
         final Task<Integer> task;
@@ -587,30 +552,17 @@ public class ParseQuery<T extends ParseObject> {
                 state.isFromLocalDatastore()) {
             task = countAsync(state);
         } else {
-            task = doCacheThenNetwork(state, c, new CacheThenNetworkCallable<T, Task<Integer>>() {
-                @Override
-                public Task<Integer> call(State<T> state, ParseUser user, Task<Void> cancellationToken) {
-                    return countAsync(state, user, cancellationToken);
-                }
-            });
+            task = doCacheThenNetwork(state, c, this::countAsync);
         }
         ParseTaskUtils.callbackOnMainThreadAsync(task, c);
     }
 
     private Task<Integer> countAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(new Callable<Task<Integer>>() {
-            @Override
-            public Task<Integer> call() {
-                return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<Integer>>() {
-                    @Override
-                    public Task<Integer> then(Task<ParseUser> task) {
-                        final ParseUser user = task.getResult();
-                        return countAsync(state, user, tcs.getTask());
-                    }
-                });
-            }
-        }, tcs);
+        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
+            final ParseUser user = task.getResult();
+            return countAsync(state, user, tcs.getTask());
+        }), tcs);
     }
 
     private Task<Integer> countAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -729,12 +681,7 @@ public class ParseQuery<T extends ParseObject> {
                 state.isFromLocalDatastore()) {
             task = getFirstAsync(state);
         } else {
-            task = doCacheThenNetwork(state, callback, new CacheThenNetworkCallable<T, Task<T>>() {
-                @Override
-                public Task<T> call(State<T> state, ParseUser user, Task<Void> cancellationToken) {
-                    return getFirstAsync(state, user, cancellationToken);
-                }
-            });
+            task = doCacheThenNetwork(state, callback, this::getFirstAsync);
         }
         ParseTaskUtils.callbackOnMainThreadAsync(task, callback);
     }
@@ -752,35 +699,24 @@ public class ParseQuery<T extends ParseObject> {
             final CacheThenNetworkCallable<T, Task<TResult>> delegate) {
 
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(new Callable<Task<TResult>>() {
-            @Override
-            public Task<TResult> call() {
-                return getUserAsync(state).onSuccessTask(new Continuation<ParseUser, Task<TResult>>() {
-                    @Override
-                    public Task<TResult> then(Task<ParseUser> task) {
-                        final ParseUser user = task.getResult();
-                        final State<T> cacheState = new State.Builder<T>(state)
-                                .setCachePolicy(CachePolicy.CACHE_ONLY)
-                                .build();
-                        final State<T> networkState = new State.Builder<T>(state)
-                                .setCachePolicy(CachePolicy.NETWORK_ONLY)
-                                .build();
+        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
+            final ParseUser user = task.getResult();
+            final State<T> cacheState = new State.Builder<T>(state)
+                    .setCachePolicy(CachePolicy.CACHE_ONLY)
+                    .build();
+            final State<T> networkState = new State.Builder<T>(state)
+                    .setCachePolicy(CachePolicy.NETWORK_ONLY)
+                    .build();
 
-                        Task<TResult> executionTask = delegate.call(cacheState, user, tcs.getTask());
-                        executionTask = ParseTaskUtils.callbackOnMainThreadAsync(executionTask, callback);
-                        return executionTask.continueWithTask(new Continuation<TResult, Task<TResult>>() {
-                            @Override
-                            public Task<TResult> then(Task<TResult> task) {
-                                if (task.isCancelled()) {
-                                    return task;
-                                }
-                                return delegate.call(networkState, user, tcs.getTask());
-                            }
-                        });
-                    }
-                });
-            }
-        }, tcs);
+            Task<TResult> executionTask = delegate.call(cacheState, user, tcs.getTask());
+            executionTask = ParseTaskUtils.callbackOnMainThreadAsync(executionTask, callback);
+            return executionTask.continueWithTask(task1 -> {
+                if (task1.isCancelled()) {
+                    return task1;
+                }
+                return delegate.call(networkState, user, tcs.getTask());
+            });
+        }), tcs);
     }
 
     /**
@@ -1463,8 +1399,8 @@ public class ParseQuery<T extends ParseObject> {
      * Constraint for a $relatedTo query.
      */
     /* package */ static class RelationConstraint {
-        private String key;
-        private ParseObject object;
+        private final String key;
+        private final ParseObject object;
 
         public RelationConstraint(String key, ParseObject object) {
             if (key == null || object == null) {
@@ -1524,6 +1460,7 @@ public class ParseQuery<T extends ParseObject> {
         private final boolean isFromLocalDatastore;
         private final String pinName;
         private final boolean ignoreACLs;
+
         private State(Builder<T> builder) {
             className = builder.className;
             where = new QueryConstraints(builder.where);
@@ -1665,11 +1602,11 @@ public class ParseQuery<T extends ParseObject> {
             private final QueryConstraints where = new QueryConstraints();
             private final Set<String> includes = new HashSet<>();
             private final Map<String, Object> extraOptions = new HashMap<>();
+            private final List<String> order = new ArrayList<>();
             // This is nullable since we allow unset selectedKeys as well as no selectedKeys
             private Set<String> selectedKeys;
             private int limit = -1; // negative limits mean, do not send a limit
             private int skip = 0; // negative skip means do not send a skip
-            private List<String> order = new ArrayList<>();
             // TODO(grantland): Move out of State
             private boolean trace;
             // Query Caching
@@ -1679,6 +1616,7 @@ public class ParseQuery<T extends ParseObject> {
             private boolean isFromLocalDatastore = false;
             private String pinName;
             private boolean ignoreACLs;
+
             public Builder(String className) {
                 this.className = className;
             }

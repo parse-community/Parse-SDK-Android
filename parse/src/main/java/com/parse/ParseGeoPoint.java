@@ -13,10 +13,9 @@ import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Locale;
-
-import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+
+import java.util.Locale;
 
 /**
  * {@code ParseGeoPoint} represents a latitude / longitude point that may be associated with a key
@@ -46,8 +45,8 @@ public class ParseGeoPoint implements Parcelable {
             return new ParseGeoPoint[size];
         }
     };
-    static double EARTH_MEAN_RADIUS_KM = 6371.0;
-    static double EARTH_MEAN_RADIUS_MILE = 3958.8;
+    static final double EARTH_MEAN_RADIUS_KM = 6371.0;
+    static final double EARTH_MEAN_RADIUS_MILE = 3958.8;
     private double latitude = 0.0;
     private double longitude = 0.0;
 
@@ -120,12 +119,9 @@ public class ParseGeoPoint implements Parcelable {
         criteria.setAccuracy(Criteria.NO_REQUIREMENT);
         criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
         return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
-                .onSuccess(new Continuation<Location, ParseGeoPoint>() {
-                    @Override
-                    public ParseGeoPoint then(Task<Location> task) {
-                        Location location = task.getResult();
-                        return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-                    }
+                .onSuccess(task -> {
+                    Location location = task.getResult();
+                    return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
                 });
     }
 
@@ -167,12 +163,9 @@ public class ParseGeoPoint implements Parcelable {
      */
     public static Task<ParseGeoPoint> getCurrentLocationInBackground(long timeout, Criteria criteria) {
         return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
-                .onSuccess(new Continuation<Location, ParseGeoPoint>() {
-                    @Override
-                    public ParseGeoPoint then(Task<Location> task) {
-                        Location location = task.getResult();
-                        return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-                    }
+                .onSuccess(task -> {
+                    Location location = task.getResult();
+                    return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
                 });
     }
 
