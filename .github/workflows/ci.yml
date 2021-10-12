@@ -31,11 +31,8 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-          distribution: 'adopt'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
       # Cache Gradle dependencies
       - name: Setup Gradle Dependencies Cache
@@ -52,10 +49,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Run tests
-        run: |
-          mkdir "$ANDROID_HOME/licenses" || true
-          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license"
-          ./gradlew clean jacocoTestReport --no-daemon
+        run: ./gradlew --no-daemon clean jacocoTestReport
 
       - name: Report test coverage
         run: |
@@ -65,16 +59,14 @@ jobs:
     name: Lint
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    container: gradle:jdk11
     steps:
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v2
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v2
-        with:
-          java-version: '11'
-          distribution: 'adopt'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
 
       # Cache Gradle dependencies
       - name: Setup Gradle Dependencies Cache
