@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: 'maven-publish'
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
@@ -32,5 +33,17 @@ dependencies {
 
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:3.9.0"
-    testImplementation "org.robolectric:robolectric:4.6"
+    testImplementation "org.robolectric:robolectric:4.6.1"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.release
+            }
+        }
+    }
 }

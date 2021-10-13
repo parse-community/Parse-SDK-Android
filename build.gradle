@@ -6,10 +6,9 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.2.2"
-        classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.3"
-        classpath "com.github.dcendents:android-maven-gradle-plugin:2.1"
+        classpath "com.android.tools.build:gradle:7.0.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.12.0"
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "io.freefair.gradle:android-gradle-plugins:4.2.0-m1"
@@ -17,14 +16,7 @@ buildscript {
 }
 
 plugins {
-    id "com.github.ben-manes.versions" version "0.28.0"
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    id "com.github.ben-manes.versions" version "0.39.0"
 }
 
 task clean(type: Delete) {
@@ -32,8 +24,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    compileSdkVersion = 30
-
-    minSdkVersion = 16
-    targetSdkVersion = 30
+    compileSdkVersion = 31
+    minSdkVersion = 21
+    targetSdkVersion = 31
 }

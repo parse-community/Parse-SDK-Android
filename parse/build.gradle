@@ -1,6 +1,7 @@
 apply plugin: "com.android.library"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -31,6 +32,9 @@ android {
         debug {
             testCoverageEnabled = true
         }
+        release {
+            testCoverageEnabled = false
+        }
     }
 
     compileOptions {
@@ -40,8 +44,7 @@ android {
 }
 
 ext {
-    // Note: Don't update past 3.12.x, as it sets the minSdk to Android 5.0
-    okhttpVersion = "3.12.10"
+    okhttpVersion = "4.9.1"
 }
 
 dependencies {
@@ -51,7 +54,7 @@ dependencies {
     api project(':bolts-tasks')
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.robolectric:robolectric:4.6"
+    testImplementation "org.robolectric:robolectric:4.6.1"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
@@ -88,3 +91,16 @@ apply plugin: "com.github.kt3k.coveralls"
 coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.release
+            }
+        }
+    }
+}
+

@@ -1,6 +1,7 @@
 apply plugin: "com.android.library"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
+apply plugin: 'maven-publish'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -24,6 +25,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            testCoverageEnabled = false
+        }
+        debug {
+            testCoverageEnabled = true
         }
     }
 
@@ -37,4 +42,16 @@ android {
 dependencies {
     api "com.google.firebase:firebase-messaging:22.0.0"
     implementation project(":parse")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called “debug”.
+            debug(MavenPublication) {
+                // Applies the component for the debug build variant.
+                from components.release
+            }
+        }
+    }
 }
