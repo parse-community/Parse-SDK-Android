@@ -84,14 +84,6 @@ jacocoAndroidUnitTestReport {
 
 //endregion
 
-//region Coveralls
-
-apply plugin: "com.github.kt3k.coveralls"
-
-coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
-
-//endregion
-
 afterEvaluate {
     publishing {
         publications {

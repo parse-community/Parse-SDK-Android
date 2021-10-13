@@ -8,7 +8,6 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:7.0.3"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "gradle.plugin.org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.12.0"
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "io.freefair.gradle:android-gradle-plugins:4.2.0-m1"
