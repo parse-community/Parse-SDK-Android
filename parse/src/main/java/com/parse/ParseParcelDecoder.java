@@ -9,28 +9,27 @@
 package com.parse;
 
 import android.os.Parcel;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
- * A {@code ParseParcelableDecoder} can be used to unparcel objects such as
- * {@link com.parse.ParseObject} from a {@link android.os.Parcel}.
- * <p>
- * This is capable of decoding objects and pointers to them.
- * However, for improved behavior in the case of {@link ParseObject}s, use the stateful
- * implementation {@link ParseObjectParcelDecoder}.
+ * A {@code ParseParcelableDecoder} can be used to unparcel objects such as {@link
+ * com.parse.ParseObject} from a {@link android.os.Parcel}.
+ *
+ * <p>This is capable of decoding objects and pointers to them. However, for improved behavior in
+ * the case of {@link ParseObject}s, use the stateful implementation {@link
+ * ParseObjectParcelDecoder}.
  *
  * @see ParseParcelEncoder
  * @see ParseObjectParcelDecoder
  */
 /* package */ class ParseParcelDecoder {
 
-    // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
+    // This class isn't really a Singleton, but since it has no state, it's more efficient to get
+    // the
     // default instance.
     private static final ParseParcelDecoder INSTANCE = new ParseParcelDecoder();
 
@@ -41,7 +40,6 @@ import java.util.Map;
     public Object decode(Parcel source) {
         String type = source.readString();
         switch (type) {
-
             case ParseParcelEncoder.TYPE_OBJECT:
                 return decodeParseObject(source);
 
@@ -102,7 +100,6 @@ import java.util.Map;
 
             default:
                 throw new RuntimeException("Could not unparcel objects from this Parcel.");
-
         }
     }
 
@@ -114,5 +111,4 @@ import java.util.Map;
         // By default, use createWithoutData. Overriden in subclass.
         return ParseObject.createWithoutData(source.readString(), source.readString());
     }
-
 }

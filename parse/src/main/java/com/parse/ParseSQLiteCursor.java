@@ -17,18 +17,16 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import com.parse.boltsinternal.Task;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 
 /**
  * Wrapper class to invoke {@link Cursor#close()} on a specific thread on Android versions below
- * android-14 as they require {@link Cursor#close()} to be called on the same thread the cursor
- * was created in
- * <p>
- * https://github.com/android/platform_frameworks_base/commit/6f37f83a4802a0d411395f3abc5f24a2cfec025d
+ * android-14 as they require {@link Cursor#close()} to be called on the same thread the cursor was
+ * created in
+ *
+ * <p>https://github.com/android/platform_frameworks_base/commit/6f37f83a4802a0d411395f3abc5f24a2cfec025d
  */
 class ParseSQLiteCursor implements Cursor {
 
@@ -198,10 +196,13 @@ class ParseSQLiteCursor implements Cursor {
     @Override
     public void close() {
         // Basically close _eventually_.
-        Task.call((Callable<Void>) () -> {
-            cursor.close();
-            return null;
-        }, executor);
+        Task.call(
+                (Callable<Void>)
+                        () -> {
+                            cursor.close();
+                            return null;
+                        },
+                executor);
     }
 
     @Override

@@ -24,7 +24,7 @@ public abstract class ParseHttpBody {
     /**
      * Creates an {@code ParseHttpBody} with given {@code Content-Type} and {@code Content-Length}.
      *
-     * @param contentType   The {@code Content-Type} of the {@code ParseHttpBody}.
+     * @param contentType The {@code Content-Type} of the {@code ParseHttpBody}.
      * @param contentLength The {@code Content-Length} of the {@code ParseHttpBody}.
      */
     public ParseHttpBody(String contentType, long contentLength) {
@@ -44,7 +44,8 @@ public abstract class ParseHttpBody {
      * Writes the content of this request to {@code out}.
      *
      * @param out The outputStream the content of this body needs to be written to.
-     * @throws IOException Throws an exception if the content of this body can not be written to {@code out}.
+     * @throws IOException Throws an exception if the content of this body can not be written to
+     *     {@code out}.
      */
     public abstract void writeTo(OutputStream out) throws IOException;
 

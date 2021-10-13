@@ -9,22 +9,18 @@
 package com.parse;
 
 import android.os.Parcel;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * An operation that removes every instance of an element from an array field.
- */
+/** An operation that removes every instance of an element from an array field. */
 class ParseRemoveOperation implements ParseFieldOperation {
-    /* package */ final static String OP_NAME = "Remove";
+    /* package */ static final String OP_NAME = "Remove";
 
     protected final HashSet<Object> objects = new HashSet<>();
 
@@ -60,7 +56,8 @@ class ParseRemoveOperation implements ParseFieldOperation {
             if (value instanceof JSONArray || value instanceof List) {
                 return new ParseSetOperation(this.apply(value, null));
             } else {
-                throw new IllegalArgumentException("You can only add an item to a List or JSONArray.");
+                throw new IllegalArgumentException(
+                        "You can only add an item to a List or JSONArray.");
             }
         } else if (previous instanceof ParseRemoveOperation) {
             HashSet<Object> result = new HashSet<>(((ParseRemoveOperation) previous).objects);
@@ -89,7 +86,8 @@ class ParseRemoveOperation implements ParseFieldOperation {
             ArrayList<Object> objectsToBeRemoved = new ArrayList<>(objects);
             objectsToBeRemoved.removeAll(result);
 
-            // Build up set of object IDs for any ParseObjects in the remaining objects-to-be-removed
+            // Build up set of object IDs for any ParseObjects in the remaining
+            // objects-to-be-removed
             HashSet<String> objectIds = new HashSet<>();
             for (Object obj : objectsToBeRemoved) {
                 if (obj instanceof ParseObject) {
@@ -101,7 +99,8 @@ class ParseRemoveOperation implements ParseFieldOperation {
             Iterator<Object> resultIterator = result.iterator();
             while (resultIterator.hasNext()) {
                 Object obj = resultIterator.next();
-                if (obj instanceof ParseObject && objectIds.contains(((ParseObject) obj).getObjectId())) {
+                if (obj instanceof ParseObject
+                        && objectIds.contains(((ParseObject) obj).getObjectId())) {
                     resultIterator.remove();
                 }
             }

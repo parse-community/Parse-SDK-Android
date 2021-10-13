@@ -11,12 +11,10 @@ package com.parse;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class ParseRESTUserCommand extends ParseRESTCommand {
 
@@ -24,7 +22,7 @@ class ParseRESTUserCommand extends ParseRESTCommand {
     private static final String HEADER_TRUE = "1";
     private final boolean isRevocableSessionEnabled;
 
-    //region Authentication
+    // region Authentication
     private int statusCode;
 
     private ParseRESTUserCommand(
@@ -39,7 +37,8 @@ class ParseRESTUserCommand extends ParseRESTCommand {
             String httpPath,
             ParseHttpRequest.Method httpMethod,
             Map<String, ?> parameters,
-            String sessionToken, boolean isRevocableSessionEnabled) {
+            String sessionToken,
+            boolean isRevocableSessionEnabled) {
         super(httpPath, httpMethod, parameters, sessionToken);
         this.isRevocableSessionEnabled = isRevocableSessionEnabled;
     }
@@ -48,25 +47,27 @@ class ParseRESTUserCommand extends ParseRESTCommand {
             String httpPath,
             ParseHttpRequest.Method httpMethod,
             JSONObject parameters,
-            String sessionToken, boolean isRevocableSessionEnabled) {
+            String sessionToken,
+            boolean isRevocableSessionEnabled) {
         super(httpPath, httpMethod, parameters, sessionToken);
         this.isRevocableSessionEnabled = isRevocableSessionEnabled;
     }
 
-    //endregion
+    // endregion
 
     public static ParseRESTUserCommand getCurrentUserCommand(String sessionToken) {
-        return new ParseRESTUserCommand("users/me", ParseHttpRequest.Method.GET, null, sessionToken);
+        return new ParseRESTUserCommand(
+                "users/me", ParseHttpRequest.Method.GET, null, sessionToken);
     }
 
-    public static ParseRESTUserCommand signUpUserCommand(JSONObject parameters, String sessionToken,
-                                                         boolean revocableSession) {
+    public static ParseRESTUserCommand signUpUserCommand(
+            JSONObject parameters, String sessionToken, boolean revocableSession) {
         return new ParseRESTUserCommand(
                 "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
     }
 
-    public static ParseRESTUserCommand logInUserCommand(String username, String password,
-                                                        boolean revocableSession) {
+    public static ParseRESTUserCommand logInUserCommand(
+            String username, String password, boolean revocableSession) {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("username", username);
         parameters.put("password", password);
@@ -92,8 +93,8 @@ class ParseRESTUserCommand extends ParseRESTCommand {
         return serviceLogInUserCommand(parameters, null, revocableSession);
     }
 
-    public static ParseRESTUserCommand serviceLogInUserCommand(JSONObject parameters,
-                                                               String sessionToken, boolean revocableSession) {
+    public static ParseRESTUserCommand serviceLogInUserCommand(
+            JSONObject parameters, String sessionToken, boolean revocableSession) {
         return new ParseRESTUserCommand(
                 "users", ParseHttpRequest.Method.POST, parameters, sessionToken, revocableSession);
     }
@@ -118,10 +119,9 @@ class ParseRESTUserCommand extends ParseRESTCommand {
     }
 
     @Override
-    protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
-                                               ProgressCallback progressCallback) {
+    protected Task<JSONObject> onResponseAsync(
+            ParseHttpResponse response, ProgressCallback progressCallback) {
         statusCode = response.getStatusCode();
         return super.onResponseAsync(response, progressCallback);
     }
-
 }

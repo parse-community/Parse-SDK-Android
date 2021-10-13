@@ -14,13 +14,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import com.parse.http.ParseHttpResponse;
-
-import org.junit.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 
 public class ParseHttpResponseTest {
 
@@ -49,14 +47,15 @@ public class ParseHttpResponseTest {
         int statusCode = 200;
         int totalSize = content.length();
 
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(content.getBytes()))
-                .setContentType(contentType)
-                .setHeaders(headers)
-                .setReasonPhrase(reasonPhrase)
-                .setStatusCode(statusCode)
-                .setTotalSize(totalSize)
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(content.getBytes()))
+                        .setContentType(contentType)
+                        .setHeaders(headers)
+                        .setReasonPhrase(reasonPhrase)
+                        .setStatusCode(statusCode)
+                        .setTotalSize(totalSize)
+                        .build();
 
         assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(response.getContent()));
         assertEquals(contentType, response.getContentType());
@@ -79,19 +78,19 @@ public class ParseHttpResponseTest {
         int statusCode = 200;
         int totalSize = content.length();
 
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(content.getBytes()))
-                .setContentType(contentType)
-                .setHeaders(headers)
-                .setReasonPhrase(reasonPhrase)
-                .setStatusCode(statusCode)
-                .setTotalSize(totalSize)
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(content.getBytes()))
+                        .setContentType(contentType)
+                        .setHeaders(headers)
+                        .setReasonPhrase(reasonPhrase)
+                        .setStatusCode(statusCode)
+                        .setTotalSize(totalSize)
+                        .build();
 
         String newReasonPhrase = "Failed";
-        ParseHttpResponse newResponse = new ParseHttpResponse.Builder(response)
-                .setReasonPhrase(newReasonPhrase)
-                .build();
+        ParseHttpResponse newResponse =
+                new ParseHttpResponse.Builder(response).setReasonPhrase(newReasonPhrase).build();
 
         assertEquals(contentType, newResponse.getContentType());
         assertEquals(newReasonPhrase, newResponse.getReasonPhrase());

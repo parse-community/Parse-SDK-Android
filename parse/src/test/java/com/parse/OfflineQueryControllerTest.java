@@ -11,12 +11,10 @@ package com.parse;
 import static org.junit.Assert.assertTrue;
 
 import com.parse.boltsinternal.Task;
-
-import org.junit.After;
-import org.junit.Test;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.After;
+import org.junit.Test;
 
 public class OfflineQueryControllerTest {
 
@@ -30,8 +28,7 @@ public class OfflineQueryControllerTest {
         TestNetworkQueryController networkController = new TestNetworkQueryController();
         OfflineQueryController controller = new OfflineQueryController(null, networkController);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject").build();
         controller.findAsync(state, null, null);
         networkController.verifyFind();
     }
@@ -41,8 +38,7 @@ public class OfflineQueryControllerTest {
         TestNetworkQueryController networkController = new TestNetworkQueryController();
         OfflineQueryController controller = new OfflineQueryController(null, networkController);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject").build();
         controller.countAsync(state, null, null);
         networkController.verifyCount();
     }
@@ -52,8 +48,7 @@ public class OfflineQueryControllerTest {
         TestNetworkQueryController networkController = new TestNetworkQueryController();
         OfflineQueryController controller = new OfflineQueryController(null, networkController);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject").build();
         controller.getFirstAsync(state, null, null);
         networkController.verifyFind();
     }
@@ -64,9 +59,8 @@ public class OfflineQueryControllerTest {
         TestOfflineStore offlineStore = new TestOfflineStore();
         OfflineQueryController controller = new OfflineQueryController(offlineStore, null);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .fromLocalDatastore()
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject").fromLocalDatastore().build();
         controller.findAsync(state, null, null);
         offlineStore.verifyFind();
     }
@@ -77,9 +71,8 @@ public class OfflineQueryControllerTest {
         TestOfflineStore offlineStore = new TestOfflineStore();
         OfflineQueryController controller = new OfflineQueryController(offlineStore, null);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .fromLocalDatastore()
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject").fromLocalDatastore().build();
         controller.countAsync(state, null, null);
         offlineStore.verifyCount();
     }
@@ -90,9 +83,8 @@ public class OfflineQueryControllerTest {
         TestOfflineStore offlineStore = new TestOfflineStore();
         OfflineQueryController controller = new OfflineQueryController(offlineStore, null);
 
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .fromLocalDatastore()
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject").fromLocalDatastore().build();
         controller.getFirstAsync(state, null, null);
         offlineStore.verifyFind();
     }

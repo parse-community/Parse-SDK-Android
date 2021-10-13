@@ -19,12 +19,9 @@ import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-
 import androidx.appcompat.app.AppCompatDialog;
 
-/**
- * For internal use.
- */
+/** For internal use. */
 class OAuth1FlowDialog extends AppCompatDialog {
 
     private final String callbackUrl;
@@ -35,7 +32,12 @@ class OAuth1FlowDialog extends AppCompatDialog {
     private WebView webView;
     private ProgressBar progress;
 
-    OAuth1FlowDialog(Context context, String requestUrl, String callbackUrl, String serviceUrlIdentifier, FlowResultHandler resultHandler) {
+    OAuth1FlowDialog(
+            Context context,
+            String requestUrl,
+            String callbackUrl,
+            String serviceUrlIdentifier,
+            FlowResultHandler resultHandler) {
         super(context);
         this.requestUrl = requestUrl;
         this.callbackUrl = callbackUrl;
@@ -61,21 +63,17 @@ class OAuth1FlowDialog extends AppCompatDialog {
     }
 
     public interface FlowResultHandler {
-        /**
-         * Called when the user cancels the dialog.
-         */
+        /** Called when the user cancels the dialog. */
         void onCancel();
 
-        /**
-         * Called when the dialog's web view receives an error.
-         */
+        /** Called when the dialog's web view receives an error. */
         void onError(int errorCode, String description, String failingUrl);
 
         /**
          * Called when the dialog portion of the flow is complete.
          *
-         * @param callbackUrl The final URL called back (including any query string appended
-         *                    by the server).
+         * @param callbackUrl The final URL called back (including any query string appended by the
+         *     server).
          */
         void onComplete(String callbackUrl);
     }
@@ -96,7 +94,8 @@ class OAuth1FlowDialog extends AppCompatDialog {
         }
 
         @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        public void onReceivedError(
+                WebView view, int errorCode, String description, String failingUrl) {
             super.onReceivedError(view, errorCode, description, failingUrl);
             OAuth1FlowDialog.this.dismiss();
             handler.onError(errorCode, description, failingUrl);

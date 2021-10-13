@@ -16,9 +16,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Signals to a {@link CancellationToken} that it should be canceled. To create a
- * {@code CancellationToken} first create a {@code CancellationTokenSource} then call
- * {@link #getToken()} to retrieve the token for the source.
+ * Signals to a {@link CancellationToken} that it should be canceled. To create a {@code
+ * CancellationToken} first create a {@code CancellationTokenSource} then call {@link #getToken()}
+ * to retrieve the token for the source.
  *
  * @see CancellationToken
  * @see CancellationTokenSource#getToken()
@@ -32,14 +32,12 @@ public class CancellationTokenSource implements Closeable {
     private boolean cancellationRequested;
     private boolean closed;
 
-    /**
-     * Create a new {@code CancellationTokenSource}.
-     */
-    public CancellationTokenSource() {
-    }
+    /** Create a new {@code CancellationTokenSource}. */
+    public CancellationTokenSource() {}
 
     /**
-     * @return {@code true} if cancellation has been requested for this {@code CancellationTokenSource}.
+     * @return {@code true} if cancellation has been requested for this {@code
+     *     CancellationTokenSource}.
      */
     public boolean isCancellationRequested() {
         synchronized (lock) {
@@ -48,9 +46,7 @@ public class CancellationTokenSource implements Closeable {
         }
     }
 
-    /**
-     * @return the token that can be passed to asynchronous method to control cancellation.
-     */
+    /** @return the token that can be passed to asynchronous method to control cancellation. */
     public CancellationToken getToken() {
         synchronized (lock) {
             throwIfClosed();
@@ -58,9 +54,7 @@ public class CancellationTokenSource implements Closeable {
         }
     }
 
-    /**
-     * Cancels the token if it has not already been cancelled.
-     */
+    /** Cancels the token if it has not already been cancelled. */
     public void cancel() {
         List<CancellationTokenRegistration> registrations;
         synchronized (lock) {
@@ -78,10 +72,12 @@ public class CancellationTokenSource implements Closeable {
     }
 
     /**
-     * Schedules a cancel operation on this {@code CancellationTokenSource} after the specified number of milliseconds.
+     * Schedules a cancel operation on this {@code CancellationTokenSource} after the specified
+     * number of milliseconds.
      *
-     * @param delay The number of milliseconds to wait before completing the returned task. If delay is {@code 0}
-     *              the cancel is executed immediately. If delay is {@code -1} any scheduled cancellation is stopped.
+     * @param delay The number of milliseconds to wait before completing the returned task. If delay
+     *     is {@code 0} the cancel is executed immediately. If delay is {@code -1} any scheduled
+     *     cancellation is stopped.
      */
     public void cancelAfter(final long delay) {
         cancelAfter(delay, TimeUnit.MILLISECONDS);
@@ -105,12 +101,16 @@ public class CancellationTokenSource implements Closeable {
             cancelScheduledCancellation();
 
             if (delay != -1) {
-                scheduledCancellation = executor.schedule(() -> {
-                    synchronized (lock) {
-                        scheduledCancellation = null;
-                    }
-                    cancel();
-                }, delay, timeUnit);
+                scheduledCancellation =
+                        executor.schedule(
+                                () -> {
+                                    synchronized (lock) {
+                                        scheduledCancellation = null;
+                                    }
+                                    cancel();
+                                },
+                                delay,
+                                timeUnit);
             }
         }
     }
@@ -149,8 +149,8 @@ public class CancellationTokenSource implements Closeable {
     }
 
     /**
-     * @throws CancellationException if this token has had cancellation requested.
-     *                               May be used to stop execution of a thread or runnable.
+     * @throws CancellationException if this token has had cancellation requested. May be used to
+     *     stop execution of a thread or runnable.
      */
     /* package */ void throwIfCancellationRequested() throws CancellationException {
         synchronized (lock) {
@@ -169,7 +169,8 @@ public class CancellationTokenSource implements Closeable {
     }
 
     // This method makes no attempt to perform any synchronization or state checks itself and once
-    // invoked will notify all runnables unconditionally. As such if you require the notification event
+    // invoked will notify all runnables unconditionally. As such if you require the notification
+    // event
     // to be synchronized with state changes you should provide external synchronization.
     // If this is invoked without external synchronization there is a probability the token becomes
     // cancelled concurrently.
@@ -181,7 +182,9 @@ public class CancellationTokenSource implements Closeable {
 
     @Override
     public String toString() {
-        return String.format(Locale.US, "%s@%s[cancellationRequested=%s]",
+        return String.format(
+                Locale.US,
+                "%s@%s[cancellationRequested=%s]",
                 getClass().getName(),
                 Integer.toHexString(hashCode()),
                 isCancellationRequested());

@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.http.ParseHttpRequest;
-
 import java.util.Map;
 
 class ParseRESTCloudCommand extends ParseRESTCommand {
@@ -22,8 +21,8 @@ class ParseRESTCloudCommand extends ParseRESTCommand {
         super(httpPath, httpMethod, parameters, sessionToken);
     }
 
-    public static ParseRESTCloudCommand callFunctionCommand(String functionName,
-                                                            Map<String, ?> parameters, String sessionToken) {
+    public static ParseRESTCloudCommand callFunctionCommand(
+            String functionName, Map<String, ?> parameters, String sessionToken) {
         final String httpPath = String.format("functions/%s", functionName);
         return new ParseRESTCloudCommand(
                 httpPath, ParseHttpRequest.Method.POST, parameters, sessionToken);

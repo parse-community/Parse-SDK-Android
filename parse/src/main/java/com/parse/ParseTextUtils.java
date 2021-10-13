@@ -27,8 +27,8 @@ import java.util.Objects;
     /**
      * Returns a string containing the tokens joined by delimiters.
      *
-     * @param tokens an array objects to be joined. Strings will be formed from
-     *               the objects by calling object.toString().
+     * @param tokens an array objects to be joined. Strings will be formed from the objects by
+     *     calling object.toString().
      */
     /* package */
     static String join(CharSequence delimiter, Iterable tokens) {
@@ -57,8 +57,9 @@ import java.util.Objects;
 
     /**
      * Returns true if a and b are equal, including if they are both null.
-     * <p><i>Note: In platform versions 1.1 and earlier, this method only worked well if
-     * both the arguments were instances of String.</i></p>
+     *
+     * <p><i>Note: In platform versions 1.1 and earlier, this method only worked well if both the
+     * arguments were instances of String.</i>
      *
      * @param a first CharSequence to check
      * @param b second CharSequence to check

@@ -21,11 +21,13 @@ class LockSet {
     private final Set<Lock> locks;
 
     public LockSet(Collection<Lock> locks) {
-        this.locks = new TreeSet<>((lhs, rhs) -> {
-            Long lhsId = getStableId(lhs);
-            Long rhsId = getStableId(rhs);
-            return lhsId.compareTo(rhsId);
-        });
+        this.locks =
+                new TreeSet<>(
+                        (lhs, rhs) -> {
+                            Long lhsId = getStableId(lhs);
+                            Long rhsId = getStableId(rhs);
+                            return lhsId.compareTo(rhsId);
+                        });
         this.locks.addAll(locks);
     }
 

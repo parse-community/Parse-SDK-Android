@@ -13,17 +13,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
-
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
 
 public class NetworkQueryControllerTest {
 
@@ -58,16 +56,16 @@ public class NetworkQueryControllerTest {
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
     }
 
-    //region testConvertFindResponse
+    // region testConvertFindResponse
 
     @After
     public void tearDown() {
         ParseRESTCommand.server = null;
     }
 
-    //endregion
+    // endregion
 
-    //region testFindAsync
+    // region testFindAsync
 
     @Test
     public void testConvertFindResponse() throws Exception {
@@ -88,9 +86,9 @@ public class NetworkQueryControllerTest {
     // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
     // ParseKeyValueCache
 
-    //endregion
+    // endregion
 
-    //region testCountAsync
+    // region testCountAsync
 
     @Test
     public void testFindAsyncWithSessionToken() throws Exception {
@@ -117,7 +115,7 @@ public class NetworkQueryControllerTest {
     // TODO(mengyan): Add testFindAsyncWithCachePolicy to verify command is added to
     // ParseKeyValueCache
 
-    //endregion
+    // endregion
 
     @Test
     public void testCountAsyncWithSessionToken() throws Exception {
@@ -142,7 +140,8 @@ public class NetworkQueryControllerTest {
     }
 
     private void verifyBasicParseObjects(
-            JSONObject mockResponse, List<ParseObject> objects, String className) throws JSONException {
+            JSONObject mockResponse, List<ParseObject> objects, String className)
+            throws JSONException {
         JSONArray objectsJSON = mockResponse.getJSONArray("results");
         assertEquals(objectsJSON.length(), objects.size());
 
@@ -162,10 +161,14 @@ public class NetworkQueryControllerTest {
         assertEquals(className, objectAgain.getClassName());
         JSONObject objectAgainJSON = objectsJSON.getJSONObject(1);
         dateLong =
-                ParseDateFormat.getInstance().parse(objectAgainJSON.getString("createdAt")).getTime();
+                ParseDateFormat.getInstance()
+                        .parse(objectAgainJSON.getString("createdAt"))
+                        .getTime();
         assertEquals(dateLong, objectAgain.getState().createdAt());
         dateLong =
-                ParseDateFormat.getInstance().parse(objectAgainJSON.getString("updatedAt")).getTime();
+                ParseDateFormat.getInstance()
+                        .parse(objectAgainJSON.getString("updatedAt"))
+                        .getTime();
         assertEquals(dateLong, objectAgain.getState().updatedAt());
         assertEquals(objectAgainJSON.getString("objectId"), objectAgain.getObjectId());
         assertEquals(objectAgainJSON.getString("sessionToken"), objectAgain.get("sessionToken"));

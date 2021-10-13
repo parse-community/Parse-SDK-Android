@@ -22,10 +22,14 @@ class ParsePushController {
         return buildRESTSendPushCommand(state, sessionToken).executeAsync(restClient).makeVoid();
     }
 
-    ParseRESTCommand buildRESTSendPushCommand(ParsePush.State state,
-                                              String sessionToken) {
-        return ParseRESTPushCommand.sendPushCommand(state.queryState(), state.channelSet(),
-                state.expirationTime(), state.expirationTimeInterval(), state.pushTime(), state.data(),
+    ParseRESTCommand buildRESTSendPushCommand(ParsePush.State state, String sessionToken) {
+        return ParseRESTPushCommand.sendPushCommand(
+                state.queryState(),
+                state.channelSet(),
+                state.expirationTime(),
+                state.expirationTimeInterval(),
+                state.pushTime(),
+                state.data(),
                 sessionToken);
     }
 }

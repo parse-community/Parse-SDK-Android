@@ -9,22 +9,18 @@
 package com.parse;
 
 import android.os.Parcel;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * An operation that adds a new element to an array field, only if it wasn't already present.
- */
+/** An operation that adds a new element to an array field, only if it wasn't already present. */
 class ParseAddUniqueOperation implements ParseFieldOperation {
-    /* package */ final static String OP_NAME = "AddUnique";
+    /* package */ static final String OP_NAME = "AddUnique";
 
     protected final LinkedHashSet<Object> objects = new LinkedHashSet<>();
 
@@ -61,7 +57,8 @@ class ParseAddUniqueOperation implements ParseFieldOperation {
             if (value instanceof JSONArray || value instanceof List) {
                 return new ParseSetOperation(this.apply(value, null));
             } else {
-                throw new IllegalArgumentException("You can only add an item to a List or JSONArray.");
+                throw new IllegalArgumentException(
+                        "You can only add an item to a List or JSONArray.");
             }
         } else if (previous instanceof ParseAddUniqueOperation) {
             List<Object> previousResult =

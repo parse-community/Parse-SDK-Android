@@ -9,17 +9,14 @@
 package com.parse;
 
 import android.content.Intent;
-
 import com.parse.boltsinternal.Capture;
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The {@code ParseAnalytics} class provides an interface to Parse's logging and analytics backend.
@@ -30,14 +27,16 @@ import java.util.Map;
 public class ParseAnalytics {
     private static final String TAG = "com.parse.ParseAnalytics";
     // Developers have the option to manually track push opens or the app open event can be tracked
-    // automatically by the ParsePushBroadcastReceiver. To avoid double-counting a push open, we track
+    // automatically by the ParsePushBroadcastReceiver. To avoid double-counting a push open, we
+    // track
     // the pushes we've seen locally. We don't need to worry about doing this in any sort of durable
     // way because a push can only launch the app once.
-    private static final Map<String, Boolean> lruSeenPushes = new LinkedHashMap<String, Boolean>() {
-        protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
-            return size() > 10;
-        }
-    };
+    private static final Map<String, Boolean> lruSeenPushes =
+            new LinkedHashMap<String, Boolean>() {
+                protected boolean removeEldestEntry(Map.Entry<String, Boolean> eldest) {
+                    return size() > 10;
+                }
+            };
 
     /* package for test */
     static ParseAnalyticsController getAnalyticsController() {
@@ -45,9 +44,9 @@ public class ParseAnalytics {
     }
 
     /**
-     * Tracks this application being launched (and if this happened as the result of the user opening
-     * a push notification, this method sends along information to correlate this open with that
-     * push).
+     * Tracks this application being launched (and if this happened as the result of the user
+     * opening a push notification, this method sends along information to correlate this open with
+     * that push).
      *
      * @param intent The {@code Intent} that started an {@code Activity}, if any. Can be null.
      * @return A Task that is resolved when the event has been tracked by Parse.
@@ -65,18 +64,21 @@ public class ParseAnalytics {
                 }
             }
         }
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
-            String sessionToken = task.getResult();
-            return getAnalyticsController().trackAppOpenedInBackground(pushHash.get(), sessionToken);
-        });
+        return ParseUser.getCurrentSessionTokenAsync()
+                .onSuccessTask(
+                        task -> {
+                            String sessionToken = task.getResult();
+                            return getAnalyticsController()
+                                    .trackAppOpenedInBackground(pushHash.get(), sessionToken);
+                        });
     }
 
     /**
-     * Tracks this application being launched (and if this happened as the result of the user opening
-     * a push notification, this method sends along information to correlate this open with that
-     * push).
+     * Tracks this application being launched (and if this happened as the result of the user
+     * opening a push notification, this method sends along information to correlate this open with
+     * that push).
      *
-     * @param intent   The {@code Intent} that started an {@code Activity}, if any. Can be null.
+     * @param intent The {@code Intent} that started an {@code Activity}, if any. Can be null.
      * @param callback callback.done(e) is called when the event has been tracked by Parse.
      */
     public static void trackAppOpenedInBackground(Intent intent, SaveCallback callback) {
@@ -87,7 +89,7 @@ public class ParseAnalytics {
      * Tracks the occurrence of a custom event. Parse will store a data point at the time of
      * invocation with the given event name.
      *
-     * @param name     The name of the custom event to report to Parse as having happened.
+     * @param name The name of the custom event to report to Parse as having happened.
      * @param callback callback.done(e) is called when the event has been tracked by Parse.
      */
     public static void trackEventInBackground(String name, SaveCallback callback) {
@@ -96,10 +98,11 @@ public class ParseAnalytics {
 
     /**
      * Tracks the occurrence of a custom event with additional dimensions. Parse will store a data
-     * point at the time of invocation with the given event name.  Dimensions will allow segmentation
+     * point at the time of invocation with the given event name. Dimensions will allow segmentation
      * of the occurrences of this custom event.
-     * <p>
-     * To track a user signup along with additional metadata, consider the following:
+     *
+     * <p>To track a user signup along with additional metadata, consider the following:
+     *
      * <pre>
      * Map<String, String> dimensions = new HashMap<String, String>();
      * dimensions.put("gender", "m");
@@ -107,22 +110,26 @@ public class ParseAnalytics {
      * dimensions.put("dayType", "weekend");
      * ParseAnalytics.trackEvent("signup", dimensions);
      * </pre>
+     *
      * There is a default limit of 8 dimensions per event tracked.
      *
-     * @param name       The name of the custom event to report to Parse as having happened.
+     * @param name The name of the custom event to report to Parse as having happened.
      * @param dimensions The dictionary of information by which to segment this event.
-     * @param callback   callback.done(e) is called when the event has been tracked by Parse.
+     * @param callback callback.done(e) is called when the event has been tracked by Parse.
      */
-    public static void trackEventInBackground(String name, Map<String, String> dimensions, SaveCallback callback) {
-        ParseTaskUtils.callbackOnMainThreadAsync(trackEventInBackground(name, dimensions), callback);
+    public static void trackEventInBackground(
+            String name, Map<String, String> dimensions, SaveCallback callback) {
+        ParseTaskUtils.callbackOnMainThreadAsync(
+                trackEventInBackground(name, dimensions), callback);
     }
 
     /**
      * Tracks the occurrence of a custom event with additional dimensions. Parse will store a data
-     * point at the time of invocation with the given event name.  Dimensions will allow segmentation
+     * point at the time of invocation with the given event name. Dimensions will allow segmentation
      * of the occurrences of this custom event.
-     * <p>
-     * To track a user signup along with additional metadata, consider the following:
+     *
+     * <p>To track a user signup along with additional metadata, consider the following:
+     *
      * <pre>
      * Map<String, String> dimensions = new HashMap<String, String>();
      * dimensions.put("gender", "m");
@@ -130,6 +137,7 @@ public class ParseAnalytics {
      * dimensions.put("dayType", "weekend");
      * ParseAnalytics.trackEvent("signup", dimensions);
      * </pre>
+     *
      * There is a default limit of 8 dimensions per event tracked.
      *
      * @param name The name of the custom event to report to Parse as having happened.
@@ -141,10 +149,11 @@ public class ParseAnalytics {
 
     /**
      * Tracks the occurrence of a custom event with additional dimensions. Parse will store a data
-     * point at the time of invocation with the given event name.  Dimensions will allow segmentation
+     * point at the time of invocation with the given event name. Dimensions will allow segmentation
      * of the occurrences of this custom event.
-     * <p>
-     * To track a user signup along with additional metadata, consider the following:
+     *
+     * <p>To track a user signup along with additional metadata, consider the following:
+     *
      * <pre>
      * Map<String, String> dimensions = new HashMap<String, String>();
      * dimensions.put("gender", "m");
@@ -152,25 +161,28 @@ public class ParseAnalytics {
      * dimensions.put("dayType", "weekend");
      * ParseAnalytics.trackEvent("signup", dimensions);
      * </pre>
+     *
      * There is a default limit of 8 dimensions per event tracked.
      *
-     * @param name       The name of the custom event to report to Parse as having happened.
+     * @param name The name of the custom event to report to Parse as having happened.
      * @param dimensions The dictionary of information by which to segment this event.
      * @return A Task that is resolved when the event has been tracked by Parse.
      */
-    public static Task<Void> trackEventInBackground(final String name,
-                                                    Map<String, String> dimensions) {
+    public static Task<Void> trackEventInBackground(
+            final String name, Map<String, String> dimensions) {
         if (name == null || name.trim().length() == 0) {
             throw new IllegalArgumentException("A name for the custom event must be provided.");
         }
-        final Map<String, String> dimensionsCopy = dimensions != null
-                ? Collections.unmodifiableMap(new HashMap<>(dimensions))
-                : null;
+        final Map<String, String> dimensionsCopy =
+                dimensions != null ? Collections.unmodifiableMap(new HashMap<>(dimensions)) : null;
 
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
-            String sessionToken = task.getResult();
-            return getAnalyticsController().trackEventInBackground(name, dimensionsCopy, sessionToken);
-        });
+        return ParseUser.getCurrentSessionTokenAsync()
+                .onSuccessTask(
+                        task -> {
+                            String sessionToken = task.getResult();
+                            return getAnalyticsController()
+                                    .trackEventInBackground(name, dimensionsCopy, sessionToken);
+                        });
     }
 
     /* package */

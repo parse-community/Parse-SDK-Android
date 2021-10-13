@@ -21,9 +21,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Activity;
 import android.content.Context;
-
 import androidx.fragment.app.Fragment;
-
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.CallbackManager;
@@ -32,15 +30,6 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.parse.boltsinternal.Task;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
-
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -52,6 +41,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.Config;
 
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
@@ -95,16 +91,18 @@ public class FacebookControllerTest {
         permissions.add("user_friends");
         permissions.add("profile");
 
-        AccessToken accessToken = new AccessToken(
-                "access_token",
-                "application_id",
-                "user_id",
-                permissions,
-                null,
-                null,
-                AccessTokenSource.DEVICE_AUTH,
-                calendar.getTime(),
-                null, null);
+        AccessToken accessToken =
+                new AccessToken(
+                        "access_token",
+                        "application_id",
+                        "user_id",
+                        permissions,
+                        null,
+                        null,
+                        AccessTokenSource.DEVICE_AUTH,
+                        calendar.getTime(),
+                        null,
+                        null);
 
         Map<String, String> authData = controller.getAuthData(accessToken);
         assertEquals("user_id", authData.get("id"));
@@ -113,7 +111,7 @@ public class FacebookControllerTest {
         assertEquals("profile,user_friends", authData.get("permissions"));
     }
 
-    //region testSetAuthData
+    // region testSetAuthData
 
     @Test
     public void testSetAuthDataWithNull() throws java.text.ParseException {
@@ -263,47 +261,37 @@ public class FacebookControllerTest {
         assertEquals("test_application_id", accessToken.getApplicationId());
     }
 
-    //endregion
+    // endregion
 
-    //region testAuthenticateAsync
+    // region testAuthenticateAsync
 
     @Test
     public void testAuthenticateAsyncWithActivityAndReadPermissions() {
         doAuthenticateAsyncWith(
-                mock(Activity.class),
-                null,
-                FacebookController.LoginAuthorizationType.READ);
+                mock(Activity.class), null, FacebookController.LoginAuthorizationType.READ);
     }
 
     @Test
     public void testAuthenticateAsyncWithFragmentAndReadPermissions() {
         doAuthenticateAsyncWith(
-                null,
-                mock(Fragment.class),
-                FacebookController.LoginAuthorizationType.READ);
+                null, mock(Fragment.class), FacebookController.LoginAuthorizationType.READ);
     }
 
     @Test
     public void testAuthenticateAsyncWithActivityAndPublishPermissions() {
         doAuthenticateAsyncWith(
-                mock(Activity.class),
-                null,
-                FacebookController.LoginAuthorizationType.PUBLISH);
+                mock(Activity.class), null, FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
     @Test
     public void testAuthenticateAsyncWithFragmentAndPublishPermissions() {
         doAuthenticateAsyncWith(
-                null,
-                mock(Fragment.class),
-                FacebookController.LoginAuthorizationType.PUBLISH);
+                null, mock(Fragment.class), FacebookController.LoginAuthorizationType.PUBLISH);
     }
 
     @SuppressWarnings("unchecked")
     public void doAuthenticateAsyncWith(
-            Activity activity,
-            Fragment fragment,
-            FacebookController.LoginAuthorizationType type) {
+            Activity activity, Fragment fragment, FacebookController.LoginAuthorizationType type) {
         FacebookController.FacebookSdkDelegate facebookSdk =
                 mock(FacebookController.FacebookSdkDelegate.class);
         LoginManager loginManager = mock(LoginManager.class);
@@ -313,12 +301,14 @@ public class FacebookControllerTest {
         FacebookController controller = new FacebookController(facebookSdk);
 
         Collection<String> permissions = new ArrayList<>();
-        Task<Map<String, String>> task = controller.authenticateAsync(
-                activity, fragment, type, permissions);
+        Task<Map<String, String>> task =
+                controller.authenticateAsync(activity, fragment, type, permissions);
         ArgumentCaptor<FacebookCallback> callbackCapture =
                 ArgumentCaptor.forClass(FacebookCallback.class);
-        verify(loginManager).registerCallback(eq(callbackManager),
-                (FacebookCallback<LoginResult>) callbackCapture.capture());
+        verify(loginManager)
+                .registerCallback(
+                        eq(callbackManager),
+                        (FacebookCallback<LoginResult>) callbackCapture.capture());
         if (FacebookController.LoginAuthorizationType.PUBLISH.equals(type)) {
             if (activity != null) {
                 verify(loginManager).logInWithPublishPermissions(activity, permissions);
@@ -358,12 +348,18 @@ public class FacebookControllerTest {
         FacebookController controller = new FacebookController(facebookSdk);
 
         Collection<String> permissions = new ArrayList<>();
-        Task<Map<String, String>> task = controller.authenticateAsync(
-                mock(Activity.class), null, FacebookController.LoginAuthorizationType.READ, permissions);
+        Task<Map<String, String>> task =
+                controller.authenticateAsync(
+                        mock(Activity.class),
+                        null,
+                        FacebookController.LoginAuthorizationType.READ,
+                        permissions);
         ArgumentCaptor<FacebookCallback> callbackCapture =
                 ArgumentCaptor.forClass(FacebookCallback.class);
-        verify(loginManager).registerCallback(eq(callbackManager),
-                (FacebookCallback<LoginResult>) callbackCapture.capture());
+        verify(loginManager)
+                .registerCallback(
+                        eq(callbackManager),
+                        (FacebookCallback<LoginResult>) callbackCapture.capture());
 
         FacebookCallback<LoginResult> callback = callbackCapture.getValue();
         callback.onCancel();
@@ -382,17 +378,23 @@ public class FacebookControllerTest {
         FacebookController controller = new FacebookController(facebookSdk);
 
         Collection<String> permissions = new ArrayList<>();
-        Task<Map<String, String>> task = controller.authenticateAsync(
-                mock(Activity.class), null, FacebookController.LoginAuthorizationType.READ, permissions);
+        Task<Map<String, String>> task =
+                controller.authenticateAsync(
+                        mock(Activity.class),
+                        null,
+                        FacebookController.LoginAuthorizationType.READ,
+                        permissions);
         ArgumentCaptor<FacebookCallback> callbackCapture =
                 ArgumentCaptor.forClass(FacebookCallback.class);
-        verify(loginManager).registerCallback(eq(callbackManager),
-                (FacebookCallback<LoginResult>) callbackCapture.capture());
+        verify(loginManager)
+                .registerCallback(
+                        eq(callbackManager),
+                        (FacebookCallback<LoginResult>) callbackCapture.capture());
 
         FacebookCallback<LoginResult> callback = callbackCapture.getValue();
         callback.onError(mock(FacebookException.class));
         assertTrue(task.isFaulted());
     }
 
-    //endregion
+    // endregion
 }

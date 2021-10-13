@@ -20,7 +20,6 @@ class ParseDelegate<T>(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: T) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
-
 }
 
 /**

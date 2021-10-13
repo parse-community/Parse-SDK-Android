@@ -9,20 +9,16 @@
 package com.parse;
 
 import android.os.Parcel;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-/**
- * An operation that adds a new element to an array field.
- */
+/** An operation that adds a new element to an array field. */
 class ParseAddOperation implements ParseFieldOperation {
-    /* package */ final static String OP_NAME = "Add";
+    /* package */ static final String OP_NAME = "Add";
 
     protected final ArrayList<Object> objects = new ArrayList<>();
 
@@ -56,7 +52,8 @@ class ParseAddOperation implements ParseFieldOperation {
         } else if (previous instanceof ParseSetOperation) {
             Object value = ((ParseSetOperation) previous).getValue();
             if (value instanceof JSONArray) {
-                ArrayList<Object> result = ParseFieldOperations.jsonArrayAsArrayList((JSONArray) value);
+                ArrayList<Object> result =
+                        ParseFieldOperations.jsonArrayAsArrayList((JSONArray) value);
                 result.addAll(objects);
                 return new ParseSetOperation(new JSONArray(result));
             } else if (value instanceof List) {
@@ -64,7 +61,8 @@ class ParseAddOperation implements ParseFieldOperation {
                 result.addAll(objects);
                 return new ParseSetOperation(result);
             } else {
-                throw new IllegalArgumentException("You can only add an item to a List or JSONArray.");
+                throw new IllegalArgumentException(
+                        "You can only add an item to a List or JSONArray.");
             }
         } else if (previous instanceof ParseAddOperation) {
             ArrayList<Object> result = new ArrayList<>(((ParseAddOperation) previous).objects);

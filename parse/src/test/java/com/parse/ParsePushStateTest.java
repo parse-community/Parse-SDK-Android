@@ -17,6 +17,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -24,23 +29,16 @@ import org.mockito.internal.util.collections.Sets;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class ParsePushStateTest {
 
-    //region testDefaults
+    // region testDefaults
 
     @Test(expected = IllegalArgumentException.class)
     public void testDefaultsWithoutData() {
         // We have to set data to a state otherwise it will throw an exception
         JSONObject data = new JSONObject();
 
-        ParsePush.State state = new ParsePush.State.Builder()
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().build();
     }
 
     @Test
@@ -48,9 +46,7 @@ public class ParsePushStateTest {
         // We have to set data to a state otherwise it will throw an exception
         JSONObject data = new JSONObject();
 
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).build();
 
         assertNull(state.expirationTime());
         assertNull(state.expirationTimeInterval());
@@ -60,7 +56,7 @@ public class ParsePushStateTest {
         assertNull(state.queryState());
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testCopy() throws JSONException {
@@ -92,16 +88,13 @@ public class ParsePushStateTest {
         assertEquals("_Installation", queryStateCopy.className());
     }
 
-    //region testExpirationTime
+    // region testExpirationTime
 
     @Test
     public void testExpirationTimeNullTime() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .expirationTime(null)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.expirationTime(null).data(new JSONObject()).build();
 
         assertNull(state.expirationTime());
     }
@@ -110,26 +103,20 @@ public class ParsePushStateTest {
     public void testExpirationTimeNormalTime() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .expirationTime(100L)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.expirationTime(100L).data(new JSONObject()).build();
 
         assertEquals(100L, state.expirationTime().longValue());
     }
 
-    //endregion
+    // endregion
 
-    //region testExpirationTimeInterval
+    // region testExpirationTimeInterval
 
     @Test
     public void testExpirationTimeIntervalNullInterval() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .expirationTimeInterval(null)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.expirationTimeInterval(null).data(new JSONObject()).build();
 
         assertNull(state.expirationTimeInterval());
     }
@@ -138,26 +125,20 @@ public class ParsePushStateTest {
     public void testExpirationTimeIntervalNormalInterval() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .expirationTimeInterval(100L)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.expirationTimeInterval(100L).data(new JSONObject()).build();
 
         assertEquals(100L, state.expirationTimeInterval().longValue());
     }
 
-    //endregion
+    // endregion
 
-    //region testPushTime
+    // region testPushTime
 
     @Test
     public void testPushTimeNullTime() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .pushTime(null)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.pushTime(null).data(new JSONObject()).build();
 
         assertNull(state.pushTime());
     }
@@ -167,10 +148,7 @@ public class ParsePushStateTest {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
         long time = System.currentTimeMillis() / 1000 + 1000;
-        ParsePush.State state = builder
-                .pushTime(time)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.pushTime(time).data(new JSONObject()).build();
 
         assertEquals(time, state.pushTime().longValue());
     }
@@ -179,34 +157,31 @@ public class ParsePushStateTest {
     public void testPushTimeInThePast() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .pushTime(System.currentTimeMillis() / 1000 - 1000)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state =
+                builder.pushTime(System.currentTimeMillis() / 1000 - 1000)
+                        .data(new JSONObject())
+                        .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPushTimeTwoWeeksFromNow() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .pushTime(System.currentTimeMillis() / 1000 + 60 * 60 * 24 * 7 * 3)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state =
+                builder.pushTime(System.currentTimeMillis() / 1000 + 60 * 60 * 24 * 7 * 3)
+                        .data(new JSONObject())
+                        .build();
     }
 
-    //endregion
+    // endregion
 
-    //region testChannelSet
+    // region testChannelSet
 
     @Test(expected = IllegalArgumentException.class)
     public void testChannelSetNullChannelSet() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .channelSet(null)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.channelSet(null).data(new JSONObject()).build();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -215,10 +190,7 @@ public class ParsePushStateTest {
         Set<String> channelSet = new HashSet<>();
         channelSet.add(null);
 
-        ParsePush.State state = builder
-                .channelSet(channelSet)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.channelSet(channelSet).data(new JSONObject()).build();
     }
 
     @Test
@@ -228,10 +200,7 @@ public class ParsePushStateTest {
         channelSet.add("foo");
         channelSet.add("bar");
 
-        ParsePush.State state = builder
-                .channelSet(channelSet)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.channelSet(channelSet).data(new JSONObject()).build();
 
         assertEquals(2, state.channelSet().size());
         assertTrue(state.channelSet().contains("foo"));
@@ -245,11 +214,12 @@ public class ParsePushStateTest {
         Set<String> channelSetAgain = new HashSet<>();
         channelSetAgain.add("bar");
 
-        ParsePush.State state = new ParsePush.State.Builder()
-                .channelSet(channelSet)
-                .channelSet(channelSetAgain)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state =
+                new ParsePush.State.Builder()
+                        .channelSet(channelSet)
+                        .channelSet(channelSetAgain)
+                        .data(new JSONObject())
+                        .build();
 
         assertEquals(1, state.channelSet().size());
         assertTrue(state.channelSet().contains("bar"));
@@ -257,29 +227,28 @@ public class ParsePushStateTest {
 
     @Test
     public void testChannelSetDuplicateChannel() {
-        final List<String> channelSet = new ArrayList<String>() {{
-            add("foo");
-            add("foo");
-        }};
-        ParsePush.State state = new ParsePush.State.Builder()
-                .channelSet(channelSet)
-                .data(new JSONObject())
-                .build();
+        final List<String> channelSet =
+                new ArrayList<String>() {
+                    {
+                        add("foo");
+                        add("foo");
+                    }
+                };
+        ParsePush.State state =
+                new ParsePush.State.Builder().channelSet(channelSet).data(new JSONObject()).build();
 
         assertEquals(1, state.channelSet().size());
         assertTrue(state.channelSet().contains("foo"));
     }
 
-    //endregion
+    // endregion
 
-    //region testData
+    // region testData
 
     @Test(expected = IllegalArgumentException.class)
     public void testDataNullData() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
-        ParsePush.State state = builder
-                .data(null)
-                .build();
+        ParsePush.State state = builder.data(null).build();
     }
 
     @Test
@@ -288,37 +257,30 @@ public class ParsePushStateTest {
         JSONObject data = new JSONObject();
         data.put("name", "value");
 
-        ParsePush.State state = builder
-                .data(data)
-                .build();
+        ParsePush.State state = builder.data(data).build();
 
         JSONObject dataAgain = state.data();
         assertEquals(1, dataAgain.length());
         assertEquals("value", dataAgain.get("name"));
     }
 
-    //endregion
+    // endregion
 
-    //region testQuery
+    // region testQuery
 
     @Test(expected = IllegalArgumentException.class)
     public void testQueryNullQuery() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .query(null)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.query(null).data(new JSONObject()).build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testQueryNotInstallationQuery() {
         ParsePush.State.Builder builder = new ParsePush.State.Builder();
 
-        ParsePush.State state = builder
-                .query(new ParseQuery<>("test"))
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state =
+                builder.query(new ParseQuery<>("test")).data(new JSONObject()).build();
     }
 
     @Test
@@ -334,24 +296,25 @@ public class ParsePushStateTest {
                 .whereMatchesQuery("subquery", subQueryState)
                 .setLimit(12)
                 .setSkip(34)
-                .orderByAscending("foo").addDescendingOrder("bar")
+                .orderByAscending("foo")
+                .addDescendingOrder("bar")
                 .include("name")
                 .selectKeys(Arrays.asList("name", "blah"))
                 .setTracingEnabled(true)
                 .redirectClassNameForKey("what");
 
-        ParsePush.State state = builder
-                .query(query)
-                .data(new JSONObject())
-                .build();
+        ParsePush.State state = builder.query(query).data(new JSONObject()).build();
 
         ParseQuery.State queryStateAgain = state.queryState();
         JSONObject queryStateAgainJson = queryStateAgain.toJSON(PointerEncoder.get());
         assertEquals("_Installation", queryStateAgainJson.getString("className"));
-        JSONAssert.assertEquals("{" +
-                "\"foo\":\"bar\"," +
-                "\"subquery\":{\"$inQuery\":{\"className\":\"TestObject\",\"where\":{}}}" +
-                "}", queryStateAgainJson.getJSONObject("where"), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(
+                "{"
+                        + "\"foo\":\"bar\","
+                        + "\"subquery\":{\"$inQuery\":{\"className\":\"TestObject\",\"where\":{}}}"
+                        + "}",
+                queryStateAgainJson.getJSONObject("where"),
+                JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(12, queryStateAgainJson.getInt("limit"));
         assertEquals(34, queryStateAgainJson.getInt("skip"));
         assertEquals("foo,-bar", queryStateAgainJson.getString("order"));
@@ -361,9 +324,9 @@ public class ParsePushStateTest {
         assertEquals("what", queryStateAgainJson.getString("redirectClassNameForKey"));
     }
 
-    //endregion
+    // endregion
 
-    //region testStateImmutable
+    // region testStateImmutable
 
     @Test
     public void testStateImmutable() throws Exception {
@@ -372,10 +335,8 @@ public class ParsePushStateTest {
         Set<String> channelSet = new HashSet<>();
         channelSet.add("foo");
         channelSet.add("bar");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .channelSet(channelSet)
-                .data(data)
-                .build();
+        ParsePush.State state =
+                new ParsePush.State.Builder().channelSet(channelSet).data(data).build();
 
         // Verify channelSet immutable
         Set<String> stateChannelSet = state.channelSet();
@@ -402,5 +363,5 @@ public class ParsePushStateTest {
         // TODO(mengyan) add test after t6941155(Convert mutable parameter to immutable)
     }
 
-    //endregion
+    // endregion
 }

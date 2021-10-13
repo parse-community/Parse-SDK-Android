@@ -9,11 +9,9 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONObject;
 
 class NetworkObjectController implements ParseObjectController {
 
@@ -28,19 +26,19 @@ class NetworkObjectController implements ParseObjectController {
     @Override
     public Task<ParseObject.State> fetchAsync(
             final ParseObject.State state, String sessionToken, final ParseDecoder decoder) {
-        final ParseRESTCommand command = ParseRESTObjectCommand.getObjectCommand(
-                state.objectId(),
-                state.className(),
-                sessionToken);
+        final ParseRESTCommand command =
+                ParseRESTObjectCommand.getObjectCommand(
+                        state.objectId(), state.className(), sessionToken);
 
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
-            // Copy and clear to create an new empty instance of the same type as `state`
-            ParseObject.State.Init<?> builder = state.newBuilder().clear();
-            return coder.decode(builder, result, decoder)
-                    .isComplete(true)
-                    .build();
-        });
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
+                            // Copy and clear to create an new empty instance of the same type as
+                            // `state`
+                            ParseObject.State.Init<?> builder = state.newBuilder().clear();
+                            return coder.decode(builder, result, decoder).isComplete(true).build();
+                        });
     }
 
     @Override
@@ -55,18 +53,17 @@ class NetworkObjectController implements ParseObjectController {
          */
         JSONObject objectJSON = coder.encode(state, operations, PointerEncoder.get());
 
-        ParseRESTObjectCommand command = ParseRESTObjectCommand.saveObjectCommand(
-                state,
-                objectJSON,
-                sessionToken);
-        return command.executeAsync(client).onSuccess(task -> {
-            JSONObject result = task.getResult();
-            // Copy and clear to create an new empty instance of the same type as `state`
-            ParseObject.State.Init<?> builder = state.newBuilder().clear();
-            return coder.decode(builder, result, decoder)
-                    .isComplete(false)
-                    .build();
-        });
+        ParseRESTObjectCommand command =
+                ParseRESTObjectCommand.saveObjectCommand(state, objectJSON, sessionToken);
+        return command.executeAsync(client)
+                .onSuccess(
+                        task -> {
+                            JSONObject result = task.getResult();
+                            // Copy and clear to create an new empty instance of the same type as
+                            // `state`
+                            ParseObject.State.Init<?> builder = state.newBuilder().clear();
+                            return coder.decode(builder, result, decoder).isComplete(false).build();
+                        });
     }
 
     @Override
@@ -84,8 +81,8 @@ class NetworkObjectController implements ParseObjectController {
             ParseOperationSet operations = operationsList.get(i);
             JSONObject objectJSON = coder.encode(state, operations, encoder);
 
-            ParseRESTObjectCommand command = ParseRESTObjectCommand.saveObjectCommand(
-                    state, objectJSON, sessionToken);
+            ParseRESTObjectCommand command =
+                    ParseRESTObjectCommand.saveObjectCommand(state, objectJSON, sessionToken);
             commands.add(command);
         }
 
@@ -96,36 +93,41 @@ class NetworkObjectController implements ParseObjectController {
         for (int i = 0; i < batchSize; i++) {
             final ParseObject.State state = states.get(i);
             final ParseDecoder decoder = decoders.get(i);
-            tasks.add(batchTasks.get(i).onSuccess(task -> {
-                JSONObject result = task.getResult();
-                // Copy and clear to create an new empty instance of the same type as `state`
-                ParseObject.State.Init<?> builder = state.newBuilder().clear();
-                return coder.decode(builder, result, decoder)
-                        .isComplete(false)
-                        .build();
-            }));
+            tasks.add(
+                    batchTasks
+                            .get(i)
+                            .onSuccess(
+                                    task -> {
+                                        JSONObject result = task.getResult();
+                                        // Copy and clear to create an new empty instance of the
+                                        // same type as `state`
+                                        ParseObject.State.Init<?> builder =
+                                                state.newBuilder().clear();
+                                        return coder.decode(builder, result, decoder)
+                                                .isComplete(false)
+                                                .build();
+                                    }));
         }
         return tasks;
     }
 
     @Override
     public Task<Void> deleteAsync(ParseObject.State state, String sessionToken) {
-        ParseRESTObjectCommand command = ParseRESTObjectCommand.deleteObjectCommand(
-                state, sessionToken);
+        ParseRESTObjectCommand command =
+                ParseRESTObjectCommand.deleteObjectCommand(state, sessionToken);
 
         return command.executeAsync(client).makeVoid();
     }
 
     @Override
-    public List<Task<Void>> deleteAllAsync(
-            List<ParseObject.State> states, String sessionToken) {
+    public List<Task<Void>> deleteAllAsync(List<ParseObject.State> states, String sessionToken) {
         int batchSize = states.size();
 
         List<ParseRESTObjectCommand> commands = new ArrayList<>(batchSize);
         for (int i = 0; i < batchSize; i++) {
             ParseObject.State state = states.get(i);
-            ParseRESTObjectCommand command = ParseRESTObjectCommand.deleteObjectCommand(
-                    state, sessionToken);
+            ParseRESTObjectCommand command =
+                    ParseRESTObjectCommand.deleteObjectCommand(state, sessionToken);
             commands.add(command);
         }
 

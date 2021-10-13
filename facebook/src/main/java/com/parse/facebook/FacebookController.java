@@ -12,9 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
-
 import androidx.fragment.app.Fragment;
-
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
 import com.facebook.CallbackManager;
@@ -24,7 +22,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.parse.boltsinternal.Task;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -41,11 +38,10 @@ class FacebookController {
 
     // Used as default activityCode. From FacebookSdk.java.
     public static final int DEFAULT_AUTH_ACTIVITY_CODE = 0xface;
-    /**
-     * Precise date format required for auth expiration data.
-     */
+    /** Precise date format required for auth expiration data. */
     private static final DateFormat PRECISE_DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+
     private static final DateFormat IMPRECISE_DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
     private static final String KEY_USER_ID = "id";
@@ -92,31 +88,34 @@ class FacebookController {
         if (callbackManager != null) {
             // This should never happen since FB auth takes over UI and starts an Activity
             return Task.forError(
-                    new RuntimeException("Unable to authenticate when another authentication is in process"));
+                    new RuntimeException(
+                            "Unable to authenticate when another authentication is in process"));
         }
 
         final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
         LoginManager manager = facebookSdkDelegate.getLoginManager();
 
         callbackManager = facebookSdkDelegate.createCallbackManager();
-        manager.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-                AccessToken accessToken = loginResult.getAccessToken();
-                Map<String, String> authData = getAuthData(accessToken);
-                tcs.trySetResult(authData);
-            }
+        manager.registerCallback(
+                callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        AccessToken accessToken = loginResult.getAccessToken();
+                        Map<String, String> authData = getAuthData(accessToken);
+                        tcs.trySetResult(authData);
+                    }
 
-            @Override
-            public void onCancel() {
-                tcs.trySetCancelled();
-            }
+                    @Override
+                    public void onCancel() {
+                        tcs.trySetCancelled();
+                    }
 
-            @Override
-            public void onError(FacebookException e) {
-                tcs.trySetError(e);
-            }
-        });
+                    @Override
+                    public void onError(FacebookException e) {
+                        tcs.trySetError(e);
+                    }
+                });
 
         if (LoginAuthorizationType.PUBLISH.equals(authorizationType)) {
             if (fragment != null) {
@@ -136,17 +135,12 @@ class FacebookController {
     }
 
     /**
-     * Get auth data from the access token.
-     * Includes the following:
-     * - UserId
-     * - Access Token
-     * - Expiration Date
-     * - Last Refresh Date
-     * - Permissions (Comma Delineated)
+     * Get auth data from the access token. Includes the following: - UserId - Access Token -
+     * Expiration Date - Last Refresh Date - Permissions (Comma Delineated)
      *
      * @param accessToken - Facebook's {@link AccessToken}
      * @return - {@link Map} of auth data used parse to create facebook {@link AccessToken} by hand.
-     * See {@link FacebookController#setAuthData(Map)}
+     *     See {@link FacebookController#setAuthData(Map)}
      */
     public Map<String, String> getAuthData(AccessToken accessToken) {
         Map<String, String> authData = new HashMap<>();
@@ -162,8 +156,7 @@ class FacebookController {
         return authData;
     }
 
-    public void setAuthData(Map<String, String> authData)
-            throws java.text.ParseException {
+    public void setAuthData(Map<String, String> authData) throws java.text.ParseException {
         if (authData == null) {
             facebookSdkDelegate.getLoginManager().logOut();
             return;
@@ -184,14 +177,18 @@ class FacebookController {
             String currUserId = currentAccessToken.getUserId();
             Date currLastRefreshDate = currentAccessToken.getLastRefresh();
 
-            if (currToken != null && currToken.equals(token)
-                    && currUserId != null && currUserId.equals(userId)) {
-                // Don't reset the current token if it's the same. If we reset it every time we'd lose
+            if (currToken != null
+                    && currToken.equals(token)
+                    && currUserId != null
+                    && currUserId.equals(userId)) {
+                // Don't reset the current token if it's the same. If we reset it every time we'd
+                // lose
                 // permissions, source, lastRefreshTime, etc.
                 return;
             }
 
-            //Don't reset if facebook sdk auth token is newer than what is cached by parse. Trust FB.
+            // Don't reset if facebook sdk auth token is newer than what is cached by parse. Trust
+            // FB.
             if (currLastRefreshDate != null
                     && lastRefreshDate != null
                     && currLastRefreshDate.after(lastRefreshDate)) {
@@ -199,7 +196,7 @@ class FacebookController {
             }
         }
 
-        //Don't forget permissions....if available
+        // Don't forget permissions....if available
         String permissionsCommaDelineated = authData.get(KEY_PERMISSIONS);
         Set<String> permissions = null;
         if (permissionsCommaDelineated != null && !permissionsCommaDelineated.isEmpty()) {
@@ -207,24 +204,25 @@ class FacebookController {
             permissions = new HashSet<>(Arrays.asList(permissionsArray));
         }
 
-        AccessToken accessToken = new AccessToken(
-                token,
-                facebookSdkDelegate.getApplicationId(),
-                userId,
-                permissions,
-                null,
-                null,
-                AccessTokenSource.DEVICE_AUTH,
-                parseDateString(authData.get(KEY_EXPIRATION_DATE)),
-                null, null);
+        AccessToken accessToken =
+                new AccessToken(
+                        token,
+                        facebookSdkDelegate.getApplicationId(),
+                        userId,
+                        permissions,
+                        null,
+                        null,
+                        AccessTokenSource.DEVICE_AUTH,
+                        parseDateString(authData.get(KEY_EXPIRATION_DATE)),
+                        null,
+                        null);
         facebookSdkDelegate.setCurrentAccessToken(accessToken);
     }
 
     /**
      * Convert String representation of a date into Date object.
-     * <p>
-     * Following date formats are supported:
-     * yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+     *
+     * <p>Following date formats are supported: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
      * yyyy-MM-dd'T'HH:mm:ss'Z'
      *
      * @param source A <code>String</code> whose beginning should be parsed.
@@ -241,7 +239,8 @@ class FacebookController {
 
     // Mirrors com.facebook.internal.LoginAuthorizationType.java
     public enum LoginAuthorizationType {
-        READ, PUBLISH
+        READ,
+        PUBLISH
     }
 
     /* package */ interface FacebookSdkDelegate {

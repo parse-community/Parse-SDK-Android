@@ -12,9 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-/**
- * Collection of {@link Executor}s to use in conjunction with {@link Task}.
- */
+/** Collection of {@link Executor}s to use in conjunction with {@link Task}. */
 /* package */ final class BoltsExecutors {
 
     private static final BoltsExecutors INSTANCE = new BoltsExecutors();
@@ -23,9 +21,10 @@ import java.util.concurrent.ScheduledExecutorService;
     private final Executor immediate;
 
     private BoltsExecutors() {
-        background = !isAndroidRuntime()
-                ? java.util.concurrent.Executors.newCachedThreadPool()
-                : AndroidExecutors.newCachedThreadPool();
+        background =
+                !isAndroidRuntime()
+                        ? java.util.concurrent.Executors.newCachedThreadPool()
+                        : AndroidExecutors.newCachedThreadPool();
         scheduled = Executors.newSingleThreadScheduledExecutor();
         immediate = new ImmediateExecutor();
     }
@@ -38,9 +37,7 @@ import java.util.concurrent.ScheduledExecutorService;
         return javaRuntimeName.toLowerCase(Locale.US).contains("android");
     }
 
-    /**
-     * An {@link java.util.concurrent.Executor} that executes tasks in parallel.
-     */
+    /** An {@link java.util.concurrent.Executor} that executes tasks in parallel. */
     public static ExecutorService background() {
         return INSTANCE.background;
     }
@@ -51,9 +48,9 @@ import java.util.concurrent.ScheduledExecutorService;
     }
 
     /**
-     * An {@link java.util.concurrent.Executor} that executes tasks in the current thread unless
-     * the stack runs too deep, at which point it will delegate to {@link BoltsExecutors#background}
-     * in order to trim the stack.
+     * An {@link java.util.concurrent.Executor} that executes tasks in the current thread unless the
+     * stack runs too deep, at which point it will delegate to {@link BoltsExecutors#background} in
+     * order to trim the stack.
      */
     /* package */
     static Executor immediate() {
@@ -61,10 +58,10 @@ import java.util.concurrent.ScheduledExecutorService;
     }
 
     /**
-     * An {@link java.util.concurrent.Executor} that runs a runnable inline (rather than scheduling it
-     * on a thread pool) as long as the recursion depth is less than MAX_DEPTH. If the executor has
-     * recursed too deeply, it will instead delegate to the {@link Task#BACKGROUND_EXECUTOR} in order
-     * to trim the stack.
+     * An {@link java.util.concurrent.Executor} that runs a runnable inline (rather than scheduling
+     * it on a thread pool) as long as the recursion depth is less than MAX_DEPTH. If the executor
+     * has recursed too deeply, it will instead delegate to the {@link Task#BACKGROUND_EXECUTOR} in
+     * order to trim the stack.
      */
     private static class ImmediateExecutor implements Executor {
         private static final int MAX_DEPTH = 15;

@@ -9,16 +9,14 @@
 package com.parse;
 
 import android.util.Base64;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@code ParseDecoder} can be used to transform JSON data structures into actual objects, such as
@@ -28,7 +26,8 @@ import java.util.Map;
  */
 public class ParseDecoder {
 
-    // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
+    // This class isn't really a Singleton, but since it has no state, it's more efficient to get
+    // the
     // default instance.
     private static final ParseDecoder INSTANCE = new ParseDecoder();
 
@@ -60,8 +59,8 @@ public class ParseDecoder {
     }
 
     /**
-     * Gets the <code>ParseObject</code> another object points to. By default a new
-     * object will be created.
+     * Gets the <code>ParseObject</code> another object points to. By default a new object will be
+     * created.
      */
     protected ParseObject decodePointer(String className, String objectId) {
         return ParseObject.createWithoutData(className, objectId);
@@ -107,8 +106,8 @@ public class ParseDecoder {
         }
 
         if (typeString.equals("Pointer")) {
-            return decodePointer(jsonObject.optString("className"),
-                    jsonObject.optString("objectId"));
+            return decodePointer(
+                    jsonObject.optString("className"), jsonObject.optString("objectId"));
         }
 
         if (typeString.equals("File")) {

@@ -12,13 +12,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.junit.Test;
 
 public class ParseCountingByteArrayHttpBodyTest {
 
@@ -36,28 +35,31 @@ public class ParseCountingByteArrayHttpBodyTest {
         final Semaphore didReportIntermediateProgress = new Semaphore(0);
         final Semaphore finish = new Semaphore(0);
 
-        ParseCountingByteArrayHttpBody body = new ParseCountingByteArrayHttpBody(
-                content, contentType, new ProgressCallback() {
-            Integer maxProgressSoFar = 0;
+        ParseCountingByteArrayHttpBody body =
+                new ParseCountingByteArrayHttpBody(
+                        content,
+                        contentType,
+                        new ProgressCallback() {
+                            Integer maxProgressSoFar = 0;
 
-            @Override
-            public void done(Integer percentDone) {
-                if (percentDone > maxProgressSoFar) {
-                    maxProgressSoFar = percentDone;
-                    assertTrue(percentDone >= 0 && percentDone <= 100);
+                            @Override
+                            public void done(Integer percentDone) {
+                                if (percentDone > maxProgressSoFar) {
+                                    maxProgressSoFar = percentDone;
+                                    assertTrue(percentDone >= 0 && percentDone <= 100);
 
-                    if (percentDone < 100 && percentDone > 0) {
-                        didReportIntermediateProgress.release();
-                    } else if (percentDone == 100) {
-                        finish.release();
-                    } else if (percentDone == 0) {
-                        // do nothing
-                    } else {
-                        fail("percentDone should be within 0 - 100");
-                    }
-                }
-            }
-        });
+                                    if (percentDone < 100 && percentDone > 0) {
+                                        didReportIntermediateProgress.release();
+                                    } else if (percentDone == 100) {
+                                        finish.release();
+                                    } else if (percentDone == 0) {
+                                        // do nothing
+                                    } else {
+                                        fail("percentDone should be within 0 - 100");
+                                    }
+                                }
+                            }
+                        });
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         body.writeTo(output);

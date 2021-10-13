@@ -8,8 +8,8 @@ package com.parse.boltsinternal;
 
 /**
  * This class is used to retain a faulted task until either its error is observed or it is
- * finalized. If it is finalized with a task, then the uncaught exception handler is exected
- * with an UnobservedTaskException.
+ * finalized. If it is finalized with a task, then the uncaught exception handler is exected with an
+ * UnobservedTaskException.
  */
 class UnobservedErrorNotifier {
     private Task<?> task;
@@ -25,7 +25,8 @@ class UnobservedErrorNotifier {
             if (faultedTask != null) {
                 Task.UnobservedExceptionHandler ueh = Task.getUnobservedExceptionHandler();
                 if (ueh != null) {
-                    ueh.unobservedException(faultedTask, new UnobservedTaskException(faultedTask.getError()));
+                    ueh.unobservedException(
+                            faultedTask, new UnobservedTaskException(faultedTask.getError()));
                 }
             }
         } finally {

@@ -14,13 +14,11 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-
+import java.util.Arrays;
+import java.util.Date;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.Arrays;
-import java.util.Date;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseObjectStateTest {
@@ -42,12 +40,13 @@ public class ParseObjectStateTest {
         long updatedAt = System.currentTimeMillis();
         long createdAt = updatedAt + 10;
 
-        ParseObject.State state = new ParseObject.State.Builder("TestObject")
-                .objectId("fake")
-                .createdAt(new Date(createdAt))
-                .updatedAt(new Date(updatedAt))
-                .isComplete(true)
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("TestObject")
+                        .objectId("fake")
+                        .createdAt(new Date(createdAt))
+                        .updatedAt(new Date(updatedAt))
+                        .isComplete(true)
+                        .build();
         assertEquals("TestObject", state.className());
         assertEquals("fake", state.objectId());
         assertEquals(createdAt, state.createdAt());
@@ -60,15 +59,16 @@ public class ParseObjectStateTest {
         long updatedAt = System.currentTimeMillis();
         long createdAt = updatedAt + 10;
 
-        ParseObject.State state = new ParseObject.State.Builder("TestObject")
-                .objectId("fake")
-                .createdAt(new Date(createdAt))
-                .updatedAt(new Date(updatedAt))
-                .isComplete(true)
-                .put("foo", "bar")
-                .put("baz", "qux")
-                .availableKeys(Arrays.asList("safe", "keys"))
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("TestObject")
+                        .objectId("fake")
+                        .createdAt(new Date(createdAt))
+                        .updatedAt(new Date(updatedAt))
+                        .isComplete(true)
+                        .put("foo", "bar")
+                        .put("baz", "qux")
+                        .availableKeys(Arrays.asList("safe", "keys"))
+                        .build();
         ParseObject.State copy = new ParseObject.State.Builder(state).build();
         assertEquals(state.className(), copy.className());
         assertEquals(state.objectId(), copy.objectId());
@@ -88,20 +88,22 @@ public class ParseObjectStateTest {
         long updatedAt = System.currentTimeMillis();
         long createdAt = updatedAt + 10;
 
-        ParseObject.State state = new ParseObject.State.Builder("TestObject")
-                .objectId("fake")
-                .createdAt(new Date(createdAt))
-                .updatedAt(new Date(updatedAt))
-                .isComplete(true)
-                .put("foo", "bar")
-                .put("baz", "qux")
-                .availableKeys(Arrays.asList("safe", "keys"))
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("TestObject")
+                        .objectId("fake")
+                        .createdAt(new Date(createdAt))
+                        .updatedAt(new Date(updatedAt))
+                        .isComplete(true)
+                        .put("foo", "bar")
+                        .put("baz", "qux")
+                        .availableKeys(Arrays.asList("safe", "keys"))
+                        .build();
 
         Parcel parcel = Parcel.obtain();
         state.writeToParcel(parcel, ParseParcelEncoder.get());
         parcel.setDataPosition(0);
-        ParseObject.State copy = ParseObject.State.createFromParcel(parcel, ParseParcelDecoder.get());
+        ParseObject.State copy =
+                ParseObject.State.createFromParcel(parcel, ParseParcelDecoder.get());
 
         assertEquals(state.className(), copy.className());
         assertEquals(state.objectId(), copy.objectId());
@@ -120,9 +122,8 @@ public class ParseObjectStateTest {
     public void testAutomaticUpdatedAt() {
         long createdAt = System.currentTimeMillis();
 
-        ParseObject.State state = new ParseObject.State.Builder("TestObject")
-                .createdAt(new Date(createdAt))
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("TestObject").createdAt(new Date(createdAt)).build();
         assertEquals(createdAt, state.createdAt());
         assertEquals(createdAt, state.updatedAt());
     }
@@ -133,8 +134,7 @@ public class ParseObjectStateTest {
         ParseObject.State state = builder.build();
         assertTrue(state.keySet().isEmpty());
 
-        builder.put("foo", "bar")
-                .put("baz", "qux");
+        builder.put("foo", "bar").put("baz", "qux");
         state = builder.build();
         assertEquals(2, state.keySet().size());
         assertEquals("bar", state.get("foo"));
