@@ -1,3 +1,10 @@
+## [2.0.1](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.0...2.0.1) (2021-10-14)
+
+
+### Bug Fixes
+
+* add maven publications to configure the Jitpack releases ([#1128](https://github.com/parse-community/Parse-SDK-Android/issues/1128)) ([67c4fb6](https://github.com/parse-community/Parse-SDK-Android/commit/67c4fb6209e1a3b3db9663156b356b8888ef0d87))
+
 # [2.0.0](https://github.com/mtrezza/Parse-SDK-Android/compare/1.22.0...2.0.0) (2021-10-10)
 
 
