@@ -41,9 +41,6 @@ dependencies {
 afterEvaluate {
     publishing {
         publications {
-            debug(MavenPublication) {
-                from components.debug
-            }
             release(MavenPublication) {
                 from components.release
             }
