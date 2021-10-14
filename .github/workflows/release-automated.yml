@@ -1,7 +1,9 @@
 name: release-automated
 on:
   push:
-    branches: [ master, release, alpha, beta ]
+    # Disabling release automation temporarily
+    # branches: [ master, release, alpha, beta ]
+    branches: [ release, alpha, beta ]
 jobs:
   publish-docs:
     runs-on: ubuntu-latest
