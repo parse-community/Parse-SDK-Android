@@ -9,13 +9,11 @@
 package com.parse;
 
 import android.os.Parcel;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A set of field-level operations that can be performed on an object, corresponding to one command.
@@ -34,9 +32,7 @@ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
     // Does this set correspond to a call to saveEventually?
     private boolean isSaveEventually = false;
 
-    /**
-     * Creates a new operation set with a random UUID.
-     */
+    /** Creates a new operation set with a random UUID. */
     public ParseOperationSet() {
         this(UUID.randomUUID().toString());
     }
@@ -47,16 +43,12 @@ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
         isSaveEventually = operations.isSaveEventually;
     }
 
-    /**
-     * Creates a new operation set with the given UUID.
-     */
+    /** Creates a new operation set with the given UUID. */
     private ParseOperationSet(String uuid) {
         this.uuid = uuid;
     }
 
-    /**
-     * The inverse of toRest. Creates a new OperationSet from the given JSON.
-     */
+    /** The inverse of toRest. Creates a new OperationSet from the given JSON. */
     public static ParseOperationSet fromRest(JSONObject json, ParseDecoder decoder)
             throws JSONException {
         // Copy the json object to avoid making changes to the old object
@@ -138,9 +130,7 @@ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
         }
     }
 
-    /**
-     * Converts this operation set into its REST format for serializing to LDS.
-     */
+    /** Converts this operation set into its REST format for serializing to LDS. */
     public JSONObject toRest(ParseEncoder objectEncoder) throws JSONException {
         JSONObject operationSetJSON = new JSONObject();
         for (String key : keySet()) {
@@ -155,9 +145,7 @@ class ParseOperationSet extends HashMap<String, ParseFieldOperation> {
         return operationSetJSON;
     }
 
-    /**
-     * Parcels this operation set into a Parcel with the given encoder.
-     */
+    /** Parcels this operation set into a Parcel with the given encoder. */
     /* package */ void toParcel(Parcel dest, ParseParcelEncoder encoder) {
         dest.writeString(uuid);
         dest.writeByte(isSaveEventually ? (byte) 1 : 0);

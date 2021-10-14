@@ -74,8 +74,10 @@ public class SubclassTest extends ResetPluginsParseTest {
     @Test
     public void testRegisteringSubclassesUsesMostDescendantSubclass() {
         try {
-            // When we register a ParseUser subclass, we have to clear the cached currentParseUser, so
-            // we need to register a mock ParseUserController here, otherwise Parse.getCacheDir() will
+            // When we register a ParseUser subclass, we have to clear the cached currentParseUser,
+            // so
+            // we need to register a mock ParseUserController here, otherwise Parse.getCacheDir()
+            // will
             // throw an exception in unit test environment.
             ParseCurrentUserController controller = mock(ParseCurrentUserController.class);
             ParseCorePlugins.getInstance().registerCurrentUserController(controller);
@@ -145,8 +147,7 @@ public class SubclassTest extends ResetPluginsParseTest {
 
     @ParseClassName("NoDefaultConstructor")
     public static class NoDefaultConstructor extends ParseObject {
-        public NoDefaultConstructor(Void argument) {
-        }
+        public NoDefaultConstructor(Void argument) {}
     }
 
     @ParseClassName("ClassWithDirtyingConstructor")
@@ -157,12 +158,9 @@ public class SubclassTest extends ResetPluginsParseTest {
     }
 
     @ParseClassName("UnregisteredClass")
-    public static class UnregisteredClass extends ParseObject {
-    }
+    public static class UnregisteredClass extends ParseObject {}
 
-    public static class MyUser extends ParseUser {
-    }
+    public static class MyUser extends ParseUser {}
 
-    public static class MyUser2 extends ParseUser {
-    }
+    public static class MyUser2 extends ParseUser {}
 }

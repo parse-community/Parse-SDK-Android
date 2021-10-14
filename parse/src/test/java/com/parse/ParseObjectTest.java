@@ -25,10 +25,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.os.Parcel;
-
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,22 +49,10 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 @RunWith(RobolectricTestRunner.class)
 public class ParseObjectTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     private static void mockCurrentUserController() {
         ParseCurrentUserController userController = mock(ParseCurrentUserController.class);
@@ -70,9 +66,9 @@ public class ParseObjectTest {
         TaskCompletionSource<ParseObject.State> tcs = new TaskCompletionSource<>();
         ParseObjectController objectController = mock(ParseObjectController.class);
         when(objectController.saveAsync(
-                any(ParseObject.State.class), any(ParseOperationSet.class),
-                nullable(String.class), any(ParseDecoder.class))
-        ).thenReturn(tcs.getTask());
+                        any(ParseObject.State.class), any(ParseOperationSet.class),
+                        nullable(String.class), any(ParseDecoder.class)))
+                .thenReturn(tcs.getTask());
         ParseCorePlugins.getInstance().registerObjectController(objectController);
         return tcs;
     }
@@ -81,9 +77,8 @@ public class ParseObjectTest {
     private static TaskCompletionSource<Void> mockObjectControllerForDelete() {
         TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
         ParseObjectController objectController = mock(ParseObjectController.class);
-        when(objectController.deleteAsync(
-                any(ParseObject.State.class), anyString())
-        ).thenReturn(tcs.getTask());
+        when(objectController.deleteAsync(any(ParseObject.State.class), anyString()))
+                .thenReturn(tcs.getTask());
         ParseCorePlugins.getInstance().registerObjectController(objectController);
         return tcs;
     }
@@ -93,7 +88,7 @@ public class ParseObjectTest {
         ParseFieldOperations.registerDefaultDecoders(); // to test JSON / Parcel decoding
     }
 
-    //region testRevert
+    // region testRevert
 
     @After
     public void tearDown() {
@@ -103,18 +98,19 @@ public class ParseObjectTest {
 
     @Test
     public void testFromJSONPayload() throws JSONException {
-        JSONObject json = new JSONObject(
-                "{" +
-                        "\"className\":\"GameScore\"," +
-                        "\"createdAt\":\"2015-06-22T21:23:41.733Z\"," +
-                        "\"objectId\":\"TT1ZskATqS\"," +
-                        "\"updatedAt\":\"2015-06-22T22:06:18.104Z\"," +
-                        "\"score\":{" +
-                        "\"__op\":\"Increment\"," +
-                        "\"amount\":1" +
-                        "}," +
-                        "\"age\":33" +
-                        "}");
+        JSONObject json =
+                new JSONObject(
+                        "{"
+                                + "\"className\":\"GameScore\","
+                                + "\"createdAt\":\"2015-06-22T21:23:41.733Z\","
+                                + "\"objectId\":\"TT1ZskATqS\","
+                                + "\"updatedAt\":\"2015-06-22T22:06:18.104Z\","
+                                + "\"score\":{"
+                                + "\"__op\":\"Increment\","
+                                + "\"amount\":1"
+                                + "},"
+                                + "\"age\":33"
+                                + "}");
 
         ParseObject parseObject = ParseObject.fromJSONPayload(json, ParseDecoder.get());
         assertEquals("GameScore", parseObject.getClassName());
@@ -130,9 +126,9 @@ public class ParseObjectTest {
         assertEquals(2, currentOperations.size());
     }
 
-    //endregion
+    // endregion
 
-    //region testFromJson
+    // region testFromJson
 
     @Test
     public void testFromJSONPayloadWithoutClassname() throws JSONException {
@@ -149,19 +145,23 @@ public class ParseObjectTest {
 
         when(lds.getObject(eq("GameScore"), eq("TT1ZskATqS"))).thenReturn(localObj);
 
-        JSONObject json = new JSONObject("{" +
-                "\"className\":\"GameScore\"," +
-                "\"createdAt\":\"2015-06-22T21:23:41.733Z\"," +
-                "\"objectId\":\"TT1ZskATqS\"," +
-                "\"updatedAt\":\"2015-06-22T22:06:18.104Z\"" +
-                "}");
+        JSONObject json =
+                new JSONObject(
+                        "{"
+                                + "\"className\":\"GameScore\","
+                                + "\"createdAt\":\"2015-06-22T21:23:41.733Z\","
+                                + "\"objectId\":\"TT1ZskATqS\","
+                                + "\"updatedAt\":\"2015-06-22T22:06:18.104Z\""
+                                + "}");
         ParseObject obj;
         for (int i = 0; i < 50000; i++) {
-            obj = ParseObject.fromJSON(json, "GameScore", ParseDecoder.get(), Collections.<String>emptySet());
+            obj =
+                    ParseObject.fromJSON(
+                            json, "GameScore", ParseDecoder.get(), Collections.<String>emptySet());
         }
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testSaveCustomObjectIdMissing() {
@@ -654,9 +654,9 @@ public class ParseObjectTest {
         assertEquals(1.1, object.getDouble("key"), 0.00001);
     }
 
-    //endregion
+    // endregion
 
-    //region testParcelable
+    // region testParcelable
 
     @Test
     public void testGetDoubleWithWrongValue() {
@@ -746,8 +746,10 @@ public class ParseObjectTest {
         assertEquals(newRel.getKnownObjects().size(), rel.getKnownObjects().size());
         newRel.hasKnownObject(related);
         assertEquals(newObject.getParseFile("file").getUrl(), object.getParseFile("file").getUrl());
-        assertEquals(newObject.getParseGeoPoint("point").getLatitude(),
-                object.getParseGeoPoint("point").getLatitude(), 0);
+        assertEquals(
+                newObject.getParseGeoPoint("point").getLatitude(),
+                object.getParseGeoPoint("point").getLatitude(),
+                0);
     }
 
     @Test
@@ -777,15 +779,19 @@ public class ParseObjectTest {
     public void testParcelWithCircularReferenceFromServer() {
         ParseObject parent = new ParseObject("Parent");
         ParseObject child = new ParseObject("Child");
-        parent.setState(new ParseObject.State.Builder("Parent")
-                .objectId("parentId")
-                .put("self", parent)
-                .put("child", child).build());
+        parent.setState(
+                new ParseObject.State.Builder("Parent")
+                        .objectId("parentId")
+                        .put("self", parent)
+                        .put("child", child)
+                        .build());
         parent.setObjectId("parentId");
-        child.setState(new ParseObject.State.Builder("Child")
-                .objectId("childId")
-                .put("self", child)
-                .put("parent", parent).build());
+        child.setState(
+                new ParseObject.State.Builder("Child")
+                        .objectId("childId")
+                        .put("self", child)
+                        .put("parent", parent)
+                        .build());
 
         Parcel parcel = Parcel.obtain();
         parent.writeToParcel(parcel, 0);
@@ -838,9 +844,9 @@ public class ParseObjectTest {
         ParseTaskUtils.wait(Task.whenAll(tasks));
     }
 
-    //endregion
+    // endregion
 
-    //region testFailingDelete
+    // region testFailingDelete
 
     @Test
     public void testParcelWhileSavingWithLDSEnabled() throws Exception {
@@ -873,9 +879,9 @@ public class ParseObjectTest {
         Parse.setLocalDatastore(null);
     }
 
-    //endregion
+    // endregion
 
-    //region testFailingSave
+    // region testFailingSave
 
     @Test
     public void testParcelWhileDeleting() throws Exception {
@@ -903,7 +909,7 @@ public class ParseObjectTest {
         assertTrue(object.isDeleted);
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testParcelWhileDeletingWithLDSEnabled() throws Exception {
@@ -937,8 +943,8 @@ public class ParseObjectTest {
 
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
 
-        Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                .build();
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application).build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
@@ -971,8 +977,8 @@ public class ParseObjectTest {
 
         ParseObject.registerSubclass(ParseUser.class);
 
-        Parse.Configuration configuration = new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                .build();
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application).build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);

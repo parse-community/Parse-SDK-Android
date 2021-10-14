@@ -13,16 +13,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-
 public class InstallationIdTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testGetGeneratesInstallationIdAndFile() throws Exception {
@@ -31,8 +29,8 @@ public class InstallationIdTest {
 
         String installationIdString = installationId.get();
         assertNotNull(installationIdString);
-        assertEquals(installationIdString,
-                ParseFileUtils.readFileToString(installationIdFile, "UTF-8"));
+        assertEquals(
+                installationIdString, ParseFileUtils.readFileToString(installationIdFile, "UTF-8"));
     }
 
     @Test
@@ -50,7 +48,8 @@ public class InstallationIdTest {
         InstallationId installationId = new InstallationId(installationIdFile);
 
         installationId.set("test_installation_id");
-        assertEquals("test_installation_id",
+        assertEquals(
+                "test_installation_id",
                 ParseFileUtils.readFileToString(installationIdFile, "UTF-8"));
     }
 

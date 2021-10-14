@@ -11,9 +11,7 @@ package com.parse;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
-/**
- * A HashMap where all the values are weak.
- */
+/** A HashMap where all the values are weak. */
 class WeakValueHashMap<K, V> {
     private final HashMap<K, WeakReference<V>> map;
 
@@ -26,8 +24,8 @@ class WeakValueHashMap<K, V> {
     }
 
     /**
-     * Returns null if the key isn't in the map, or if it is an expired reference. If it is, then the
-     * reference is removed from the map.
+     * Returns null if the key isn't in the map, or if it is an expired reference. If it is, then
+     * the reference is removed from the map.
      */
     public V get(K key) {
         WeakReference<V> reference = map.get(key);

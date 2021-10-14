@@ -9,13 +9,8 @@
 package com.parse;
 
 import androidx.annotation.NonNull;
-
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,13 +22,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The {@code ParseQuery} class defines a query that is used to fetch {@link ParseObject}s. The most
  * common use case is finding all objects that match a query through the {@link #findInBackground()}
  * method, using a {@link FindCallback}. For example, this sample code fetches all objects of class
  * {@code "MyClass"}. It calls a different function depending on whether the fetch succeeded or not.
- * <p/>
+ *
+ * <p>
+ *
  * <pre>
  * ParseQuery&lt;ParseObject&gt; query = ParseQuery.getQuery("MyClass");
  * query.findInBackground(new FindCallback&lt;ParseObject&gt;() {
@@ -46,12 +45,14 @@ import java.util.regex.Pattern;
  *     }
  * }
  * </pre>
- * <p/>
- * A {@code ParseQuery} can also be used to retrieve a single object whose id is known, through the
- * {@link #getInBackground(String)} method, using a {@link GetCallback}. For example, this
- * sample code fetches an object of class {@code "MyClass"} and id {@code myId}. It calls
- * a different function depending on whether the fetch succeeded or not.
- * <p/>
+ *
+ * <p>A {@code ParseQuery} can also be used to retrieve a single object whose id is known, through
+ * the {@link #getInBackground(String)} method, using a {@link GetCallback}. For example, this
+ * sample code fetches an object of class {@code "MyClass"} and id {@code myId}. It calls a
+ * different function depending on whether the fetch succeeded or not.
+ *
+ * <p>
+ *
  * <pre>
  * ParseQuery&lt;ParseObject&gt; query = ParseQuery.getQuery("MyClass");
  * query.getInBackground(myId, new GetCallback&lt;ParseObject&gt;() {
@@ -64,11 +65,13 @@ import java.util.regex.Pattern;
  *     }
  * }
  * </pre>
- * <p/>
- * A {@code ParseQuery} can also be used to count the number of objects that match the query without
- * retrieving all of those objects. For example, this sample code counts the number of objects of
- * the class {@code "MyClass"}.
- * <p/>
+ *
+ * <p>A {@code ParseQuery} can also be used to count the number of objects that match the query
+ * without retrieving all of those objects. For example, this sample code counts the number of
+ * objects of the class {@code "MyClass"}.
+ *
+ * <p>
+ *
  * <pre>
  * ParseQuery&lt;ParseObject&gt; query = ParseQuery.getQuery("MyClass");
  * query.countInBackground(new CountCallback() {
@@ -81,12 +84,12 @@ import java.util.regex.Pattern;
  *     }
  * }
  * </pre>
- * <p/>
- * Using the callback methods is usually preferred because the network operation will not block the
- * calling thread. However, in some cases it may be easier to use the {@link #find()},
- * {@link #get(String)} or {@link #count()} calls, which do block the calling thread. For example,
- * if your application has already spawned a background task to perform work, that background task
- * could use the blocking calls and avoid the code complexity of callbacks.
+ *
+ * <p>Using the callback methods is usually preferred because the network operation will not block
+ * the calling thread. However, in some cases it may be easier to use the {@link #find()}, {@link
+ * #get(String)} or {@link #count()} calls, which do block the calling thread. For example, if your
+ * application has already spawned a background task to perform work, that background task could use
+ * the blocking calls and avoid the code complexity of callbacks.
  */
 @SuppressWarnings("UnusedReturnValue")
 public class ParseQuery<T extends ParseObject> {
@@ -95,8 +98,8 @@ public class ParseQuery<T extends ParseObject> {
 
     private final State.Builder<T> builder;
     // Just like ParseFile
-    private final Set<TaskCompletionSource<?>> currentTasks = Collections.synchronizedSet(
-            new HashSet<>());
+    private final Set<TaskCompletionSource<?>> currentTasks =
+            Collections.synchronizedSet(new HashSet<>());
     private ParseUser user;
 
     /**
@@ -110,8 +113,8 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Constructs a query. A default query with no further parameters will retrieve all
-     * {@link ParseObject}s of the provided class.
+     * Constructs a query. A default query with no further parameters will retrieve all {@link
+     * ParseObject}s of the provided class.
      *
      * @param theClassName The name of the class to retrieve {@link ParseObject}s for.
      */
@@ -192,17 +195,16 @@ public class ParseQuery<T extends ParseObject> {
     private static void throwIfLDSEnabled(boolean enabled) {
         boolean ldsEnabled = Parse.isLocalDatastoreEnabled();
         if (enabled && !ldsEnabled) {
-            throw new IllegalStateException("Method requires Local Datastore. " +
-                    "Please refer to `Parse#enableLocalDatastore(Context)`.");
+            throw new IllegalStateException(
+                    "Method requires Local Datastore. "
+                            + "Please refer to `Parse#enableLocalDatastore(Context)`.");
         }
         if (!enabled && ldsEnabled) {
             throw new IllegalStateException("Unsupported method when Local Datastore is enabled.");
         }
     }
 
-    /**
-     * Clears the cached result for all queries.
-     */
+    /** Clears the cached result for all queries. */
     public static void clearAllCachedResults() {
         throwIfLDSEnabled();
 
@@ -215,9 +217,10 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Sets the user to be used for this query.
+     *
      * <p>
-     * <p>
-     * The query will use the user if set, otherwise it will read the current user.
+     *
+     * <p>The query will use the user if set, otherwise it will read the current user.
      */
     /* package for tests */ ParseQuery<T> setUser(ParseUser user) {
         this.user = user;
@@ -239,10 +242,8 @@ public class ParseQuery<T extends ParseObject> {
         return ParseUser.getCurrentUserAsync();
     }
 
-    /**
-     * Cancels the current network request(s) (if any is running).
-     */
-    //TODO (grantland): Deprecate and replace with CancellationTokens
+    /** Cancels the current network request(s) (if any is running). */
+    // TODO (grantland): Deprecate and replace with CancellationTokens
     public void cancel() {
         Set<TaskCompletionSource<?>> tasks = new HashSet<>(currentTasks);
         for (TaskCompletionSource<?> tcs : tasks) {
@@ -257,7 +258,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Retrieves a list of {@link ParseObject}s that satisfy this query.
-     * <p/>
+     *
+     * <p>
      *
      * @return A list of all {@link ParseObject}s obeying the conditions set in this query.
      * @throws ParseException Throws a {@link ParseException} if no object is found.
@@ -269,8 +271,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Retrieves at most one {@link ParseObject} that satisfies this query.
-     * <p/>
-     * <strong>Note:</strong>This mutates the {@code ParseQuery}.
+     *
+     * <p><strong>Note:</strong>This mutates the {@code ParseQuery}.
      *
      * @return A {@link ParseObject} obeying the conditions set in this query.
      * @throws ParseException Throws a {@link ParseException} if no object is found.
@@ -280,17 +282,15 @@ public class ParseQuery<T extends ParseObject> {
         return ParseTaskUtils.wait(getFirstInBackground());
     }
 
-    /**
-     * @return the caching policy.
-     */
+    /** @return the caching policy. */
     public CachePolicy getCachePolicy() {
         return builder.getCachePolicy();
     }
 
     /**
      * Change the caching policy of this query.
-     * <p/>
-     * Unsupported when Local Datastore is enabled.
+     *
+     * <p>Unsupported when Local Datastore is enabled.
      *
      * @return this, so you can chain this call.
      * @see ParseQuery#fromLocalDatastore()
@@ -304,8 +304,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Change the source of this query to the server.
-     * <p/>
-     * Requires Local Datastore to be enabled.
+     *
+     * <p>Requires Local Datastore to be enabled.
      *
      * @return this, so you can chain this call.
      * @see ParseQuery#setCachePolicy(CachePolicy)
@@ -321,8 +321,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Change the source of this query to all pinned objects.
-     * <p/>
-     * Requires Local Datastore to be enabled.
+     *
+     * <p>Requires Local Datastore to be enabled.
      *
      * @return this, so you can chain this call.
      * @see ParseQuery#setCachePolicy(CachePolicy)
@@ -334,8 +334,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Change the source of this query to the default group of pinned objects.
-     * <p/>
-     * Requires Local Datastore to be enabled.
+     *
+     * <p>Requires Local Datastore to be enabled.
      *
      * @return this, so you can chain this call.
      * @see ParseObject#DEFAULT_PIN
@@ -348,8 +348,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Change the source of this query to a specific group of pinned objects.
-     * <p/>
-     * Requires Local Datastore to be enabled.
+     *
+     * <p>Requires Local Datastore to be enabled.
      *
      * @param name the pinned group
      * @return this, so you can chain this call.
@@ -362,8 +362,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Ignore ACLs when querying from the Local Datastore.
-     * <p/>
-     * This is particularly useful when querying for objects with Role based ACLs set on them.
+     *
+     * <p>This is particularly useful when querying for objects with Role based ACLs set on them.
      *
      * @return this, so you can chain this call.
      */
@@ -394,7 +394,8 @@ public class ParseQuery<T extends ParseObject> {
      * Wraps the runnable operation and keeps it in sync with the given tcs, so we know how many
      * operations are running (currentTasks.size()) and can cancel them.
      */
-    private <TResult> Task<TResult> perform(Callable<Task<TResult>> runnable, final TaskCompletionSource<?> tcs) {
+    private <TResult> Task<TResult> perform(
+            Callable<Task<TResult>> runnable, final TaskCompletionSource<?> tcs) {
         currentTasks.add(tcs);
 
         Task<TResult> task;
@@ -403,18 +404,19 @@ public class ParseQuery<T extends ParseObject> {
         } catch (Exception e) {
             task = Task.forError(e);
         }
-        return task.continueWithTask(task1 -> {
-            tcs.trySetResult(null); // release
-            currentTasks.remove(tcs);
-            return task1;
-        });
+        return task.continueWithTask(
+                task1 -> {
+                    tcs.trySetResult(null); // release
+                    currentTasks.remove(tcs);
+                    return task1;
+                });
     }
 
     /**
      * Retrieves a list of {@link ParseObject}s that satisfy this query from the source in a
      * background thread.
-     * <p/>
-     * This is preferable to using {@link #find()}, unless your code is already running in a
+     *
+     * <p>This is preferable to using {@link #find()}, unless your code is already running in a
      * background thread.
      *
      * @return A {@link Task} that will be resolved when the find has completed.
@@ -426,8 +428,8 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Retrieves a list of {@link ParseObject}s that satisfy this query from the source in a
      * background thread.
-     * <p/>
-     * This is preferable to using {@link #find()}, unless your code is already running in a
+     *
+     * <p>This is preferable to using {@link #find()}, unless your code is already running in a
      * background thread.
      *
      * @param callback callback.done(objectList, e) is called when the find completes.
@@ -436,8 +438,7 @@ public class ParseQuery<T extends ParseObject> {
         final State<T> state = builder.build();
 
         final Task<List<T>> task;
-        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK ||
-                state.isFromLocalDatastore()) {
+        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK || state.isFromLocalDatastore()) {
             task = findAsync(state);
         } else {
             task = doCacheThenNetwork(state, callback, this::findAsync);
@@ -447,51 +448,54 @@ public class ParseQuery<T extends ParseObject> {
 
     private Task<List<T>> findAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
-            final ParseUser user = task.getResult();
-            return findAsync(state, user, tcs.getTask());
-        }), tcs);
+        return perform(
+                () ->
+                        getUserAsync(state)
+                                .onSuccessTask(
+                                        task -> {
+                                            final ParseUser user = task.getResult();
+                                            return findAsync(state, user, tcs.getTask());
+                                        }),
+                tcs);
     }
 
-    /* package */ Task<List<T>> findAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
+    /* package */ Task<List<T>> findAsync(
+            State<T> state, ParseUser user, Task<Void> cancellationToken) {
         return ParseQuery.getQueryController().findAsync(state, user, cancellationToken);
     }
 
     /**
      * Retrieves at most one {@link ParseObject} that satisfies this query from the source in a
      * background thread.
-     * <p/>
-     * This is preferable to using {@link #getFirst()}, unless your code is already running in a
+     *
+     * <p>This is preferable to using {@link #getFirst()}, unless your code is already running in a
      * background thread.
-     * <p/>
-     * <strong>Note:</strong>This mutates the {@code ParseQuery}.
+     *
+     * <p><strong>Note:</strong>This mutates the {@code ParseQuery}.
      *
      * @return A {@link Task} that will be resolved when the get has completed.
      */
     public Task<T> getFirstInBackground() {
-        final State<T> state = builder.setLimit(1)
-                .build();
+        final State<T> state = builder.setLimit(1).build();
         return getFirstAsync(state);
     }
 
     /**
      * Retrieves at most one {@link ParseObject} that satisfies this query from the source in a
      * background thread.
-     * <p/>
-     * This is preferable to using {@link #getFirst()}, unless your code is already running in a
+     *
+     * <p>This is preferable to using {@link #getFirst()}, unless your code is already running in a
      * background thread.
-     * <p/>
-     * <strong>Note:</strong>This mutates the {@code ParseQuery}.
+     *
+     * <p><strong>Note:</strong>This mutates the {@code ParseQuery}.
      *
      * @param callback callback.done(object, e) is called when the find completes.
      */
     public void getFirstInBackground(final GetCallback<T> callback) {
-        final State<T> state = builder.setLimit(1)
-                .build();
+        final State<T> state = builder.setLimit(1).build();
 
         final Task<T> task;
-        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK ||
-                state.isFromLocalDatastore()) {
+        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK || state.isFromLocalDatastore()) {
             task = getFirstAsync(state);
         } else {
             task = doCacheThenNetwork(state, callback, this::getFirstAsync);
@@ -501,10 +505,15 @@ public class ParseQuery<T extends ParseObject> {
 
     private Task<T> getFirstAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
-            final ParseUser user = task.getResult();
-            return getFirstAsync(state, user, tcs.getTask());
-        }), tcs);
+        return perform(
+                () ->
+                        getUserAsync(state)
+                                .onSuccessTask(
+                                        task -> {
+                                            final ParseUser user = task.getResult();
+                                            return getFirstAsync(state, user, tcs.getTask());
+                                        }),
+                tcs);
     }
 
     private Task<T> getFirstAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -514,7 +523,8 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Counts the number of objects that match this query. This does not use caching.
      *
-     * @throws ParseException Throws an exception when the network connection fails or when the query is invalid.
+     * @throws ParseException Throws an exception when the network connection fails or when the
+     *     query is invalid.
      */
     public int count() throws ParseException {
         return ParseTaskUtils.wait(countInBackground());
@@ -543,13 +553,13 @@ public class ParseQuery<T extends ParseObject> {
         final State<T> state = copy.setLimit(0).build();
 
         // Hack to workaround CountCallback's non-uniform signature.
-        final ParseCallback2<Integer, ParseException> c = callback != null
-                ? (integer, e) -> callback.done(e == null ? integer : -1, e)
-                : null;
+        final ParseCallback2<Integer, ParseException> c =
+                callback != null
+                        ? (integer, e) -> callback.done(e == null ? integer : -1, e)
+                        : null;
 
         final Task<Integer> task;
-        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK ||
-                state.isFromLocalDatastore()) {
+        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK || state.isFromLocalDatastore()) {
             task = countAsync(state);
         } else {
             task = doCacheThenNetwork(state, c, this::countAsync);
@@ -559,10 +569,15 @@ public class ParseQuery<T extends ParseObject> {
 
     private Task<Integer> countAsync(final State<T> state) {
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
-            final ParseUser user = task.getResult();
-            return countAsync(state, user, tcs.getTask());
-        }), tcs);
+        return perform(
+                () ->
+                        getUserAsync(state)
+                                .onSuccessTask(
+                                        task -> {
+                                            final ParseUser user = task.getResult();
+                                            return countAsync(state, user, tcs.getTask());
+                                        }),
+                tcs);
     }
 
     private Task<Integer> countAsync(State<T> state, ParseUser user, Task<Void> cancellationToken) {
@@ -571,22 +586,20 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Constructs a {@link ParseObject} whose id is already known by fetching data from the source.
-     * <p/>
-     * <strong>Note:</strong>This mutates the {@code ParseQuery}.
+     *
+     * <p><strong>Note:</strong>This mutates the {@code ParseQuery}.
      *
      * @param objectId Object id of the {@link ParseObject} to fetch.
-     * @throws ParseException Throws an exception when there is no such object or when the network connection
-     *                        fails.
+     * @throws ParseException Throws an exception when there is no such object or when the network
+     *     connection fails.
      * @see ParseException#OBJECT_NOT_FOUND
      */
     public T get(final String objectId) throws ParseException {
         return ParseTaskUtils.wait(getInBackground(objectId));
     }
 
-    /**
-     * Returns whether or not this query has a cached result.
-     */
-    //TODO (grantland): should be done Async since it does disk i/o & calls through to current user
+    /** Returns whether or not this query has a cached result. */
+    // TODO (grantland): should be done Async since it does disk i/o & calls through to current user
     public boolean hasCachedResult() {
         throwIfLDSEnabled();
 
@@ -606,9 +619,10 @@ public class ParseQuery<T extends ParseObject> {
          * TODO: Once the count queries are cached, only return false when both queries miss in the
          * cache.
          */
-        String raw = ParseKeyValueCache.loadFromKeyValueCache(
-                ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey(), state.maxCacheAge()
-        );
+        String raw =
+                ParseKeyValueCache.loadFromKeyValueCache(
+                        ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey(),
+                        state.maxCacheAge());
         return raw != null;
     }
 
@@ -616,7 +630,7 @@ public class ParseQuery<T extends ParseObject> {
      * Removes the previously cached result for this query, forcing the next find() to hit the
      * network. If there is no cached result for this query, then this is a no-op.
      */
-    //TODO (grantland): should be done Async since it does disk i/o & calls through to current user
+    // TODO (grantland): should be done Async since it does disk i/o & calls through to current user
     public void clearCachedResult() {
         throwIfLDSEnabled();
 
@@ -634,16 +648,15 @@ public class ParseQuery<T extends ParseObject> {
 
         // TODO: Once the count queries are cached, handle the cached results of the count query.
         ParseKeyValueCache.clearFromKeyValueCache(
-                ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey()
-        );
+                ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey());
     }
 
     /**
-     * Constructs a {@link ParseObject} whose id is already known by fetching data from the source in a
-     * background thread. This does not use caching.
-     * <p/>
-     * This is preferable to using the {@link ParseObject#createWithoutData(String, String)}, unless
-     * your code is already running in a background thread.
+     * Constructs a {@link ParseObject} whose id is already known by fetching data from the source
+     * in a background thread. This does not use caching.
+     *
+     * <p>This is preferable to using the {@link ParseObject#createWithoutData(String, String)},
+     * unless your code is already running in a background thread.
      *
      * @param objectId Object id of the {@link ParseObject} to fetch.
      * @return A {@link Task} that is resolved when the fetch completes.
@@ -652,18 +665,16 @@ public class ParseQuery<T extends ParseObject> {
     // other parameters don't even make sense here?
     // We'll need to add a version with CancellationToken if we do.
     public Task<T> getInBackground(final String objectId) {
-        final State<T> state = builder.setSkip(-1)
-                .whereObjectIdEquals(objectId)
-                .build();
+        final State<T> state = builder.setSkip(-1).whereObjectIdEquals(objectId).build();
         return getFirstAsync(state);
     }
 
     /**
-     * Constructs a {@link ParseObject} whose id is already known by fetching data from the source in
-     * a background thread. This does not use caching.
-     * <p/>
-     * This is preferable to using the {@link ParseObject#createWithoutData(String, String)}, unless
-     * your code is already running in a background thread.
+     * Constructs a {@link ParseObject} whose id is already known by fetching data from the source
+     * in a background thread. This does not use caching.
+     *
+     * <p>This is preferable to using the {@link ParseObject#createWithoutData(String, String)},
+     * unless your code is already running in a background thread.
      *
      * @param objectId Object id of the {@link ParseObject} to fetch.
      * @param callback callback.done(object, e) will be called when the fetch completes.
@@ -672,13 +683,10 @@ public class ParseQuery<T extends ParseObject> {
     // other parameters don't even make sense here?
     // We'll need to add a version with CancellationToken if we do.
     public void getInBackground(final String objectId, final GetCallback<T> callback) {
-        final State<T> state = builder.setSkip(-1)
-                .whereObjectIdEquals(objectId)
-                .build();
+        final State<T> state = builder.setSkip(-1).whereObjectIdEquals(objectId).build();
 
         final Task<T> task;
-        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK ||
-                state.isFromLocalDatastore()) {
+        if (state.cachePolicy() != CachePolicy.CACHE_THEN_NETWORK || state.isFromLocalDatastore()) {
             task = getFirstAsync(state);
         } else {
             task = doCacheThenNetwork(state, callback, this::getFirstAsync);
@@ -688,10 +696,10 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Helper method for CACHE_THEN_NETWORK.
-     * <p>
-     * Serially executes the {@code delegate} once in cache with the {@code} callback and then returns
-     * a task for the execution of the second {@code delegate} execution on the network for the caller
-     * to callback on.
+     *
+     * <p>Serially executes the {@code delegate} once in cache with the {@code} callback and then
+     * returns a task for the execution of the second {@code delegate} execution on the network for
+     * the caller to callback on.
      */
     private <TResult> Task<TResult> doCacheThenNetwork(
             final ParseQuery.State<T> state,
@@ -699,31 +707,44 @@ public class ParseQuery<T extends ParseObject> {
             final CacheThenNetworkCallable<T, Task<TResult>> delegate) {
 
         final TaskCompletionSource<Void> tcs = new TaskCompletionSource<>();
-        return perform(() -> getUserAsync(state).onSuccessTask(task -> {
-            final ParseUser user = task.getResult();
-            final State<T> cacheState = new State.Builder<T>(state)
-                    .setCachePolicy(CachePolicy.CACHE_ONLY)
-                    .build();
-            final State<T> networkState = new State.Builder<T>(state)
-                    .setCachePolicy(CachePolicy.NETWORK_ONLY)
-                    .build();
+        return perform(
+                () ->
+                        getUserAsync(state)
+                                .onSuccessTask(
+                                        task -> {
+                                            final ParseUser user = task.getResult();
+                                            final State<T> cacheState =
+                                                    new State.Builder<T>(state)
+                                                            .setCachePolicy(CachePolicy.CACHE_ONLY)
+                                                            .build();
+                                            final State<T> networkState =
+                                                    new State.Builder<T>(state)
+                                                            .setCachePolicy(
+                                                                    CachePolicy.NETWORK_ONLY)
+                                                            .build();
 
-            Task<TResult> executionTask = delegate.call(cacheState, user, tcs.getTask());
-            executionTask = ParseTaskUtils.callbackOnMainThreadAsync(executionTask, callback);
-            return executionTask.continueWithTask(task1 -> {
-                if (task1.isCancelled()) {
-                    return task1;
-                }
-                return delegate.call(networkState, user, tcs.getTask());
-            });
-        }), tcs);
+                                            Task<TResult> executionTask =
+                                                    delegate.call(cacheState, user, tcs.getTask());
+                                            executionTask =
+                                                    ParseTaskUtils.callbackOnMainThreadAsync(
+                                                            executionTask, callback);
+                                            return executionTask.continueWithTask(
+                                                    task1 -> {
+                                                        if (task1.isCancelled()) {
+                                                            return task1;
+                                                        }
+                                                        return delegate.call(
+                                                                networkState, user, tcs.getTask());
+                                                    });
+                                        }),
+                tcs);
     }
 
     /**
      * Add a constraint to the query that requires a particular key's value to be equal to the
      * provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that the {@link ParseObject} must contain.
      * @return this, so you can chain this call.
      */
@@ -736,7 +757,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to be less than the
      * provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that provides an upper bound.
      * @return this, so you can chain this call.
      */
@@ -749,7 +770,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to be not equal to the
      * provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that must not be equalled.
      * @return this, so you can chain this call.
      */
@@ -762,7 +783,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to be greater than the
      * provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that provides an lower bound.
      * @return this, so you can chain this call.
      */
@@ -771,13 +792,13 @@ public class ParseQuery<T extends ParseObject> {
         return this;
     }
 
-    //region CACHE_THEN_NETWORK
+    // region CACHE_THEN_NETWORK
 
     /**
      * Add a constraint to the query that requires a particular key's value to be less than or equal
      * to the provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that provides an upper bound.
      * @return this, so you can chain this call.
      */
@@ -790,7 +811,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to be greater than or
      * equal to the provided value.
      *
-     * @param key   The key to check.
+     * @param key The key to check.
      * @param value The value that provides an lower bound.
      * @return this, so you can chain this call.
      */
@@ -799,13 +820,13 @@ public class ParseQuery<T extends ParseObject> {
         return this;
     }
 
-    //endregion
+    // endregion
 
     /**
      * Add a constraint to the query that requires a particular key's value to be contained in the
      * provided list of values.
      *
-     * @param key    The key to check.
+     * @param key The key to check.
      * @param values The values that will match.
      * @return this, so you can chain this call.
      */
@@ -818,7 +839,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to contain every one of
      * the provided list of values.
      *
-     * @param key    The key to check. This key's value must be an array.
+     * @param key The key to check. This key's value must be an array.
      * @param values The values that will match.
      * @return this, so you can chain this call.
      */
@@ -828,12 +849,12 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Adds a constraint for finding string values that contain a provided
-     * string using Full Text Search
-     * <p>
-     * Requires Parse-Server@2.5.0
+     * Adds a constraint for finding string values that contain a provided string using Full Text
+     * Search
      *
-     * @param key  The key to be constrained.
+     * <p>Requires Parse-Server@2.5.0
+     *
+     * @param key The key to be constrained.
      * @param text String to be searched
      * @return this, so you can chain this call.
      */
@@ -846,7 +867,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value to contain each one of
      * the provided list of strings entirely or just starting with given strings.
      *
-     * @param key    The key to check. This key's value must be an array.
+     * @param key The key to check. This key's value must be an array.
      * @param values The values that will match entirely or starting with them.
      * @return this, so you can chain this call.
      */
@@ -862,12 +883,13 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Add a constraint to the query that requires a particular key's value match another
-     * {@code ParseQuery}.
-     * <p/>
-     * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
+     * Add a constraint to the query that requires a particular key's value match another {@code
+     * ParseQuery}.
      *
-     * @param key   The key to check.
+     * <p>This only works on keys whose values are {@link ParseObject}s or lists of {@link
+     * ParseObject}s.
+     *
+     * @param key The key to check.
      * @param query The query that the value should match
      * @return this, so you can chain this call.
      */
@@ -879,10 +901,11 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Add a constraint to the query that requires a particular key's value does not match another
      * {@code ParseQuery}.
-     * <p/>
-     * This only works on keys whose values are {@link ParseObject}s or lists of {@link ParseObject}s.
      *
-     * @param key   The key to check.
+     * <p>This only works on keys whose values are {@link ParseObject}s or lists of {@link
+     * ParseObject}s.
+     *
+     * @param key The key to check.
      * @param query The query that the value should not match
      * @return this, so you can chain this call.
      */
@@ -892,15 +915,16 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Add a constraint to the query that requires a particular key's value matches a value for a key
-     * in the results of another {@code ParseQuery}.
+     * Add a constraint to the query that requires a particular key's value matches a value for a
+     * key in the results of another {@code ParseQuery}.
      *
-     * @param key        The key whose value is being checked
+     * @param key The key whose value is being checked
      * @param keyInQuery The key in the objects from the sub query to look in
-     * @param query      The sub query to run
+     * @param query The sub query to run
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereMatchesKeyInQuery(String key, String keyInQuery, ParseQuery<?> query) {
+    public ParseQuery<T> whereMatchesKeyInQuery(
+            String key, String keyInQuery, ParseQuery<?> query) {
         builder.whereMatchesKeyInQuery(key, keyInQuery, query.getBuilder());
         return this;
     }
@@ -909,13 +933,13 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value does not match any value
      * for a key in the results of another {@code ParseQuery}.
      *
-     * @param key        The key whose value is being checked and excluded
+     * @param key The key whose value is being checked and excluded
      * @param keyInQuery The key in the objects from the sub query to look in
-     * @param query      The sub query to run
+     * @param query The sub query to run
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereDoesNotMatchKeyInQuery(String key, String keyInQuery,
-                                                     ParseQuery<?> query) {
+    public ParseQuery<T> whereDoesNotMatchKeyInQuery(
+            String key, String keyInQuery, ParseQuery<?> query) {
         builder.whereDoesNotMatchKeyInQuery(key, keyInQuery, query.getBuilder());
         return this;
     }
@@ -924,7 +948,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a constraint to the query that requires a particular key's value not be contained in the
      * provided list of values.
      *
-     * @param key    The key to check.
+     * @param key The key to check.
      * @param values The values that will not match.
      * @return this, so you can chain this call.
      */
@@ -937,7 +961,7 @@ public class ParseQuery<T extends ParseObject> {
      * Add a proximity based constraint for finding objects with key point values near the point
      * given.
      *
-     * @param key   The key that the {@link ParseGeoPoint} is stored in.
+     * @param key The key that the {@link ParseGeoPoint} is stored in.
      * @param point The reference {@link ParseGeoPoint} that is used.
      * @return this, so you can chain this call.
      */
@@ -947,13 +971,13 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Add a proximity based constraint for finding objects with key point values near the point given
-     * and within the maximum distance given.
-     * <p/>
-     * Radius of earth used is {@code 3958.8} miles.
+     * Add a proximity based constraint for finding objects with key point values near the point
+     * given and within the maximum distance given.
      *
-     * @param key         The key that the {@link ParseGeoPoint} is stored in.
-     * @param point       The reference {@link ParseGeoPoint} that is used.
+     * <p>Radius of earth used is {@code 3958.8} miles.
+     *
+     * @param key The key that the {@link ParseGeoPoint} is stored in.
+     * @param point The reference {@link ParseGeoPoint} that is used.
      * @param maxDistance Maximum distance (in miles) of results to return.
      * @return this, so you can chain this call.
      */
@@ -962,40 +986,40 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Add a proximity based constraint for finding objects with key point values near the point given
-     * and within the maximum distance given.
-     * <p/>
-     * Radius of earth used is {@code 6371.0} kilometers.
+     * Add a proximity based constraint for finding objects with key point values near the point
+     * given and within the maximum distance given.
      *
-     * @param key         The key that the {@link ParseGeoPoint} is stored in.
-     * @param point       The reference {@link ParseGeoPoint} that is used.
+     * <p>Radius of earth used is {@code 6371.0} kilometers.
+     *
+     * @param key The key that the {@link ParseGeoPoint} is stored in.
+     * @param point The reference {@link ParseGeoPoint} that is used.
      * @param maxDistance Maximum distance (in kilometers) of results to return.
      * @return this, so you can chain this call.
      */
-    public ParseQuery<T> whereWithinKilometers(String key, ParseGeoPoint point, double maxDistance) {
+    public ParseQuery<T> whereWithinKilometers(
+            String key, ParseGeoPoint point, double maxDistance) {
         return whereWithinRadians(key, point, maxDistance / ParseGeoPoint.EARTH_MEAN_RADIUS_KM);
     }
 
     /**
-     * Add a proximity based constraint for finding objects with key point values near the point given
-     * and within the maximum distance given.
+     * Add a proximity based constraint for finding objects with key point values near the point
+     * given and within the maximum distance given.
      *
-     * @param key         The key that the {@link ParseGeoPoint} is stored in.
-     * @param point       The reference {@link ParseGeoPoint} that is used.
+     * @param key The key that the {@link ParseGeoPoint} is stored in.
+     * @param point The reference {@link ParseGeoPoint} that is used.
      * @param maxDistance Maximum distance (in radians) of results to return.
      * @return this, so you can chain this call.
      */
     public ParseQuery<T> whereWithinRadians(String key, ParseGeoPoint point, double maxDistance) {
-        builder.whereNear(key, point)
-                .maxDistance(key, maxDistance);
+        builder.whereNear(key, point).maxDistance(key, maxDistance);
         return this;
     }
 
     /**
-     * Add a constraint to the query that requires a particular key's coordinates be contained within
-     * a given rectangular geographic bounding box.
+     * Add a constraint to the query that requires a particular key's coordinates be contained
+     * within a given rectangular geographic bounding box.
      *
-     * @param key       The key to be constrained.
+     * @param key The key to be constrained.
      * @param southwest The lower-left inclusive corner of the box.
      * @param northeast The upper-right inclusive corner of the box.
      * @return this, so you can chain this call.
@@ -1007,13 +1031,13 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Adds a constraint to the query that requires a particular key's
-     * coordinates be contained within and on the bounds of a given polygon.
-     * Supports closed and open (last point is connected to first) paths
-     * <p>
-     * Polygon must have at least 3 points
+     * Adds a constraint to the query that requires a particular key's coordinates be contained
+     * within and on the bounds of a given polygon. Supports closed and open (last point is
+     * connected to first) paths
      *
-     * @param key    The key to be constrained.
+     * <p>Polygon must have at least 3 points
+     *
+     * @param key The key to be constrained.
      * @param points List<ParseGeoPoint> or ParsePolygon
      * @return this, so you can chain this call.
      */
@@ -1027,12 +1051,12 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * Add a constraint to the query that requires a particular key's
-     * coordinates that contains a {@link ParseGeoPoint}s
-     * <p>
-     * (Requires parse-server@2.6.0)
+     * Add a constraint to the query that requires a particular key's coordinates that contains a
+     * {@link ParseGeoPoint}s
      *
-     * @param key   The key to be constrained.
+     * <p>(Requires parse-server@2.6.0)
+     *
+     * @param key The key to be constrained.
      * @param point ParseGeoPoint
      * @return this, so you can chain this call.
      */
@@ -1044,10 +1068,10 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Add a regular expression constraint for finding string values that match the provided regular
      * expression.
-     * <p/>
-     * This may be slow for large datasets.
      *
-     * @param key   The key that the string to match is stored in.
+     * <p>This may be slow for large datasets.
+     *
+     * @param key The key that the string to match is stored in.
      * @param regex The regular expression pattern to match.
      * @return this, so you can chain this call.
      */
@@ -1059,14 +1083,14 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Add a regular expression constraint for finding string values that match the provided regular
      * expression.
-     * <p/>
-     * This may be slow for large datasets.
      *
-     * @param key       The key that the string to match is stored in.
-     * @param regex     The regular expression pattern to match.
+     * <p>This may be slow for large datasets.
+     *
+     * @param key The key that the string to match is stored in.
+     * @param regex The regular expression pattern to match.
      * @param modifiers Any of the following supported PCRE modifiers:<br>
-     *                  <code>i</code> - Case insensitive search<br>
-     *                  <code>m</code> - Search across multiple lines of input<br>
+     *     <code>i</code> - Case insensitive search<br>
+     *     <code>m</code> - Search across multiple lines of input<br>
      * @return this, so you can chain this call.
      */
     public ParseQuery<T> whereMatches(String key, String regex, String modifiers) {
@@ -1079,10 +1103,10 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Add a constraint for finding string values that contain a provided string.
-     * <p/>
-     * This will be slow for large datasets.
      *
-     * @param key       The key that the string to match is stored in.
+     * <p>This will be slow for large datasets.
+     *
+     * @param key The key that the string to match is stored in.
      * @param substring The substring that the value must contain.
      * @return this, so you can chain this call.
      */
@@ -1094,10 +1118,10 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Add a constraint for finding string values that start with a provided string.
-     * <p/>
-     * This query will use the backend index, so it will be fast even for large datasets.
      *
-     * @param key    The key that the string to match is stored in.
+     * <p>This query will use the backend index, so it will be fast even for large datasets.
+     *
+     * @param key The key that the string to match is stored in.
      * @param prefix The substring that the value must start with.
      * @return this, so you can chain this call.
      */
@@ -1109,10 +1133,10 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Add a constraint for finding string values that end with a provided string.
-     * <p/>
-     * This will be slow for large datasets.
      *
-     * @param key    The key that the string to match is stored in.
+     * <p>This will be slow for large datasets.
+     *
+     * @param key The key that the string to match is stored in.
      * @param suffix The substring that the value must end with.
      * @return this, so you can chain this call.
      */
@@ -1124,8 +1148,9 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Include nested {@link ParseObject}s for the provided key.
-     * <p/>
-     * You can use dot notation to specify which fields in the included object that are also fetched.
+     *
+     * <p>You can use dot notation to specify which fields in the included object that are also
+     * fetched.
      *
      * @param key The key that should be included.
      * @return this, so you can chain this call.
@@ -1137,13 +1162,13 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Restrict the fields of returned {@link ParseObject}s to only include the provided keys.
-     * <p/>
-     * If this is called multiple times, then all of the keys specified in each of the calls will be
-     * included.
-     * <p/>
-     * <strong>Note:</strong> This option will be ignored when querying from the local datastore. This
-     * is done since all the keys will be in memory anyway and there will be no performance gain from
-     * removing them.
+     *
+     * <p>If this is called multiple times, then all of the keys specified in each of the calls will
+     * be included.
+     *
+     * <p><strong>Note:</strong> This option will be ignored when querying from the local datastore.
+     * This is done since all the keys will be in memory anyway and there will be no performance
+     * gain from removing them.
      *
      * @param keys The set of keys to include in the result.
      * @return this, so you can chain this call.
@@ -1188,8 +1213,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Also sorts the results in ascending order by the given key.
-     * <p/>
-     * The previous sort keys have precedence over this key.
+     *
+     * <p>The previous sort keys have precedence over this key.
      *
      * @param key The key to order by
      * @return this, so you can chain this call.
@@ -1212,8 +1237,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Also sorts the results in descending order by the given key.
-     * <p/>
-     * The previous sort keys have precedence over this key.
+     *
+     * <p>The previous sort keys have precedence over this key.
      *
      * @param key The key to order by
      * @return this, so you can chain this call.
@@ -1223,18 +1248,16 @@ public class ParseQuery<T extends ParseObject> {
         return this;
     }
 
-    /**
-     * Accessor for the limit.
-     */
+    /** Accessor for the limit. */
     public int getLimit() {
         return builder.getLimit();
     }
 
     /**
      * Controls the maximum number of results that are returned.
-     * <p/>
-     * Setting a negative limit denotes retrieval without a limit. The default limit is {@code 100},
-     * with a maximum of {@code 1000} results being returned at a time.
+     *
+     * <p>Setting a negative limit denotes retrieval without a limit. The default limit is {@code
+     * 100}, with a maximum of {@code 1000} results being returned at a time.
      *
      * @param newLimit The new limit.
      * @return this, so you can chain this call.
@@ -1244,17 +1267,15 @@ public class ParseQuery<T extends ParseObject> {
         return this;
     }
 
-    /**
-     * Accessor for the skip value.
-     */
+    /** Accessor for the skip value. */
     public int getSkip() {
         return builder.getSkip();
     }
 
     /**
      * Controls the number of results to skip before returning any results.
-     * <p/>
-     * This is useful for pagination. Default is to skip zero results.
+     *
+     * <p>This is useful for pagination. Default is to skip zero results.
      *
      * @param newSkip The new skip
      * @return this, so you can chain this call.
@@ -1264,16 +1285,14 @@ public class ParseQuery<T extends ParseObject> {
         return this;
     }
 
-    /**
-     * Accessor for the class name.
-     */
+    /** Accessor for the class name. */
     public String getClassName() {
         return builder.getClassName();
     }
 
     /**
-     * Clears constraints related to the given key, if any was set previously.
-     * Order, includes and selected keys are not affected by this operation.
+     * Clears constraints related to the given key, if any was set previously. Order, includes and
+     * selected keys are not affected by this operation.
      *
      * @param key key to be cleared from current constraints.
      * @return this, so you can chain this call.
@@ -1285,8 +1304,9 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Turn on performance tracing of finds.
-     * <p/>
-     * If performance tracing is already turned on this does nothing. In general you don't need to call trace.
+     *
+     * <p>If performance tracing is already turned on this does nothing. In general you don't need
+     * to call trace.
      *
      * @return this, so you can chain this call.
      */
@@ -1307,58 +1327,56 @@ public class ParseQuery<T extends ParseObject> {
     }
 
     /**
-     * {@code CachePolicy} specifies different caching policies that could be used with
-     * {@link ParseQuery}.
-     * <p/>
-     * This lets you show data when the user's device is offline, or when the app has just started and
-     * network requests have not yet had time to complete. Parse takes care of automatically flushing
-     * the cache when it takes up too much space.
-     * <p/>
-     * <strong>Note:</strong> Cache policy can only be set when Local Datastore is not enabled.
+     * {@code CachePolicy} specifies different caching policies that could be used with {@link
+     * ParseQuery}.
+     *
+     * <p>This lets you show data when the user's device is offline, or when the app has just
+     * started and network requests have not yet had time to complete. Parse takes care of
+     * automatically flushing the cache when it takes up too much space.
+     *
+     * <p><strong>Note:</strong> Cache policy can only be set when Local Datastore is not enabled.
      *
      * @see com.parse.ParseQuery
      */
     public enum CachePolicy {
         /**
          * The query does not load from the cache or save results to the cache.
-         * <p/>
-         * This is the default cache policy.
+         *
+         * <p>This is the default cache policy.
          */
         IGNORE_CACHE,
 
         /**
          * The query only loads from the cache, ignoring the network.
-         * <p/>
-         * If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
+         *
+         * <p>If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
          */
         CACHE_ONLY,
 
-        /**
-         * The query does not load from the cache, but it will save results to the cache.
-         */
+        /** The query does not load from the cache, but it will save results to the cache. */
         NETWORK_ONLY,
 
         /**
-         * The query first tries to load from the cache, but if that fails, it loads results from the
-         * network.
-         * <p/>
-         * If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
+         * The query first tries to load from the cache, but if that fails, it loads results from
+         * the network.
+         *
+         * <p>If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
          */
         CACHE_ELSE_NETWORK,
 
         /**
-         * The query first tries to load from the network, but if that fails, it loads results from the
-         * cache.
-         * <p/>
-         * If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
+         * The query first tries to load from the network, but if that fails, it loads results from
+         * the cache.
+         *
+         * <p>If there are no cached results, this causes a {@link ParseException#CACHE_MISS}.
          */
         NETWORK_ELSE_CACHE,
 
         /**
-         * The query first loads from the cache, then loads from the network.
-         * The callback will be called twice - first with the cached results, then with the network
-         * results. Since it returns two results at different times, this cache policy cannot be used
-         * with synchronous or task methods.
+         * The query first loads from the cache, then loads from the network. The callback will be
+         * called twice - first with the cached results, then with the network results. Since it
+         * returns two results at different times, this cache policy cannot be used with synchronous
+         * or task methods.
          */
         // TODO(grantland): Remove this and come up with a different solution, since it breaks our
         // "callbacks get called at most once" paradigm. (v2)
@@ -1371,8 +1389,8 @@ public class ParseQuery<T extends ParseObject> {
 
     /**
      * Constraints for a {@code ParseQuery}'s where clause. A map of field names to constraints. The
-     * values can either be actual values to compare with for equality, or instances of
-     * {@link KeyConstraints}.
+     * values can either be actual values to compare with for equality, or instances of {@link
+     * KeyConstraints}.
      */
     @SuppressWarnings("serial")
     /* package */ static class QueryConstraints extends HashMap<String, Object> {
@@ -1392,12 +1410,9 @@ public class ParseQuery<T extends ParseObject> {
      * against.
      */
     @SuppressWarnings("serial")
-    /* package */ static class KeyConstraints extends HashMap<String, Object> {
-    }
+    /* package */ static class KeyConstraints extends HashMap<String, Object> {}
 
-    /**
-     * Constraint for a $relatedTo query.
-     */
+    /** Constraint for a $relatedTo query. */
     /* package */ static class RelationConstraint {
         private final String key;
         private final ParseObject object;
@@ -1422,9 +1437,7 @@ public class ParseQuery<T extends ParseObject> {
             return object.getRelation(key);
         }
 
-        /**
-         * Encodes the constraint in a format appropriate for including in the query.
-         */
+        /** Encodes the constraint in a format appropriate for including in the query. */
         public JSONObject encode(ParseEncoder objectEncoder) {
             JSONObject json = new JSONObject();
             try {
@@ -1438,9 +1451,7 @@ public class ParseQuery<T extends ParseObject> {
         }
     }
 
-    /**
-     * Used by Parse LiveQuery
-     */
+    /** Used by Parse LiveQuery */
     public static class State<T extends ParseObject> {
 
         private final String className;
@@ -1465,9 +1476,10 @@ public class ParseQuery<T extends ParseObject> {
             className = builder.className;
             where = new QueryConstraints(builder.where);
             include = Collections.unmodifiableSet(new HashSet<>(builder.includes));
-            selectedKeys = builder.selectedKeys != null
-                    ? Collections.unmodifiableSet(new HashSet<>(builder.selectedKeys))
-                    : null;
+            selectedKeys =
+                    builder.selectedKeys != null
+                            ? Collections.unmodifiableSet(new HashSet<>(builder.selectedKeys))
+                            : null;
             limit = builder.limit;
             skip = builder.skip;
             order = Collections.unmodifiableList(new ArrayList<>(builder.order));
@@ -1578,10 +1590,12 @@ public class ParseQuery<T extends ParseObject> {
 
         @Override
         public String toString() {
-            return String.format(Locale.US, "%s[className=%s, where=%s, include=%s, " +
-                            "selectedKeys=%s, limit=%s, skip=%s, order=%s, extraOptions=%s, " +
-                            "cachePolicy=%s, maxCacheAge=%s, " +
-                            "trace=%s]",
+            return String.format(
+                    Locale.US,
+                    "%s[className=%s, where=%s, include=%s, "
+                            + "selectedKeys=%s, limit=%s, skip=%s, order=%s, extraOptions=%s, "
+                            + "cachePolicy=%s, maxCacheAge=%s, "
+                            + "trace=%s]",
                     getClass().getName(),
                     className,
                     where,
@@ -1611,7 +1625,8 @@ public class ParseQuery<T extends ParseObject> {
             private boolean trace;
             // Query Caching
             private CachePolicy cachePolicy = CachePolicy.IGNORE_CACHE;
-            private long maxCacheAge = Long.MAX_VALUE; // 292 million years should be enough not to cause issues
+            private long maxCacheAge =
+                    Long.MAX_VALUE; // 292 million years should be enough not to cause issues
             // LDS
             private boolean isFromLocalDatastore = false;
             private String pinName;
@@ -1629,7 +1644,8 @@ public class ParseQuery<T extends ParseObject> {
                 className = state.className();
                 where.putAll(state.constraints());
                 includes.addAll(state.includes());
-                selectedKeys = state.selectedKeys() != null ? new HashSet(state.selectedKeys()) : null;
+                selectedKeys =
+                        state.selectedKeys() != null ? new HashSet(state.selectedKeys()) : null;
                 limit = state.limit();
                 skip = state.skip();
                 order.addAll(state.order());
@@ -1646,7 +1662,8 @@ public class ParseQuery<T extends ParseObject> {
                 className = builder.className;
                 where.putAll(builder.where);
                 includes.addAll(builder.includes);
-                selectedKeys = builder.selectedKeys != null ? new HashSet(builder.selectedKeys) : null;
+                selectedKeys =
+                        builder.selectedKeys != null ? new HashSet(builder.selectedKeys) : null;
                 limit = builder.limit;
                 skip = builder.skip;
                 order.addAll(builder.order);
@@ -1662,7 +1679,8 @@ public class ParseQuery<T extends ParseObject> {
             // TODO(grantland): Convert mutable parameter to immutable t6941155
             public static <T extends ParseObject> Builder<T> or(List<Builder<T>> builders) {
                 if (builders.isEmpty()) {
-                    throw new IllegalArgumentException("Can't take an or of an empty list of queries");
+                    throw new IllegalArgumentException(
+                            "Can't take an or of an empty list of queries");
                 }
 
                 String className = null;
@@ -1673,16 +1691,20 @@ public class ParseQuery<T extends ParseObject> {
                                 "All of the queries in an or query must be on the same class ");
                     }
                     if (builder.limit >= 0) {
-                        throw new IllegalArgumentException("Cannot have limits in sub queries of an 'OR' query");
+                        throw new IllegalArgumentException(
+                                "Cannot have limits in sub queries of an 'OR' query");
                     }
                     if (builder.skip > 0) {
-                        throw new IllegalArgumentException("Cannot have skips in sub queries of an 'OR' query");
+                        throw new IllegalArgumentException(
+                                "Cannot have skips in sub queries of an 'OR' query");
                     }
                     if (!builder.order.isEmpty()) {
-                        throw new IllegalArgumentException("Cannot have an order in sub queries of an 'OR' query");
+                        throw new IllegalArgumentException(
+                                "Cannot have an order in sub queries of an 'OR' query");
                     }
                     if (!builder.includes.isEmpty()) {
-                        throw new IllegalArgumentException("Cannot have an include in sub queries of an 'OR' query");
+                        throw new IllegalArgumentException(
+                                "Cannot have an include in sub queries of an 'OR' query");
                     }
                     if (builder.selectedKeys != null) {
                         throw new IllegalArgumentException(
@@ -1693,21 +1715,20 @@ public class ParseQuery<T extends ParseObject> {
                     constraints.add(builder.where);
                 }
 
-                return new State.Builder<T>(className)
-                        .whereSatifiesAnyOf(constraints);
+                return new State.Builder<T>(className).whereSatifiesAnyOf(constraints);
             }
 
             public String getClassName() {
                 return className;
             }
 
-            //region Where Constraints
+            // region Where Constraints
 
             /**
-             * Add a constraint to the query that requires a particular key's value to be equal to the
-             * provided value.
+             * Add a constraint to the query that requires a particular key's value to be equal to
+             * the provided value.
              *
-             * @param key   The key to check.
+             * @param key The key to check.
              * @param value The value that the {@link ParseObject} must contain.
              * @return this, so you can chain this call.
              */
@@ -1718,19 +1739,23 @@ public class ParseQuery<T extends ParseObject> {
             }
 
             // TODO(grantland): Convert mutable parameter to immutable t6941155
-            public Builder<T> whereDoesNotMatchKeyInQuery(String key, String keyInQuery, Builder<?> builder) {
+            public Builder<T> whereDoesNotMatchKeyInQuery(
+                    String key, String keyInQuery, Builder<?> builder) {
                 Map<String, Object> condition = new HashMap<>();
                 condition.put("key", keyInQuery);
                 condition.put("query", builder);
-                return addConditionInternal(key, "$dontSelect", Collections.unmodifiableMap(condition));
+                return addConditionInternal(
+                        key, "$dontSelect", Collections.unmodifiableMap(condition));
             }
 
             // TODO(grantland): Convert mutable parameter to immutable t6941155
-            public Builder<T> whereMatchesKeyInQuery(String key, String keyInQuery, Builder<?> builder) {
+            public Builder<T> whereMatchesKeyInQuery(
+                    String key, String keyInQuery, Builder<?> builder) {
                 Map<String, Object> condition = new HashMap<>();
                 condition.put("key", keyInQuery);
                 condition.put("query", builder);
-                return addConditionInternal(key, "$select", Collections.unmodifiableMap(new HashMap<>(condition)));
+                return addConditionInternal(
+                        key, "$select", Collections.unmodifiableMap(new HashMap<>(condition)));
             }
 
             // TODO(grantland): Convert mutable parameter to immutable t6941155
@@ -1751,7 +1776,8 @@ public class ParseQuery<T extends ParseObject> {
                 return addCondition(key, "$maxDistance", maxDistance);
             }
 
-            public Builder<T> whereWithin(String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
+            public Builder<T> whereWithin(
+                    String key, ParseGeoPoint southwest, ParseGeoPoint northeast) {
                 List<Object> array = new ArrayList<>();
                 array.add(southwest);
                 array.add(northeast);
@@ -1780,9 +1806,9 @@ public class ParseQuery<T extends ParseObject> {
                 return addCondition(key, "$text", searchDictionary);
             }
 
-            public Builder<T> addCondition(String key, String condition,
-                                           Collection<?> value) {
-                return addConditionInternal(key, condition, Collections.unmodifiableCollection(value));
+            public Builder<T> addCondition(String key, String condition, Collection<?> value) {
+                return addConditionInternal(
+                        key, condition, Collections.unmodifiableCollection(value));
             }
 
             // TODO(grantland): Add typing
@@ -1819,8 +1845,8 @@ public class ParseQuery<T extends ParseObject> {
 
             /**
              * Add a constraint that a require matches any one of an array of {@code ParseQuery}s.
-             * <p/>
-             * The {@code ParseQuery}s passed cannot have any orders, skips, or limits set.
+             *
+             * <p>The {@code ParseQuery}s passed cannot have any orders, skips, or limits set.
              *
              * @param constraints The array of queries to or
              * @return this, so you can chain this call.
@@ -1843,9 +1869,9 @@ public class ParseQuery<T extends ParseObject> {
                 return this;
             }
 
-            //endregion
+            // endregion
 
-            //region Order
+            // region Order
 
             private Builder<T> setOrder(String key) {
                 order.clear();
@@ -1870,8 +1896,8 @@ public class ParseQuery<T extends ParseObject> {
 
             /**
              * Also sorts the results in ascending order by the given key.
-             * <p/>
-             * The previous sort keys have precedence over this key.
+             *
+             * <p>The previous sort keys have precedence over this key.
              *
              * @param key The key to order by
              * @return this, so you can chain this call.
@@ -1892,8 +1918,8 @@ public class ParseQuery<T extends ParseObject> {
 
             /**
              * Also sorts the results in descending order by the given key.
-             * <p/>
-             * The previous sort keys have precedence over this key.
+             *
+             * <p>The previous sort keys have precedence over this key.
              *
              * @param key The key to order by
              * @return this, so you can chain this call.
@@ -1902,14 +1928,15 @@ public class ParseQuery<T extends ParseObject> {
                 return addOrder(String.format("-%s", key));
             }
 
-            //endregion
+            // endregion
 
-            //region Includes
+            // region Includes
 
             /**
              * Include nested {@link ParseObject}s for the provided key.
-             * <p/>
-             * You can use dot notation to specify which fields in the included object that are also fetched.
+             *
+             * <p>You can use dot notation to specify which fields in the included object that are
+             * also fetched.
              *
              * @param key The key that should be included.
              * @return this, so you can chain this call.
@@ -1919,17 +1946,18 @@ public class ParseQuery<T extends ParseObject> {
                 return this;
             }
 
-            //endregion
+            // endregion
 
             /**
-             * Restrict the fields of returned {@link ParseObject}s to only include the provided keys.
-             * <p/>
-             * If this is called multiple times, then all of the keys specified in each of the calls will be
-             * included.
-             * <p/>
-             * <strong>Note:</strong> This option will be ignored when querying from the local datastore. This
-             * is done since all the keys will be in memory anyway and there will be no performance gain from
-             * removing them.
+             * Restrict the fields of returned {@link ParseObject}s to only include the provided
+             * keys.
+             *
+             * <p>If this is called multiple times, then all of the keys specified in each of the
+             * calls will be included.
+             *
+             * <p><strong>Note:</strong> This option will be ignored when querying from the local
+             * datastore. This is done since all the keys will be in memory anyway and there will be
+             * no performance gain from removing them.
              *
              * @param keys The set of keys to include in the result.
              * @return this, so you can chain this call.
@@ -2032,7 +2060,8 @@ public class ParseQuery<T extends ParseObject> {
 
             public State<T> build() {
                 if (!isFromLocalDatastore && ignoreACLs) {
-                    throw new IllegalStateException("`ignoreACLs` cannot be combined with network queries");
+                    throw new IllegalStateException(
+                            "`ignoreACLs` cannot be combined with network queries");
                 }
                 return new State<>(this);
             }

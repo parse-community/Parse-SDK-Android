@@ -14,17 +14,11 @@ import static org.junit.Assert.assertNull;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
-
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
@@ -36,13 +30,16 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;
 import okio.BufferedSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseOkHttpClientTest {
 
     private final MockWebServer server = new MockWebServer();
 
-    //region testTransferRequest/Response
+    // region testTransferRequest/Response
 
     @Test
     public void testGetOkHttpRequestType() throws IOException {
@@ -51,35 +48,30 @@ public class ParseOkHttpClientTest {
         builder.setUrl("http://www.parse.com");
 
         // Get
-        ParseHttpRequest parseRequest = builder
-                .setMethod(ParseHttpRequest.Method.GET)
-                .setBody(null)
-                .build();
+        ParseHttpRequest parseRequest =
+                builder.setMethod(ParseHttpRequest.Method.GET).setBody(null).build();
         Request okHttpRequest = parseClient.getRequest(parseRequest);
         assertEquals(ParseHttpRequest.Method.GET.toString(), okHttpRequest.method());
 
         // Post
-        parseRequest = builder
-                .setMethod(ParseHttpRequest.Method.POST)
-                .setBody(new ParseByteArrayHttpBody("test", "application/json"))
-                .build();
+        parseRequest =
+                builder.setMethod(ParseHttpRequest.Method.POST)
+                        .setBody(new ParseByteArrayHttpBody("test", "application/json"))
+                        .build();
         okHttpRequest = parseClient.getRequest(parseRequest);
         assertEquals(ParseHttpRequest.Method.POST.toString(), okHttpRequest.method());
 
         // Delete
-        parseRequest = builder
-                .setMethod(ParseHttpRequest.Method.DELETE)
-                .setBody(null)
-                .build();
+        parseRequest = builder.setMethod(ParseHttpRequest.Method.DELETE).setBody(null).build();
         okHttpRequest = parseClient.getRequest(parseRequest);
         assertEquals(ParseHttpRequest.Method.DELETE.toString(), okHttpRequest.method());
         assertNull(okHttpRequest.body());
 
         // Put
-        parseRequest = builder
-                .setMethod(ParseHttpRequest.Method.PUT)
-                .setBody(new ParseByteArrayHttpBody("test", "application/json"))
-                .build();
+        parseRequest =
+                builder.setMethod(ParseHttpRequest.Method.PUT)
+                        .setBody(new ParseByteArrayHttpBody("test", "application/json"))
+                        .build();
         okHttpRequest = parseClient.getRequest(parseRequest);
         assertEquals(ParseHttpRequest.Method.PUT.toString(), okHttpRequest.method());
     }
@@ -95,12 +87,13 @@ public class ParseOkHttpClientTest {
         String content = "test";
         int contentLength = content.length();
         String contentType = "application/json";
-        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-                .setUrl(url)
-                .setMethod(ParseHttpRequest.Method.POST)
-                .setBody(new ParseByteArrayHttpBody(content, contentType))
-                .setHeaders(headers)
-                .build();
+        ParseHttpRequest parseRequest =
+                new ParseHttpRequest.Builder()
+                        .setUrl(url)
+                        .setMethod(ParseHttpRequest.Method.POST)
+                        .setBody(new ParseByteArrayHttpBody(content, contentType))
+                        .setHeaders(headers)
+                        .build();
 
         ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
         Request okHttpRequest = parseClient.getRequest(parseRequest);
@@ -129,11 +122,12 @@ public class ParseOkHttpClientTest {
     public void testGetOkHttpRequestWithEmptyContentType() throws Exception {
         String url = "http://www.parse.com/";
         String content = "test";
-        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-                .setUrl(url)
-                .setMethod(ParseHttpRequest.Method.POST)
-                .setBody(new ParseByteArrayHttpBody(content, null))
-                .build();
+        ParseHttpRequest parseRequest =
+                new ParseHttpRequest.Builder()
+                        .setUrl(url)
+                        .setMethod(ParseHttpRequest.Method.POST)
+                        .setBody(new ParseByteArrayHttpBody(content, null))
+                        .build();
 
         ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
         Request okHttpRequest = parseClient.getRequest(parseRequest);
@@ -150,33 +144,33 @@ public class ParseOkHttpClientTest {
         final int contentLength = content.length();
         final String contentType = "application/json";
         String url = "http://www.parse.com/";
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        Response okHttpResponse = new Response.Builder()
-                .request(request)
-                .protocol(Protocol.HTTP_1_1)
-                .code(statusCode)
-                .message(reasonPhrase)
-                .body(new ResponseBody() {
-                    @Override
-                    public MediaType contentType() {
-                        return MediaType.parse(contentType);
-                    }
+        Request request = new Request.Builder().url(url).build();
+        Response okHttpResponse =
+                new Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(statusCode)
+                        .message(reasonPhrase)
+                        .body(
+                                new ResponseBody() {
+                                    @Override
+                                    public MediaType contentType() {
+                                        return MediaType.parse(contentType);
+                                    }
 
-                    @Override
-                    public long contentLength() {
-                        return contentLength;
-                    }
+                                    @Override
+                                    public long contentLength() {
+                                        return contentLength;
+                                    }
 
-                    @Override
-                    public BufferedSource source() {
-                        Buffer buffer = new Buffer();
-                        buffer.write(content.getBytes());
-                        return buffer;
-                    }
-                })
-                .build();
+                                    @Override
+                                    public BufferedSource source() {
+                                        Buffer buffer = new Buffer();
+                                        buffer.write(content.getBytes());
+                                        return buffer;
+                                    }
+                                })
+                        .build();
 
         ParseHttpClient parseClient = ParseHttpClient.createClient(new OkHttpClient.Builder());
         ParseHttpResponse parseResponse = parseClient.getResponse(okHttpResponse);
@@ -191,9 +185,9 @@ public class ParseOkHttpClientTest {
         assertArrayEquals(content.getBytes(), ParseIOUtils.toByteArray(parseResponse.getContent()));
     }
 
-    //endregion
+    // endregion
 
-    //region testOkHttpClientWithInterceptor
+    // region testOkHttpClientWithInterceptor
 
     @Test
     public void testParseOkHttpClientExecuteWithGZIPResponse() throws Exception {
@@ -204,10 +198,11 @@ public class ParseOkHttpClientTest {
         gzipOut.write("content".getBytes());
         gzipOut.close();
         buffer.write(byteOut.toByteArray());
-        MockResponse mockResponse = new MockResponse()
-                .setStatus("HTTP/1.1 " + 201 + " " + "OK")
-                .setBody(buffer)
-                .setHeader("Content-Encoding", "gzip");
+        MockResponse mockResponse =
+                new MockResponse()
+                        .setStatus("HTTP/1.1 " + 201 + " " + "OK")
+                        .setBody(buffer)
+                        .setHeader("Content-Encoding", "gzip");
 
         // Start mock server
         server.enqueue(mockResponse);
@@ -217,10 +212,11 @@ public class ParseOkHttpClientTest {
 
         // We do not need to add Accept-Encoding header manually, httpClient library should do that.
         String requestUrl = server.url("/").toString();
-        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-                .setUrl(requestUrl)
-                .setMethod(ParseHttpRequest.Method.GET)
-                .build();
+        ParseHttpRequest parseRequest =
+                new ParseHttpRequest.Builder()
+                        .setUrl(requestUrl)
+                        .setMethod(ParseHttpRequest.Method.GET)
+                        .build();
 
         // Execute request
         ParseHttpResponse parseResponse = client.execute(parseRequest);
@@ -232,5 +228,5 @@ public class ParseOkHttpClientTest {
         server.shutdown();
     }
 
-    //endregion
+    // endregion
 }

@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.http.ParseHttpRequest;
-
 import org.json.JSONObject;
 
 class ParseRESTSessionCommand extends ParseRESTCommand {
@@ -34,6 +33,9 @@ class ParseRESTSessionCommand extends ParseRESTCommand {
 
     public static ParseRESTSessionCommand upgradeToRevocableSessionCommand(String sessionToken) {
         return new ParseRESTSessionCommand(
-                "upgradeToRevocableSession", ParseHttpRequest.Method.POST, new JSONObject(), sessionToken);
+                "upgradeToRevocableSession",
+                ParseHttpRequest.Method.POST,
+                new JSONObject(),
+                sessionToken);
     }
 }

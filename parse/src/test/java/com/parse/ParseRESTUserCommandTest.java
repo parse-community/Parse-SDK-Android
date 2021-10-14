@@ -14,18 +14,16 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 public class ParseRESTUserCommandTest {
 
@@ -41,7 +39,7 @@ public class ParseRESTUserCommandTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testConstruct
+    // region testConstruct
 
     @Test
     public void testGetCurrentUserCommand() {
@@ -56,8 +54,8 @@ public class ParseRESTUserCommandTest {
 
     @Test
     public void testLogInUserCommand() throws Exception {
-        ParseRESTUserCommand command = ParseRESTUserCommand.logInUserCommand(
-                "userName", "password", true);
+        ParseRESTUserCommand command =
+                ParseRESTUserCommand.logInUserCommand("userName", "password", true);
 
         assertEquals("login", command.httpPath);
         assertEquals(ParseHttpRequest.Method.GET, command.method);
@@ -69,7 +67,8 @@ public class ParseRESTUserCommandTest {
 
     @Test
     public void testResetPasswordResetCommand() throws Exception {
-        ParseRESTUserCommand command = ParseRESTUserCommand.resetPasswordResetCommand("test@parse.com");
+        ParseRESTUserCommand command =
+                ParseRESTUserCommand.resetPasswordResetCommand("test@parse.com");
 
         assertEquals("requestPasswordReset", command.httpPath);
         assertEquals(ParseHttpRequest.Method.POST, command.method);
@@ -124,9 +123,9 @@ public class ParseRESTUserCommandTest {
         // TODO(mengyan): Find a way to verify revocableSession
     }
 
-    //endregion
+    // endregion
 
-    //region testAddAdditionalHeaders
+    // region testAddAdditionalHeaders
 
     @Test
     public void testAddAdditionalHeaders() throws Exception {
@@ -141,28 +140,28 @@ public class ParseRESTUserCommandTest {
         assertEquals("1", requestBuilder.build().getHeader("X-Parse-Revocable-Session"));
     }
 
-    //endregion
+    // endregion
 
-    //region testOnResponseAsync
+    // region testOnResponseAsync
 
     @Test
     public void testOnResponseAsync() {
-        ParseRESTUserCommand command =
-                ParseRESTUserCommand.getCurrentUserCommand("sessionToken");
+        ParseRESTUserCommand command = ParseRESTUserCommand.getCurrentUserCommand("sessionToken");
 
         String content = "content";
         String contentType = "application/json";
         int statusCode = 200;
 
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(content.getBytes()))
-                .setContentType(contentType)
-                .setStatusCode(statusCode)
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(content.getBytes()))
+                        .setContentType(contentType)
+                        .setStatusCode(statusCode)
+                        .build();
         command.onResponseAsync(response, null);
 
         assertEquals(200, command.getStatusCode());
     }
 
-    //endregion
+    // endregion
 }

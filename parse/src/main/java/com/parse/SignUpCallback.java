@@ -11,16 +11,19 @@ package com.parse;
 /**
  * A {@code SignUpCallback} is used to run code after signing up a {@link ParseUser} in a background
  * thread.
- * <p>
- * The easiest way to use a {@code SignUpCallback} is through an anonymous inner class. Override the
- * {@code done} function to specify what the callback should do after the save is complete. The
+ *
+ * <p>The easiest way to use a {@code SignUpCallback} is through an anonymous inner class. Override
+ * the {@code done} function to specify what the callback should do after the save is complete. The
  * {@code done} function will be run in the UI thread, while the signup happens in a background
  * thread. This ensures that the UI does not freeze while the signup happens.
- * <p>
- * For example, this sample code signs up the object {@code myUser} and calls a different
+ *
+ * <p>For example, this sample code signs up the object {@code myUser} and calls a different
  * function depending on whether the signup succeeded or not.
+ *
  * <p>
+ *
  * <p>
+ *
  * <pre>
  * myUser.signUpInBackground(new SignUpCallback() {
  *   public void done(ParseException e) {

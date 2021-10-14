@@ -9,15 +9,13 @@
 package com.parse;
 
 import android.util.Base64;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A {@code ParseEncoder} can be used to transform objects such as {@link ParseObject}s into JSON
@@ -143,8 +141,8 @@ public abstract class ParseEncoder {
             return object;
         }
 
-        throw new IllegalArgumentException("invalid type for ParseObject: "
-                + object.getClass().toString());
+        throw new IllegalArgumentException(
+                "invalid type for ParseObject: " + object.getClass().toString());
     }
 
     protected abstract JSONObject encodeRelatedObject(ParseObject object);

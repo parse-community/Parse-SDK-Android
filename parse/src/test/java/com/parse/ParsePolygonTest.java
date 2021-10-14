@@ -14,26 +14,24 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParsePolygonTest {
 
     @Test
     public void testConstructors() {
-        List<ParseGeoPoint> arrayPoints = Arrays.asList(
-                new ParseGeoPoint(0, 0),
-                new ParseGeoPoint(0, 1),
-                new ParseGeoPoint(1, 1),
-                new ParseGeoPoint(1, 0)
-        );
+        List<ParseGeoPoint> arrayPoints =
+                Arrays.asList(
+                        new ParseGeoPoint(0, 0),
+                        new ParseGeoPoint(0, 1),
+                        new ParseGeoPoint(1, 1),
+                        new ParseGeoPoint(1, 0));
 
         List<ParseGeoPoint> listPoints = new ArrayList<>();
         listPoints.add(new ParseGeoPoint(0, 0));

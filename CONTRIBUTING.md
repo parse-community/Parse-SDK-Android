@@ -14,7 +14,7 @@ We actively welcome your pull requests. When we get one, we'll run some Parse-sp
 4. Add unit tests for any new code you add.
 3. If you've changed APIs, update the documentation.
 4. Ensure the test suite passes.
-5. Make sure your code lints.
+5. Make sure your code lints by running `./gradlew spotlessApply`.
 
 ## Bugs
 Although we try to keep developing on Parse easy, you still may run into some issues. Technical questions should be asked on [Stack Overflow][stack-overflow], and for everything else we'll be using GitHub issues.

@@ -12,19 +12,18 @@ import android.location.Criteria;
 import android.location.Location;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.parse.boltsinternal.Task;
-
 import java.util.Locale;
 
 /**
  * {@code ParseGeoPoint} represents a latitude / longitude point that may be associated with a key
  * in a {@link ParseObject} or used as a reference point for geo queries. This allows proximity
  * based queries on the key.
- * <p/>
- * Only one key in a class may contain a {@code ParseGeoPoint}.
- * <p/>
- * Example:
+ *
+ * <p>Only one key in a class may contain a {@code ParseGeoPoint}.
+ *
+ * <p>Example:
+ *
  * <pre>
  * ParseGeoPoint point = new ParseGeoPoint(30.0, -20.0);
  * ParseObject object = new ParseObject("PlaceObject");
@@ -32,34 +31,31 @@ import java.util.Locale;
  * object.save();
  * </pre>
  */
-
 public class ParseGeoPoint implements Parcelable {
-    public final static Creator<ParseGeoPoint> CREATOR = new Creator<ParseGeoPoint>() {
-        @Override
-        public ParseGeoPoint createFromParcel(Parcel source) {
-            return new ParseGeoPoint(source, ParseParcelDecoder.get());
-        }
+    public static final Creator<ParseGeoPoint> CREATOR =
+            new Creator<ParseGeoPoint>() {
+                @Override
+                public ParseGeoPoint createFromParcel(Parcel source) {
+                    return new ParseGeoPoint(source, ParseParcelDecoder.get());
+                }
 
-        @Override
-        public ParseGeoPoint[] newArray(int size) {
-            return new ParseGeoPoint[size];
-        }
-    };
+                @Override
+                public ParseGeoPoint[] newArray(int size) {
+                    return new ParseGeoPoint[size];
+                }
+            };
     static final double EARTH_MEAN_RADIUS_KM = 6371.0;
     static final double EARTH_MEAN_RADIUS_MILE = 3958.8;
     private double latitude = 0.0;
     private double longitude = 0.0;
 
-    /**
-     * Creates a new default point with latitude and longitude set to 0.0.
-     */
-    public ParseGeoPoint() {
-    }
+    /** Creates a new default point with latitude and longitude set to 0.0. */
+    public ParseGeoPoint() {}
 
     /**
      * Creates a new point with the specified latitude and longitude.
      *
-     * @param latitude  The point's latitude.
+     * @param latitude The point's latitude.
      * @param longitude The point's longitude.
      */
     public ParseGeoPoint(double latitude, double longitude) {
@@ -78,8 +74,8 @@ public class ParseGeoPoint implements Parcelable {
 
     /**
      * Creates a new point instance from a {@link Parcel} source. This is used when unparceling a
-     * ParseGeoPoint. Subclasses that need Parcelable behavior should provide their own
-     * {@link android.os.Parcelable.Creator} and override this constructor.
+     * ParseGeoPoint. Subclasses that need Parcelable behavior should provide their own {@link
+     * android.os.Parcelable.Creator} and override this constructor.
      *
      * @param source The recovered parcel.
      */
@@ -88,11 +84,11 @@ public class ParseGeoPoint implements Parcelable {
     }
 
     /**
-     * Creates a new point instance from a {@link Parcel} using the given {@link ParseParcelDecoder}.
-     * The decoder is currently unused, but it might be in the future, plus this is the pattern we
-     * are using in parcelable classes.
+     * Creates a new point instance from a {@link Parcel} using the given {@link
+     * ParseParcelDecoder}. The decoder is currently unused, but it might be in the future, plus
+     * this is the pattern we are using in parcelable classes.
      *
-     * @param source  the parcel
+     * @param source the parcel
      * @param decoder the decoder
      */
     ParseGeoPoint(Parcel source, ParseParcelDecoder decoder) {
@@ -102,42 +98,47 @@ public class ParseGeoPoint implements Parcelable {
 
     /**
      * Asynchronously fetches the current location of the device.
-     * <p>
-     * This will use a default {@link Criteria} with no accuracy or power requirements, which will
-     * generally result in slower, but more accurate location fixes.
-     * <p/>
-     * <strong>Note:</strong> If GPS is the best provider, it might not be able to locate the device
-     * at all and timeout.
+     *
+     * <p>This will use a default {@link Criteria} with no accuracy or power requirements, which
+     * will generally result in slower, but more accurate location fixes.
+     *
+     * <p><strong>Note:</strong> If GPS is the best provider, it might not be able to locate the
+     * device at all and timeout.
      *
      * @param timeout The number of milliseconds to allow before timing out.
      * @return A Task that is resolved when a location is found.
      * @see android.location.LocationManager#getBestProvider(android.location.Criteria, boolean)
-     * @see android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener)
+     * @see android.location.LocationManager#requestLocationUpdates(String, long, float,
+     *     android.location.LocationListener)
      */
     public static Task<ParseGeoPoint> getCurrentLocationInBackground(long timeout) {
         Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.NO_REQUIREMENT);
         criteria.setPowerRequirement(Criteria.NO_REQUIREMENT);
-        return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
-                .onSuccess(task -> {
-                    Location location = task.getResult();
-                    return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-                });
+        return LocationNotifier.getCurrentLocationAsync(
+                        Parse.getApplicationContext(), timeout, criteria)
+                .onSuccess(
+                        task -> {
+                            Location location = task.getResult();
+                            return new ParseGeoPoint(
+                                    location.getLatitude(), location.getLongitude());
+                        });
     }
 
     /**
      * Asynchronously fetches the current location of the device.
-     * <p>
-     * This will use a default {@link Criteria} with no accuracy or power requirements, which will
-     * generally result in slower, but more accurate location fixes.
-     * <p/>
-     * <strong>Note:</strong> If GPS is the best provider, it might not be able to locate the device
-     * at all and timeout.
      *
-     * @param timeout  The number of milliseconds to allow before timing out.
+     * <p>This will use a default {@link Criteria} with no accuracy or power requirements, which
+     * will generally result in slower, but more accurate location fixes.
+     *
+     * <p><strong>Note:</strong> If GPS is the best provider, it might not be able to locate the
+     * device at all and timeout.
+     *
+     * @param timeout The number of milliseconds to allow before timing out.
      * @param callback callback.done(geoPoint, error) is called when a location is found.
      * @see android.location.LocationManager#getBestProvider(android.location.Criteria, boolean)
-     * @see android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener)
+     * @see android.location.LocationManager#requestLocationUpdates(String, long, float,
+     *     android.location.LocationListener)
      */
     public static void getCurrentLocationInBackground(long timeout, LocationCallback callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(getCurrentLocationInBackground(timeout), callback);
@@ -145,56 +146,59 @@ public class ParseGeoPoint implements Parcelable {
 
     /**
      * Asynchronously fetches the current location of the device.
-     * <p>
-     * This will request location updates from the best provider that match the given criteria
-     * and return the first location received.
-     * <p>
-     * You can customize the criteria to meet your specific needs.
-     * * For higher accuracy, you can set {@link Criteria#setAccuracy(int)}, however result in longer
-     * times for a fix.
-     * * For better battery efficiency and faster location fixes, you can set
-     * {@link Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
      *
-     * @param timeout  The number of milliseconds to allow before timing out.
+     * <p>This will request location updates from the best provider that match the given criteria
+     * and return the first location received.
+     *
+     * <p>You can customize the criteria to meet your specific needs. * For higher accuracy, you can
+     * set {@link Criteria#setAccuracy(int)}, however result in longer times for a fix. * For better
+     * battery efficiency and faster location fixes, you can set {@link
+     * Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
+     *
+     * @param timeout The number of milliseconds to allow before timing out.
      * @param criteria The application criteria for selecting a location provider.
      * @return A Task that is resolved when a location is found.
      * @see android.location.LocationManager#getBestProvider(android.location.Criteria, boolean)
-     * @see android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener)
+     * @see android.location.LocationManager#requestLocationUpdates(String, long, float,
+     *     android.location.LocationListener)
      */
-    public static Task<ParseGeoPoint> getCurrentLocationInBackground(long timeout, Criteria criteria) {
-        return LocationNotifier.getCurrentLocationAsync(Parse.getApplicationContext(), timeout, criteria)
-                .onSuccess(task -> {
-                    Location location = task.getResult();
-                    return new ParseGeoPoint(location.getLatitude(), location.getLongitude());
-                });
+    public static Task<ParseGeoPoint> getCurrentLocationInBackground(
+            long timeout, Criteria criteria) {
+        return LocationNotifier.getCurrentLocationAsync(
+                        Parse.getApplicationContext(), timeout, criteria)
+                .onSuccess(
+                        task -> {
+                            Location location = task.getResult();
+                            return new ParseGeoPoint(
+                                    location.getLatitude(), location.getLongitude());
+                        });
     }
 
     /**
      * Asynchronously fetches the current location of the device.
-     * <p>
-     * This will request location updates from the best provider that match the given criteria
-     * and return the first location received.
-     * <p>
-     * You can customize the criteria to meet your specific needs.
-     * * For higher accuracy, you can set {@link Criteria#setAccuracy(int)}, however result in longer
-     * times for a fix.
-     * * For better battery efficiency and faster location fixes, you can set
-     * {@link Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
      *
-     * @param timeout  The number of milliseconds to allow before timing out.
+     * <p>This will request location updates from the best provider that match the given criteria
+     * and return the first location received.
+     *
+     * <p>You can customize the criteria to meet your specific needs. * For higher accuracy, you can
+     * set {@link Criteria#setAccuracy(int)}, however result in longer times for a fix. * For better
+     * battery efficiency and faster location fixes, you can set {@link
+     * Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
+     *
+     * @param timeout The number of milliseconds to allow before timing out.
      * @param criteria The application criteria for selecting a location provider.
      * @param callback callback.done(geoPoint, error) is called when a location is found.
      * @see android.location.LocationManager#getBestProvider(android.location.Criteria, boolean)
-     * @see android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener)
+     * @see android.location.LocationManager#requestLocationUpdates(String, long, float,
+     *     android.location.LocationListener)
      */
-    public static void getCurrentLocationInBackground(long timeout, Criteria criteria,
-                                                      LocationCallback callback) {
-        ParseTaskUtils.callbackOnMainThreadAsync(getCurrentLocationInBackground(timeout, criteria), callback);
+    public static void getCurrentLocationInBackground(
+            long timeout, Criteria criteria, LocationCallback callback) {
+        ParseTaskUtils.callbackOnMainThreadAsync(
+                getCurrentLocationInBackground(timeout, criteria), callback);
     }
 
-    /**
-     * Get latitude.
-     */
+    /** Get latitude. */
     public double getLatitude() {
         return latitude;
     }
@@ -211,9 +215,7 @@ public class ParseGeoPoint implements Parcelable {
         this.latitude = latitude;
     }
 
-    /**
-     * Get longitude.
-     */
+    /** Get longitude. */
     public double getLongitude() {
         return longitude;
     }
@@ -225,7 +227,8 @@ public class ParseGeoPoint implements Parcelable {
      */
     public void setLongitude(double longitude) {
         if (longitude > 180.0 || longitude < -180.0) {
-            throw new IllegalArgumentException("Longitude must be within the range (-180.0, 180.0).");
+            throw new IllegalArgumentException(
+                    "Longitude must be within the range (-180.0, 180.0).");
         }
         this.longitude = longitude;
     }
@@ -249,8 +252,11 @@ public class ParseGeoPoint implements Parcelable {
         // Square of half the straight line chord distance between both points.
         // [0.0, 1.0]
         double a =
-                sinDeltaLatDiv2 * sinDeltaLatDiv2 + Math.cos(lat1rad) * Math.cos(lat2rad)
-                        * sinDeltaLongDiv2 * sinDeltaLongDiv2;
+                sinDeltaLatDiv2 * sinDeltaLatDiv2
+                        + Math.cos(lat1rad)
+                                * Math.cos(lat2rad)
+                                * sinDeltaLongDiv2
+                                * sinDeltaLongDiv2;
         a = Math.min(1.0, a);
         return 2. * Math.asin(Math.sqrt(a));
     }
@@ -281,8 +287,8 @@ public class ParseGeoPoint implements Parcelable {
         if (obj == this) {
             return true;
         }
-        return ((ParseGeoPoint) obj).getLatitude() == latitude &&
-                ((ParseGeoPoint) obj).getLongitude() == longitude;
+        return ((ParseGeoPoint) obj).getLatitude() == latitude
+                && ((ParseGeoPoint) obj).getLongitude() == longitude;
     }
 
     @Override

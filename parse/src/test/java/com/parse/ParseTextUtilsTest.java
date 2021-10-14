@@ -12,14 +12,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Collections;
+import org.junit.Test;
 
 public class ParseTextUtilsTest {
 
-    //region testJoin
+    // region testJoin
 
     @Test
     public void testJoinMultipleItems() {
@@ -33,9 +32,9 @@ public class ParseTextUtilsTest {
         assertEquals("one", joined);
     }
 
-    //endregion
+    // endregion
 
-    //region testIsEmpty
+    // region testIsEmpty
 
     @Test
     public void testEmptyStringIsEmpty() {
@@ -52,9 +51,9 @@ public class ParseTextUtilsTest {
         assertFalse(ParseTextUtils.isEmpty("not empty"));
     }
 
-    //endregion
+    // endregion
 
-    //region testEquals
+    // region testEquals
 
     @Test
     public void testEqualsNull() {
@@ -79,5 +78,5 @@ public class ParseTextUtilsTest {
         assertFalse(ParseTextUtils.equals("grantland", "nlutsenko"));
     }
 
-    //endregion
+    // endregion
 }

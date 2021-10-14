@@ -22,7 +22,6 @@ class ListParseDelegate<T>(private val name: String?) {
     ) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
-
 }
 
 /**

@@ -13,20 +13,18 @@ import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class ParseRESTObjectBatchCommand extends ParseRESTCommand {
-    public final static int COMMAND_OBJECT_BATCH_MAX_SIZE = 50;
+    public static final int COMMAND_OBJECT_BATCH_MAX_SIZE = 50;
 
     private static final String KEY_RESULTS = "results";
 
@@ -51,8 +49,8 @@ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
 
         if (batchSize > COMMAND_OBJECT_BATCH_MAX_SIZE) {
             // There's more than the max, split it up into batches
-            List<List<ParseRESTObjectCommand>> batches = Lists.partition(commands,
-                    COMMAND_OBJECT_BATCH_MAX_SIZE);
+            List<List<ParseRESTObjectCommand>> batches =
+                    Lists.partition(commands, COMMAND_OBJECT_BATCH_MAX_SIZE);
             for (int i = 0, size = batches.size(); i < size; i++) {
                 List<ParseRESTObjectCommand> batch = batches.get(i);
                 tasks.addAll(executeBatch(client, batch, sessionToken));
@@ -85,51 +83,62 @@ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
             throw new RuntimeException(e);
         }
 
-        ParseRESTCommand command = new ParseRESTObjectBatchCommand(
-                "batch", ParseHttpRequest.Method.POST, parameters, sessionToken);
+        ParseRESTCommand command =
+                new ParseRESTObjectBatchCommand(
+                        "batch", ParseHttpRequest.Method.POST, parameters, sessionToken);
 
-        command.executeAsync(client).continueWith((Continuation<JSONObject, Void>) task -> {
-            TaskCompletionSource<JSONObject> tcs;
+        command.executeAsync(client)
+                .continueWith(
+                        (Continuation<JSONObject, Void>)
+                                task -> {
+                                    TaskCompletionSource<JSONObject> tcs;
 
-            if (task.isFaulted() || task.isCancelled()) {
-                // REST command failed or canceled, fail or cancel all tasks
-                for (int i = 0; i < batchSize; i++) {
-                    tcs = tcss.get(i);
-                    if (task.isFaulted()) {
-                        tcs.setError(task.getError());
-                    } else {
-                        tcs.setCancelled();
-                    }
-                }
-            }
+                                    if (task.isFaulted() || task.isCancelled()) {
+                                        // REST command failed or canceled, fail or cancel all tasks
+                                        for (int i = 0; i < batchSize; i++) {
+                                            tcs = tcss.get(i);
+                                            if (task.isFaulted()) {
+                                                tcs.setError(task.getError());
+                                            } else {
+                                                tcs.setCancelled();
+                                            }
+                                        }
+                                    }
 
-            JSONObject json = task.getResult();
-            JSONArray results = json.getJSONArray(KEY_RESULTS);
+                                    JSONObject json = task.getResult();
+                                    JSONArray results = json.getJSONArray(KEY_RESULTS);
 
-            int resultLength = results.length();
-            if (resultLength != batchSize) {
-                // Invalid response, fail all tasks
-                for (int i = 0; i < batchSize; i++) {
-                    tcs = tcss.get(i);
-                    tcs.setError(new IllegalStateException(
-                            "Batch command result count expected: " + batchSize + " but was: " + resultLength));
-                }
-            }
+                                    int resultLength = results.length();
+                                    if (resultLength != batchSize) {
+                                        // Invalid response, fail all tasks
+                                        for (int i = 0; i < batchSize; i++) {
+                                            tcs = tcss.get(i);
+                                            tcs.setError(
+                                                    new IllegalStateException(
+                                                            "Batch command result count expected: "
+                                                                    + batchSize
+                                                                    + " but was: "
+                                                                    + resultLength));
+                                        }
+                                    }
 
-            for (int i = 0; i < batchSize; i++) {
-                JSONObject result = results.getJSONObject(i);
-                tcs = tcss.get(i);
+                                    for (int i = 0; i < batchSize; i++) {
+                                        JSONObject result = results.getJSONObject(i);
+                                        tcs = tcss.get(i);
 
-                if (result.has("success")) {
-                    JSONObject success = result.getJSONObject("success");
-                    tcs.setResult(success);
-                } else if (result.has("error")) {
-                    JSONObject error = result.getJSONObject("error");
-                    tcs.setError(new ParseException(error.getInt("code"), error.getString("error")));
-                }
-            }
-            return null;
-        });
+                                        if (result.has("success")) {
+                                            JSONObject success = result.getJSONObject("success");
+                                            tcs.setResult(success);
+                                        } else if (result.has("error")) {
+                                            JSONObject error = result.getJSONObject("error");
+                                            tcs.setError(
+                                                    new ParseException(
+                                                            error.getInt("code"),
+                                                            error.getString("error")));
+                                        }
+                                    }
+                                    return null;
+                                });
 
         return tasks;
     }
@@ -139,8 +148,8 @@ class ParseRESTObjectBatchCommand extends ParseRESTCommand {
      * let's wrap that with a JSONObject {@code { "results": &lt;original response%gt; }}.
      */
     @Override
-    protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
-                                               ProgressCallback downloadProgressCallback) {
+    protected Task<JSONObject> onResponseAsync(
+            ParseHttpResponse response, ProgressCallback downloadProgressCallback) {
         InputStream responseStream = null;
         String content;
         try {

@@ -1,8 +1,11 @@
 @file:Suppress("NOTHING_TO_INLINE", "unused")
-
 package com.parse.ktx
 
-import com.parse.*
+import com.parse.ParseException
+import com.parse.ParseGeoPoint
+import com.parse.ParseObject
+import com.parse.ParsePolygon
+import com.parse.ParseQuery
 import kotlin.reflect.KProperty
 
 /**

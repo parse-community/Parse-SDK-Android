@@ -11,8 +11,8 @@ package com.parse;
 import java.util.Map;
 
 /**
- * A subclass of <code>ParseDecoder</code> which can keep <code>ParseObject</code> that
- * has been fetched instead of creating a new instance.
+ * A subclass of <code>ParseDecoder</code> which can keep <code>ParseObject</code> that has been
+ * fetched instead of creating a new instance.
  */
 class KnownParseObjectDecoder extends ParseDecoder {
     private final Map<String, ParseObject> fetchedObjects;
@@ -23,8 +23,8 @@ class KnownParseObjectDecoder extends ParseDecoder {
     }
 
     /**
-     * If the object has been fetched, the fetched object will be returned. Otherwise a
-     * new created object will be returned.
+     * If the object has been fetched, the fetched object will be returned. Otherwise a new created
+     * object will be returned.
      */
     @Override
     protected ParseObject decodePointer(String className, String objectId) {

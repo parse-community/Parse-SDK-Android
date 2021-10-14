@@ -20,14 +20,13 @@ public class CancellationTokenRegistration implements Closeable {
     private Runnable action;
     private boolean closed;
 
-    /* package */ CancellationTokenRegistration(CancellationTokenSource tokenSource, Runnable action) {
+    /* package */ CancellationTokenRegistration(
+            CancellationTokenSource tokenSource, Runnable action) {
         this.tokenSource = tokenSource;
         this.action = action;
     }
 
-    /**
-     * Unregisters the callback runnable from the cancellation token.
-     */
+    /** Unregisters the callback runnable from the cancellation token. */
     @Override
     public void close() {
         synchronized (lock) {
@@ -55,5 +54,4 @@ public class CancellationTokenRegistration implements Closeable {
             throw new IllegalStateException("Object already closed");
         }
     }
-
 }

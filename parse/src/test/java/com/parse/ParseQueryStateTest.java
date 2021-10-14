@@ -13,6 +13,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -21,19 +27,13 @@ import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 @RunWith(RobolectricTestRunner.class)
 public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test
     public void testDefaults() {
-        ParseQuery.State.Builder<ParseObject> builder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builder =
+                new ParseQuery.State.Builder<>("TestObject");
         ParseQuery.State<ParseObject> state = builder.build();
 
         assertEquals("TestObject", state.className());
@@ -57,50 +57,58 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test
     public void testClassName() {
-        ParseQuery.State<ParseObject> stateA = new ParseQuery.State.Builder<>("TestObject")
-                .build();
+        ParseQuery.State<ParseObject> stateA = new ParseQuery.State.Builder<>("TestObject").build();
         assertEquals("TestObject", stateA.className());
 
-        ParseQuery.State<ParseUser> stateB = new ParseQuery.State.Builder<>(ParseUser.class)
-                .build();
+        ParseQuery.State<ParseUser> stateB =
+                new ParseQuery.State.Builder<>(ParseUser.class).build();
         assertEquals("_User", stateB.className());
     }
 
     @Test
     public void testConstraints() {
         ParseQuery.QueryConstraints constraints;
-        ParseQuery.State.Builder<ParseObject> builder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builder =
+                new ParseQuery.State.Builder<>("TestObject");
 
-        constraints = builder
-                .whereEqualTo("foo", "bar")
-                .whereEqualTo("foo", "baz") // Should overwrite since same key
-                .addCondition("people", "$in", Collections.singletonList("stanley")) // Collection
-                .addCondition("people", "$in", Collections.singletonList("grantland")) // Collection (overwrite)
-                .addCondition("something", "$exists", false) // Object
-                .build()
-                .constraints();
+        constraints =
+                builder.whereEqualTo("foo", "bar")
+                        .whereEqualTo("foo", "baz") // Should overwrite since same key
+                        .addCondition(
+                                "people", "$in", Collections.singletonList("stanley")) // Collection
+                        .addCondition(
+                                "people",
+                                "$in",
+                                Collections.singletonList("grantland")) // Collection (overwrite)
+                        .addCondition("something", "$exists", false) // Object
+                        .build()
+                        .constraints();
         assertEquals(3, constraints.size());
         assertEquals("baz", constraints.get("foo"));
-        Collection<?> in = ((Collection<?>) ((ParseQuery.KeyConstraints) constraints.get("people")).get("$in"));
+        Collection<?> in =
+                ((Collection<?>)
+                        ((ParseQuery.KeyConstraints) constraints.get("people")).get("$in"));
         assertEquals(1, in.size());
         assertEquals("grantland", new ArrayList<>(in).get(0));
-        assertEquals(false, ((ParseQuery.KeyConstraints) constraints.get("something")).get("$exists"));
+        assertEquals(
+                false, ((ParseQuery.KeyConstraints) constraints.get("something")).get("$exists"));
     }
 
     @Test
     public void testConstraintsWithSubqueries() {
-        //TODO
+        // TODO
     }
 
     @Test
     public void testParseRelation() {
-        //TODO whereRelatedTo, redirectClassNameForKey
+        // TODO whereRelatedTo, redirectClassNameForKey
     }
 
     @Test
     public void testOrder() {
         ParseQuery.State<ParseObject> state;
-        ParseQuery.State.Builder<ParseObject> builder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builder =
+                new ParseQuery.State.Builder<>("TestObject");
 
         // Ascending adds
         builder.orderByAscending("foo");
@@ -131,12 +139,14 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test
     public void testMisc() { // Include, SelectKeys, Limit, Skip
-        ParseQuery.State.Builder<ParseObject> builder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builder =
+                new ParseQuery.State.Builder<>("TestObject");
 
         builder.include("foo").include("bar");
         assertEquals(2, builder.build().includes().size());
 
-        builder.selectKeys(Collections.singletonList("foo")).selectKeys(Arrays.asList("bar", "baz", "qux"));
+        builder.selectKeys(Collections.singletonList("foo"))
+                .selectKeys(Arrays.asList("bar", "baz", "qux"));
         assertEquals(4, builder.build().selectedKeys().size());
 
         builder.setLimit(42);
@@ -150,35 +160,36 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
 
     @Test
     public void testTrace() {
-        assertTrue(new ParseQuery.State.Builder<>("TestObject")
-                .setTracingEnabled(true)
-                .build()
-                .isTracingEnabled());
+        assertTrue(
+                new ParseQuery.State.Builder<>("TestObject")
+                        .setTracingEnabled(true)
+                        .build()
+                        .isTracingEnabled());
     }
 
     @Test
     public void testCachePolicy() {
-        //TODO
+        // TODO
     }
 
-    //TODO(grantland): Add tests for LDS and throwing for LDS/CachePolicy once we remove OfflineStore
+    // TODO(grantland): Add tests for LDS and throwing for LDS/CachePolicy once we remove
+    // OfflineStore
     // global t6942994
 
     @Test(expected = IllegalStateException.class)
     public void testThrowIfNotLDSAndIgnoreACLs() {
-        new ParseQuery.State.Builder<>("TestObject")
-                .fromNetwork()
-                .ignoreACLs()
-                .build();
+        new ParseQuery.State.Builder<>("TestObject").fromNetwork().ignoreACLs().build();
     }
 
-    //region Or Tests
+    // region Or Tests
 
     @Test
     public void testOr() {
         List<ParseQuery.State.Builder<ParseObject>> subqueries = new ArrayList<>();
-        subqueries.add(new ParseQuery.State.Builder<>("TestObject").whereEqualTo("name", "grantland"));
-        subqueries.add(new ParseQuery.State.Builder<>("TestObject").whereEqualTo("name", "stanley"));
+        subqueries.add(
+                new ParseQuery.State.Builder<>("TestObject").whereEqualTo("name", "grantland"));
+        subqueries.add(
+                new ParseQuery.State.Builder<>("TestObject").whereEqualTo("name", "stanley"));
 
         ParseQuery.State<ParseObject> state = ParseQuery.State.Builder.or(subqueries).build();
         assertEquals("TestObject", state.className());
@@ -195,9 +206,11 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
     @Test
     public void testOrIsMutable() {
         List<ParseQuery.State.Builder<ParseObject>> subqueries = new ArrayList<>();
-        ParseQuery.State.Builder<ParseObject> builderA = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builderA =
+                new ParseQuery.State.Builder<>("TestObject");
         subqueries.add(builderA);
-        ParseQuery.State.Builder<ParseObject> builderB = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builderB =
+                new ParseQuery.State.Builder<>("TestObject");
         subqueries.add(builderB);
 
         ParseQuery.State.Builder<ParseObject> builder = ParseQuery.State.Builder.or(subqueries);
@@ -261,16 +274,19 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
     public void testOrThrowsWithSelectedKeys() {
         List<ParseQuery.State.Builder<ParseObject>> subqueries = new ArrayList<>();
         subqueries.add(new ParseQuery.State.Builder<>("TestObjectA"));
-        subqueries.add(new ParseQuery.State.Builder<>("TestObjectB").selectKeys(Collections.singletonList("blah")));
+        subqueries.add(
+                new ParseQuery.State.Builder<>("TestObjectB")
+                        .selectKeys(Collections.singletonList("blah")));
         ParseQuery.State.Builder.or(subqueries).build();
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testSubqueryToJSON() throws JSONException {
         ParseEncoder encoder = PointerEncoder.get();
-        ParseQuery.State.Builder<ParseObject> builder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> builder =
+                new ParseQuery.State.Builder<>("TestObject");
 
         JSONObject json = builder.build().toJSON(encoder);
         assertEquals("TestObject", json.getString("className"));
@@ -283,25 +299,30 @@ public class ParseQueryStateTest extends ResetPluginsParseTest {
         }
         assertEquals(2, count);
 
-        ParseQuery.State.Builder<ParseObject> subbuilder = new ParseQuery.State.Builder<>("TestObject");
+        ParseQuery.State.Builder<ParseObject> subbuilder =
+                new ParseQuery.State.Builder<>("TestObject");
 
-        json = builder
-                .whereEqualTo("foo", "bar")
-                .whereMatchesQuery("subquery", subbuilder)
-                .setLimit(12)
-                .setSkip(34)
-                .orderByAscending("foo").addDescendingOrder("bar")
-                .include("name")
-                .selectKeys(Arrays.asList("name", "blah"))
-                .setTracingEnabled(true)
-                .redirectClassNameForKey("what")
-                .build()
-                .toJSON(encoder);
+        json =
+                builder.whereEqualTo("foo", "bar")
+                        .whereMatchesQuery("subquery", subbuilder)
+                        .setLimit(12)
+                        .setSkip(34)
+                        .orderByAscending("foo")
+                        .addDescendingOrder("bar")
+                        .include("name")
+                        .selectKeys(Arrays.asList("name", "blah"))
+                        .setTracingEnabled(true)
+                        .redirectClassNameForKey("what")
+                        .build()
+                        .toJSON(encoder);
         assertEquals("TestObject", json.getString("className"));
-        JSONAssert.assertEquals("{" +
-                "\"foo\":\"bar\"," +
-                "\"subquery\":{\"$inQuery\":{\"className\":\"TestObject\",\"where\":{}}}" +
-                "}", json.getJSONObject("where"), JSONCompareMode.NON_EXTENSIBLE);
+        JSONAssert.assertEquals(
+                "{"
+                        + "\"foo\":\"bar\","
+                        + "\"subquery\":{\"$inQuery\":{\"className\":\"TestObject\",\"where\":{}}}"
+                        + "}",
+                json.getJSONObject("where"),
+                JSONCompareMode.NON_EXTENSIBLE);
         assertEquals(12, json.getInt("limit"));
         assertEquals(34, json.getInt("skip"));
         assertEquals("foo,-bar", json.getString("order"));

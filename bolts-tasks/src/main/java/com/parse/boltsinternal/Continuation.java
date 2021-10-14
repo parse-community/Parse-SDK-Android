@@ -8,9 +8,9 @@ package com.parse.boltsinternal;
 
 /**
  * A function to be called after a task completes.
- * <p>
- * If you wish to have the Task from a Continuation that does not return a Task be cancelled
- * then throw a {@link java.util.concurrent.CancellationException} from the Continuation.
+ *
+ * <p>If you wish to have the Task from a Continuation that does not return a Task be cancelled then
+ * throw a {@link java.util.concurrent.CancellationException} from the Continuation.
  *
  * @see Task
  */

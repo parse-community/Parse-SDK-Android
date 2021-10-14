@@ -14,8 +14,7 @@ package com.parse.boltsinternal;
 public class Capture<T> {
     private T value;
 
-    public Capture() {
-    }
+    public Capture() {}
 
     public Capture(T value) {
         this.value = value;

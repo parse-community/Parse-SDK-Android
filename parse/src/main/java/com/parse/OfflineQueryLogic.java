@@ -12,11 +12,6 @@ import com.parse.ParseQuery.KeyConstraints;
 import com.parse.ParseQuery.QueryConstraints;
 import com.parse.ParseQuery.RelationConstraint;
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,6 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class OfflineQueryLogic {
     private final OfflineStore store;
@@ -51,8 +49,12 @@ class OfflineQueryLogic {
              * Only Maps and JSONObjects can be dotted into for getting values, so we should reject
              * anything like ParseObjects and arrays.
              */
-            if (!(value == null || value == JSONObject.NULL || value instanceof Map || value instanceof JSONObject)) {
-                // Technically, they can search inside the REST representation of some nested objects.
+            if (!(value == null
+                    || value == JSONObject.NULL
+                    || value instanceof Map
+                    || value instanceof JSONObject)) {
+                // Technically, they can search inside the REST representation of some nested
+                // objects.
                 if (depth > 0) {
                     Object restFormat = null;
                     try {
@@ -64,8 +66,8 @@ class OfflineQueryLogic {
                         return getValue(restFormat, parts[1], depth + 1);
                     }
                 }
-                throw new ParseException(ParseException.INVALID_QUERY, String.format("Key %s is invalid.",
-                        key));
+                throw new ParseException(
+                        ParseException.INVALID_QUERY, String.format("Key %s is invalid.", key));
             }
             return getValue(value, parts[1], depth + 1);
         }
@@ -73,10 +75,11 @@ class OfflineQueryLogic {
         if (container instanceof ParseObject) {
             final ParseObject object = (ParseObject) container;
 
-            // The object needs to have been fetched already if we are going to sort by one of its fields.
+            // The object needs to have been fetched already if we are going to sort by one of its
+            // fields.
             if (!object.isDataAvailable()) {
-                throw new ParseException(ParseException.INVALID_NESTED_KEY, String.format("Bad key: %s",
-                        key));
+                throw new ParseException(
+                        ParseException.INVALID_NESTED_KEY, String.format("Bad key: %s", key));
             }
 
             // Handle special keys for ParseObjects.
@@ -106,7 +109,8 @@ class OfflineQueryLogic {
             return null;
 
         } else {
-            throw new ParseException(ParseException.INVALID_NESTED_KEY, String.format("Bad key: %s", key));
+            throw new ParseException(
+                    ParseException.INVALID_NESTED_KEY, String.format("Bad key: %s", key));
         }
     }
 
@@ -139,9 +143,7 @@ class OfflineQueryLogic {
         }
     }
 
-    /**
-     * Returns true if decider returns true for any value in the given list.
-     */
+    /** Returns true if decider returns true for any value in the given list. */
     private static boolean compareList(Object constraint, List<?> values, Decider decider) {
         for (Object value : values) {
             if (decider.decide(constraint, value)) {
@@ -151,9 +153,7 @@ class OfflineQueryLogic {
         return false;
     }
 
-    /**
-     * Returns true if decider returns true for any value in the given list.
-     */
+    /** Returns true if decider returns true for any value in the given list. */
     private static boolean compareArray(Object constraint, JSONArray values, Decider decider) {
         for (int i = 0; i < values.length(); ++i) {
             try {
@@ -170,8 +170,8 @@ class OfflineQueryLogic {
 
     /**
      * Returns true if the decider returns true for the given value and the given constraint. This
-     * method handles Mongo's logic where an item can match either an item itself, or any item within
-     * the item, if the item is an array.
+     * method handles Mongo's logic where an item can match either an item itself, or any item
+     * within the item, if the item is an array.
      */
     private static boolean compare(Object constraint, Object value, Decider decider) {
         if (value instanceof List) {
@@ -184,8 +184,8 @@ class OfflineQueryLogic {
     }
 
     /**
-     * Implements simple equality constraints. This emulates Mongo's behavior where "equals" can mean
-     * array containment.
+     * Implements simple equality constraints. This emulates Mongo's behavior where "equals" can
+     * mean array containment.
      */
     private static boolean matchesEqualConstraint(Object constraint, Object value) {
         if (constraint == null || value == null) {
@@ -211,7 +211,13 @@ class OfflineQueryLogic {
 
         Decider decider;
         if (isStartsWithRegex(constraint)) {
-            decider = (constraint1, value1) -> ((String) value1).matches(((KeyConstraints) constraint1).get("$regex").toString());
+            decider =
+                    (constraint1, value1) ->
+                            ((String) value1)
+                                    .matches(
+                                            ((KeyConstraints) constraint1)
+                                                    .get("$regex")
+                                                    .toString());
         } else {
             decider = Object::equals;
         }
@@ -219,64 +225,66 @@ class OfflineQueryLogic {
         return compare(constraint, value, decider);
     }
 
-    /**
-     * Matches $ne constraints.
-     */
+    /** Matches $ne constraints. */
     private static boolean matchesNotEqualConstraint(Object constraint, Object value) {
         return !matchesEqualConstraint(constraint, value);
     }
 
-    /**
-     * Matches $lt constraints.
-     */
+    /** Matches $lt constraints. */
     private static boolean matchesLessThanConstraint(Object constraint, Object value) {
-        return compare(constraint, value, (constraint1, value1) -> {
-            if (value1 == null || value1 == JSONObject.NULL) {
-                return false;
-            }
-            return compareTo(constraint1, value1) > 0;
-        });
+        return compare(
+                constraint,
+                value,
+                (constraint1, value1) -> {
+                    if (value1 == null || value1 == JSONObject.NULL) {
+                        return false;
+                    }
+                    return compareTo(constraint1, value1) > 0;
+                });
     }
 
-    /**
-     * Matches $lte constraints.
-     */
+    /** Matches $lte constraints. */
     private static boolean matchesLessThanOrEqualToConstraint(Object constraint, Object value) {
-        return compare(constraint, value, (constraint1, value1) -> {
-            if (value1 == null || value1 == JSONObject.NULL) {
-                return false;
-            }
-            return compareTo(constraint1, value1) >= 0;
-        });
+        return compare(
+                constraint,
+                value,
+                (constraint1, value1) -> {
+                    if (value1 == null || value1 == JSONObject.NULL) {
+                        return false;
+                    }
+                    return compareTo(constraint1, value1) >= 0;
+                });
     }
 
-    /**
-     * Matches $gt constraints.
-     */
+    /** Matches $gt constraints. */
     private static boolean matchesGreaterThanConstraint(Object constraint, Object value) {
-        return compare(constraint, value, (constraint1, value1) -> {
-            if (value1 == null || value1 == JSONObject.NULL) {
-                return false;
-            }
-            return compareTo(constraint1, value1) < 0;
-        });
+        return compare(
+                constraint,
+                value,
+                (constraint1, value1) -> {
+                    if (value1 == null || value1 == JSONObject.NULL) {
+                        return false;
+                    }
+                    return compareTo(constraint1, value1) < 0;
+                });
     }
 
-    /**
-     * Matches $gte constraints.
-     */
+    /** Matches $gte constraints. */
     private static boolean matchesGreaterThanOrEqualToConstraint(Object constraint, Object value) {
-        return compare(constraint, value, (constraint1, value1) -> {
-            if (value1 == null || value1 == JSONObject.NULL) {
-                return false;
-            }
-            return compareTo(constraint1, value1) <= 0;
-        });
+        return compare(
+                constraint,
+                value,
+                (constraint1, value1) -> {
+                    if (value1 == null || value1 == JSONObject.NULL) {
+                        return false;
+                    }
+                    return compareTo(constraint1, value1) <= 0;
+                });
     }
 
     /**
-     * Matches $in constraints.
-     * $in returns true if the intersection of value and constraint is not an empty set.
+     * Matches $in constraints. $in returns true if the intersection of value and constraint is not
+     * an empty set.
      */
     private static boolean matchesInConstraint(Object constraint, Object value) {
         if (constraint instanceof Collection) {
@@ -290,16 +298,12 @@ class OfflineQueryLogic {
         throw new IllegalArgumentException("Constraint type not supported for $in queries.");
     }
 
-    /**
-     * Matches $nin constraints.
-     */
+    /** Matches $nin constraints. */
     private static boolean matchesNotInConstraint(Object constraint, Object value) {
         return !matchesInConstraint(constraint, value);
     }
 
-    /**
-     * Matches $all constraints.
-     */
+    /** Matches $all constraints. */
     private static boolean matchesAllConstraint(Object constraint, Object value) {
         if (value == null || value == JSONObject.NULL) {
             return false;
@@ -313,7 +317,8 @@ class OfflineQueryLogic {
             if (isAnyValueRegexStartsWith((Collection<?>) constraint)) {
                 constraint = cleanRegexStartsWith((Collection<?>) constraint);
                 if (constraint == null) {
-                    throw new IllegalArgumentException("All values in $all queries must be of starting with regex or non regex.");
+                    throw new IllegalArgumentException(
+                            "All values in $all queries must be of starting with regex or non regex.");
                 }
             }
 
@@ -328,8 +333,8 @@ class OfflineQueryLogic {
     }
 
     /**
-     * Check if any of the collection constraints is a regex to match strings that starts with another
-     * string.
+     * Check if any of the collection constraints is a regex to match strings that starts with
+     * another string.
      */
     private static boolean isAnyValueRegexStartsWith(Collection<?> constraints) {
         for (Object constraint : constraints) {
@@ -342,8 +347,8 @@ class OfflineQueryLogic {
     }
 
     /**
-     * Cleans all regex constraints. If any of the constraints is not a regex, then null is returned.
-     * All values in a $all constraint must be a starting with another string regex.
+     * Cleans all regex constraints. If any of the constraints is not a regex, then null is
+     * returned. All values in a $all constraint must be a starting with another string regex.
      */
     private static Collection<?> cleanRegexStartsWith(Collection<?> constraints) {
         ArrayList<KeyConstraints> cleanedValues = new ArrayList<>();
@@ -365,9 +370,9 @@ class OfflineQueryLogic {
 
     /**
      * Creates a regex pattern to match a substring at the beginning of another string.
-     * <p>
-     * If given string is not a regex to match a string at the beginning of another string, then null
-     * is returned.
+     *
+     * <p>If given string is not a regex to match a string at the beginning of another string, then
+     * null is returned.
      */
     private static KeyConstraints cleanRegexStartsWith(KeyConstraints regex) {
         if (!isStartsWithRegex(regex)) {
@@ -375,34 +380,32 @@ class OfflineQueryLogic {
         }
 
         // remove all instances of \Q and \E from the remaining text & escape single quotes
-        String literalizedString = ((String) regex.get("$regex"))
-                .replaceAll("([^\\\\])(\\\\E)", "$1")
-                .replaceAll("([^\\\\])(\\\\Q)", "$1")
-                .replaceAll("^\\\\E", "")
-                .replaceAll("^\\\\Q", "")
-                .replaceAll("([^'])'", "$1''")
-                .replaceAll("^'([^'])", "''$1");
+        String literalizedString =
+                ((String) regex.get("$regex"))
+                        .replaceAll("([^\\\\])(\\\\E)", "$1")
+                        .replaceAll("([^\\\\])(\\\\Q)", "$1")
+                        .replaceAll("^\\\\E", "")
+                        .replaceAll("^\\\\Q", "")
+                        .replaceAll("([^'])'", "$1''")
+                        .replaceAll("^'([^'])", "''$1");
 
         regex.put("$regex", literalizedString + ".*");
         return regex;
     }
 
-    /**
-     * Check if given constraint is a regex to match strings that starts with another string.
-     */
+    /** Check if given constraint is a regex to match strings that starts with another string. */
     private static boolean isStartsWithRegex(Object constraint) {
         if (constraint == null || !(constraint instanceof KeyConstraints)) {
             return false;
         }
 
         KeyConstraints keyConstraints = (KeyConstraints) constraint;
-        return keyConstraints.size() == 1 && keyConstraints.containsKey("$regex") &&
-                ((String) keyConstraints.get("$regex")).startsWith("^");
+        return keyConstraints.size() == 1
+                && keyConstraints.containsKey("$regex")
+                && ((String) keyConstraints.get("$regex")).startsWith("^");
     }
 
-    /**
-     * Matches $regex constraints.
-     */
+    /** Matches $regex constraints. */
     private static boolean matchesRegexConstraint(Object constraint, Object value, String options)
             throws ParseException {
         if (value == null || value == JSONObject.NULL) {
@@ -414,8 +417,9 @@ class OfflineQueryLogic {
         }
 
         if (!options.matches("^[imxs]*$")) {
-            throw new ParseException(ParseException.INVALID_QUERY, String.format(
-                    "Invalid regex options: %s", options));
+            throw new ParseException(
+                    ParseException.INVALID_QUERY,
+                    String.format("Invalid regex options: %s", options));
         }
 
         int flags = 0;
@@ -438,9 +442,7 @@ class OfflineQueryLogic {
         return matcher.find();
     }
 
-    /**
-     * Matches $exists constraints.
-     */
+    /** Matches $exists constraints. */
     private static boolean matchesExistsConstraint(Object constraint, Object value) {
         /*
          * In the Android SDK, null means "undefined", and JSONObject.NULL means "null".
@@ -452,11 +454,9 @@ class OfflineQueryLogic {
         }
     }
 
-    /**
-     * Matches $nearSphere constraints.
-     */
-    private static boolean matchesNearSphereConstraint(Object constraint, Object value,
-                                                       Double maxDistance) {
+    /** Matches $nearSphere constraints. */
+    private static boolean matchesNearSphereConstraint(
+            Object constraint, Object value, Double maxDistance) {
         if (value == null || value == JSONObject.NULL) {
             return false;
         }
@@ -468,9 +468,7 @@ class OfflineQueryLogic {
         return point1.distanceInRadiansTo(point2) <= maxDistance;
     }
 
-    /**
-     * Matches $within constraints.
-     */
+    /** Matches $within constraints. */
     private static boolean matchesWithinConstraint(Object constraint, Object value)
             throws ParseException {
         if (value == null || value == JSONObject.NULL) {
@@ -486,15 +484,18 @@ class OfflineQueryLogic {
         ParseGeoPoint target = (ParseGeoPoint) value;
 
         if (northeast.getLongitude() < southwest.getLongitude()) {
-            throw new ParseException(ParseException.INVALID_QUERY,
+            throw new ParseException(
+                    ParseException.INVALID_QUERY,
                     "whereWithinGeoBox queries cannot cross the International Date Line.");
         }
         if (northeast.getLatitude() < southwest.getLatitude()) {
-            throw new ParseException(ParseException.INVALID_QUERY,
+            throw new ParseException(
+                    ParseException.INVALID_QUERY,
                     "The southwest corner of a geo box must be south of the northeast corner.");
         }
         if (northeast.getLongitude() - southwest.getLongitude() > 180) {
-            throw new ParseException(ParseException.INVALID_QUERY,
+            throw new ParseException(
+                    ParseException.INVALID_QUERY,
                     "Geo box queries larger than 180 degrees in longitude are not supported. "
                             + "Please check point order.");
         }
@@ -505,25 +506,20 @@ class OfflineQueryLogic {
                 && target.getLongitude() <= northeast.getLongitude());
     }
 
-    /**
-     * Matches $geoIntersects constraints.
-     */
+    /** Matches $geoIntersects constraints. */
     private static boolean matchesGeoIntersectsConstraint(Object constraint, Object value) {
         if (value == null || value == JSONObject.NULL) {
             return false;
         }
 
         @SuppressWarnings("unchecked")
-        HashMap<String, ParseGeoPoint> constraintMap =
-                (HashMap<String, ParseGeoPoint>) constraint;
+        HashMap<String, ParseGeoPoint> constraintMap = (HashMap<String, ParseGeoPoint>) constraint;
         ParseGeoPoint point = constraintMap.get("$point");
         ParsePolygon target = (ParsePolygon) value;
         return target.containsPoint(point);
     }
 
-    /**
-     * Matches $geoWithin constraints.
-     */
+    /** Matches $geoWithin constraints. */
     private static boolean matchesGeoWithinConstraint(Object constraint, Object value) {
         if (value == null || value == JSONObject.NULL) {
             return false;
@@ -543,8 +539,9 @@ class OfflineQueryLogic {
      *
      * @throws UnsupportedOperationException if the operator is not one this function can handle.
      */
-    private static boolean matchesStatelessConstraint(String operator, Object constraint,
-                                                      Object value, KeyConstraints allKeyConstraints) throws ParseException {
+    private static boolean matchesStatelessConstraint(
+            String operator, Object constraint, Object value, KeyConstraints allKeyConstraints)
+            throws ParseException {
         switch (operator) {
             case "$ne":
                 return matchesNotEqualConstraint(constraint, value);
@@ -599,14 +596,14 @@ class OfflineQueryLogic {
                 return matchesGeoIntersectsConstraint(constraint, value);
 
             default:
-                throw new UnsupportedOperationException(String.format(
-                        "The offline store does not yet support the %s operator.", operator));
+                throw new UnsupportedOperationException(
+                        String.format(
+                                "The offline store does not yet support the %s operator.",
+                                operator));
         }
     }
 
-    /**
-     * Returns true iff the object is visible based on its read ACL and the given user objectId.
-     */
+    /** Returns true iff the object is visible based on its read ACL and the given user objectId. */
     /* package */
     static <T extends ParseObject> boolean hasReadAccess(ParseUser user, T object) {
         if (user == object) {
@@ -624,9 +621,7 @@ class OfflineQueryLogic {
         // TODO: Implement roles.
     }
 
-    /**
-     * Returns true iff the object is visible based on its read ACL and the given user objectId.
-     */
+    /** Returns true iff the object is visible based on its read ACL and the given user objectId. */
     /* package */
     static <T extends ParseObject> boolean hasWriteAccess(ParseUser user, T object) {
         if (user == object) {
@@ -644,9 +639,7 @@ class OfflineQueryLogic {
         // TODO: Implement roles.
     }
 
-    /**
-     * Sorts the given array based on the parameters of the given query.
-     */
+    /** Sorts the given array based on the parameters of the given query. */
     /* package */
     static <T extends ParseObject> void sort(List<T> results, ParseQuery.State<T> state)
             throws ParseException {
@@ -655,8 +648,9 @@ class OfflineQueryLogic {
         for (String key : state.order()) {
             if (!key.matches("^-?[A-Za-z][A-Za-z0-9_]*$")) {
                 if (!"_created_at".equals(key) && !"_updated_at".equals(key)) {
-                    throw new ParseException(ParseException.INVALID_KEY_NAME, String.format(
-                            "Invalid key name: \"%s\".", key));
+                    throw new ParseException(
+                            ParseException.INVALID_KEY_NAME,
+                            String.format("Invalid key name: \"%s\".", key));
                 }
             }
         }
@@ -686,58 +680,59 @@ class OfflineQueryLogic {
          * TODO(klimt): Test whether we allow dotting into objects for sorting.
          */
 
-        Collections.sort(results, (lhs, rhs) -> {
-            if (nearSphereKey != null) {
-                ParseGeoPoint lhsPoint;
-                ParseGeoPoint rhsPoint;
-                try {
-                    lhsPoint = (ParseGeoPoint) getValue(lhs, nearSphereKey);
-                    rhsPoint = (ParseGeoPoint) getValue(rhs, nearSphereKey);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
+        Collections.sort(
+                results,
+                (lhs, rhs) -> {
+                    if (nearSphereKey != null) {
+                        ParseGeoPoint lhsPoint;
+                        ParseGeoPoint rhsPoint;
+                        try {
+                            lhsPoint = (ParseGeoPoint) getValue(lhs, nearSphereKey);
+                            rhsPoint = (ParseGeoPoint) getValue(rhs, nearSphereKey);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
 
-                // GeoPoints can't be null if there's a $nearSphere.
-                double lhsDistance = lhsPoint.distanceInRadiansTo(nearSphereValue);
-                double rhsDistance = rhsPoint.distanceInRadiansTo(nearSphereValue);
-                if (lhsDistance != rhsDistance) {
-                    return (lhsDistance - rhsDistance > 0) ? 1 : -1;
-                }
-            }
+                        // GeoPoints can't be null if there's a $nearSphere.
+                        double lhsDistance = lhsPoint.distanceInRadiansTo(nearSphereValue);
+                        double rhsDistance = rhsPoint.distanceInRadiansTo(nearSphereValue);
+                        if (lhsDistance != rhsDistance) {
+                            return (lhsDistance - rhsDistance > 0) ? 1 : -1;
+                        }
+                    }
 
-            for (String key : keys) {
-                boolean descending = false;
-                if (key.startsWith("-")) {
-                    descending = true;
-                    key = key.substring(1);
-                }
+                    for (String key : keys) {
+                        boolean descending = false;
+                        if (key.startsWith("-")) {
+                            descending = true;
+                            key = key.substring(1);
+                        }
 
-                Object lhsValue;
-                Object rhsValue;
-                try {
-                    lhsValue = getValue(lhs, key);
-                    rhsValue = getValue(rhs, key);
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
+                        Object lhsValue;
+                        Object rhsValue;
+                        try {
+                            lhsValue = getValue(lhs, key);
+                            rhsValue = getValue(rhs, key);
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
 
-                int result;
-                try {
-                    result = compareTo(lhsValue, rhsValue);
-                } catch (IllegalArgumentException e) {
-                    throw new IllegalArgumentException(String.format("Unable to sort by key %s.", key), e);
-                }
-                if (result != 0) {
-                    return descending ? -result : result;
-                }
-            }
-            return 0;
-        });
+                        int result;
+                        try {
+                            result = compareTo(lhsValue, rhsValue);
+                        } catch (IllegalArgumentException e) {
+                            throw new IllegalArgumentException(
+                                    String.format("Unable to sort by key %s.", key), e);
+                        }
+                        if (result != 0) {
+                            return descending ? -result : result;
+                        }
+                    }
+                    return 0;
+                });
     }
 
-    /**
-     * Makes sure that the object specified by path, relative to container, is fetched.
-     */
+    /** Makes sure that the object specified by path, relative to container, is fetched. */
     private static Task<Void> fetchIncludeAsync(
             final OfflineStore store,
             final Object container,
@@ -763,7 +758,9 @@ class OfflineQueryLogic {
             Task<Void> task = Task.forResult(null);
             for (int i = 0; i < array.length(); ++i) {
                 final int index = i;
-                task = task.onSuccessTask(task12 -> fetchIncludeAsync(store, array.get(index), path, db));
+                task =
+                        task.onSuccessTask(
+                                task12 -> fetchIncludeAsync(store, array.get(index), path, db));
             }
             return task;
         }
@@ -778,8 +775,10 @@ class OfflineQueryLogic {
                 ParseObject object = (ParseObject) container;
                 return store.fetchLocallyAsync(object, db).makeVoid();
             } else {
-                return Task.forError(new ParseException(
-                        ParseException.INVALID_NESTED_KEY, "include is invalid for non-ParseObjects"));
+                return Task.forError(
+                        new ParseException(
+                                ParseException.INVALID_NESTED_KEY,
+                                "include is invalid for non-ParseObjects"));
             }
         }
 
@@ -790,27 +789,31 @@ class OfflineQueryLogic {
         final String rest = (parts.length > 1 ? parts[1] : null);
 
         // Make sure the container is fetched.
-        return Task.<Void>forResult(null).continueWithTask(task -> {
-            if (container instanceof ParseObject) {
-                // Make sure this object is fetched before descending into it.
-                return fetchIncludeAsync(store, container, null, db).onSuccess(task13 -> ((ParseObject) container).get(key));
-            } else if (container instanceof Map) {
-                return Task.forResult(((Map) container).get(key));
-            } else if (container instanceof JSONObject) {
-                return Task.forResult(((JSONObject) container).opt(key));
-            } else if (JSONObject.NULL.equals(container)) {
-                // Accept JSONObject.NULL value in included field. We swallow it silently instead of
-                // throwing an exception.
-                return null;
-            } else {
-                return Task.forError(new IllegalStateException("include is invalid"));
-            }
-        }).onSuccessTask(task -> fetchIncludeAsync(store, task.getResult(), rest, db));
+        return Task.<Void>forResult(null)
+                .continueWithTask(
+                        task -> {
+                            if (container instanceof ParseObject) {
+                                // Make sure this object is fetched before descending into it.
+                                return fetchIncludeAsync(store, container, null, db)
+                                        .onSuccess(task13 -> ((ParseObject) container).get(key));
+                            } else if (container instanceof Map) {
+                                return Task.forResult(((Map) container).get(key));
+                            } else if (container instanceof JSONObject) {
+                                return Task.forResult(((JSONObject) container).opt(key));
+                            } else if (JSONObject.NULL.equals(container)) {
+                                // Accept JSONObject.NULL value in included field. We swallow it
+                                // silently instead of
+                                // throwing an exception.
+                                return null;
+                            } else {
+                                return Task.forError(
+                                        new IllegalStateException("include is invalid"));
+                            }
+                        })
+                .onSuccessTask(task -> fetchIncludeAsync(store, task.getResult(), rest, db));
     }
 
-    /**
-     * Makes sure all of the objects included by the given query get fetched.
-     */
+    /** Makes sure all of the objects included by the given query get fetched. */
     /* package */
     static <T extends ParseObject> Task<Void> fetchIncludesAsync(
             final OfflineStore store,
@@ -826,11 +829,9 @@ class OfflineQueryLogic {
         return task;
     }
 
-    /**
-     * Creates a matcher that handles $inQuery constraints.
-     */
-    private <T extends ParseObject> ConstraintMatcher<T> createInQueryMatcher(ParseUser user,
-                                                                              Object constraint, final String key) {
+    /** Creates a matcher that handles $inQuery constraints. */
+    private <T extends ParseObject> ConstraintMatcher<T> createInQueryMatcher(
+            ParseUser user, Object constraint, final String key) {
         // TODO(grantland): Convert builder to state t6941155
         @SuppressWarnings("unchecked")
         ParseQuery.State<T> query = ((ParseQuery.State.Builder<T>) constraint).build();
@@ -843,11 +844,9 @@ class OfflineQueryLogic {
         };
     }
 
-    /**
-     * Creates a matcher that handles $notInQuery constraints.
-     */
-    private <T extends ParseObject> ConstraintMatcher<T> createNotInQueryMatcher(ParseUser user,
-                                                                                 Object constraint, final String key) {
+    /** Creates a matcher that handles $notInQuery constraints. */
+    private <T extends ParseObject> ConstraintMatcher<T> createNotInQueryMatcher(
+            ParseUser user, Object constraint, final String key) {
         final ConstraintMatcher<T> inQueryMatcher = createInQueryMatcher(user, constraint, key);
         return new ConstraintMatcher<T>(user) {
             @Override
@@ -857,15 +856,14 @@ class OfflineQueryLogic {
         };
     }
 
-    /**
-     * Creates a matcher that handles $select constraints.
-     */
-    private <T extends ParseObject> ConstraintMatcher<T> createSelectMatcher(ParseUser user,
-                                                                             Object constraint, final String key) {
+    /** Creates a matcher that handles $select constraints. */
+    private <T extends ParseObject> ConstraintMatcher<T> createSelectMatcher(
+            ParseUser user, Object constraint, final String key) {
         Map<?, ?> constraintMap = (Map<?, ?>) constraint;
         // TODO(grantland): Convert builder to state t6941155
         @SuppressWarnings("unchecked")
-        ParseQuery.State<T> query = ((ParseQuery.State.Builder<T>) constraintMap.get("query")).build();
+        ParseQuery.State<T> query =
+                ((ParseQuery.State.Builder<T>) constraintMap.get("query")).build();
         final String resultKey = (String) constraintMap.get("key");
         return new SubQueryMatcher<T>(user, query) {
             @Override
@@ -882,11 +880,9 @@ class OfflineQueryLogic {
         };
     }
 
-    /**
-     * Creates a matcher that handles $dontSelect constraints.
-     */
-    private <T extends ParseObject> ConstraintMatcher<T> createDontSelectMatcher(ParseUser user,
-                                                                                 Object constraint, final String key) {
+    /** Creates a matcher that handles $dontSelect constraints. */
+    private <T extends ParseObject> ConstraintMatcher<T> createDontSelectMatcher(
+            ParseUser user, Object constraint, final String key) {
         final ConstraintMatcher<T> selectMatcher = createSelectMatcher(user, constraint, key);
         return new ConstraintMatcher<T>(user) {
             @Override
@@ -899,9 +895,12 @@ class OfflineQueryLogic {
     /*
      * Creates a matcher for a particular constraint operator.
      */
-    private <T extends ParseObject> ConstraintMatcher<T> createMatcher(ParseUser user,
-                                                                       final String operator, final Object constraint, final String key,
-                                                                       final KeyConstraints allKeyConstraints) {
+    private <T extends ParseObject> ConstraintMatcher<T> createMatcher(
+            ParseUser user,
+            final String operator,
+            final Object constraint,
+            final String key,
+            final KeyConstraints allKeyConstraints) {
         switch (operator) {
             case "$inQuery":
                 return createInQueryMatcher(user, constraint, key);
@@ -924,8 +923,9 @@ class OfflineQueryLogic {
                     public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
                         try {
                             Object value = getValue(object, key);
-                            return Task.forResult(matchesStatelessConstraint(operator, constraint, value,
-                                    allKeyConstraints));
+                            return Task.forResult(
+                                    matchesStatelessConstraint(
+                                            operator, constraint, value, allKeyConstraints));
                         } catch (ParseException e) {
                             return Task.forError(e);
                         }
@@ -934,11 +934,9 @@ class OfflineQueryLogic {
         }
     }
 
-    /**
-     * Handles $or queries.
-     */
-    private <T extends ParseObject> ConstraintMatcher<T> createOrMatcher(ParseUser user,
-                                                                         ArrayList<QueryConstraints> queries) {
+    /** Handles $or queries. */
+    private <T extends ParseObject> ConstraintMatcher<T> createOrMatcher(
+            ParseUser user, ArrayList<QueryConstraints> queries) {
         // Make a list of all the matchers to OR together.
         final ArrayList<ConstraintMatcher<T>> matchers = new ArrayList<>();
         for (QueryConstraints constraints : queries) {
@@ -953,26 +951,27 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(final T object, final ParseSQLiteDatabase db) {
                 Task<Boolean> task = Task.forResult(false);
                 for (final ConstraintMatcher<T> matcher : matchers) {
-                    task = task.onSuccessTask(task1 -> {
-                        if (task1.getResult()) {
-                            return task1;
-                        }
-                        return matcher.matchesAsync(object, db);
-                    });
+                    task =
+                            task.onSuccessTask(
+                                    task1 -> {
+                                        if (task1.getResult()) {
+                                            return task1;
+                                        }
+                                        return matcher.matchesAsync(object, db);
+                                    });
                 }
                 return task;
             }
         };
-
     }
 
     /**
      * Returns a ConstraintMatcher that return true iff the object matches QueryConstraints. This
-     * takes in a SQLiteDatabase connection because SQLite is finicky about nesting connections, so we
-     * want to reuse them whenever possible.
+     * takes in a SQLiteDatabase connection because SQLite is finicky about nesting connections, so
+     * we want to reuse them whenever possible.
      */
-    private <T extends ParseObject> ConstraintMatcher<T> createMatcher(ParseUser user,
-                                                                       QueryConstraints queryConstraints) {
+    private <T extends ParseObject> ConstraintMatcher<T> createMatcher(
+            ParseUser user, QueryConstraints queryConstraints) {
         // Make a list of all the matchers to AND together.
         final ArrayList<ConstraintMatcher<T>> matchers = new ArrayList<>();
         for (final String key : queryConstraints.keySet()) {
@@ -1004,29 +1003,33 @@ class OfflineQueryLogic {
                  * It's a $relatedTo constraint.
                  */
                 final RelationConstraint relation = (RelationConstraint) queryConstraintValue;
-                matchers.add(new ConstraintMatcher<T>(user) {
-                    @Override
-                    public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
-                        return Task.forResult(relation.getRelation().hasKnownObject(object));
-                    }
-                });
+                matchers.add(
+                        new ConstraintMatcher<T>(user) {
+                            @Override
+                            public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
+                                return Task.forResult(
+                                        relation.getRelation().hasKnownObject(object));
+                            }
+                        });
 
             } else {
                 /*
                  * It's not a set of constraints, so it's just a value to compare against.
                  */
-                matchers.add(new ConstraintMatcher<T>(user) {
-                    @Override
-                    public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
-                        Object objectValue;
-                        try {
-                            objectValue = getValue(object, key);
-                        } catch (ParseException e) {
-                            return Task.forError(e);
-                        }
-                        return Task.forResult(matchesEqualConstraint(queryConstraintValue, objectValue));
-                    }
-                });
+                matchers.add(
+                        new ConstraintMatcher<T>(user) {
+                            @Override
+                            public Task<Boolean> matchesAsync(T object, ParseSQLiteDatabase db) {
+                                Object objectValue;
+                                try {
+                                    objectValue = getValue(object, key);
+                                } catch (ParseException e) {
+                                    return Task.forError(e);
+                                }
+                                return Task.forResult(
+                                        matchesEqualConstraint(queryConstraintValue, objectValue));
+                            }
+                        });
             }
         }
 
@@ -1038,12 +1041,14 @@ class OfflineQueryLogic {
             public Task<Boolean> matchesAsync(final T object, final ParseSQLiteDatabase db) {
                 Task<Boolean> task = Task.forResult(true);
                 for (final ConstraintMatcher<T> matcher : matchers) {
-                    task = task.onSuccessTask(task1 -> {
-                        if (!task1.getResult()) {
-                            return task1;
-                        }
-                        return matcher.matchesAsync(object, db);
-                    });
+                    task =
+                            task.onSuccessTask(
+                                    task1 -> {
+                                        if (!task1.getResult()) {
+                                            return task1;
+                                        }
+                                        return matcher.matchesAsync(object, db);
+                                    });
                 }
                 return task;
             }
@@ -1052,12 +1057,12 @@ class OfflineQueryLogic {
 
     /**
      * Returns a ConstraintMatcher that return true iff the object matches the given query's
-     * constraints. This takes in a SQLiteDatabase connection because SQLite is finicky about nesting
-     * connections, so we want to reuse them whenever possible.
+     * constraints. This takes in a SQLiteDatabase connection because SQLite is finicky about
+     * nesting connections, so we want to reuse them whenever possible.
      *
      * @param state The query.
-     * @param user  The user we are testing ACL access for.
-     * @param <T>   Subclass of ParseObject.
+     * @param user The user we are testing ACL access for.
+     * @param <T> Subclass of ParseObject.
      * @return A new instance of ConstraintMatcher.
      */
     /* package */ <T extends ParseObject> ConstraintMatcher<T> createMatcher(
@@ -1076,18 +1081,16 @@ class OfflineQueryLogic {
         };
     }
 
-    /**
-     * A decider decides whether the given value matches the given constraint.
-     */
+    /** A decider decides whether the given value matches the given constraint. */
     private interface Decider {
         boolean decide(Object constraint, Object value);
     }
 
     /**
      * A query is converted into a complex hierarchy of ConstraintMatchers that evaluate whether a
-     * ParseObject matches each part of the query. This is done because some parts of the query (such
-     * as $inQuery) are much more efficient if we can do some preprocessing. This makes some parts of
-     * the query matching stateful.
+     * ParseObject matches each part of the query. This is done because some parts of the query
+     * (such as $inQuery) are much more efficient if we can do some preprocessing. This makes some
+     * parts of the query matching stateful.
      */
     /* package */ abstract static class ConstraintMatcher<T extends ParseObject> {
 
@@ -1117,7 +1120,8 @@ class OfflineQueryLogic {
              * of the query gets short-circuited.
              */
             if (subQueryResults == null) {
-                //TODO (grantland): We need to pass through the original pin we were limiting the parent
+                // TODO (grantland): We need to pass through the original pin we were limiting the
+                // parent
                 // query on.
                 subQueryResults = store.findAsync(subQuery, user, null, db);
             }

@@ -14,9 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
 
-/**
- * Used to parse legacy created_at and updated_at from disk. It is only precise to the second.
- */
+/** Used to parse legacy created_at and updated_at from disk. It is only precise to the second. */
 class ParseImpreciseDateFormat {
     private static final String TAG = "ParseDateFormat";
 

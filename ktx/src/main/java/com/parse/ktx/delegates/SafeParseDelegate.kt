@@ -31,7 +31,6 @@ class SafeParseDelegate<T>(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, t: T?) {
         parseObject.putOrRemove(property.name, t)
     }
-
 }
 
 /**

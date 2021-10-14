@@ -11,15 +11,17 @@ package com.parse;
 /**
  * A {@code SendCallback} is used to run code after sending a {@link ParsePush} in a background
  * thread.
- * <p/>
- * The easiest way to use a {@code SendCallback} is through an anonymous inner class. Override the
- * {@code done} function to specify what the callback should do after the send is complete. The
+ *
+ * <p>The easiest way to use a {@code SendCallback} is through an anonymous inner class. Override
+ * the {@code done} function to specify what the callback should do after the send is complete. The
  * {@code done} function will be run in the UI thread, while the send happens in a background
  * thread. This ensures that the UI does not freeze while the send happens.
- * <p/>
- * For example, this sample code sends the message {@code "Hello world"} on the
- * {@code "hello"} channel and logs whether the send succeeded.
- * <p/>
+ *
+ * <p>For example, this sample code sends the message {@code "Hello world"} on the {@code "hello"}
+ * channel and logs whether the send succeeded.
+ *
+ * <p>
+ *
  * <pre>
  * ParsePush push = new ParsePush();
  * push.setChannel(&quot;hello&quot;);

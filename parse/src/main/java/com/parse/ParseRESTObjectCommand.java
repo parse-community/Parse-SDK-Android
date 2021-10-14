@@ -9,9 +9,7 @@
 package com.parse;
 
 import android.net.Uri;
-
 import com.parse.http.ParseHttpRequest;
-
 import org.json.JSONObject;
 
 class ParseRESTObjectCommand extends ParseRESTCommand {
@@ -24,19 +22,19 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
         super(httpPath, httpMethod, parameters, sessionToken);
     }
 
-    public static ParseRESTObjectCommand getObjectCommand(String objectId, String className,
-                                                          String sessionToken) {
-        String httpPath = String.format("classes/%s/%s", Uri.encode(className), Uri.encode(objectId));
-        return new ParseRESTObjectCommand(httpPath, ParseHttpRequest.Method.GET, null, sessionToken);
+    public static ParseRESTObjectCommand getObjectCommand(
+            String objectId, String className, String sessionToken) {
+        String httpPath =
+                String.format("classes/%s/%s", Uri.encode(className), Uri.encode(objectId));
+        return new ParseRESTObjectCommand(
+                httpPath, ParseHttpRequest.Method.GET, null, sessionToken);
     }
 
     public static ParseRESTObjectCommand saveObjectCommand(
             ParseObject.State state, JSONObject operations, String sessionToken) {
         if (state.objectId() == null) {
             return ParseRESTObjectCommand.createObjectCommand(
-                    state.className(),
-                    operations,
-                    sessionToken);
+                    state.className(), operations, sessionToken);
         } else {
             if (Parse.isAllowCustomObjectId()) {
                 if (state.createdAt() == -1) {
@@ -61,16 +59,19 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
         }
     }
 
-    private static ParseRESTObjectCommand createObjectCommand(String className, JSONObject changes,
-                                                              String sessionToken) {
+    private static ParseRESTObjectCommand createObjectCommand(
+            String className, JSONObject changes, String sessionToken) {
         String httpPath = String.format("classes/%s", Uri.encode(className));
-        return new ParseRESTObjectCommand(httpPath, ParseHttpRequest.Method.POST, changes, sessionToken);
+        return new ParseRESTObjectCommand(
+                httpPath, ParseHttpRequest.Method.POST, changes, sessionToken);
     }
 
-    private static ParseRESTObjectCommand updateObjectCommand(String objectId, String className,
-                                                              JSONObject changes, String sessionToken) {
-        String httpPath = String.format("classes/%s/%s", Uri.encode(className), Uri.encode(objectId));
-        return new ParseRESTObjectCommand(httpPath, ParseHttpRequest.Method.PUT, changes, sessionToken);
+    private static ParseRESTObjectCommand updateObjectCommand(
+            String objectId, String className, JSONObject changes, String sessionToken) {
+        String httpPath =
+                String.format("classes/%s/%s", Uri.encode(className), Uri.encode(objectId));
+        return new ParseRESTObjectCommand(
+                httpPath, ParseHttpRequest.Method.PUT, changes, sessionToken);
     }
 
     public static ParseRESTObjectCommand deleteObjectCommand(
@@ -80,6 +81,7 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
         if (objectId != null) {
             httpPath += String.format("/%s", Uri.encode(objectId));
         }
-        return new ParseRESTObjectCommand(httpPath, ParseHttpRequest.Method.DELETE, null, sessionToken);
+        return new ParseRESTObjectCommand(
+                httpPath, ParseHttpRequest.Method.DELETE, null, sessionToken);
     }
 }

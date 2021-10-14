@@ -9,14 +9,13 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * The {@code ParseSession} is a local representation of session data that can be saved
- * and retrieved from the Parse cloud.
+ * The {@code ParseSession} is a local representation of session data that can be saved and
+ * retrieved from the Parse cloud.
  */
 @ParseClassName("_Session")
 public class ParseSession extends ParseObject {
@@ -28,9 +27,15 @@ public class ParseSession extends ParseObject {
     private static final String KEY_EXPIRES_AT = "expiresAt";
     private static final String KEY_INSTALLATION_ID = "installationId";
 
-    private static final List<String> READ_ONLY_KEYS = Collections.unmodifiableList(
-            Arrays.asList(KEY_SESSION_TOKEN, KEY_CREATED_WITH, KEY_RESTRICTED, KEY_USER, KEY_EXPIRES_AT,
-                    KEY_INSTALLATION_ID));
+    private static final List<String> READ_ONLY_KEYS =
+            Collections.unmodifiableList(
+                    Arrays.asList(
+                            KEY_SESSION_TOKEN,
+                            KEY_CREATED_WITH,
+                            KEY_RESTRICTED,
+                            KEY_USER,
+                            KEY_EXPIRES_AT,
+                            KEY_INSTALLATION_ID));
 
     private static ParseSessionController getSessionController() {
         return ParseCorePlugins.getInstance().getSessionController();
@@ -40,26 +45,31 @@ public class ParseSession extends ParseObject {
      * Get the current {@code ParseSession} object related to the current user.
      *
      * @return A task that resolves a {@code ParseSession} object or {@code null} if not valid or
-     * logged in.
+     *     logged in.
      */
     public static Task<ParseSession> getCurrentSessionInBackground() {
-        return ParseUser.getCurrentSessionTokenAsync().onSuccessTask(task -> {
-            String sessionToken = task.getResult();
-            if (sessionToken == null) {
-                return Task.forResult(null);
-            }
-            return getSessionController().getSessionAsync(sessionToken).onSuccess(task1 -> {
-                State result = task1.getResult();
-                return ParseObject.from(result);
-            });
-        });
+        return ParseUser.getCurrentSessionTokenAsync()
+                .onSuccessTask(
+                        task -> {
+                            String sessionToken = task.getResult();
+                            if (sessionToken == null) {
+                                return Task.forResult(null);
+                            }
+                            return getSessionController()
+                                    .getSessionAsync(sessionToken)
+                                    .onSuccess(
+                                            task1 -> {
+                                                State result = task1.getResult();
+                                                return ParseObject.from(result);
+                                            });
+                        });
     }
 
     /**
      * Get the current {@code ParseSession} object related to the current user.
      *
      * @param callback A callback that returns a {@code ParseSession} object or {@code null} if not
-     *                 valid or logged in.
+     *     valid or logged in.
      */
     public static void getCurrentSessionInBackground(GetCallback<ParseSession> callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(getCurrentSessionInBackground(), callback);
@@ -79,10 +89,13 @@ public class ParseSession extends ParseObject {
             return Task.forResult(sessionToken);
         }
 
-        return getSessionController().upgradeToRevocable(sessionToken).onSuccess(task -> {
-            State result = task.getResult();
-            return ParseObject.<ParseSession>from(result).getSessionToken();
-        });
+        return getSessionController()
+                .upgradeToRevocable(sessionToken)
+                .onSuccess(
+                        task -> {
+                            State result = task.getResult();
+                            return ParseObject.<ParseSession>from(result).getSessionToken();
+                        });
     }
 
     /* package */
@@ -100,18 +113,16 @@ public class ParseSession extends ParseObject {
     }
 
     @Override
-        /* package */ boolean needsDefaultACL() {
+    /* package */ boolean needsDefaultACL() {
         return false;
     }
 
     @Override
-        /* package */ boolean isKeyMutable(String key) {
+    /* package */ boolean isKeyMutable(String key) {
         return !READ_ONLY_KEYS.contains(key);
     }
 
-    /**
-     * @return the session token for a user, if they are logged in.
-     */
+    /** @return the session token for a user, if they are logged in. */
     public String getSessionToken() {
         return getString(KEY_SESSION_TOKEN);
     }
