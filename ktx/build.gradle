@@ -1,5 +1,6 @@
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "maven-publish"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
@@ -44,4 +45,17 @@ android {
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation project(":parse")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            debug(MavenPublication) {
+                from components.debug
+            }
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
 }
