@@ -168,11 +168,12 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-                new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .server("https://api.parse.com/1")
-                        .allowCustomObjectId()
-                        .build();
-
+            new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                .server("https://api.parse.com/1")
+                .enableLocalDataStore()
+                .allowCustomObjectId()
+                .build();
         ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
         Parse.initialize(configuration, plugins);
 
@@ -183,6 +184,7 @@ public class ParseObjectTest {
             assertEquals(e.getCode(), 104);
             assertThat(e.getMessage(), is("ObjectId must not be null"));
         }
+        Parse.destroy();
     }
 
     @Test
@@ -191,13 +193,11 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-                new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .server("https://api.parse.com/1")
-                        .allowCustomObjectId()
-                        .build();
-
-        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
-        Parse.initialize(configuration, plugins);
+            new Parse.Configuration.Builder(RuntimeEnvironment.application).allowCustomObjectId().build();
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.configuration()).thenReturn(configuration);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        ParsePlugins.set(plugins);
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
@@ -217,17 +217,14 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-                new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .server("https://api.parse.com/1")
-                        .enableLocalDataStore()
-                        .allowCustomObjectId()
-                        .build();
-
+            new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                .server("https://api.parse.com/1")
+                .enableLocalDataStore()
+                .allowCustomObjectId()
+                .build();
         ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
         Parse.initialize(configuration, plugins);
-
-        OfflineStore lds = mock(OfflineStore.class);
-        Parse.setLocalDatastore(lds);
 
         ParseObject object = new ParseObject("TestObject");
         object.saveEventually(
@@ -239,6 +236,7 @@ public class ParseObjectTest {
                         assertThat(e.getMessage(), is("ObjectId must not be null"));
                     }
                 });
+        Parse.destroy();
     }
 
     @Test
@@ -247,17 +245,11 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-                new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                        .server("https://api.parse.com/1")
-                        .enableLocalDataStore()
-                        .allowCustomObjectId()
-                        .build();
-
-        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
-        Parse.initialize(configuration, plugins);
-
-        OfflineStore lds = mock(OfflineStore.class);
-        Parse.setLocalDatastore(lds);
+            new Parse.Configuration.Builder(RuntimeEnvironment.application).allowCustomObjectId().build();
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.configuration()).thenReturn(configuration);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        ParsePlugins.set(plugins);
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
