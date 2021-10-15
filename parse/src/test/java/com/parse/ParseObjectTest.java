@@ -9,7 +9,6 @@
 package com.parse;
 
 import static org.hamcrest.core.Is.is;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -231,14 +230,15 @@ public class ParseObjectTest {
         Parse.setLocalDatastore(lds);
 
         ParseObject object = new ParseObject("TestObject");
-        object.saveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                assertNotNull(e);
-                assertEquals(e.getCode(), 104);
-                assertThat(e.getMessage(), is("ObjectId must not be null"));
-            }
-        });
+        object.saveEventually(
+                new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        assertNotNull(e);
+                        assertEquals(e.getCode(), 104);
+                        assertThat(e.getMessage(), is("ObjectId must not be null"));
+                    }
+                });
     }
 
     @Test
@@ -261,15 +261,16 @@ public class ParseObjectTest {
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
-        object.saveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                assertNull(e);
-            }
-        });
+        object.saveEventually(
+                new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        assertNull(e);
+                    }
+                });
     }
 
-    //region testGetter
+    // region testGetter
 
     @Test
     public void testRevert() throws ParseException {

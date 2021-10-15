@@ -111,7 +111,9 @@ public class Parse {
         return isLocalDatastoreEnabled;
     }
 
-    public static boolean isAllowCustomObjectId() { return allowCustomObjectId; }
+    public static boolean isAllowCustomObjectId() {
+        return allowCustomObjectId;
+    }
 
     /**
      * Authenticates this client as belonging to your application. This must be called before your

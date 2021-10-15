@@ -39,22 +39,14 @@ class ParseRESTObjectCommand extends ParseRESTCommand {
             if (Parse.isAllowCustomObjectId()) {
                 if (state.createdAt() == -1) {
                     return ParseRESTObjectCommand.createObjectCommand(
-                            state.className(),
-                            operations,
-                            sessionToken);
+                            state.className(), operations, sessionToken);
                 } else {
                     return ParseRESTObjectCommand.updateObjectCommand(
-                            state.objectId(),
-                            state.className(),
-                            operations,
-                            sessionToken);
+                            state.objectId(), state.className(), operations, sessionToken);
                 }
             } else {
                 return ParseRESTObjectCommand.updateObjectCommand(
-                        state.objectId(),
-                        state.className(),
-                        operations,
-                        sessionToken);
+                        state.objectId(), state.className(), operations, sessionToken);
             }
         }
     }
