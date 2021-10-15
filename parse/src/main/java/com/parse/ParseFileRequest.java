@@ -11,7 +11,6 @@ package com.parse;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -31,47 +30,56 @@ class ParseFileRequest extends ParseRequest<Void> {
     }
 
     @Override
-    protected Task<Void> onResponseAsync(final ParseHttpResponse response,
-                                         final ProgressCallback downloadProgressCallback) {
+    protected Task<Void> onResponseAsync(
+            final ParseHttpResponse response, final ProgressCallback downloadProgressCallback) {
         int statusCode = response.getStatusCode();
         if (statusCode >= 200 && statusCode < 300 || statusCode == 304) {
             // OK
         } else {
             String action = method == ParseHttpRequest.Method.GET ? "Download from" : "Upload to";
-            return Task.forError(new ParseException(ParseException.CONNECTION_FAILED, String.format(
-                    "%s file server failed. %s", action, response.getReasonPhrase())));
+            return Task.forError(
+                    new ParseException(
+                            ParseException.CONNECTION_FAILED,
+                            String.format(
+                                    "%s file server failed. %s",
+                                    action, response.getReasonPhrase())));
         }
 
         if (method != ParseHttpRequest.Method.GET) {
             return null;
         }
 
-        return Task.call(() -> {
-            long totalSize = response.getTotalSize();
-            long downloadedSize = 0;
-            InputStream responseStream = null;
-            FileOutputStream tempFileStream = null;
-            try {
-                responseStream = response.getContent();
-                tempFileStream = ParseFileUtils.openOutputStream(tempFile);
+        return Task.call(
+                () -> {
+                    long totalSize = response.getTotalSize();
+                    long downloadedSize = 0;
+                    InputStream responseStream = null;
+                    FileOutputStream tempFileStream = null;
+                    try {
+                        responseStream = response.getContent();
+                        tempFileStream = ParseFileUtils.openOutputStream(tempFile);
 
-                int nRead;
-                byte[] data = new byte[32 << 10]; // 32KB
+                        int nRead;
+                        byte[] data = new byte[32 << 10]; // 32KB
 
-                while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
-                    tempFileStream.write(data, 0, nRead);
-                    downloadedSize += nRead;
-                    if (downloadProgressCallback != null && totalSize != -1) {
-                        int progressToReport =
-                                Math.round((float) downloadedSize / (float) totalSize * 100.0f);
-                        downloadProgressCallback.done(progressToReport);
+                        while ((nRead = responseStream.read(data, 0, data.length)) != -1) {
+                            tempFileStream.write(data, 0, nRead);
+                            downloadedSize += nRead;
+                            if (downloadProgressCallback != null && totalSize != -1) {
+                                int progressToReport =
+                                        Math.round(
+                                                (float) downloadedSize
+                                                        / (float) totalSize
+                                                        * 100.0f);
+                                downloadProgressCallback.done(progressToReport);
+                            }
+                        }
+                        return null;
+                    } finally {
+                        ParseIOUtils.closeQuietly(responseStream);
+                        ParseIOUtils.closeQuietly(tempFileStream);
                     }
-                }
-                return null;
-            } finally {
-                ParseIOUtils.closeQuietly(responseStream);
-                ParseIOUtils.closeQuietly(tempFileStream);
-            }
-        }, ParseExecutors.io());
+                },
+                ParseExecutors.io());
     }
 }

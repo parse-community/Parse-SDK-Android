@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: "maven-publish"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
@@ -37,4 +38,14 @@ android {
 dependencies {
     api "com.google.firebase:firebase-messaging:22.0.0"
     implementation project(":parse")
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
 }

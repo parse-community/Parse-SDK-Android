@@ -17,25 +17,22 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ParseCurrentConfigControllerTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    //region testConstructor
+    // region testConstructor
 
     @Test
     public void testConstructor() {
@@ -46,44 +43,60 @@ public class ParseCurrentConfigControllerTest {
         assertNull(currentConfigController.currentConfig);
     }
 
-    //endregion
+    // endregion
 
-    //region testSaveToDisk
+    // region testSaveToDisk
 
     @Test
     public void testSaveToDiskSuccess() throws Exception {
         // Construct sample ParseConfig
         final Date date = new Date();
-        final ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
+        final ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("image.png")
+                                .url("http://yarr.com/image.png")
+                                .build());
         final ParseGeoPoint geoPoint = new ParseGeoPoint(44.484, 26.029);
-        final List<Object> list = new ArrayList<Object>() {{
-            add("foo");
-            add("bar");
-            add("baz");
-        }};
-        final Map<String, Object> map = new HashMap<String, Object>() {{
-            put("first", "foo");
-            put("second", "bar");
-            put("third", "baz");
-        }};
+        final List<Object> list =
+                new ArrayList<Object>() {
+                    {
+                        add("foo");
+                        add("bar");
+                        add("baz");
+                    }
+                };
+        final Map<String, Object> map =
+                new HashMap<String, Object>() {
+                    {
+                        put("first", "foo");
+                        put("second", "bar");
+                        put("third", "baz");
+                    }
+                };
 
-        final Map<String, Object> sampleConfigParameters = new HashMap<String, Object>() {{
-            put("string", "value");
-            put("int", 42);
-            put("double", 0.2778);
-            put("trueBool", true);
-            put("falseBool", false);
-            put("date", date);
-            put("file", file);
-            put("geoPoint", geoPoint);
-            put("array", list);
-            put("object", map);
-        }};
+        final Map<String, Object> sampleConfigParameters =
+                new HashMap<String, Object>() {
+                    {
+                        put("string", "value");
+                        put("int", 42);
+                        put("double", 0.2778);
+                        put("trueBool", true);
+                        put("falseBool", false);
+                        put("date", date);
+                        put("file", file);
+                        put("geoPoint", geoPoint);
+                        put("array", list);
+                        put("object", map);
+                    }
+                };
 
-        JSONObject sampleConfigJson = new JSONObject() {{
-            put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
-        }};
+        JSONObject sampleConfigJson =
+                new JSONObject() {
+                    {
+                        put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
+                    }
+                };
         ParseConfig config = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
 
         // Save to disk
@@ -114,53 +127,70 @@ public class ParseCurrentConfigControllerTest {
         assertEquals(geoPoint.getLongitude(), geoPointAgain.getLongitude(), 0.0000001);
         List<Object> listAgain = (List<Object>) decodedDiskConfigParameters.get("array");
         assertArrayEquals(list.toArray(), listAgain.toArray());
-        Map<String, Object> mapAgain = (Map<String, Object>) decodedDiskConfigParameters.get("object");
+        Map<String, Object> mapAgain =
+                (Map<String, Object>) decodedDiskConfigParameters.get("object");
         assertEquals(map.size(), mapAgain.size());
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             assertEquals(entry.getValue(), mapAgain.get(entry.getKey()));
         }
     }
 
-    //TODO(mengyan) Add testSaveToDiskFailIOException when we have a way to handle IOException
+    // TODO(mengyan) Add testSaveToDiskFailIOException when we have a way to handle IOException
 
-    //endregion
+    // endregion
 
-    //region testGetFromDisk
+    // region testGetFromDisk
 
     @Test
     public void testGetFromDiskSuccess() throws Exception {
         // Construct sample ParseConfig json
         final Date date = new Date();
-        final ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
+        final ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("image.png")
+                                .url("http://yarr.com/image.png")
+                                .build());
         final ParseGeoPoint geoPoint = new ParseGeoPoint(44.484, 26.029);
-        final List<Object> list = new ArrayList<Object>() {{
-            add("foo");
-            add("bar");
-            add("baz");
-        }};
-        final Map<String, Object> map = new HashMap<String, Object>() {{
-            put("first", "foo");
-            put("second", "bar");
-            put("third", "baz");
-        }};
+        final List<Object> list =
+                new ArrayList<Object>() {
+                    {
+                        add("foo");
+                        add("bar");
+                        add("baz");
+                    }
+                };
+        final Map<String, Object> map =
+                new HashMap<String, Object>() {
+                    {
+                        put("first", "foo");
+                        put("second", "bar");
+                        put("third", "baz");
+                    }
+                };
 
-        final Map<String, Object> sampleConfigParameters = new HashMap<String, Object>() {{
-            put("string", "value");
-            put("int", 42);
-            put("double", 0.2778);
-            put("trueBool", true);
-            put("falseBool", false);
-            put("date", date);
-            put("file", file);
-            put("geoPoint", geoPoint);
-            put("array", list);
-            put("object", map);
-        }};
+        final Map<String, Object> sampleConfigParameters =
+                new HashMap<String, Object>() {
+                    {
+                        put("string", "value");
+                        put("int", 42);
+                        put("double", 0.2778);
+                        put("trueBool", true);
+                        put("falseBool", false);
+                        put("date", date);
+                        put("file", file);
+                        put("geoPoint", geoPoint);
+                        put("array", list);
+                        put("object", map);
+                    }
+                };
 
-        JSONObject sampleConfigJson = new JSONObject() {{
-            put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
-        }};
+        JSONObject sampleConfigJson =
+                new JSONObject() {
+                    {
+                        put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
+                    }
+                };
         ParseConfig config = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
 
         // Save to disk
@@ -213,9 +243,9 @@ public class ParseCurrentConfigControllerTest {
         assertNull(config);
     }
 
-    //endregion
+    // endregion
 
-    //region testSetCurrentConfigAsync
+    // region testSetCurrentConfigAsync
 
     @Test
     public void testSetCurrentConfigAsyncSuccess() throws Exception {
@@ -235,9 +265,9 @@ public class ParseCurrentConfigControllerTest {
         assertSame(config, currentConfigController.currentConfig);
     }
 
-    //endregion
+    // endregion
 
-    //region testGetCurrentConfigAsync
+    // region testGetCurrentConfigAsync
 
     @Test
     public void testGetCurrentConfigAsyncSuccessCurrentConfigAlreadySet() throws Exception {
@@ -263,12 +293,18 @@ public class ParseCurrentConfigControllerTest {
                 new ParseCurrentConfigController(configFile);
 
         // Save sample ParseConfig to disk
-        final Map<String, Object> sampleConfigParameters = new HashMap<String, Object>() {{
-            put("string", "value");
-        }};
-        JSONObject sampleConfigJson = new JSONObject() {{
-            put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
-        }};
+        final Map<String, Object> sampleConfigParameters =
+                new HashMap<String, Object>() {
+                    {
+                        put("string", "value");
+                    }
+                };
+        JSONObject sampleConfigJson =
+                new JSONObject() {
+                    {
+                        put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
+                    }
+                };
         ParseConfig diskConfig = ParseConfig.decode(sampleConfigJson, ParseDecoder.get());
         currentConfigController.saveToDisk(diskConfig);
 
@@ -306,9 +342,9 @@ public class ParseCurrentConfigControllerTest {
         assertEquals(0, config.getParams().size());
     }
 
-    //endregion
+    // endregion
 
-    //region testClearCurrentConfigForTesting
+    // region testClearCurrentConfigForTesting
 
     @Test
     public void testClearCurrentConfigForTestingSuccess() {
@@ -326,5 +362,5 @@ public class ParseCurrentConfigControllerTest {
         assertNull(currentConfigController.currentConfig);
     }
 
-    //endregion
+    // endregion
 }

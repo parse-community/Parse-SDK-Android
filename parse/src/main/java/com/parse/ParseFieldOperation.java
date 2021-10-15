@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.os.Parcel;
-
 import org.json.JSONException;
 
 /**
@@ -30,16 +29,18 @@ interface ParseFieldOperation {
     /**
      * Writes the ParseFieldOperation to the given Parcel using the given encoder.
      *
-     * @param dest              The destination Parcel.
+     * @param dest The destination Parcel.
      * @param parcelableEncoder A ParseParcelableEncoder.
      */
     void encode(Parcel dest, ParseParcelEncoder parcelableEncoder);
 
     /**
-     * Returns a field operation that is composed of a previous operation followed by this operation.
-     * This will not mutate either operation. However, it may return self if the current operation is
-     * not affected by previous changes. For example:
+     * Returns a field operation that is composed of a previous operation followed by this
+     * operation. This will not mutate either operation. However, it may return self if the current
+     * operation is not affected by previous changes. For example:
+     *
      * <p>
+     *
      * <pre>
      * {increment by 2}.mergeWithPrevious({set to 5}) -> {set to 7}
      * {set to 5}.mergeWithPrevious({increment by 2}) -> {set to 5}
@@ -59,9 +60,8 @@ interface ParseFieldOperation {
      * construct objects that refer back to its parent.
      *
      * @param oldValue The previous value for the field.
-     * @param key      The key that this value is for.
+     * @param key The key that this value is for.
      * @return The new value for the field.
      */
     Object apply(Object oldValue, String key);
 }
-

@@ -13,12 +13,10 @@ import static org.junit.Assert.assertEquals;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
-
-import org.junit.Test;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.Test;
 
 public class ParseHttpRequestTest {
 
@@ -35,12 +33,13 @@ public class ParseHttpRequestTest {
         String contentType = "application/json";
         ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
 
-        ParseHttpRequest request = new ParseHttpRequest.Builder()
-                .setUrl(url)
-                .addHeader(name, value)
-                .setMethod(method)
-                .setBody(body)
-                .build();
+        ParseHttpRequest request =
+                new ParseHttpRequest.Builder()
+                        .setUrl(url)
+                        .addHeader(name, value)
+                        .setMethod(method)
+                        .setBody(body)
+                        .build();
 
         assertEquals(url, request.getUrl());
         assertEquals(method.toString(), request.getMethod().toString());
@@ -64,12 +63,13 @@ public class ParseHttpRequestTest {
         String contentType = "application/json";
         ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
 
-        ParseHttpRequest request = new ParseHttpRequest.Builder()
-                .setUrl(url)
-                .addHeader(name, value)
-                .setMethod(method)
-                .setBody(body)
-                .build();
+        ParseHttpRequest request =
+                new ParseHttpRequest.Builder()
+                        .setUrl(url)
+                        .addHeader(name, value)
+                        .setMethod(method)
+                        .setBody(body)
+                        .build();
 
         ParseHttpRequest requestAgain = new ParseHttpRequest.Builder(request).build();
 
@@ -95,17 +95,16 @@ public class ParseHttpRequestTest {
         String contentType = "application/json";
         ParseByteArrayHttpBody body = new ParseByteArrayHttpBody(content, contentType);
 
-        ParseHttpRequest request = new ParseHttpRequest.Builder()
-                .setUrl(url)
-                .addHeader(name, value)
-                .setMethod(method)
-                .setBody(body)
-                .build();
+        ParseHttpRequest request =
+                new ParseHttpRequest.Builder()
+                        .setUrl(url)
+                        .addHeader(name, value)
+                        .setMethod(method)
+                        .setBody(body)
+                        .build();
 
         String newURL = "www.api.parse.com";
-        ParseHttpRequest newRequest = new ParseHttpRequest.Builder(request)
-                .setUrl(newURL)
-                .build();
+        ParseHttpRequest newRequest = new ParseHttpRequest.Builder(request).setUrl(newURL).build();
 
         assertEquals(newURL, newRequest.getUrl());
         assertEquals(method.toString(), newRequest.getMethod().toString());

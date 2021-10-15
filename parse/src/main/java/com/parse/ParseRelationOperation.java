@@ -9,22 +9,18 @@
 package com.parse;
 
 import android.os.Parcel;
-
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-/**
- * An operation where a ParseRelation's value is modified.
- */
+/** An operation where a ParseRelation's value is modified. */
 class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperation {
-    /* package */ final static String OP_NAME_ADD = "AddRelation";
-    /* package */ final static String OP_NAME_REMOVE = "RemoveRelation";
-    /* package */ final static String OP_NAME_BATCH = "Batch";
+    /* package */ static final String OP_NAME_ADD = "AddRelation";
+    /* package */ static final String OP_NAME_REMOVE = "RemoveRelation";
+    /* package */ static final String OP_NAME_BATCH = "Batch";
 
     // The className of the target objects.
     private final String targetClass;
@@ -70,13 +66,16 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
         }
 
         if (targetClass == null) {
-            throw new IllegalArgumentException("Cannot create a ParseRelationOperation with no objects.");
+            throw new IllegalArgumentException(
+                    "Cannot create a ParseRelationOperation with no objects.");
         }
         this.targetClass = targetClass;
     }
 
-    private ParseRelationOperation(String newTargetClass, Set<ParseObject> newRelationsToAdd,
-                                   Set<ParseObject> newRelationsToRemove) {
+    private ParseRelationOperation(
+            String newTargetClass,
+            Set<ParseObject> newRelationsToAdd,
+            Set<ParseObject> newRelationsToRemove) {
         targetClass = newTargetClass;
         relationsToAdd = new HashSet<>(newRelationsToAdd);
         relationsToRemove = new HashSet<>(newRelationsToRemove);
@@ -188,13 +187,15 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
             return removes;
         }
 
-        throw new IllegalArgumentException("A ParseRelationOperation was created without any data.");
+        throw new IllegalArgumentException(
+                "A ParseRelationOperation was created without any data.");
     }
 
     @Override
     public void encode(Parcel dest, ParseParcelEncoder parcelableEncoder) {
         if (relationsToAdd.isEmpty() && relationsToRemove.isEmpty()) {
-            throw new IllegalArgumentException("A ParseRelationOperation was created without any data.");
+            throw new IllegalArgumentException(
+                    "A ParseRelationOperation was created without any data.");
         }
         if (relationsToAdd.size() > 0 && relationsToRemove.size() > 0) {
             dest.writeString(OP_NAME_BATCH);
@@ -229,12 +230,17 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
 
             if (previousOperation.targetClass != null
                     && !previousOperation.targetClass.equals(targetClass)) {
-                throw new IllegalArgumentException("Related object object must be of class "
-                        + previousOperation.targetClass + ", but " + targetClass + " was passed in.");
+                throw new IllegalArgumentException(
+                        "Related object object must be of class "
+                                + previousOperation.targetClass
+                                + ", but "
+                                + targetClass
+                                + " was passed in.");
             }
 
             Set<ParseObject> newRelationsToAdd = new HashSet<>(previousOperation.relationsToAdd);
-            Set<ParseObject> newRelationsToRemove = new HashSet<>(previousOperation.relationsToRemove);
+            Set<ParseObject> newRelationsToRemove =
+                    new HashSet<>(previousOperation.relationsToRemove);
             if (relationsToAdd != null) {
                 addAllParseObjectsToSet(relationsToAdd, newRelationsToAdd);
                 removeAllParseObjectsFromSet(relationsToAdd, newRelationsToRemove);
@@ -243,7 +249,8 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
                 removeAllParseObjectsFromSet(relationsToRemove, newRelationsToAdd);
                 addAllParseObjectsToSet(relationsToRemove, newRelationsToRemove);
             }
-            return new ParseRelationOperation<T>(targetClass, newRelationsToAdd, newRelationsToRemove);
+            return new ParseRelationOperation<T>(
+                    targetClass, newRelationsToAdd, newRelationsToRemove);
 
         } else {
             throw new IllegalArgumentException("Operation is invalid after previous operation.");
@@ -261,8 +268,12 @@ class ParseRelationOperation<T extends ParseObject> implements ParseFieldOperati
         } else if (oldValue instanceof ParseRelation) {
             relation = (ParseRelation<T>) oldValue;
             if (targetClass != null && !targetClass.equals(relation.getTargetClass())) {
-                throw new IllegalArgumentException("Related object object must be of class "
-                        + relation.getTargetClass() + ", but " + targetClass + " was passed in.");
+                throw new IllegalArgumentException(
+                        "Related object object must be of class "
+                                + relation.getTargetClass()
+                                + ", but "
+                                + targetClass
+                                + " was passed in.");
             }
         } else {
             throw new IllegalArgumentException("Operation is invalid after previous operation.");

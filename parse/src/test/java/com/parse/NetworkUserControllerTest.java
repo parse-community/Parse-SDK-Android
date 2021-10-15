@@ -12,6 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -19,11 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 // For Uri.encode
 @RunWith(RobolectricTestRunner.class)
@@ -39,35 +38,37 @@ public class NetworkUserControllerTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testSignUpAsync
+    // region testSignUpAsync
 
     @Test
     public void testSignUpAsync() throws Exception {
         // Make mock response and client
         JSONObject mockResponse = generateBasicMockResponse();
         ParseHttpClient restClient =
-                ParseTestUtils.mockParseHttpClientWithResponse(generateBasicMockResponse(), 200, "OK");
+                ParseTestUtils.mockParseHttpClientWithResponse(
+                        generateBasicMockResponse(), 200, "OK");
         // Make test user state and operationSet
-        ParseUser.State state = new ParseUser.State.Builder()
-                .put("username", "testUserName")
-                .put("password", "testPassword")
-                .build();
+        ParseUser.State state =
+                new ParseUser.State.Builder()
+                        .put("username", "testUserName")
+                        .put("password", "testPassword")
+                        .build();
         ParseOperationSet operationSet = new ParseOperationSet();
         operationSet.put("username", new ParseSetOperation("testUserName"));
         operationSet.put("password", new ParseSetOperation("testPassword"));
 
         NetworkUserController controller = new NetworkUserController(restClient, true);
-        ParseUser.State newState = ParseTaskUtils.wait(
-                controller.signUpAsync(state, operationSet, "sessionToken"));
+        ParseUser.State newState =
+                ParseTaskUtils.wait(controller.signUpAsync(state, operationSet, "sessionToken"));
 
         verifyBasicUserState(mockResponse, newState);
         assertFalse(newState.isComplete());
         assertTrue(newState.isNew());
     }
 
-    //endregion
+    // endregion
 
-    //region testLoginAsync
+    // region testLoginAsync
 
     @Test
     public void testLoginAsyncWithUserNameAndPassword() throws Exception {
@@ -77,7 +78,8 @@ public class NetworkUserControllerTest {
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
 
         NetworkUserController controller = new NetworkUserController(restClient);
-        ParseUser.State newState = ParseTaskUtils.wait(controller.logInAsync("userName", "password"));
+        ParseUser.State newState =
+                ParseTaskUtils.wait(controller.logInAsync("userName", "password"));
 
         // Verify user state
         verifyBasicUserState(mockResponse, newState);
@@ -93,10 +95,11 @@ public class NetworkUserControllerTest {
         ParseHttpClient restClient =
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 201, "OK");
         // Make test user state and operationSet
-        ParseUser.State state = new ParseUser.State.Builder()
-                .put("username", "testUserName")
-                .put("password", "testPassword")
-                .build();
+        ParseUser.State state =
+                new ParseUser.State.Builder()
+                        .put("username", "testUserName")
+                        .put("password", "testPassword")
+                        .build();
         ParseOperationSet operationSet = new ParseOperationSet();
         operationSet.put("username", new ParseSetOperation("testUserName"));
         operationSet.put("password", new ParseSetOperation("testPassword"));
@@ -118,10 +121,11 @@ public class NetworkUserControllerTest {
         ParseHttpClient restClient =
                 ParseTestUtils.mockParseHttpClientWithResponse(mockResponse, 200, "OK");
         // Make test user state and operationSet
-        ParseUser.State state = new ParseUser.State.Builder()
-                .put("username", "testUserName")
-                .put("password", "testPassword")
-                .build();
+        ParseUser.State state =
+                new ParseUser.State.Builder()
+                        .put("username", "testUserName")
+                        .put("password", "testPassword")
+                        .build();
         ParseOperationSet operationSet = new ParseOperationSet();
         operationSet.put("username", new ParseSetOperation("testUserName"));
         operationSet.put("password", new ParseSetOperation("testPassword"));
@@ -148,8 +152,8 @@ public class NetworkUserControllerTest {
         facebookAuthInfoMap.put("token", "test");
 
         NetworkUserController controller = new NetworkUserController(restClient, true);
-        ParseUser.State newState = ParseTaskUtils.wait(
-                controller.logInAsync("facebook", facebookAuthInfoMap));
+        ParseUser.State newState =
+                ParseTaskUtils.wait(controller.logInAsync("facebook", facebookAuthInfoMap));
 
         // Verify user state
         verifyBasicUserState(mockResponse, newState);
@@ -170,8 +174,8 @@ public class NetworkUserControllerTest {
         facebookAuthInfoMap.put("token", "test");
 
         NetworkUserController controller = new NetworkUserController(restClient, true);
-        ParseUser.State newState = ParseTaskUtils.wait(
-                controller.logInAsync("facebook", facebookAuthInfoMap));
+        ParseUser.State newState =
+                ParseTaskUtils.wait(controller.logInAsync("facebook", facebookAuthInfoMap));
 
         // Verify user state
         verifyBasicUserState(mockResponse, newState);
@@ -180,9 +184,9 @@ public class NetworkUserControllerTest {
         assertTrue(newState.isComplete());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetUserAsync
+    // region testGetUserAsync
 
     @Test
     public void testGetUserAsync() throws Exception {
@@ -201,9 +205,9 @@ public class NetworkUserControllerTest {
         assertFalse(newState.isNew());
     }
 
-    //endregion
+    // endregion
 
-    //region testRequestPasswordResetAsync
+    // region testRequestPasswordResetAsync
 
     @Test
     public void testRequestPasswordResetAsync() throws Exception {
@@ -216,7 +220,7 @@ public class NetworkUserControllerTest {
         ParseTaskUtils.wait(controller.requestPasswordResetAsync("sessionToken"));
     }
 
-    //endregion
+    // endregion
 
     private JSONObject generateBasicMockResponse() throws JSONException {
         JSONObject mockResponse = new JSONObject();

@@ -9,7 +9,6 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
 import java.util.List;
 
 interface ParseObjectController {

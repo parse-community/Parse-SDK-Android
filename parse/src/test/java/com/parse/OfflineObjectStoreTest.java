@@ -23,7 +23,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
-
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,16 +32,11 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 public class OfflineObjectStoreTest {
 
     private static final String PIN_NAME = "test";
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() {
@@ -72,7 +68,7 @@ public class OfflineObjectStoreTest {
         verify(user, times(1)).pinInBackground(PIN_NAME, false);
     }
 
-    //region getAsync
+    // region getAsync
 
     @Test
     public void testGetAsyncFromLDS() throws Exception {
@@ -81,10 +77,8 @@ public class OfflineObjectStoreTest {
         ParseQueryController queryController = mock(ParseQueryController.class);
         //noinspection unchecked
         when(queryController.findAsync(
-                any(ParseQuery.State.class),
-                nullable(ParseUser.class),
-                any(Task.class))
-        ).thenReturn(Task.forResult(Collections.singletonList(user)));
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class)))
+                .thenReturn(Task.forResult(Collections.singletonList(user)));
         ParseCorePlugins.getInstance().registerQueryController(queryController);
 
         OfflineObjectStore<ParseUser> store =
@@ -103,10 +97,10 @@ public class OfflineObjectStoreTest {
         ParseQueryController queryController = mock(ParseQueryController.class);
         //noinspection unchecked
         when(queryController.findAsync(
-                any(ParseQuery.State.class),
-                nullable(ParseUser.class),
-                any(Task.class))
-        ).thenReturn(Task.forResult(Arrays.asList(mock(ParseUser.class), mock(ParseUser.class))));
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class)))
+                .thenReturn(
+                        Task.forResult(
+                                Arrays.asList(mock(ParseUser.class), mock(ParseUser.class))));
         ParseCorePlugins.getInstance().registerQueryController(queryController);
         OfflineStore lds = mock(OfflineStore.class);
         when(lds.unpinAllObjectsAsync(anyString())).thenReturn(Task.<Void>forResult(null));
@@ -133,10 +127,8 @@ public class OfflineObjectStoreTest {
         ParseQueryController queryController = mock(ParseQueryController.class);
         //noinspection unchecked
         when(queryController.findAsync(
-                any(ParseQuery.State.class),
-                nullable(ParseUser.class),
-                any(Task.class))
-        ).thenReturn(Task.forResult(null));
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class)))
+                .thenReturn(Task.forResult(null));
         ParseCorePlugins.getInstance().registerQueryController(queryController);
         OfflineStore lds = mock(OfflineStore.class);
         when(lds.pinAllObjectsAsync(anyString(), anyList(), anyBoolean()))
@@ -147,7 +139,8 @@ public class OfflineObjectStoreTest {
         Parse.setLocalDatastore(lds);
 
         ParseUser user = mock(ParseUser.class);
-        when(user.pinInBackground(anyString(), anyBoolean())).thenReturn(Task.<Void>forResult(null));
+        when(user.pinInBackground(anyString(), anyBoolean()))
+                .thenReturn(Task.<Void>forResult(null));
         @SuppressWarnings("unchecked")
         ParseObjectStore<ParseUser> legacy = mock(ParseObjectStore.class);
         when(legacy.getAsync()).thenReturn(Task.forResult(user));
@@ -168,9 +161,9 @@ public class OfflineObjectStoreTest {
         assertSame(user, userAgain);
     }
 
-    //endregion
+    // endregion
 
-    //region existsAsync
+    // region existsAsync
 
     @Test
     public void testExistsAsyncLDS() throws Exception {
@@ -178,18 +171,17 @@ public class OfflineObjectStoreTest {
         ParseQueryController queryController = mock(ParseQueryController.class);
         //noinspection unchecked
         when(queryController.countAsync(
-                any(ParseQuery.State.class),
-                nullable(ParseUser.class),
-                any(Task.class))
-        ).thenReturn(Task.forResult(1));
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class)))
+                .thenReturn(Task.forResult(1));
         ParseCorePlugins.getInstance().registerQueryController(queryController);
 
         OfflineObjectStore<ParseUser> store =
                 new OfflineObjectStore<>(ParseUser.class, PIN_NAME, null);
         assertTrue(ParseTaskUtils.wait(store.existsAsync()));
         //noinspection unchecked
-        verify(queryController, times(1)).countAsync(
-                any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
+        verify(queryController, times(1))
+                .countAsync(
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
     }
 
     @Test
@@ -198,10 +190,8 @@ public class OfflineObjectStoreTest {
         ParseQueryController queryController = mock(ParseQueryController.class);
         //noinspection unchecked
         when(queryController.countAsync(
-                any(ParseQuery.State.class),
-                nullable(ParseUser.class),
-                any(Task.class))
-        ).thenReturn(Task.forResult(0));
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class)))
+                .thenReturn(Task.forResult(0));
         ParseCorePlugins.getInstance().registerQueryController(queryController);
 
         @SuppressWarnings("unchecked")
@@ -213,13 +203,14 @@ public class OfflineObjectStoreTest {
 
         assertTrue(ParseTaskUtils.wait(store.existsAsync()));
         //noinspection unchecked
-        verify(queryController, times(1)).countAsync(
-                any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
+        verify(queryController, times(1))
+                .countAsync(
+                        any(ParseQuery.State.class), nullable(ParseUser.class), any(Task.class));
     }
 
-    //endregion
+    // endregion
 
-    //region deleteAsync
+    // region deleteAsync
 
     @Test
     public void testDeleteAsync() throws Exception {
@@ -258,6 +249,5 @@ public class OfflineObjectStoreTest {
         verify(legacy, times(1)).deleteAsync();
     }
 
-    //endregion
+    // endregion
 }
-

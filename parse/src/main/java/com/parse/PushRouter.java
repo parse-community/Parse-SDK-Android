@@ -11,23 +11,21 @@ package com.parse;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * PushRouter handles distribution of push payloads through a broadcast intent with the
  * "com.parse.push.intent.RECEIVE" action. It also serializes a history of the last several pushes
  * seen by this app. This history is necessary for two reasons:
- * <p>
- * - For PPNS, we provide the last-seen timestamp to the server as part of the handshake. This is
- * used as a cursor into the server-side inbox of recent pushes for this client.
- * - For GCM, we use the history to deduplicate pushes when GCM decides to change the canonical
- * registration id for a client (which can result in duplicate pushes while both the old and
- * new registration id are still valid).
+ *
+ * <p>- For PPNS, we provide the last-seen timestamp to the server as part of the handshake. This is
+ * used as a cursor into the server-side inbox of recent pushes for this client. - For GCM, we use
+ * the history to deduplicate pushes when GCM decides to change the canonical registration id for a
+ * client (which can result in duplicate pushes while both the old and new registration id are still
+ * valid).
  */
 public class PushRouter {
     private static final String TAG = "com.parse.ParsePushRouter";
@@ -61,8 +59,7 @@ public class PushRouter {
     }
 
     /* package for tests */
-    static PushRouter pushRouterFromState(
-            File diskState, File oldDiskState, int maxHistoryLength) {
+    static PushRouter pushRouterFromState(File diskState, File oldDiskState, int maxHistoryLength) {
         JSONObject state = readJSONFileQuietly(diskState);
         JSONObject historyJSON = (state != null) ? state.optJSONObject("history") : null;
         PushHistory history = new PushHistory(maxHistoryLength, historyJSON);
@@ -106,15 +103,8 @@ public class PushRouter {
     /**
      * Returns the state in this object as a persistable JSONObject. The persisted state looks like
      * this:
-     * <p>
-     * {
-     * "history": {
-     * "seen": {
-     * "<message ID>": "<timestamp>",
-     * ...
-     * }
-     * "lastTime": "<timestamp>"
-     * }
+     *
+     * <p>{ "history": { "seen": { "<message ID>": "<timestamp>", ... } "lastTime": "<timestamp>" }
      * }
      */
     /* package */

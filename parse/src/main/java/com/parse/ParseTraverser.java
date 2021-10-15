@@ -8,14 +8,13 @@
  */
 package com.parse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Subclass ParseTraverser to make an function to be run recursively on every object pointed to on
@@ -28,9 +27,7 @@ abstract class ParseTraverser {
     // Whether to call visit with the object passed in.
     private boolean yieldRoot;
 
-    /**
-     * Creates a new ParseTraverser.
-     */
+    /** Creates a new ParseTraverser. */
     public ParseTraverser() {
         traverseParseObjects = false;
         yieldRoot = false;
@@ -43,10 +40,9 @@ abstract class ParseTraverser {
      */
     protected abstract boolean visit(Object object);
 
-    /**
-     * Internal implementation of traverse.
-     */
-    private void traverseInternal(Object root, boolean yieldRoot, IdentityHashMap<Object, Object> seen) {
+    /** Internal implementation of traverse. */
+    private void traverseInternal(
+            Object root, boolean yieldRoot, IdentityHashMap<Object, Object> seen) {
         if (root == null || seen.containsKey(root)) {
             return;
         }
@@ -132,9 +128,7 @@ abstract class ParseTraverser {
         return this;
     }
 
-    /**
-     * Causes the traverser to traverse all objects pointed to by root, recursively.
-     */
+    /** Causes the traverser to traverse all objects pointed to by root, recursively. */
     public void traverse(Object root) {
         IdentityHashMap<Object, Object> seen = new IdentityHashMap<>();
         traverseInternal(root, yieldRoot, seen);

@@ -11,6 +11,12 @@ package com.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,21 +24,13 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
 @RunWith(RobolectricTestRunner.class)
 public class ParseFileUtilsTest {
 
     private static final String TEST_STRING = "this is a test string";
     private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testReadFileToString() throws Exception {

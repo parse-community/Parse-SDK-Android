@@ -15,7 +15,6 @@ import android.content.IntentFilter;
 import android.content.ReceiverCallNotAllowedException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -67,13 +66,17 @@ class ConnectivityNotifier extends BroadcastReceiver {
                     return false;
                 }
                 context = context.getApplicationContext();
-                context.registerReceiver(this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+                context.registerReceiver(
+                        this, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
                 hasRegisteredReceiver = true;
                 return true;
             } catch (ReceiverCallNotAllowedException e) {
-                // In practice, this only happens with the push service, which will trigger a retry soon afterwards.
-                PLog.v(TAG, "Cannot register a broadcast receiver because the executing " +
-                        "thread is currently in a broadcast receiver. Will try again later.");
+                // In practice, this only happens with the push service, which will trigger a retry
+                // soon afterwards.
+                PLog.v(
+                        TAG,
+                        "Cannot register a broadcast receiver because the executing "
+                                + "thread is currently in a broadcast receiver. Will try again later.");
                 return false;
             }
         }

@@ -12,22 +12,21 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ParseFileHttpBodyTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    // Generate a test file used for create ParseFileHttpBody, if you change file's content, make sure
+    // Generate a test file used for create ParseFileHttpBody, if you change file's content, make
+    // sure
     // you also change the test file content in verifyTestFileContent().
     private static File makeTestFile(File root) throws IOException {
         File file = new File(root, "test");

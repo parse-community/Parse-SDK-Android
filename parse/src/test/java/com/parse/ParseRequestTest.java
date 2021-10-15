@@ -21,7 +21,11 @@ import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,18 +34,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-
 public class ParseRequestTest {
 
     private static byte[] data;
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @BeforeClass
     public static void setUpClass() {
@@ -59,7 +56,8 @@ public class ParseRequestTest {
         boolean incrementalPercentage = false;
         for (int percentDone : callback.history) {
             assertTrue("Progress went backwards", percentDone >= lastPercentDone);
-            assertTrue("Invalid percentDone: " + percentDone, percentDone >= 0 && percentDone <= 100);
+            assertTrue(
+                    "Invalid percentDone: " + percentDone, percentDone >= 0 && percentDone <= 100);
 
             if (percentDone > 0 || percentDone < 100) {
                 incrementalPercentage = true;
@@ -67,7 +65,9 @@ public class ParseRequestTest {
 
             lastPercentDone = percentDone;
         }
-        assertTrue("ProgressCallback was not called with a value between 0 and 100: " + callback.history,
+        assertTrue(
+                "ProgressCallback was not called with a value between 0 and 100: "
+                        + callback.history,
                 incrementalPercentage);
         assertEquals(100, callback.history.get(callback.history.size() - 1).intValue());
     }
@@ -87,7 +87,8 @@ public class ParseRequestTest {
         ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
         when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenThrow(new IOException());
 
-        TestParseRequest request = new TestParseRequest(ParseHttpRequest.Method.GET, "http://parse.com");
+        TestParseRequest request =
+                new TestParseRequest(ParseHttpRequest.Method.GET, "http://parse.com");
         Task<String> task = request.executeAsync(mockHttpClient);
         task.waitForCompletion();
 
@@ -97,11 +98,12 @@ public class ParseRequestTest {
     // TODO(grantland): Move to ParseFileRequestTest or ParseCountingByteArrayHttpBodyTest
     @Test
     public void testDownloadProgress() throws Exception {
-        ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
-                .setStatusCode(200)
-                .setTotalSize((long) data.length)
-                .setContent(new ByteArrayInputStream(data))
-                .build();
+        ParseHttpResponse mockResponse =
+                new ParseHttpResponse.Builder()
+                        .setStatusCode(200)
+                        .setTotalSize((long) data.length)
+                        .setContent(new ByteArrayInputStream(data))
+                        .build();
 
         ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
         when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);

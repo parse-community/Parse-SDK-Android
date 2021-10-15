@@ -10,28 +10,18 @@ package com.parse;
 
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * Properties
- * - time
- * Used for sort order when querying for all EventuallyPins
- * - type
- * TYPE_SAVE or TYPE_DELETE
- * - object
- * The object that the operation should notify when complete
- * - operationSetUUID
- * The operationSet to be completed
- * - sessionToken
- * The user that instantiated the operation
+ * Properties - time Used for sort order when querying for all EventuallyPins - type TYPE_SAVE or
+ * TYPE_DELETE - object The object that the operation should notify when complete - operationSetUUID
+ * The operationSet to be completed - sessionToken The user that instantiated the operation
  */
 @ParseClassName("_EventuallyPin")
 class EventuallyPin extends ParseObject {
@@ -46,13 +36,13 @@ class EventuallyPin extends ParseObject {
         super("_EventuallyPin");
     }
 
-    public static Task<EventuallyPin> pinEventuallyCommand(ParseObject object,
-                                                           ParseRESTCommand command) {
+    public static Task<EventuallyPin> pinEventuallyCommand(
+            ParseObject object, ParseRESTCommand command) {
         int type = TYPE_COMMAND;
         JSONObject json = null;
         if (command.httpPath.startsWith("classes")) {
-            if (command.method == ParseHttpRequest.Method.POST ||
-                    command.method == ParseHttpRequest.Method.PUT) {
+            if (command.method == ParseHttpRequest.Method.POST
+                    || command.method == ParseHttpRequest.Method.PUT) {
                 type = TYPE_SAVE;
             } else if (command.method == ParseHttpRequest.Method.DELETE) {
                 type = TYPE_DELETE;
@@ -61,25 +51,26 @@ class EventuallyPin extends ParseObject {
             json = command.toJSONObject();
         }
         return pinEventuallyCommand(
-                type,
-                object,
-                command.getOperationSetUUID(),
-                command.getSessionToken(),
-                json);
+                type, object, command.getOperationSetUUID(), command.getSessionToken(), json);
     }
 
     /**
-     * @param type             Type of the command: TYPE_SAVE, TYPE_DELETE, TYPE_COMMAND
-     * @param obj              (Optional) Object the operation is being executed on. Required for TYPE_SAVE and
-     *                         TYPE_DELETE.
-     * @param operationSetUUID (Optional) UUID of the ParseOperationSet that is paired with the ParseCommand.
-     *                         Required for TYPE_SAVE and TYPE_DELETE.
-     * @param sessionToken     (Optional) The sessionToken for the command. Required for TYPE_SAVE and TYPE_DELETE.
-     * @param command          (Optional) JSON representation of the ParseCommand. Required for TYPE_COMMAND.
+     * @param type Type of the command: TYPE_SAVE, TYPE_DELETE, TYPE_COMMAND
+     * @param obj (Optional) Object the operation is being executed on. Required for TYPE_SAVE and
+     *     TYPE_DELETE.
+     * @param operationSetUUID (Optional) UUID of the ParseOperationSet that is paired with the
+     *     ParseCommand. Required for TYPE_SAVE and TYPE_DELETE.
+     * @param sessionToken (Optional) The sessionToken for the command. Required for TYPE_SAVE and
+     *     TYPE_DELETE.
+     * @param command (Optional) JSON representation of the ParseCommand. Required for TYPE_COMMAND.
      * @return Returns a task that is resolved when the command is pinned.
      */
-    private static Task<EventuallyPin> pinEventuallyCommand(int type, ParseObject obj,
-                                                            String operationSetUUID, String sessionToken, JSONObject command) {
+    private static Task<EventuallyPin> pinEventuallyCommand(
+            int type,
+            ParseObject obj,
+            String operationSetUUID,
+            String sessionToken,
+            JSONObject command) {
         final EventuallyPin pin = new EventuallyPin();
         pin.put("uuid", UUID.randomUUID().toString());
         pin.put("time", new Date());
@@ -104,10 +95,11 @@ class EventuallyPin extends ParseObject {
     }
 
     public static Task<List<EventuallyPin>> findAllPinned(Collection<String> excludeUUIDs) {
-        ParseQuery<EventuallyPin> query = new ParseQuery<>(EventuallyPin.class)
-                .fromPin(PIN_NAME)
-                .ignoreACLs()
-                .orderByAscending("time");
+        ParseQuery<EventuallyPin> query =
+                new ParseQuery<>(EventuallyPin.class)
+                        .fromPin(PIN_NAME)
+                        .ignoreACLs()
+                        .orderByAscending("time");
 
         if (excludeUUIDs != null) {
             query.whereNotContainedIn("uuid", excludeUUIDs);
@@ -115,19 +107,22 @@ class EventuallyPin extends ParseObject {
 
         // We need pass in a null user because we don't want the query to fetch the current user
         // from LDS.
-        return query.findInBackground().onSuccessTask(task -> {
-            final List<EventuallyPin> pins = task.getResult();
-            List<Task<Void>> tasks = new ArrayList<>();
+        return query.findInBackground()
+                .onSuccessTask(
+                        task -> {
+                            final List<EventuallyPin> pins = task.getResult();
+                            List<Task<Void>> tasks = new ArrayList<>();
 
-            for (EventuallyPin pin : pins) {
-                ParseObject object = pin.getObject();
-                if (object != null) {
-                    tasks.add(object.fetchFromLocalDatastoreAsync().makeVoid());
-                }
-            }
+                            for (EventuallyPin pin : pins) {
+                                ParseObject object = pin.getObject();
+                                if (object != null) {
+                                    tasks.add(object.fetchFromLocalDatastoreAsync().makeVoid());
+                                }
+                            }
 
-            return Task.whenAll(tasks).continueWithTask(task1 -> Task.forResult(pins));
-        });
+                            return Task.whenAll(tasks)
+                                    .continueWithTask(task1 -> Task.forResult(pins));
+                        });
     }
 
     @Override

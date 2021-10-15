@@ -12,9 +12,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import java.util.concurrent.CancellationException;
+import org.junit.Test;
 
 public class CancellationTest {
 
@@ -91,8 +90,10 @@ public class CancellationTest {
         try {
             token.throwIfCancellationRequested();
         } catch (CancellationException e) {
-            fail("Token has not been cancelled yet, " + CancellationException.class.getSimpleName()
-                    + " should not be thrown");
+            fail(
+                    "Token has not been cancelled yet, "
+                            + CancellationException.class.getSimpleName()
+                            + " should not be thrown");
         }
 
         cts.cancel();
@@ -156,9 +157,10 @@ public class CancellationTest {
         CancellationTokenSource cts = new CancellationTokenSource();
         CancellationToken token = cts.getToken();
 
-        token.register(() -> {
-            // Do nothing
-        });
+        token.register(
+                () -> {
+                    // Do nothing
+                });
 
         cts.close();
     }

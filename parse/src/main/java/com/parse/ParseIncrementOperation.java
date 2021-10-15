@@ -9,15 +9,12 @@
 package com.parse;
 
 import android.os.Parcel;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * An operation that increases a numeric field's value by a given amount.
- */
+/** An operation that increases a numeric field's value by a given amount. */
 class ParseIncrementOperation implements ParseFieldOperation {
-    /* package */ final static String OP_NAME = "Increment";
+    /* package */ static final String OP_NAME = "Increment";
 
     private final Number amount;
 

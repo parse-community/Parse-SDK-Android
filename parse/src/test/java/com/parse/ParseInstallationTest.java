@@ -24,19 +24,16 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-
 import com.parse.boltsinternal.Task;
-
+import java.util.Collections;
+import java.util.Locale;
+import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-
-import java.util.Collections;
-import java.util.Locale;
-import java.util.TimeZone;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseInstallationTest extends ResetPluginsParseTest {
@@ -87,17 +84,17 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
     @Test
     public void testImmutableKeys() {
         String[] immutableKeys = {
-                "installationId",
-                "deviceType",
-                "appName",
-                "appIdentifier",
-                "parseVersion",
-                "deviceToken",
-                "deviceTokenLastModified",
-                "pushType",
-                "timeZone",
-                "localeIdentifier",
-                "appVersion"
+            "installationId",
+            "deviceType",
+            "appName",
+            "appIdentifier",
+            "parseVersion",
+            "deviceToken",
+            "deviceTokenLastModified",
+            "pushType",
+            "timeZone",
+            "localeIdentifier",
+            "appVersion"
         };
 
         ParseInstallation installation = new ParseInstallation();
@@ -147,29 +144,30 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
 
         ParseObjectController objController = mock(ParseObjectController.class);
         // mock return task when Installation was deleted on the server
-        Task<ParseObject.State> taskError = Task.forError(new ParseException(ParseException.MISSING_REQUIRED_FIELD_ERROR, ""));
+        Task<ParseObject.State> taskError =
+                Task.forError(new ParseException(ParseException.MISSING_REQUIRED_FIELD_ERROR, ""));
         // mock return task when Installation was re-saved to the server
         Task<ParseObject.State> task = Task.forResult(null);
         when(objController.saveAsync(
-                any(ParseObject.State.class),
-                any(ParseOperationSet.class),
-                eq(sessionToken),
-                any(ParseDecoder.class)))
+                        any(ParseObject.State.class),
+                        any(ParseOperationSet.class),
+                        eq(sessionToken),
+                        any(ParseDecoder.class)))
                 .thenReturn(taskError)
                 .thenReturn(task);
-        ParseCorePlugins.getInstance()
-                .registerObjectController(objController);
+        ParseCorePlugins.getInstance().registerObjectController(objController);
 
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         assertNotNull(installation);
         installation.put("key", "value");
         ParseTaskUtils.wait(installation.saveAsync(sessionToken, toAwait));
         verify(controller).getAsync();
-        verify(objController, times(2)).saveAsync(
-                any(ParseObject.State.class),
-                any(ParseOperationSet.class),
-                eq(sessionToken),
-                any(ParseDecoder.class));
+        verify(objController, times(2))
+                .saveAsync(
+                        any(ParseObject.State.class),
+                        any(ParseOperationSet.class),
+                        eq(sessionToken),
+                        any(ParseDecoder.class));
     }
 
     @Test
@@ -183,23 +181,24 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         ParseCurrentInstallationController controller = mockCurrentInstallationController();
         ParseObjectController objController = mock(ParseObjectController.class);
         // mock return task when Installation was deleted on the server
-        Task<ParseObject.State> taskError = Task.forError(new ParseException(ParseException.OBJECT_NOT_FOUND, ""));
+        Task<ParseObject.State> taskError =
+                Task.forError(new ParseException(ParseException.OBJECT_NOT_FOUND, ""));
         // mock return task when Installation was re-saved to the server
         Task<ParseObject.State> task = Task.forResult(null);
         when(objController.saveAsync(
-                any(ParseObject.State.class),
-                any(ParseOperationSet.class),
-                eq(sessionToken),
-                any(ParseDecoder.class)))
+                        any(ParseObject.State.class),
+                        any(ParseOperationSet.class),
+                        eq(sessionToken),
+                        any(ParseDecoder.class)))
                 .thenReturn(taskError)
                 .thenReturn(task);
-        ParseCorePlugins.getInstance()
-                .registerObjectController(objController);
+        ParseCorePlugins.getInstance().registerObjectController(objController);
 
-        ParseObject.State state = new ParseObject.State.Builder("_Installation")
-                .objectId("oldId")
-                .put("deviceToken", "deviceToken")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("_Installation")
+                        .objectId("oldId")
+                        .put("deviceToken", "deviceToken")
+                        .build();
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
         assertNotNull(installation);
         installation.setState(state);
@@ -207,11 +206,12 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         ParseTaskUtils.wait(installation.saveAsync(sessionToken, toAwait));
 
         verify(controller).getAsync();
-        verify(objController, times(2)).saveAsync(
-                any(ParseObject.State.class),
-                any(ParseOperationSet.class),
-                eq(sessionToken),
-                any(ParseDecoder.class));
+        verify(objController, times(2))
+                .saveAsync(
+                        any(ParseObject.State.class),
+                        any(ParseOperationSet.class),
+                        eq(sessionToken),
+                        any(ParseDecoder.class));
         Parse.setLocalDatastore(null);
     }
 
@@ -220,12 +220,12 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         // Mock currentInstallationController to make setAsync work
         ParseCurrentInstallationController controller =
                 mock(ParseCurrentInstallationController.class);
-        when(controller.setAsync(any(ParseInstallation.class))).thenReturn(Task.<Void>forResult(null));
+        when(controller.setAsync(any(ParseInstallation.class)))
+                .thenReturn(Task.<Void>forResult(null));
         ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
         // Mock return state
-        ParseInstallation.State state = new ParseInstallation.State.Builder("_Installation")
-                .put("key", "value")
-                .build();
+        ParseInstallation.State state =
+                new ParseInstallation.State.Builder("_Installation").put("key", "value").build();
 
         ParseInstallation installation = new ParseInstallation();
         installation.put("keyAgain", "valueAgain");
@@ -244,13 +244,15 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         // Mock currentInstallationController to make setAsync work
         ParseCurrentInstallationController controller =
                 mock(ParseCurrentInstallationController.class);
-        when(controller.setAsync(any(ParseInstallation.class))).thenReturn(Task.<Void>forResult(null));
+        when(controller.setAsync(any(ParseInstallation.class)))
+                .thenReturn(Task.<Void>forResult(null));
         ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
         // Mock return state
-        ParseInstallation.State state = new ParseInstallation.State.Builder("_Installation")
-                .put("key", "value")
-                .isComplete(true)
-                .build();
+        ParseInstallation.State state =
+                new ParseInstallation.State.Builder("_Installation")
+                        .put("key", "value")
+                        .isComplete(true)
+                        .build();
 
         ParseInstallation installation = new ParseInstallation();
         ParseTaskUtils.wait(installation.handleFetchResultAsync(state));
@@ -343,7 +345,6 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         verify(controller, times(1)).getAsync();
     }
 
-
     // TODO(mengyan): Add testFetchAsync, right now we can not test super methods inside
     // testFetchAsync
 
@@ -376,10 +377,8 @@ public class ParseInstallationTest extends ResetPluginsParseTest {
         ParseCurrentInstallationController controller =
                 mock(ParseCurrentInstallationController.class);
         ParseInstallation currentInstallation = new ParseInstallation();
-        when(controller.getAsync())
-                .thenReturn(Task.forResult(currentInstallation));
-        ParseCorePlugins.getInstance()
-                .registerCurrentInstallationController(controller);
+        when(controller.getAsync()).thenReturn(Task.forResult(currentInstallation));
+        ParseCorePlugins.getInstance().registerCurrentInstallationController(controller);
         return controller;
     }
 }

@@ -9,13 +9,11 @@
 package com.parse;
 
 import androidx.annotation.NonNull;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * PushHistory manages a fixed-length history of pushes received. It is used by to dedup recently
@@ -31,18 +29,13 @@ class PushHistory {
 
     /**
      * Creates a push history object from a JSON object that looks like this:
-     * <p>
-     * {
-     * "seen": {
-     * "push_id_1": "2013-11-01T22:01:00.000Z",
-     * "push_id_2": "2013-11-01T22:01:01.000Z",
-     * "push_id_3": "2013-11-01T22:01:02.000Z"
-     * },
-     * "lastTime": "2013-11-01T22:01:02.000Z"
-     * }
-     * <p>
-     * The "history" entries correspond to entries in the "entries" queue.
-     * The "lastTime" entry corresponds to the "lastTime" field.
+     *
+     * <p>{ "seen": { "push_id_1": "2013-11-01T22:01:00.000Z", "push_id_2":
+     * "2013-11-01T22:01:01.000Z", "push_id_3": "2013-11-01T22:01:02.000Z" }, "lastTime":
+     * "2013-11-01T22:01:02.000Z" }
+     *
+     * <p>The "history" entries correspond to entries in the "entries" queue. The "lastTime" entry
+     * corresponds to the "lastTime" field.
      */
     public PushHistory(int maxHistoryLength, JSONObject json) {
         this.maxHistoryLength = maxHistoryLength;
@@ -67,9 +60,7 @@ class PushHistory {
         }
     }
 
-    /**
-     * Serializes the history state to a JSON object using the format described in loadJSON().
-     */
+    /** Serializes the history state to a JSON object using the format described in loadJSON(). */
     public JSONObject toJSON() throws JSONException {
         JSONObject json = new JSONObject();
 
@@ -108,7 +99,8 @@ class PushHistory {
      */
     public boolean tryInsertPush(String pushId, String timestamp) {
         if (timestamp == null) {
-            throw new IllegalArgumentException("Can't insert null pushId or timestamp into history");
+            throw new IllegalArgumentException(
+                    "Can't insert null pushId or timestamp into history");
         }
 
         if (lastTime == null || timestamp.compareTo(lastTime) > 0) {
