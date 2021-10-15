@@ -52,6 +52,7 @@ async function config() {
     ci: true,
     tagFormat: '${version}',
     plugins: [
+      "gradle-semantic-release-plugin",
       ['@semantic-release/commit-analyzer', {
         preset: 'angular',
         releaseRules: [
@@ -79,7 +80,7 @@ async function config() {
         'changelogFile': changelogFile,
       }],
       ['@semantic-release/git', {
-        assets: [changelogFile],
+        assets: ["gradle.properties", changelogFile],
       }],
       ['@semantic-release/github', {
         successComment: getReleaseComment(),
