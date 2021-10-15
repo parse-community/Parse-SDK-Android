@@ -14,9 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
 
-/**
- * This is the currently used date format. It is precise to the millisecond.
- */
+/** This is the currently used date format. It is precise to the millisecond. */
 /* package */ class ParseDateFormat {
     private static final String TAG = "ParseDateFormat";
 

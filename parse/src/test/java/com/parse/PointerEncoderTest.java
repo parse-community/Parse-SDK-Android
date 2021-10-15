@@ -17,8 +17,7 @@ import org.junit.rules.ExpectedException;
 
 public class PointerEncoderTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testEncodeRelatedObjectWithoutObjectId() {

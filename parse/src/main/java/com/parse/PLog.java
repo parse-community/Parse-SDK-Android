@@ -11,9 +11,7 @@ package com.parse;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
-/**
- * Parse Logger. See {@link #setLogLevel(int)}
- */
+/** Parse Logger. See {@link #setLogLevel(int)} */
 @SuppressWarnings("WeakerAccess")
 public class PLog {
 
@@ -22,25 +20,24 @@ public class PLog {
 
     private static int logLevel = Integer.MAX_VALUE;
 
-    /**
-     * Returns the level of logging that will be displayed.
-     */
+    /** Returns the level of logging that will be displayed. */
     public static int getLogLevel() {
         return logLevel;
     }
 
     /**
-     * Sets the level of logging to display, where each level includes all those below it. The default
-     * level is {@link #LOG_LEVEL_NONE}. Please ensure this is set to {@link Log#ERROR}
-     * or {@link #LOG_LEVEL_NONE} before deploying your app to ensure no sensitive information is
+     * Sets the level of logging to display, where each level includes all those below it. The
+     * default level is {@link #LOG_LEVEL_NONE}. Please ensure this is set to {@link Log#ERROR} or
+     * {@link #LOG_LEVEL_NONE} before deploying your app to ensure no sensitive information is
      * logged. The levels are:
+     *
      * <ul>
-     * <li>{@link Log#VERBOSE}</li>
-     * <li>{@link Log#DEBUG}</li>
-     * <li>{@link Log#INFO}</li>
-     * <li>{@link Log#WARN}</li>
-     * <li>{@link Log#ERROR}</li>
-     * <li>{@link #LOG_LEVEL_NONE}</li>
+     *   <li>{@link Log#VERBOSE}
+     *   <li>{@link Log#DEBUG}
+     *   <li>{@link Log#INFO}
+     *   <li>{@link Log#WARN}
+     *   <li>{@link Log#ERROR}
+     *   <li>{@link #LOG_LEVEL_NONE}
      * </ul>
      *
      * @param logLevel The level of logcat logging that Parse should do.

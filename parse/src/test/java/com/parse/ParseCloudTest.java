@@ -27,18 +27,16 @@ import static org.robolectric.annotation.LooperMode.Mode.PAUSED;
 import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import com.parse.boltsinternal.Task;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.LooperMode;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.annotation.LooperMode;
 
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
@@ -51,7 +49,7 @@ public class ParseCloudTest extends ResetPluginsParseTest {
         ParseTestUtils.setTestParseUser();
     }
 
-    //region testGetCloudCodeController
+    // region testGetCloudCodeController
 
     @Test
     public void testGetCloudCodeController() {
@@ -61,9 +59,9 @@ public class ParseCloudTest extends ResetPluginsParseTest {
         assertSame(controller, ParseCloud.getCloudCodeController());
     }
 
-    //endregion
+    // endregion
 
-    //region testCallFunctions
+    // region testCallFunctions
 
     @Test
     public void testCallFunctionAsync() throws Exception {
@@ -76,8 +74,7 @@ public class ParseCloudTest extends ResetPluginsParseTest {
         Task cloudCodeTask = ParseCloud.callFunctionInBackground("name", parameters);
         ParseTaskUtils.wait(cloudCodeTask);
 
-        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-                isNull());
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters), isNull());
         assertTrue(cloudCodeTask.isCompleted());
         assertNull(cloudCodeTask.getError());
         assertThat(cloudCodeTask.getResult(), instanceOf(String.class));
@@ -94,8 +91,7 @@ public class ParseCloudTest extends ResetPluginsParseTest {
 
         Object result = ParseCloud.callFunction("name", parameters);
 
-        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-                isNull());
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters), isNull());
         assertThat(result, instanceOf(String.class));
         assertEquals("result", result);
     }
@@ -110,8 +106,7 @@ public class ParseCloudTest extends ResetPluginsParseTest {
 
         ParseCloud.callFunctionInBackground("name", parameters, null);
 
-        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-                isNull());
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters), isNull());
     }
 
     @Test
@@ -123,22 +118,24 @@ public class ParseCloudTest extends ResetPluginsParseTest {
         parameters.put("key2", "value1");
 
         final Semaphore done = new Semaphore(0);
-        ParseCloud.callFunctionInBackground("name", parameters, (result, e) -> {
-            assertNull(e);
-            assertThat(result, instanceOf(String.class));
-            assertEquals("result", result);
-            done.release();
-        });
+        ParseCloud.callFunctionInBackground(
+                "name",
+                parameters,
+                (result, e) -> {
+                    assertNull(e);
+                    assertThat(result, instanceOf(String.class));
+                    assertEquals("result", result);
+                    done.release();
+                });
 
         shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters),
-                isNull());
+        verify(controller, times(1)).callFunctionInBackground(eq("name"), eq(parameters), isNull());
     }
 
-    //endregion
+    // endregion
 
     private <T> ParseCloudCodeController mockParseCloudCodeControllerWithResponse(final T result) {
         ParseCloudCodeController controller = mock(ParseCloudCodeController.class);

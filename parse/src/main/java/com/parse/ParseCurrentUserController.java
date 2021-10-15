@@ -10,8 +10,7 @@ package com.parse;
 
 import com.parse.boltsinternal.Task;
 
-interface ParseCurrentUserController
-        extends ParseObjectCurrentController<ParseUser> {
+interface ParseCurrentUserController extends ParseObjectCurrentController<ParseUser> {
 
     /**
      * Gets the persisted current ParseUser.

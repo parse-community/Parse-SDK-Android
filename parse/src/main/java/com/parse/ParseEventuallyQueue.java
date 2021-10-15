@@ -9,16 +9,13 @@
 package com.parse;
 
 import android.util.SparseArray;
-
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /* package */ abstract class ParseEventuallyQueue {
 
@@ -50,9 +47,7 @@ import java.util.concurrent.TimeUnit;
         // do nothing
     }
 
-    /**
-     * See class TestHelper below.
-     */
+    /** See class TestHelper below. */
     public TestHelper getTestHelper() {
         if (testHelper == null) {
             testHelper = new TestHelper();
@@ -75,20 +70,19 @@ import java.util.concurrent.TimeUnit;
     public abstract void resume();
 
     /**
-     * Attempts to run the given command and any pending commands. Adds the command to the pending set
-     * if it can't be run yet.
+     * Attempts to run the given command and any pending commands. Adds the command to the pending
+     * set if it can't be run yet.
      *
      * @param command - The command to run.
-     * @param object  - If this command references an unsaved object, we need to remove any previous command
-     *                referencing that unsaved object. Otherwise, it will get created over and over again.
-     *                So object is a reference to the object, if it has no objectId. Otherwise, it can be
-     *                null.
+     * @param object - If this command references an unsaved object, we need to remove any previous
+     *     command referencing that unsaved object. Otherwise, it will get created over and over
+     *     again. So object is a reference to the object, if it has no objectId. Otherwise, it can
+     *     be null.
      */
-    public abstract Task<JSONObject> enqueueEventuallyAsync(ParseRESTCommand command,
-                                                            ParseObject object);
+    public abstract Task<JSONObject> enqueueEventuallyAsync(
+            ParseRESTCommand command, ParseObject object);
 
-    protected ParseRESTCommand commandFromJSON(JSONObject json)
-            throws JSONException {
+    protected ParseRESTCommand commandFromJSON(JSONObject json) throws JSONException {
         ParseRESTCommand command = null;
         if (ParseRESTCommand.isValidCommandJSONObject(json)) {
             command = ParseRESTCommand.fromJSONObject(json);
@@ -100,22 +94,20 @@ import java.util.concurrent.TimeUnit;
         return command;
     }
 
-    /* package */ Task<JSONObject> waitForOperationSetAndEventuallyPin(ParseOperationSet operationSet,
-                                                                       EventuallyPin eventuallyPin) {
+    /* package */ Task<JSONObject> waitForOperationSetAndEventuallyPin(
+            ParseOperationSet operationSet, EventuallyPin eventuallyPin) {
         return Task.forResult(null);
     }
 
     /* package */
     abstract void simulateReboot();
 
-    /**
-     * Gets rid of all pending commands.
-     */
+    /** Gets rid of all pending commands. */
     public abstract void clear();
 
     /**
-     * Fakes an object update notification for use in tests. This is used by saveEventually to make it
-     * look like test code has updated an object through the command cache even if it actually
+     * Fakes an object update notification for use in tests. This is used by saveEventually to make
+     * it look like test code has updated an object through the command cache even if it actually
      * avoided executing update by determining the object wasn't dirty.
      */
     void fakeObjectUpdate() {

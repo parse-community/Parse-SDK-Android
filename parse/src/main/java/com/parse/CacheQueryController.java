@@ -9,11 +9,9 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 
 class CacheQueryController extends AbstractQueryController {
 
@@ -29,17 +27,18 @@ class CacheQueryController extends AbstractQueryController {
             final ParseUser user,
             final Task<Void> cancellationToken) {
         final String sessionToken = user != null ? user.getSessionToken() : null;
-        CommandDelegate<List<T>> callbacks = new CommandDelegate<List<T>>() {
-            @Override
-            public Task<List<T>> runOnNetworkAsync() {
-                return networkController.findAsync(state, sessionToken, cancellationToken);
-            }
+        CommandDelegate<List<T>> callbacks =
+                new CommandDelegate<List<T>>() {
+                    @Override
+                    public Task<List<T>> runOnNetworkAsync() {
+                        return networkController.findAsync(state, sessionToken, cancellationToken);
+                    }
 
-            @Override
-            public Task<List<T>> runFromCacheAsync() {
-                return findFromCacheAsync(state, sessionToken);
-            }
-        };
+                    @Override
+                    public Task<List<T>> runFromCacheAsync() {
+                        return findFromCacheAsync(state, sessionToken);
+                    }
+                };
         return runCommandWithPolicyAsync(callbacks, state.cachePolicy());
     }
 
@@ -49,17 +48,18 @@ class CacheQueryController extends AbstractQueryController {
             final ParseUser user,
             final Task<Void> cancellationToken) {
         final String sessionToken = user != null ? user.getSessionToken() : null;
-        CommandDelegate<Integer> callbacks = new CommandDelegate<Integer>() {
-            @Override
-            public Task<Integer> runOnNetworkAsync() {
-                return networkController.countAsync(state, sessionToken, cancellationToken);
-            }
+        CommandDelegate<Integer> callbacks =
+                new CommandDelegate<Integer>() {
+                    @Override
+                    public Task<Integer> runOnNetworkAsync() {
+                        return networkController.countAsync(state, sessionToken, cancellationToken);
+                    }
 
-            @Override
-            public Task<Integer> runFromCacheAsync() {
-                return countFromCacheAsync(state, sessionToken);
-            }
-        };
+                    @Override
+                    public Task<Integer> runFromCacheAsync() {
+                        return countFromCacheAsync(state, sessionToken);
+                    }
+                };
         return runCommandWithPolicyAsync(callbacks, state.cachePolicy());
     }
 
@@ -68,23 +68,28 @@ class CacheQueryController extends AbstractQueryController {
      * identical to this one.
      *
      * @param sessionToken The user requesting access.
-     * @return A list of {@link ParseObject}s corresponding to this query. Returns null if there is no
-     * cache for this query.
+     * @return A list of {@link ParseObject}s corresponding to this query. Returns null if there is
+     *     no cache for this query.
      */
     private <T extends ParseObject> Task<List<T>> findFromCacheAsync(
             final ParseQuery.State<T> state, String sessionToken) {
-        final String cacheKey = ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey();
-        return Task.call(() -> {
-            JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
-            if (cached == null) {
-                throw new ParseException(ParseException.CACHE_MISS, "results not cached");
-            }
-            try {
-                return networkController.convertFindResponse(state, cached);
-            } catch (JSONException e) {
-                throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
-            }
-        }, Task.BACKGROUND_EXECUTOR);
+        final String cacheKey =
+                ParseRESTQueryCommand.findCommand(state, sessionToken).getCacheKey();
+        return Task.call(
+                () -> {
+                    JSONObject cached =
+                            ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
+                    if (cached == null) {
+                        throw new ParseException(ParseException.CACHE_MISS, "results not cached");
+                    }
+                    try {
+                        return networkController.convertFindResponse(state, cached);
+                    } catch (JSONException e) {
+                        throw new ParseException(
+                                ParseException.CACHE_MISS, "the cache contains corrupted json");
+                    }
+                },
+                Task.BACKGROUND_EXECUTOR);
     }
 
     /**
@@ -92,27 +97,32 @@ class CacheQueryController extends AbstractQueryController {
      * identical to this one.
      *
      * @param sessionToken The user requesting access.
-     * @return A list of {@link ParseObject}s corresponding to this query. Returns null if there is no
-     * cache for this query.
+     * @return A list of {@link ParseObject}s corresponding to this query. Returns null if there is
+     *     no cache for this query.
      */
     private <T extends ParseObject> Task<Integer> countFromCacheAsync(
             final ParseQuery.State<T> state, String sessionToken) {
-        final String cacheKey = ParseRESTQueryCommand.countCommand(state, sessionToken).getCacheKey();
-        return Task.call(() -> {
-            JSONObject cached = ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
-            if (cached == null) {
-                throw new ParseException(ParseException.CACHE_MISS, "results not cached");
-            }
-            try {
-                return cached.getInt("count");
-            } catch (JSONException e) {
-                throw new ParseException(ParseException.CACHE_MISS, "the cache contains corrupted json");
-            }
-        }, Task.BACKGROUND_EXECUTOR);
+        final String cacheKey =
+                ParseRESTQueryCommand.countCommand(state, sessionToken).getCacheKey();
+        return Task.call(
+                () -> {
+                    JSONObject cached =
+                            ParseKeyValueCache.jsonFromKeyValueCache(cacheKey, state.maxCacheAge());
+                    if (cached == null) {
+                        throw new ParseException(ParseException.CACHE_MISS, "results not cached");
+                    }
+                    try {
+                        return cached.getInt("count");
+                    } catch (JSONException e) {
+                        throw new ParseException(
+                                ParseException.CACHE_MISS, "the cache contains corrupted json");
+                    }
+                },
+                Task.BACKGROUND_EXECUTOR);
     }
 
-    private <TResult> Task<TResult> runCommandWithPolicyAsync(final CommandDelegate<TResult> c,
-                                                              ParseQuery.CachePolicy policy) {
+    private <TResult> Task<TResult> runCommandWithPolicyAsync(
+            final CommandDelegate<TResult> c, ParseQuery.CachePolicy policy) {
         switch (policy) {
             case IGNORE_CACHE:
             case NETWORK_ONLY:
@@ -120,23 +130,29 @@ class CacheQueryController extends AbstractQueryController {
             case CACHE_ONLY:
                 return c.runFromCacheAsync();
             case CACHE_ELSE_NETWORK:
-                return c.runFromCacheAsync().continueWithTask(task -> {
-                    if (task.getError() instanceof ParseException) {
-                        return c.runOnNetworkAsync();
-                    }
-                    return task;
-                });
+                return c.runFromCacheAsync()
+                        .continueWithTask(
+                                task -> {
+                                    if (task.getError() instanceof ParseException) {
+                                        return c.runOnNetworkAsync();
+                                    }
+                                    return task;
+                                });
             case NETWORK_ELSE_CACHE:
-                return c.runOnNetworkAsync().continueWithTask(task -> {
-                    Exception error = task.getError();
-                    if (error instanceof ParseException &&
-                            ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
-                        return c.runFromCacheAsync();
-                    }
-                    // Either the query succeeded, or there was an an error with the query, not the
-                    // network
-                    return task;
-                });
+                return c.runOnNetworkAsync()
+                        .continueWithTask(
+                                task -> {
+                                    Exception error = task.getError();
+                                    if (error instanceof ParseException
+                                            && ((ParseException) error).getCode()
+                                                    == ParseException.CONNECTION_FAILED) {
+                                        return c.runFromCacheAsync();
+                                    }
+                                    // Either the query succeeded, or there was an an error with the
+                                    // query, not the
+                                    // network
+                                    return task;
+                                });
             case CACHE_THEN_NETWORK:
                 throw new RuntimeException(
                         "You cannot use the cache policy CACHE_THEN_NETWORK with find()");

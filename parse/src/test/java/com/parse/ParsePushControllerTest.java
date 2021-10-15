@@ -23,7 +23,12 @@ import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,13 +38,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 // For SSLSessionCache
 @RunWith(RobolectricTestRunner.class)
@@ -60,7 +58,7 @@ public class ParsePushControllerTest {
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
     }
 
-    //region testBuildRESTSendPushCommand
+    // region testBuildRESTSendPushCommand
 
     @After
     public void tearDown() {
@@ -75,15 +73,16 @@ public class ParsePushControllerTest {
         // Build PushState
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        List<String> expectedChannelSet = new ArrayList<String>() {{
-            add("foo");
-            add("bar");
-            add("yarr");
-        }};
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .channelSet(expectedChannelSet)
-                .build();
+        List<String> expectedChannelSet =
+                new ArrayList<String>() {
+                    {
+                        add("foo");
+                        add("bar");
+                        add("yarr");
+                    }
+                };
+        ParsePush.State state =
+                new ParsePush.State.Builder().data(data).channelSet(expectedChannelSet).build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -95,12 +94,14 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
         // Verify device type and query
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_WHERE));
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+        assertEquals(
+                "hello world",
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
         JSONArray pushChannels = jsonParameters.getJSONArray(ParseRESTPushCommand.KEY_CHANNELS);
-        assertEquals(new JSONArray(expectedChannelSet), pushChannels,
-                JSONCompareMode.NON_EXTENSIBLE);
+        assertEquals(
+                new JSONArray(expectedChannelSet), pushChannels, JSONCompareMode.NON_EXTENSIBLE);
     }
 
     @Test
@@ -111,10 +112,8 @@ public class ParsePushControllerTest {
         // Build PushState
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .expirationTime((long) 1400000000)
-                .build();
+        ParsePush.State state =
+                new ParsePush.State.Builder().data(data).expirationTime((long) 1400000000).build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -126,8 +125,10 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
         // Verify device type and query
         assertEquals("{}", jsonParameters.get(ParseRESTPushCommand.KEY_WHERE).toString());
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+        assertEquals(
+                "hello world",
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
         assertEquals(1400000000, jsonParameters.getLong(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
     }
@@ -141,10 +142,7 @@ public class ParsePushControllerTest {
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
         long pushTime = System.currentTimeMillis() / 1000 + 1000;
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .pushTime(pushTime)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).pushTime(pushTime).build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -156,8 +154,10 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
         // Verify device type and query
         assertEquals("{}", jsonParameters.get(ParseRESTPushCommand.KEY_WHERE).toString());
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+        assertEquals(
+                "hello world",
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
         assertEquals(pushTime, jsonParameters.getLong(ParseRESTPushCommand.KEY_PUSH_TIME));
     }
@@ -170,10 +170,11 @@ public class ParsePushControllerTest {
         // Build PushState
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .expirationTimeInterval((long) 86400)
-                .build();
+        ParsePush.State state =
+                new ParsePush.State.Builder()
+                        .data(data)
+                        .expirationTimeInterval((long) 86400)
+                        .build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -185,8 +186,10 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
         // Verify device type and query
         assertEquals("{}", jsonParameters.get(ParseRESTPushCommand.KEY_WHERE).toString());
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+        assertEquals(
+                "hello world",
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
         assertEquals(86400, jsonParameters.getLong(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
     }
@@ -202,10 +205,7 @@ public class ParsePushControllerTest {
         ParseQuery<ParseInstallation> query = ParseInstallation.getQuery();
         query.whereEqualTo("language", "en/US");
         query.whereLessThan("version", "1.2");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .query(query)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).query(query).build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -215,10 +215,13 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_PUSH_TIME));
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
-        assertFalse(jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_WHERE)
-                .has(ParseRESTPushCommand.KEY_DEVICE_TYPE));
+        assertFalse(
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_WHERE)
+                        .has(ParseRESTPushCommand.KEY_DEVICE_TYPE));
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
-        assertEquals("hello world",
+        assertEquals(
+                "hello world",
                 jsonParameters
                         .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
@@ -229,9 +232,9 @@ public class ParsePushControllerTest {
         assertEquals("1.2", inequality.getString("$lt"));
     }
 
-    //endregion
+    // endregion
 
-    //region testSendInBackground
+    // region testSendInBackground
 
     @Test
     public void testBuildRESTSendPushCommandWithPushToIOSAndAndroid() throws Exception {
@@ -241,9 +244,7 @@ public class ParsePushControllerTest {
         // Build PushState
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).build();
 
         // Build command
         ParseRESTCommand pushCommand = controller.buildRESTSendPushCommand(state, "sessionToken");
@@ -254,11 +255,15 @@ public class ParsePushControllerTest {
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_TIME));
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_EXPIRATION_INTERVAL));
         assertFalse(jsonParameters.has(ParseRESTPushCommand.KEY_CHANNELS));
-        assertEquals("hello world",
-                jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_DATA)
+        assertEquals(
+                "hello world",
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_DATA)
                         .getString(ParsePush.KEY_DATA_MESSAGE));
-        assertFalse(jsonParameters.getJSONObject(ParseRESTPushCommand.KEY_WHERE)
-                .has(ParseRESTPushCommand.KEY_DEVICE_TYPE));
+        assertFalse(
+                jsonParameters
+                        .getJSONObject(ParseRESTPushCommand.KEY_WHERE)
+                        .has(ParseRESTPushCommand.KEY_DEVICE_TYPE));
     }
 
     @Test
@@ -270,9 +275,7 @@ public class ParsePushControllerTest {
 
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).build();
 
         Task<Void> pushTask = controller.sendInBackground(state, "sessionToken");
 
@@ -282,7 +285,7 @@ public class ParsePushControllerTest {
         verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testSendInBackgroundFailWithIOException() throws Exception {
@@ -295,9 +298,7 @@ public class ParsePushControllerTest {
 
         JSONObject data = new JSONObject();
         data.put(ParsePush.KEY_DATA_MESSAGE, "hello world");
-        ParsePush.State state = new ParsePush.State.Builder()
-                .data(data)
-                .build();
+        ParsePush.State state = new ParsePush.State.Builder().data(data).build();
 
         Task<Void> pushTask = controller.sendInBackground(state, "sessionToken");
 
@@ -312,15 +313,16 @@ public class ParsePushControllerTest {
         assertEquals(ParseException.CONNECTION_FAILED, ((ParseException) error).getCode());
     }
 
-    private ParseHttpClient mockParseHttpClientWithResponse(JSONObject content, int statusCode,
-                                                            String reasonPhrase) throws IOException {
+    private ParseHttpClient mockParseHttpClientWithResponse(
+            JSONObject content, int statusCode, String reasonPhrase) throws IOException {
         byte[] contentBytes = content.toString().getBytes();
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(contentBytes))
-                .setStatusCode(statusCode)
-                .setTotalSize(contentBytes.length)
-                .setContentType("application/json")
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(contentBytes))
+                        .setStatusCode(statusCode)
+                        .setTotalSize(contentBytes.length)
+                        .setContentType("application/json")
+                        .build();
         ParseHttpClient client = mock(ParseHttpClient.class);
         when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
         return client;

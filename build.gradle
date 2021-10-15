@@ -13,11 +13,13 @@ buildscript {
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "io.freefair.gradle:android-gradle-plugins:4.2.0-m1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.16.0"
     }
 }
 
 plugins {
     id "com.github.ben-manes.versions" version "0.28.0"
+    id "com.diffplug.spotless" version "5.16.0"
 }
 
 allprojects {
@@ -25,10 +27,39 @@ allprojects {
         google()
         mavenCentral()
     }
-}
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    apply plugin: "com.diffplug.spotless"
+
+    spotless {
+        java {
+            target '**/*.java'
+            googleJavaFormat().aosp()
+            removeUnusedImports()
+            trimTrailingWhitespace()
+            indentWithSpaces()
+            endWithNewline()
+        }
+        kotlin {
+            target '**/*.kt'
+            ktlint().userData(["disabled_rules": "no-wildcard-imports"])
+            trimTrailingWhitespace()
+            indentWithSpaces()
+            endWithNewline()
+        }
+        format 'misc', {
+            target '**/*.gradle', '**/*.md', '**/.gitignore'
+            indentWithSpaces()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+
+        format 'xml', {
+            target '**/*.xml'
+            indentWithSpaces()
+            trimTrailingWhitespace()
+            endWithNewline()
+        }
+    }
 }
 
 ext {

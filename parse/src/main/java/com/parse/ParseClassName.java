@@ -15,16 +15,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Associates a class name for a subclass of ParseObject.
- */
+/** Associates a class name for a subclass of ParseObject. */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
 public @interface ParseClassName {
-    /**
-     * @return The Parse class name associated with the ParseObject subclass.
-     */
+    /** @return The Parse class name associated with the ParseObject subclass. */
     String value();
 }

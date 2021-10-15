@@ -15,7 +15,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +32,17 @@ public class ManifestInfo {
     private static String displayName = null;
 
     /**
-     * Returns the version code for this app, as specified by the android:versionCode attribute in the
-     * <manifest> element of the manifest.
+     * Returns the version code for this app, as specified by the android:versionCode attribute in
+     * the <manifest> element of the manifest.
      */
     public static int getVersionCode() {
         synchronized (lock) {
             if (versionCode == -1) {
                 try {
-                    versionCode = getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionCode;
+                    versionCode =
+                            getPackageManager()
+                                    .getPackageInfo(getContext().getPackageName(), 0)
+                                    .versionCode;
                 } catch (NameNotFoundException e) {
                     PLog.e(TAG, "Couldn't find info about own package", e);
                 }
@@ -51,14 +53,17 @@ public class ManifestInfo {
     }
 
     /**
-     * Returns the version name for this app, as specified by the android:versionName attribute in the
-     * <manifest> element of the manifest.
+     * Returns the version name for this app, as specified by the android:versionName attribute in
+     * the <manifest> element of the manifest.
      */
     public static String getVersionName() {
         synchronized (lock) {
             if (versionName == null) {
                 try {
-                    versionName = getPackageManager().getPackageInfo(getContext().getPackageName(), 0).versionName;
+                    versionName =
+                            getPackageManager()
+                                    .getPackageInfo(getContext().getPackageName(), 0)
+                                    .versionName;
                 } catch (NameNotFoundException e) {
                     PLog.e(TAG, "Couldn't find info about own package", e);
                     versionName = "unknown";
@@ -76,8 +81,8 @@ public class ManifestInfo {
     }
 
     /**
-     * Returns the display name of the app used by the app launcher, as specified by the android:label
-     * attribute in the <application> element of the manifest.
+     * Returns the display name of the app used by the app launcher, as specified by the
+     * android:label attribute in the <application> element of the manifest.
      */
     public static String getDisplayName(Context context) {
         synchronized (lock) {
@@ -104,8 +109,8 @@ public class ManifestInfo {
     }
 
     /**
-     * Returns a list of ResolveInfo objects corresponding to the BroadcastReceivers with Intent Filters
-     * specifying the given action within the app's package.
+     * Returns a list of ResolveInfo objects corresponding to the BroadcastReceivers with Intent
+     * Filters specifying the given action within the app's package.
      */
     /* package */
     static List<ResolveInfo> getIntentReceivers(String... actions) {
@@ -115,9 +120,9 @@ public class ManifestInfo {
         List<ResolveInfo> list = new ArrayList<>();
 
         for (String action : actions) {
-            list.addAll(pm.queryBroadcastReceivers(
-                    new Intent(action),
-                    PackageManager.GET_INTENT_FILTERS));
+            list.addAll(
+                    pm.queryBroadcastReceivers(
+                            new Intent(action), PackageManager.GET_INTENT_FILTERS));
         }
 
         for (int i = list.size() - 1; i >= 0; --i) {
@@ -145,9 +150,7 @@ public class ManifestInfo {
         }
     }
 
-    /**
-     * @return A {@link Bundle} if meta-data is specified in AndroidManifest, otherwise null.
-     */
+    /** @return A {@link Bundle} if meta-data is specified in AndroidManifest, otherwise null. */
     public static Bundle getApplicationMetadata(Context context) {
         ApplicationInfo info = getApplicationInfo(context, PackageManager.GET_META_DATA);
         if (info != null) {

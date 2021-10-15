@@ -9,20 +9,15 @@
 package com.parse;
 
 import android.net.Uri;
-
 import com.parse.http.ParseHttpRequest;
-
+import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
-import java.util.Map;
-
 class ParseRESTAnalyticsCommand extends ParseRESTCommand {
 
-    /**
-     * The set of predefined events
-     */
+    /** The set of predefined events */
     // Tracks the AppOpened event
     /* package for test */ static final String EVENT_APP_OPENED = "AppOpened";
 
@@ -52,7 +47,10 @@ class ParseRESTAnalyticsCommand extends ParseRESTCommand {
 
     /* package */
     static ParseRESTAnalyticsCommand trackEventCommand(
-            String eventName, String pushHash, Map<String, String> dimensions, String sessionToken) {
+            String eventName,
+            String pushHash,
+            Map<String, String> dimensions,
+            String sessionToken) {
         String httpPath = String.format(PATH, Uri.encode(eventName));
         JSONObject parameters = new JSONObject();
         try {

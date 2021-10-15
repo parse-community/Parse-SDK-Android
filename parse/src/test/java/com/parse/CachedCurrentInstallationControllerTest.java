@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +39,7 @@ public class CachedCurrentInstallationControllerTest {
         ParseObject.unregisterSubclass(ParseInstallation.class);
     }
 
-    //region testSetAsync
+    // region testSetAsync
 
     @Test
     public void testSetAsyncWithNotCurrentInstallation() throws Exception {
@@ -79,9 +78,9 @@ public class CachedCurrentInstallationControllerTest {
         verify(installationId, times(1)).set("testInstallationId");
     }
 
-    //endregion
+    // endregion
 
-    //region testGetAsync
+    // region testGetAsync
 
     @Test
     public void testGetAsyncFromMemory() throws Exception {
@@ -174,9 +173,9 @@ public class CachedCurrentInstallationControllerTest {
         assertEquals("android", installationA.get(KEY_DEVICE_TYPE));
     }
 
-    //endregion
+    // endregion
 
-    //region testExistsAsync
+    // region testExistsAsync
 
     @Test
     public void testExistAsyncFromMemory() throws Exception {
@@ -202,7 +201,7 @@ public class CachedCurrentInstallationControllerTest {
         verify(store, times(1)).existsAsync();
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testClearFromMemory() {

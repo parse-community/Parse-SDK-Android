@@ -17,8 +17,8 @@ class ParseCountingByteArrayHttpBody extends ParseByteArrayHttpBody {
     private static final int DEFAULT_CHUNK_SIZE = 4096;
     private final ProgressCallback progressCallback;
 
-    public ParseCountingByteArrayHttpBody(byte[] content, String contentType,
-                                          final ProgressCallback progressCallback) {
+    public ParseCountingByteArrayHttpBody(
+            byte[] content, String contentType, final ProgressCallback progressCallback) {
         super(content, contentType);
         this.progressCallback = progressCallback;
     }

@@ -14,19 +14,17 @@ import static org.junit.Assert.assertTrue;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.parse.http.ParseHttpRequest;
-
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
 
 public class ParseRESTQueryCommandTest {
 
@@ -40,28 +38,27 @@ public class ParseRESTQueryCommandTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testEncode
+    // region testEncode
 
     @Test
     public void testEncodeWithNoCount() throws Exception {
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .orderByAscending("orderKey")
-                .addCondition("inKey", "$in", Arrays.asList("inValue", "inValueAgain"))
-                .selectKeys(Collections.singletonList("selectedKey, selectedKeyAgain"))
-                .include("includeKey")
-                .setLimit(5)
-                .setSkip(6)
-                .redirectClassNameForKey("extraKey")
-                .setTracingEnabled(true)
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .orderByAscending("orderKey")
+                        .addCondition("inKey", "$in", Arrays.asList("inValue", "inValueAgain"))
+                        .selectKeys(Collections.singletonList("selectedKey, selectedKeyAgain"))
+                        .include("includeKey")
+                        .setLimit(5)
+                        .setSkip(6)
+                        .redirectClassNameForKey("extraKey")
+                        .setTracingEnabled(true)
+                        .build();
 
         Map<String, String> encoded = ParseRESTQueryCommand.encode(state, false);
 
         assertEquals("orderKey", encoded.get(ParseRESTQueryCommand.KEY_ORDER));
         JSONObject conditionJson = new JSONObject(encoded.get(ParseRESTQueryCommand.KEY_WHERE));
-        JSONArray conditionWhereJsonArray = new JSONArray()
-                .put("inValue")
-                .put("inValueAgain");
+        JSONArray conditionWhereJsonArray = new JSONArray().put("inValue").put("inValueAgain");
         assertEquals(
                 conditionWhereJsonArray,
                 conditionJson.getJSONObject("inKey").getJSONArray("$in"),
@@ -77,10 +74,8 @@ public class ParseRESTQueryCommandTest {
 
     @Test
     public void testEncodeWithCount() {
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .setSkip(6)
-                .setLimit(3)
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject").setSkip(6).setLimit(3).build();
 
         Map<String, String> encoded = ParseRESTQueryCommand.encode(state, true);
 
@@ -90,15 +85,16 @@ public class ParseRESTQueryCommandTest {
         assertEquals("1", encoded.get(ParseRESTQueryCommand.KEY_COUNT));
     }
 
-    //endregion
+    // endregion
 
-    //region testConstruct
+    // region testConstruct
 
     @Test
     public void testFindCommand() throws Exception {
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .selectKeys(Arrays.asList("key", "kayAgain"))
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .selectKeys(Arrays.asList("key", "kayAgain"))
+                        .build();
 
         ParseRESTQueryCommand command = ParseRESTQueryCommand.findCommand(state, "sessionToken");
 
@@ -112,9 +108,10 @@ public class ParseRESTQueryCommandTest {
 
     @Test
     public void testCountCommand() throws Exception {
-        ParseQuery.State<ParseObject> state = new ParseQuery.State.Builder<>("TestObject")
-                .selectKeys(Arrays.asList("key", "kayAgain"))
-                .build();
+        ParseQuery.State<ParseObject> state =
+                new ParseQuery.State.Builder<>("TestObject")
+                        .selectKeys(Arrays.asList("key", "kayAgain"))
+                        .build();
 
         ParseRESTQueryCommand command = ParseRESTQueryCommand.countCommand(state, "sessionToken");
 
@@ -126,5 +123,5 @@ public class ParseRESTQueryCommandTest {
         assertEquals(jsonParameters, command.jsonParameters, JSONCompareMode.NON_EXTENSIBLE);
     }
 
-    //endregion
+    // endregion
 }

@@ -14,7 +14,6 @@ import static org.junit.Assert.assertNull;
 import static org.robolectric.Shadows.shadowOf;
 
 import android.webkit.MimeTypeMap;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,11 +44,12 @@ public class ParseFileStateTest {
 
     @Test
     public void testProperties() {
-        ParseFile.State state = new ParseFile.State.Builder()
-                .name("test")
-                .mimeType("application/test")
-                .url("http://twitter.com/grantland")
-                .build();
+        ParseFile.State state =
+                new ParseFile.State.Builder()
+                        .name("test")
+                        .mimeType("application/test")
+                        .url("http://twitter.com/grantland")
+                        .build();
         assertEquals("test", state.name());
         assertEquals("application/test", state.mimeType());
         assertEquals("http://twitter.com/grantland", state.url());
@@ -57,11 +57,12 @@ public class ParseFileStateTest {
 
     @Test
     public void testCopy() {
-        ParseFile.State state = new ParseFile.State.Builder()
-                .name("test")
-                .mimeType("application/test")
-                .url("http://twitter.com/grantland")
-                .build();
+        ParseFile.State state =
+                new ParseFile.State.Builder()
+                        .name("test")
+                        .mimeType("application/test")
+                        .url("http://twitter.com/grantland")
+                        .build();
         ParseFile.State copy = new ParseFile.State.Builder(state).build();
         assertEquals("test", copy.name());
         assertEquals("application/test", copy.mimeType());
@@ -71,17 +72,13 @@ public class ParseFileStateTest {
 
     @Test
     public void testMimeType() {
-        ParseFile.State state = new ParseFile.State.Builder()
-                .mimeType("test")
-                .build();
+        ParseFile.State state = new ParseFile.State.Builder().mimeType("test").build();
         assertEquals("test", state.mimeType());
     }
 
     @Test
     public void testMimeTypeNotSetFromExtension() {
-        ParseFile.State state = new ParseFile.State.Builder()
-                .name("test.txt")
-                .build();
+        ParseFile.State state = new ParseFile.State.Builder().name("test.txt").build();
         assertNull(state.mimeType());
     }
 }

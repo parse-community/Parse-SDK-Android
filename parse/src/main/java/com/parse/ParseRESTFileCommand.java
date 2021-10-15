@@ -10,12 +10,9 @@ package com.parse;
 
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
-
 import java.io.File;
 
-/**
- * REST network command for creating & uploading {@link ParseFile}s.
- */
+/** REST network command for creating & uploading {@link ParseFile}s. */
 class ParseRESTFileCommand extends ParseRESTCommand {
 
     private final byte[] data;
@@ -34,15 +31,17 @@ class ParseRESTFileCommand extends ParseRESTCommand {
 
     @Override
     protected ParseHttpBody newBody(final ProgressCallback progressCallback) {
-        // TODO(mengyan): Delete ParseByteArrayHttpBody when we change input byte array to staged file
+        // TODO(mengyan): Delete ParseByteArrayHttpBody when we change input byte array to staged
+        // file
         // in ParseFileController
         if (progressCallback == null) {
-            return data != null ?
-                    new ParseByteArrayHttpBody(data, contentType) : new ParseFileHttpBody(file, contentType);
+            return data != null
+                    ? new ParseByteArrayHttpBody(data, contentType)
+                    : new ParseFileHttpBody(file, contentType);
         }
-        return data != null ?
-                new ParseCountingByteArrayHttpBody(data, contentType, progressCallback) :
-                new ParseCountingFileHttpBody(file, contentType, progressCallback);
+        return data != null
+                ? new ParseCountingByteArrayHttpBody(data, contentType, progressCallback)
+                : new ParseCountingFileHttpBody(file, contentType, progressCallback);
     }
 
     public static class Builder extends Init<Builder> {
@@ -76,7 +75,7 @@ class ParseRESTFileCommand extends ParseRESTCommand {
         }
 
         @Override
-            /* package */ Builder self() {
+        /* package */ Builder self() {
             return this;
         }
 

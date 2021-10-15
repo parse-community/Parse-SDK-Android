@@ -29,7 +29,7 @@ public class ParseRoleTest {
         ParseObject.unregisterSubclass(ParseRole.class);
     }
 
-    //region testConstructor
+    // region testConstructor
 
     @Test
     public void testConstructorWithName() {
@@ -48,9 +48,9 @@ public class ParseRoleTest {
         assertSame(acl, role.getACL());
     }
 
-    //endregion
+    // endregion
 
-    //region testSetName
+    // region testSetName
 
     @Test
     public void testSetName() {
@@ -61,9 +61,9 @@ public class ParseRoleTest {
         assertEquals("Test", role.getName());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetUsers
+    // region testGetUsers
 
     @Test
     public void testGetUsers() {
@@ -73,9 +73,9 @@ public class ParseRoleTest {
         assertSame(role.getUsers(), role.getRelation("users"));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetRoles
+    // region testGetRoles
 
     @Test
     public void testGetRoles() {
@@ -85,9 +85,9 @@ public class ParseRoleTest {
         assertSame(role.getRoles(), role.getRelation("roles"));
     }
 
-    //endregion
+    // endregion
 
-    //region testValidateSave
+    // region testValidateSave
 
     @Test
     public void testValidateSaveSuccess() {
@@ -112,9 +112,9 @@ public class ParseRoleTest {
         role.validateSave();
     }
 
-    //endregion
+    // endregion
 
-    //region testPut
+    // region testPut
 
     @Test
     public void testPutSuccess() {
@@ -147,16 +147,20 @@ public class ParseRoleTest {
         role.put("name", "!!!!");
     }
 
-    //endregion
+    // endregion
 
-    //region testGetQuery
+    // region testGetQuery
 
     @Test
     public void testGetQuery() {
         ParseQuery<?> query = ParseRole.getQuery();
 
-        assertEquals(ParseCorePlugins.getInstance().getSubclassingController().getClassName(ParseRole.class), query.getBuilder().getClassName());
+        assertEquals(
+                ParseCorePlugins.getInstance()
+                        .getSubclassingController()
+                        .getClassName(ParseRole.class),
+                query.getBuilder().getClassName());
     }
 
-    //endregion
+    // endregion
 }

@@ -8,9 +8,7 @@
  */
 package com.parse.twitter;
 
-/**
- * OAuth Flow exception
- */
+/** OAuth Flow exception */
 public class OAuth1FlowException extends Exception {
     private static final long serialVersionUID = 4272662026279290823L;
     private final int errorCode;
@@ -18,8 +16,10 @@ public class OAuth1FlowException extends Exception {
     private final String failingUrl;
 
     public OAuth1FlowException(int errorCode, String description, String failingUrl) {
-        super(String.format("OAuth Flow Error %d: Url: %s Description: %s", errorCode, failingUrl,
-                description));
+        super(
+                String.format(
+                        "OAuth Flow Error %d: Url: %s Description: %s",
+                        errorCode, failingUrl, description));
         this.errorCode = errorCode;
         this.description = description;
         this.failingUrl = failingUrl;

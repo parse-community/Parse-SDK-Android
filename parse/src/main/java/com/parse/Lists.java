@@ -20,10 +20,11 @@ import java.util.List;
 
 /**
  * Static utility methods pertaining to {@link List} instances.
+ *
  * <p>
+ *
  * <p>See the Guava User Guide article on <a href=
- * "https://github.com/google/guava/wiki/CollectionUtilitiesExplained#lists">
- * {@code Lists}</a>.
+ * "https://github.com/google/guava/wiki/CollectionUtilitiesExplained#lists"> {@code Lists}</a>.
  *
  * @author Kevin Bourrillion
  * @author Mike Bostock
@@ -33,14 +34,15 @@ import java.util.List;
 class Lists {
 
     /**
-     * Returns consecutive sublists of a list, each of the same size (the final list may be smaller).
-     * For example, partitioning a list containing [a, b, c, d, e] with a partition size of 3 yields
-     * [[a, b, c], [d, e]] -- an outer list containing two inner lists of three and two elements, all
-     * in the original order.
-     * <p>
-     * The outer list is unmodifiable, but reflects the latest state of the source list. The inner
-     * lists are sublist views of the original list, produced on demand using List.subList(int, int),
-     * and are subject to all the usual caveats about modification as explained in that API.
+     * Returns consecutive sublists of a list, each of the same size (the final list may be
+     * smaller). For example, partitioning a list containing [a, b, c, d, e] with a partition size
+     * of 3 yields [[a, b, c], [d, e]] -- an outer list containing two inner lists of three and two
+     * elements, all in the original order.
+     *
+     * <p>The outer list is unmodifiable, but reflects the latest state of the source list. The
+     * inner lists are sublist views of the original list, produced on demand using
+     * List.subList(int, int), and are subject to all the usual caveats about modification as
+     * explained in that API.
      *
      * @param list the list to return consecutive sublists of
      * @param size the desired size of each sublist (the last may be smaller)

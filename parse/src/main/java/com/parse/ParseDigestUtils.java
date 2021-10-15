@@ -11,9 +11,7 @@ package com.parse;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Static utility helpers to compute {@link MessageDigest}s.
- */
+/** Static utility helpers to compute {@link MessageDigest}s. */
 /* package */ class ParseDigestUtils {
 
     private static final char[] hexArray = "0123456789abcdef".toCharArray();

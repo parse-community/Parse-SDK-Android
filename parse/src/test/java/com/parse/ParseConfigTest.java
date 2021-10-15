@@ -27,7 +27,13 @@ import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 import com.parse.boltsinternal.Task;
-
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -36,15 +42,6 @@ import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.LooperMode;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
 
 // For android.os.Looper
 @RunWith(RobolectricTestRunner.class)
@@ -57,7 +54,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseTestUtils.setTestParseUser();
     }
 
-    //region testConstructor
+    // region testConstructor
 
     @Test
     public void testDefaultConstructor() {
@@ -88,9 +85,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseConfig.decode(json, ParseDecoder.get());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetInBackground
+    // region testGetInBackground
 
     @Test
     public void testGetInBackgroundSuccess() throws Exception {
@@ -122,7 +119,8 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         verify(controller, times(1)).getAsync(nullable(String.class));
         assertThat(configTask.getError(), instanceOf(ParseException.class));
-        assertEquals(ParseException.CONNECTION_FAILED,
+        assertEquals(
+                ParseException.CONNECTION_FAILED,
                 ((ParseException) configTask.getError()).getCode());
         assertEquals("error", configTask.getError().getMessage());
     }
@@ -137,11 +135,12 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground((config1, e) -> {
-            assertEquals(1, config1.params.size());
-            assertEquals("value", config1.params.get("string"));
-            done.release();
-        });
+        ParseConfig.getInBackground(
+                (config1, e) -> {
+                    assertEquals(1, config1.params.size());
+                    assertEquals("value", config1.params.get("string"));
+                    done.release();
+                });
 
         shadowMainLooper().idle();
 
@@ -157,11 +156,12 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         final Semaphore done = new Semaphore(0);
-        ParseConfig.getInBackground((config, e) -> {
-            assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
-            assertEquals("error", e.getMessage());
-            done.release();
-        });
+        ParseConfig.getInBackground(
+                (config, e) -> {
+                    assertEquals(ParseException.CONNECTION_FAILED, e.getCode());
+                    assertEquals("error", e.getMessage());
+                    done.release();
+                });
 
         shadowMainLooper().idle();
 
@@ -202,9 +202,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         }
     }
 
-    //endregion
+    // endregion
 
-    //region testGetCurrentConfig
+    // region testGetCurrentConfig
 
     @Test
     public void testGetCurrentConfigSuccess() {
@@ -212,8 +212,10 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         params.put("string", "value");
 
         ParseConfig config = new ParseConfig(params);
-        ParseConfigController controller = new ParseConfigController(mock(ParseHttpClient.class),
-                mockParseCurrentConfigControllerWithResponse(config));
+        ParseConfigController controller =
+                new ParseConfigController(
+                        mock(ParseHttpClient.class),
+                        mockParseCurrentConfigControllerWithResponse(config));
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         ParseConfig configAgain = ParseConfig.getCurrentConfig();
@@ -223,8 +225,10 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     @Test
     public void testGetCurrentConfigFail() {
         ParseException exception = new ParseException(ParseException.CONNECTION_FAILED, "error");
-        ParseConfigController controller = new ParseConfigController(mock(ParseHttpClient.class),
-                mockParseCurrentConfigControllerWithException(exception));
+        ParseConfigController controller =
+                new ParseConfigController(
+                        mock(ParseHttpClient.class),
+                        mockParseCurrentConfigControllerWithException(exception));
         ParseCorePlugins.getInstance().registerConfigController(controller);
 
         ParseConfig configAgain = ParseConfig.getCurrentConfig();
@@ -232,9 +236,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertEquals(0, configAgain.getParams().size());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetBoolean
+    // region testGetBoolean
 
     @Test
     public void testGetBooleanKeyExist() {
@@ -266,9 +270,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertFalse(config.getBoolean("key", false));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetInt
+    // region testGetInt
 
     @Test
     public void testGetIntKeyExist() {
@@ -290,9 +294,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertEquals(100, config.getInt("wrongKey", 100));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetDouble
+    // region testGetDouble
 
     @Test
     public void testGetDoubleKeyExist() {
@@ -314,9 +318,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertEquals(100.1, config.getDouble("wrongKey", 100.1), 0.0001);
     }
 
-    //endregion
+    // endregion
 
-    //region testGetLong
+    // region testGetLong
 
     @Test
     public void testGetLongKeyExist() {
@@ -338,9 +342,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertEquals((long) 100, config.getLong("wrongKey", (long) 100));
     }
 
-    //endregion
+    // endregion
 
-    //region testGet
+    // region testGet
 
     @Test
     public void testGetKeyExist() {
@@ -375,9 +379,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.get("keyAgain", "haha"));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetString
+    // region testGetString
 
     @Test
     public void testGetStringKeyExist() {
@@ -422,9 +426,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getString("keyAgain", "haha"));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetDate
+    // region testGetDate
 
     @Test
     public void testGetDateKeyExist() {
@@ -481,9 +485,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getDate("keyAgain", date));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetList
+    // region testGetList
 
     @Test
     public void testGetListKeyExist() {
@@ -552,9 +556,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getList("keyAgain", list));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetNumber
+    // region testGetNumber
 
     @Test
     public void testGetNumberKeyExist() {
@@ -605,9 +609,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getNumber("keyAgain", number));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetMap
+    // region testGetMap
 
     @Test
     public void testGetMapKeyExist() {
@@ -680,9 +684,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getMap("keyAgain", map));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetJsonObject
+    // region testGetJsonObject
 
     @Test
     public void testGetJsonObjectKeyExist() throws Exception {
@@ -695,7 +699,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertEquals(json, config.getJSONObject("key"), JSONCompareMode.NON_EXTENSIBLE);
-        assertEquals(json, config.getJSONObject("key", new JSONObject()),
+        assertEquals(
+                json,
+                config.getJSONObject("key", new JSONObject()),
                 JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -711,7 +717,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertNull(config.getJSONObject("wrongKey"));
-        //TODO(mengyan) ParseConfig.getJSONObject should return jsonAgain, but due to the error in
+        // TODO(mengyan) ParseConfig.getJSONObject should return jsonAgain, but due to the error in
         // ParseConfig.getJsonObject, this returns null right now. Revise when we correct the logic
         // for ParseConfig.getJsonObject.
         assertNull(config.getJSONObject("wrongKey", jsonAgain));
@@ -726,7 +732,7 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertNull(config.getJSONObject("key"));
-        //TODO(mengyan) ParseConfig.getJSONObject should return json, but due to the error in
+        // TODO(mengyan) ParseConfig.getJSONObject should return json, but due to the error in
         // ParseConfig.getJsonObject, this returns null right now. Revise when we correct the logic
         // for ParseConfig.getJsonObject.
         assertNull(config.getJSONObject("key", json));
@@ -747,9 +753,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getJSONObject("keyAgain", json));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetJsonArray
+    // region testGetJsonArray
 
     @Test
     public void testGetJsonArrayKeyExist() throws Exception {
@@ -767,7 +773,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertEquals(jsonArray, config.getJSONArray("key"), JSONCompareMode.NON_EXTENSIBLE);
-        assertEquals(jsonArray, config.getJSONArray("key", new JSONArray()),
+        assertEquals(
+                jsonArray,
+                config.getJSONArray("key", new JSONArray()),
                 JSONCompareMode.NON_EXTENSIBLE);
     }
 
@@ -788,8 +796,10 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertNull(config.getJSONArray("wrongKey"));
-        //TODO(mengyan) ParseConfig.getJSONArray should return default jsonArrayAgain, but due to the
-        // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct the
+        // TODO(mengyan) ParseConfig.getJSONArray should return default jsonArrayAgain, but due to
+        // the
+        // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct
+        // the
         // logic for ParseConfig.getJSONArray.
         assertNull(config.getJSONArray("wrongKey", jsonArrayAgain));
     }
@@ -808,8 +818,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
         ParseConfig config = new ParseConfig(params);
         assertNull(config.getJSONArray("key"));
-        //TODO(mengyan) ParseConfig.getJSONArray should return default jsonArray, but due to the
-        // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct the
+        // TODO(mengyan) ParseConfig.getJSONArray should return default jsonArray, but due to the
+        // error in ParseConfig.getJSONArray, this returns null right now. Revise when we correct
+        // the
         // logic for ParseConfig.getJSONArray.
         assertNull(config.getJSONArray("key", jsonArray));
     }
@@ -833,9 +844,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getJSONArray("keyAgain", jsonArray));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetParseGeoPoint
+    // region testGetParseGeoPoint
 
     @Test
     public void testGetParseGeoPointKeyExist() {
@@ -888,16 +899,24 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getParseGeoPoint("keyAgain", geoPoint));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetParseFile
+    // region testGetParseFile
 
     @Test
     public void testGetParseFileKeyExist() {
-        final ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
-        ParseFile fileAgain = new ParseFile(
-                new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
+        final ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("image.png")
+                                .url("http://yarr.com/image.png")
+                                .build());
+        ParseFile fileAgain =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("file.txt")
+                                .url("http://yarr.com/file.txt")
+                                .build());
         final Map<String, Object> params = new HashMap<>();
         params.put("key", file);
 
@@ -910,10 +929,18 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
     @Test
     public void testGetParseFileKeyNotExist() {
-        final ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
-        ParseFile fileAgain = new ParseFile(
-                new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
+        final ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("image.png")
+                                .url("http://yarr.com/image.png")
+                                .build());
+        ParseFile fileAgain =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("file.txt")
+                                .url("http://yarr.com/file.txt")
+                                .build());
         final Map<String, Object> params = new HashMap<>();
         params.put("key", file);
 
@@ -924,8 +951,12 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
     @Test
     public void testGetParseFileKeyExistValueNotParseFile() {
-        ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
+        ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("file.txt")
+                                .url("http://yarr.com/file.txt")
+                                .build());
         final Map<String, Object> params = new HashMap<>();
         params.put("key", 1);
 
@@ -936,8 +967,12 @@ public class ParseConfigTest extends ResetPluginsParseTest {
 
     @Test
     public void testGetParseFileKeyExistValueNull() {
-        ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("file.txt").url("http://yarr.com/file.txt").build());
+        ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("file.txt")
+                                .url("http://yarr.com/file.txt")
+                                .build());
         final Map<String, Object> params = new HashMap<>();
         params.put("key", JSONObject.NULL);
         params.put("keyAgain", JSONObject.NULL);
@@ -949,9 +984,9 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertNull(config.getParseFile("keyAgain", file));
     }
 
-    //endregion
+    // endregion
 
-    //region testToString
+    // region testToString
 
     @Test
     public void testToStringList() {
@@ -1003,12 +1038,11 @@ public class ParseConfigTest extends ResetPluginsParseTest {
         assertTrue(configStr.contains("27.029"));
     }
 
-    //endregion
+    // endregion
 
     private ParseConfigController mockParseConfigControllerWithResponse(final ParseConfig result) {
         ParseConfigController controller = mock(ParseConfigController.class);
-        when(controller.getAsync(nullable(String.class)))
-                .thenReturn(Task.forResult(result));
+        when(controller.getAsync(nullable(String.class))).thenReturn(Task.forResult(result));
         return controller;
     }
 
@@ -1022,16 +1056,14 @@ public class ParseConfigTest extends ResetPluginsParseTest {
     private ParseCurrentConfigController mockParseCurrentConfigControllerWithResponse(
             final ParseConfig result) {
         ParseCurrentConfigController controller = mock(ParseCurrentConfigController.class);
-        when(controller.getCurrentConfigAsync())
-                .thenReturn(Task.forResult(result));
+        when(controller.getCurrentConfigAsync()).thenReturn(Task.forResult(result));
         return controller;
     }
 
     private ParseCurrentConfigController mockParseCurrentConfigControllerWithException(
             Exception exception) {
         ParseCurrentConfigController controller = mock(ParseCurrentConfigController.class);
-        when(controller.getCurrentConfigAsync())
-                .thenReturn(Task.<ParseConfig>forError(exception));
+        when(controller.getCurrentConfigAsync()).thenReturn(Task.<ParseConfig>forError(exception));
         return controller;
     }
 }

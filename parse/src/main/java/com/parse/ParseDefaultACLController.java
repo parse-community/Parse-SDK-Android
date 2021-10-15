@@ -20,15 +20,14 @@ class ParseDefaultACLController {
     /**
      * Sets a default ACL that will be applied to all {@link ParseObject}s when they are created.
      *
-     * @param acl                      The ACL to use as a template for all {@link ParseObject}s created after set
-     *                                 has been called. This value will be copied and used as a template for the creation of
-     *                                 new ACLs, so changes to the instance after {@code set(ParseACL, boolean)}
-     *                                 has been called will not be reflected in new {@link ParseObject}s.
-     * @param withAccessForCurrentUser If {@code true}, the {@code ParseACL} that is applied to newly-created
-     *                                 {@link ParseObject}s will provide read and write access to the
-     *                                 {@link ParseUser#getCurrentUser()} at the time of creation. If {@code false}, the
-     *                                 provided ACL will be used without modification. If acl is {@code null}, this value is
-     *                                 ignored.
+     * @param acl The ACL to use as a template for all {@link ParseObject}s created after set has
+     *     been called. This value will be copied and used as a template for the creation of new
+     *     ACLs, so changes to the instance after {@code set(ParseACL, boolean)} has been called
+     *     will not be reflected in new {@link ParseObject}s.
+     * @param withAccessForCurrentUser If {@code true}, the {@code ParseACL} that is applied to
+     *     newly-created {@link ParseObject}s will provide read and write access to the {@link
+     *     ParseUser#getCurrentUser()} at the time of creation. If {@code false}, the provided ACL
+     *     will be used without modification. If acl is {@code null}, this value is ignored.
      */
     public void set(ParseACL acl, boolean withAccessForCurrentUser) {
         defaultACLWithCurrentUser = null;
@@ -62,5 +61,4 @@ class ParseDefaultACLController {
         }
         return defaultACL;
     }
-
 }

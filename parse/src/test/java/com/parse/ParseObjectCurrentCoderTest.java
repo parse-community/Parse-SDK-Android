@@ -11,23 +11,22 @@ package com.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.Test;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.SimpleTimeZone;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Test;
 
 public class ParseObjectCurrentCoderTest {
 
     // These magic strings are copied from ParseObjectCurrentCoder, since we do not want to make
     // the magic strings in ParseObjectCurrentCoder to be package for tests.
-  /*
-  /2 format JSON Keys
-  */
+    /*
+    /2 format JSON Keys
+    */
     private static final String KEY_OBJECT_ID = "objectId";
     private static final String KEY_CLASS_NAME = "classname";
     private static final String KEY_CREATED_AT = "createdAt";
@@ -42,17 +41,17 @@ public class ParseObjectCurrentCoderTest {
     private static final String KEY_OLD_UPDATED_AT = "updated_at";
     private static final String KEY_OLD_POINTERS = "pointers";
 
-
     @Test
     public void testEncodeSuccess() throws Exception {
         Date createAt = new Date(1000);
         Date updateAt = new Date(2000);
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .createdAt(createAt)
-                .updatedAt(updateAt)
-                .objectId("objectId")
-                .put("key", "value")
-                .build();
+        ParseObject.State state =
+                new ParseObject.State.Builder("Test")
+                        .createdAt(createAt)
+                        .updatedAt(updateAt)
+                        .objectId("objectId")
+                        .put("key", "value")
+                        .build();
 
         ParseObjectCurrentCoder coder = ParseObjectCurrentCoder.get();
         JSONObject objectJson = coder.encode(state, null, PointerEncoder.get());
@@ -69,8 +68,7 @@ public class ParseObjectCurrentCoderTest {
 
     @Test
     public void testEncodeSuccessWithEmptyState() throws Exception {
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .build();
+        ParseObject.State state = new ParseObject.State.Builder("Test").build();
 
         ParseObjectCurrentCoder coder = ParseObjectCurrentCoder.get();
         JSONObject objectJson = coder.encode(state, null, PointerEncoder.get());
@@ -84,8 +82,7 @@ public class ParseObjectCurrentCoderTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testEncodeFailureWithNotNullParseOperationSet() {
-        ParseObject.State state = new ParseObject.State.Builder("Test")
-                .build();
+        ParseObject.State state = new ParseObject.State.Builder("Test").build();
 
         ParseObjectCurrentCoder coder = ParseObjectCurrentCoder.get();
         coder.encode(state, new ParseOperationSet(), PointerEncoder.get());
@@ -97,11 +94,12 @@ public class ParseObjectCurrentCoderTest {
         Date updateAt = new Date(2000);
         String createAtStr = ParseDateFormat.getInstance().format(createAt);
         String updateAtStr = ParseDateFormat.getInstance().format(updateAt);
-        JSONObject dataJson = new JSONObject()
-                .put(KEY_OBJECT_ID, "objectId")
-                .put(KEY_CREATED_AT, createAtStr)
-                .put(KEY_UPDATED_AT, updateAtStr)
-                .put("key", "value");
+        JSONObject dataJson =
+                new JSONObject()
+                        .put(KEY_OBJECT_ID, "objectId")
+                        .put(KEY_CREATED_AT, createAtStr)
+                        .put(KEY_UPDATED_AT, updateAtStr)
+                        .put("key", "value");
         JSONObject objectJson = new JSONObject();
         objectJson.put(KEY_DATA, dataJson);
 
@@ -124,19 +122,19 @@ public class ParseObjectCurrentCoderTest {
         String createAtStr = ParseImpreciseDateFormat.getInstance().format(createAt);
         String updateAtStr = ParseImpreciseDateFormat.getInstance().format(updateAt);
         JSONObject pointerJson = new JSONObject();
-        JSONArray innerObjectJson = new JSONArray()
-                .put(0, "innerObject")
-                .put(1, "innerObjectId");
+        JSONArray innerObjectJson = new JSONArray().put(0, "innerObject").put(1, "innerObjectId");
         pointerJson.put("inner", innerObjectJson);
-        JSONObject oldObjectJson = new JSONObject()
-                .put(KEY_OLD_OBJECT_ID, "objectId")
-                .put(KEY_OLD_CREATED_AT, createAtStr)
-                .put(KEY_OLD_UPDATED_AT, updateAtStr)
-                .put(KEY_OLD_POINTERS, pointerJson);
+        JSONObject oldObjectJson =
+                new JSONObject()
+                        .put(KEY_OLD_OBJECT_ID, "objectId")
+                        .put(KEY_OLD_CREATED_AT, createAtStr)
+                        .put(KEY_OLD_UPDATED_AT, updateAtStr)
+                        .put(KEY_OLD_POINTERS, pointerJson);
 
         ParseObjectCurrentCoder coder = ParseObjectCurrentCoder.get();
         ParseObject.State.Builder builder =
-                coder.decode(new ParseObject.State.Builder("Test"), oldObjectJson, ParseDecoder.get());
+                coder.decode(
+                        new ParseObject.State.Builder("Test"), oldObjectJson, ParseDecoder.get());
 
         // We use the builder to build a state to verify the content in the builder
         ParseObject.State state = builder.build();
@@ -159,21 +157,27 @@ public class ParseObjectCurrentCoderTest {
         String dateString = "2011-08-12T01:06:05Z";
         Date date = format.parse(dateString);
 
-        String jsonString = "{" +
-                "'id':'wnAiJVI3ra'," +
-                "'updated_at':'" + dateString + "'," +
-                "'pointers':{'child':['child','" + childObject.getObjectId() + "']}," +
-                "'classname':'myClass'," +
-                "'dirty':true," +
-                "'data':{'foo':'bar'}," +
-                "'created_at':'2011-08-12T01:06:05Z'," +
-                "'deletedKeys':['toDelete']" +
-                "}";
+        String jsonString =
+                "{"
+                        + "'id':'wnAiJVI3ra',"
+                        + "'updated_at':'"
+                        + dateString
+                        + "',"
+                        + "'pointers':{'child':['child','"
+                        + childObject.getObjectId()
+                        + "']},"
+                        + "'classname':'myClass',"
+                        + "'dirty':true,"
+                        + "'data':{'foo':'bar'},"
+                        + "'created_at':'2011-08-12T01:06:05Z',"
+                        + "'deletedKeys':['toDelete']"
+                        + "}";
 
         ParseObjectCurrentCoder coder = ParseObjectCurrentCoder.get();
         JSONObject json = new JSONObject(jsonString);
-        ParseObject.State state = coder.decode(
-                new ParseObject.State.Builder("Test"), json, ParseDecoder.get()).build();
+        ParseObject.State state =
+                coder.decode(new ParseObject.State.Builder("Test"), json, ParseDecoder.get())
+                        .build();
 
         assertEquals("wnAiJVI3ra", state.objectId());
         assertEquals("bar", state.get("foo"));
@@ -181,18 +185,22 @@ public class ParseObjectCurrentCoderTest {
         assertEquals(((ParseObject) state.get("child")).getObjectId(), childObject.getObjectId());
 
         // Test that objects can be serialized and deserialized without timestamps
-        String jsonStringWithoutTimestamps = "{" +
-                "'id':'wnAiJVI3ra'," +
-                "'pointers':{'child':['child','" + childObject.getObjectId() + "']}," +
-                "'classname':'myClass'," +
-                "'dirty':true," +
-                "'data':{'foo':'bar'}," +
-                "'deletedKeys':['toDelete']" +
-                "}";
+        String jsonStringWithoutTimestamps =
+                "{"
+                        + "'id':'wnAiJVI3ra',"
+                        + "'pointers':{'child':['child','"
+                        + childObject.getObjectId()
+                        + "']},"
+                        + "'classname':'myClass',"
+                        + "'dirty':true,"
+                        + "'data':{'foo':'bar'},"
+                        + "'deletedKeys':['toDelete']"
+                        + "}";
 
         json = new JSONObject(jsonStringWithoutTimestamps);
-        state = coder.decode(
-                new ParseObject.State.Builder("Test"), json, ParseDecoder.get()).build();
+        state =
+                coder.decode(new ParseObject.State.Builder("Test"), json, ParseDecoder.get())
+                        .build();
         assertEquals("wnAiJVI3ra", state.objectId());
     }
 }

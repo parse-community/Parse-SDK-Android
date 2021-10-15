@@ -201,7 +201,9 @@ object ParseGoogleUtils {
      * with the same result as the input task after the callback has been run.
      */
     private fun <T> callbackOnMainThreadAsync(
-        task: Task<T>, callback: SaveCallback, reportCancellation: Boolean
+        task: Task<T>,
+        callback: SaveCallback,
+        reportCancellation: Boolean
     ): Task<T> {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation)
     }
@@ -212,46 +214,50 @@ object ParseGoogleUtils {
      * is false, the callback will not be called if the task was cancelled.
      */
     private fun <T> callbackOnMainThreadInternalAsync(
-        task: Task<T>, callback: Any?, reportCancellation: Boolean
+        task: Task<T>,
+        callback: Any?,
+        reportCancellation: Boolean
     ): Task<T> {
         if (callback == null) {
             return task
         }
         val tcs: Task<T>.TaskCompletionSource = Task.create()
-        task.continueWith<Void>(Continuation { task ->
-            if (task.isCancelled && !reportCancellation) {
-                tcs.setCancelled()
-                return@Continuation null
-            }
-            Task.UI_THREAD_EXECUTOR.execute {
-                try {
-                    var error = task.error
-                    if (error != null && error !is ParseException) {
-                        error = ParseException(error)
-                    }
-                    if (callback is SaveCallback) {
-                        callback.done(error as? ParseException)
-                    } else if (callback is LogInCallback) {
-                        callback.done(
-                            task.result as? ParseUser, error as? ParseException
-                        )
-                    }
-                } finally {
-                    when {
-                        task.isCancelled -> {
-                            tcs.setCancelled()
+        task.continueWith<Void>(
+            Continuation { task ->
+                if (task.isCancelled && !reportCancellation) {
+                    tcs.setCancelled()
+                    return@Continuation null
+                }
+                Task.UI_THREAD_EXECUTOR.execute {
+                    try {
+                        var error = task.error
+                        if (error != null && error !is ParseException) {
+                            error = ParseException(error)
                         }
-                        task.isFaulted -> {
-                            tcs.setError(task.error)
+                        if (callback is SaveCallback) {
+                            callback.done(error as? ParseException)
+                        } else if (callback is LogInCallback) {
+                            callback.done(
+                                task.result as? ParseUser, error as? ParseException
+                            )
                         }
-                        else -> {
-                            tcs.setResult(task.result)
+                    } finally {
+                        when {
+                            task.isCancelled -> {
+                                tcs.setCancelled()
+                            }
+                            task.isFaulted -> {
+                                tcs.setError(task.error)
+                            }
+                            else -> {
+                                tcs.setResult(task.result)
+                            }
                         }
                     }
                 }
+                null
             }
-            null
-        })
+        )
         return tcs.task
     }
 }

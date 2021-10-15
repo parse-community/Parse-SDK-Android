@@ -9,20 +9,16 @@
 package com.parse;
 
 import android.os.Parcel;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * An operation where a field is deleted from the object.
- */
+/** An operation where a field is deleted from the object. */
 class ParseDeleteOperation implements ParseFieldOperation {
-    /* package */ final static String OP_NAME = "Delete";
+    /* package */ static final String OP_NAME = "Delete";
 
     private static final ParseDeleteOperation defaultInstance = new ParseDeleteOperation();
 
-    private ParseDeleteOperation() {
-    }
+    private ParseDeleteOperation() {}
 
     public static ParseDeleteOperation getInstance() {
         return defaultInstance;
