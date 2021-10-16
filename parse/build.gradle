@@ -32,6 +32,9 @@ android {
         debug {
             testCoverageEnabled = true
         }
+        release {
+            testCoverageEnabled = false
+        }
     }
 
     compileOptions {
