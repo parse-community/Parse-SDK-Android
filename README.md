@@ -23,6 +23,15 @@ allprojects {
     }
 }
 ```
+or alternatively in your settings.gradle file:
+
+```dependencyResolutionManagement {
+       repositories {
+           ...
+           maven { url "https://jitpack.io" }
+       }
+   }
+```
 
 Then, add the library to your project `build.gradle`
 ```gradle
