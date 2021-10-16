@@ -21,6 +21,15 @@ android {
         abortOnError false
     }
 
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+        release {
+            testCoverageEnabled = false
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
