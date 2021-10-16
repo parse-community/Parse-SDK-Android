@@ -30,6 +30,7 @@ android {
         }
     }
 
+    // Could actually be removed since implicitly declared with Gradle 7
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
