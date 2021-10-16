@@ -168,12 +168,12 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
-                .server("https://api.parse.com/1")
-                .enableLocalDataStore()
-                .allowCustomObjectId()
-                .build();
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
         ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
         Parse.initialize(configuration, plugins);
 
@@ -184,7 +184,9 @@ public class ParseObjectTest {
             assertEquals(e.getCode(), 104);
             assertThat(e.getMessage(), is("ObjectId must not be null"));
         }
+
         Parse.destroy();
+        ParsePlugins.reset();
     }
 
     @Test
@@ -193,7 +195,9 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(RuntimeEnvironment.application).allowCustomObjectId().build();
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .allowCustomObjectId()
+                        .build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
@@ -209,6 +213,9 @@ public class ParseObjectTest {
             exception = e;
         }
         assertNull(exception);
+
+        Parse.destroy();
+        ParsePlugins.reset();
     }
 
     @Test
@@ -217,12 +224,12 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
-                .server("https://api.parse.com/1")
-                .enableLocalDataStore()
-                .allowCustomObjectId()
-                .build();
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
         ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
         Parse.initialize(configuration, plugins);
 
@@ -236,7 +243,9 @@ public class ParseObjectTest {
                         assertThat(e.getMessage(), is("ObjectId must not be null"));
                     }
                 });
+
         Parse.destroy();
+        ParsePlugins.reset();
     }
 
     @Test
@@ -245,7 +254,9 @@ public class ParseObjectTest {
         mockCurrentUserController();
 
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(RuntimeEnvironment.application).allowCustomObjectId().build();
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .allowCustomObjectId()
+                        .build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
@@ -260,6 +271,9 @@ public class ParseObjectTest {
                         assertNull(e);
                     }
                 });
+
+        Parse.destroy();
+        ParsePlugins.reset();
     }
 
     // region testGetter
