@@ -186,8 +186,6 @@ public class ParseObjectTest {
             assertEquals(e.getCode(), 104);
             assertThat(e.getMessage(), is("ObjectId must not be null"));
         }
-
-        Parse.destroy();
     }
 
     @Test
@@ -217,8 +215,6 @@ public class ParseObjectTest {
             exception = e;
         }
         assertNull(exception);
-
-        Parse.destroy();
     }
 
     @Test
