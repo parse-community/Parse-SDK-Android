@@ -248,7 +248,6 @@ public class ParseObjectTest {
                 });
 
         Parse.setLocalDatastore(null);
-        Parse.destroy();
     }
 
     @Test
@@ -277,7 +276,6 @@ public class ParseObjectTest {
                 });
 
         Parse.setLocalDatastore(null);
-        Parse.destroy();
     }
 
     // region testGetter
