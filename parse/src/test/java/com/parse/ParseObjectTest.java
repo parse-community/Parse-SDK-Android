@@ -174,7 +174,9 @@ public class ParseObjectTest {
                         .enableLocalDataStore()
                         .allowCustomObjectId()
                         .build();
-        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.configuration()).thenReturn(configuration);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
         Parse.initialize(configuration, plugins);
 
         ParseObject object = new ParseObject("TestObject");
@@ -186,7 +188,6 @@ public class ParseObjectTest {
         }
 
         Parse.destroy();
-        ParsePlugins.reset();
     }
 
     @Test
@@ -196,12 +197,15 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
                         .allowCustomObjectId()
                         .build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
-        ParsePlugins.set(plugins);
+        Parse.initialize(configuration, plugins);
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
@@ -215,7 +219,6 @@ public class ParseObjectTest {
         assertNull(exception);
 
         Parse.destroy();
-        ParsePlugins.reset();
     }
 
     @Test
@@ -244,8 +247,8 @@ public class ParseObjectTest {
                     }
                 });
 
+        Parse.setLocalDatastore(null);
         Parse.destroy();
-        ParsePlugins.reset();
     }
 
     @Test
@@ -255,12 +258,13 @@ public class ParseObjectTest {
 
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
                         .allowCustomObjectId()
                         .build();
-        ParsePlugins plugins = mock(ParsePlugins.class);
-        when(plugins.configuration()).thenReturn(configuration);
-        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
-        ParsePlugins.set(plugins);
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
 
         ParseObject object = new ParseObject("TestObject");
         object.setObjectId("ABCDEF123456");
@@ -272,8 +276,8 @@ public class ParseObjectTest {
                     }
                 });
 
+        Parse.setLocalDatastore(null);
         Parse.destroy();
-        ParsePlugins.reset();
     }
 
     // region testGetter
