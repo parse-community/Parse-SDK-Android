@@ -1,3 +1,10 @@
+## [2.0.2](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.1...2.0.2) (2021-10-17)
+
+
+### Bug Fixes
+
+* race condition when keys are added or removed while the object is being traversed ([#1062](https://github.com/parse-community/Parse-SDK-Android/issues/1062)) ([d28e64d](https://github.com/parse-community/Parse-SDK-Android/commit/d28e64dfc6ade48a032504c54a9bfd2c08a800e2))
+
 ## [2.0.1](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.0...2.0.1) (2021-10-14)
 
 
