@@ -4,6 +4,9 @@
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-Android/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-Android)
 [![codecov](https://codecov.io/gh/parse-community/Parse-SDK-Android/branch/master/graph/badge.svg)](https://codecov.io/gh/parse-community/Parse-SDK-Android)
 
+[![android min api](https://img.shields.io/badge/Android_API->=16-66c718.svg)](https://github.com/parse-community/parse-dashboard/releases)
+[![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
+
 [![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
 [![](https://jitpack.io/v/parse-community/Parse-SDK-Android/month.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
 
