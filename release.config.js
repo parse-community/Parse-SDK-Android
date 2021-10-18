@@ -79,8 +79,11 @@ async function config() {
         'changelogFile': changelogFile,
       }],
       "gradle-semantic-release-plugin",
+      ['@semantic-release/npm', {
+        'npmPublish': false,
+      }],
       ['@semantic-release/git', {
-        assets: ["gradle.properties", changelogFile],
+        assets: [changelogFile, 'package.json', 'package-lock.json', 'gradle.properties'],
       }],
       ['@semantic-release/github', {
         successComment: getReleaseComment(),
