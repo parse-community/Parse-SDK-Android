@@ -8,10 +8,12 @@
  */
 package com.parse;
 
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -94,7 +96,14 @@ abstract class ParseTraverser {
         } else if (root instanceof ParseObject) {
             if (traverseParseObjects) {
                 ParseObject object = (ParseObject) root;
-                for (String key : object.keySet()) {
+                // Because the object's keySet is not thread safe, because the underlying Map isn't,
+                // we need to create a copy before iterating over the object's keys to avoid
+                // ConcurrentModificationExceptions
+                Set<String> keySet;
+                synchronized (object.mutex) {
+                    keySet = new HashSet<>(object.keySet());
+                }
+                for (String key : keySet) {
                     traverseInternal(object.get(key), true, seen);
                 }
             }
