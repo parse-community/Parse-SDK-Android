@@ -1,3 +1,10 @@
+## [2.0.3](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.2...2.0.3) (2021-10-18)
+
+
+### Bug Fixes
+
+* java package version always 1.0.0, current parse version not pushed to server ([#1130](https://github.com/parse-community/Parse-SDK-Android/issues/1130)) ([3c6496a](https://github.com/parse-community/Parse-SDK-Android/commit/3c6496a2bc8be989f3d1d7f808edc829dea2579e))
+
 ## [2.0.2](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.1...2.0.2) (2021-10-17)
 
 
