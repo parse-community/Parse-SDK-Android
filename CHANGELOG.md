@@ -20,7 +20,7 @@
 * add maven publications to configure the Jitpack releases ([#1128](https://github.com/parse-community/Parse-SDK-Android/issues/1128)) ([67c4fb6](https://github.com/parse-community/Parse-SDK-Android/commit/67c4fb6209e1a3b3db9663156b356b8888ef0d87))
 * Parse Android SDK 2.0.0 not building on jitpack ([#1129](https://github.com/parse-community/Parse-SDK-Android/issues/1129)) ([5d40917](https://github.com/parse-community/Parse-SDK-Android/commit/5d409174358ec4f2f04b9e0ea3000743c4a066ff))
 
-# [2.0.0](https://github.com/mtrezza/Parse-SDK-Android/compare/1.22.0...2.0.0) (2021-10-10)
+# [2.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/1.26.0...2.0.0) (2021-10-10)
 
 ### BREAKING CHANGES
 - Required minimum SDK version is 16 ([#1095](https://github.com/parse-community/Parse-SDK-Android/pull/1095))
