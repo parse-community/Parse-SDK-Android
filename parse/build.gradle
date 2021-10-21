@@ -33,9 +33,6 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             buildConfigField("String","PARSE_VERSION","\"${version}\"")
         }
-        release {
-            testCoverageEnabled = false
-        }
     }
 
     // Could actually be removed since implicitly declared with Gradle 7
