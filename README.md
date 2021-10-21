@@ -1,4 +1,6 @@
-# Parse SDK for Android
+![parse-repository-header-sdk-android](https://user-images.githubusercontent.com/5673677/138284986-844b692c-d976-4370-a840-0ada5de8a8bf.png)
+
+---
 
 [![Build Status](https://github.com/parse-community/Parse-SDK-Android/workflows/ci/badge.svg?branch=master)](https://github.com/parse-community/Parse-SDK-Android/actions?query=workflow%3Aci+branch%3Amaster)
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-Android/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-Android)
@@ -18,10 +20,19 @@
 
 ---
 
-A library that gives you access to the powerful Parse Server backend from your Android app.
-For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).
+A library that gives you access to the powerful Parse Server backend from your Android app. For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).
 
-## Dependency
+---
+
+- [Getting Started](#getting-started)
+  - [Add Dependency](#add-dependency)
+  - [Setup](#setup)
+- [Contributing](#contributing)
+- [More Parse Android Projects](#more-parse-android-projects)
+
+# Getting Started
+
+## Add Dependency
 
 Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
 
@@ -60,7 +71,7 @@ dependencies {
 
 replacing `latest.version.here` with the latest released version (see JitPack badge above).
 
-### Setup
+## Setup
 
 Initialize Parse in a custom class that extends `Application`:
 
@@ -97,11 +108,11 @@ Note that if you are testing with a server using `http`, you will need to add `a
 
 See the [guide][guide] for the rest of the SDK usage.
 
-## How Do I Contribute?
+# Contributing
 
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
 
-## Other Parse Projects
+# More Parse Android Projects
 These are other official libraries we made that can help you create your Parse app.
 
 - [ParseGoogleUtils](/google) - Google login/signup.
@@ -113,15 +124,6 @@ These are other official libraries we made that can help you create your Parse a
 - [Parse RxJava](/rxjava) - Transform Parse `Task`s to RxJava `Completable`s and `Single`s
 - [ParseLiveQuery](https://github.com/parse-community/ParseLiveQuery-Android) - Realtime query subscription.
 - [ParseUI](https://github.com/parse-community/ParseUI-Android) - Prebuilt UI elements.
-
-## License
-
-    Copyright (c) 2015-present, Parse, LLC.
-    All rights reserved.
-
-    This source code is licensed under the BSD-style license found in the
-    LICENSE file in the root directory of this source tree. An additional grant
-    of patent rights can be found in the PATENTS file in the same directory.
 
 ---
 
