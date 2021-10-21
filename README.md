@@ -1,12 +1,22 @@
 # Parse SDK for Android
 
 [![Build Status](https://github.com/parse-community/Parse-SDK-Android/workflows/ci/badge.svg?branch=master)](https://github.com/parse-community/Parse-SDK-Android/actions?query=workflow%3Aci+branch%3Amaster)
-[![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
+[![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-Android/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-Android)
 [![codecov](https://codecov.io/gh/parse-community/Parse-SDK-Android/branch/master/graph/badge.svg)](https://codecov.io/gh/parse-community/Parse-SDK-Android)
+
+[![android min api](https://img.shields.io/badge/Android_API->=16-66c718.svg)](https://github.com/parse-community/parse-dashboard/releases)
+[![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
+
+[![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
+[![](https://jitpack.io/v/parse-community/Parse-SDK-Android/month.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
+
 [![Backers on Open Collective](https://opencollective.com/parse-server/backers/badge.svg)][open-collective-link]
 [![Sponsors on Open Collective](https://opencollective.com/parse-server/sponsors/badge.svg)][open-collective-link]
 [![License](https://img.shields.io/badge/license-BSD-lightgrey.svg)](https://github.com/parse-community/Parse-SDK-Android/blob/master/LICENSE)
+[![Forum](https://img.shields.io/discourse/https/community.parseplatform.org/topics.svg)](https://community.parseplatform.org/c/parse-server)
 [![Twitter Follow](https://img.shields.io/twitter/follow/ParsePlatform.svg?label=Follow%20us%20on%20Twitter&style=social)](https://twitter.com/intent/follow?screen_name=ParsePlatform)
+
+---
 
 A library that gives you access to the powerful Parse Server backend from your Android app.
 For more information about Parse and its features, see [the website](https://parseplatform.org/), [getting started][guide], and [blog](https://blog.parseplatform.org/).

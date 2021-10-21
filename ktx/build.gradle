@@ -10,15 +10,7 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-    }
-
-    packagingOptions {
-        exclude "**/BuildConfig.class"
     }
 
     lintOptions {
@@ -26,13 +18,14 @@ android {
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            testCoverageEnabled = false
-        }
         debug {
             testCoverageEnabled = true
+            buildConfigField("String","PARSE_VERSION","\"${version}\"")
+        }
+        release {
+            minifyEnabled false
+            testCoverageEnabled = false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
 
