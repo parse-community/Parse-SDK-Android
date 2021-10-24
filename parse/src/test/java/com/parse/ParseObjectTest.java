@@ -93,6 +93,7 @@ public class ParseObjectTest extends ResetPluginsParseTest {
     @After
     public void tearDown() throws Exception {
         super.tearDown();
+        Parse.destroy();
     }
 
     @Test
