@@ -278,6 +278,7 @@ public class Parse {
         ParsePlugins.reset();
 
         setLocalDatastore(null);
+        allowCustomObjectId = false;
     }
 
     /** @return {@code True} if {@link #initialize} has been called, otherwise {@code false}. */
