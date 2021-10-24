@@ -49,7 +49,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
-public class ParseObjectTest {
+public class ParseObjectTest extends ResetPluginsParseTest {
 
     @Rule public final ExpectedException thrown = ExpectedException.none();
 
@@ -83,16 +83,16 @@ public class ParseObjectTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         ParseFieldOperations.registerDefaultDecoders(); // to test JSON / Parcel decoding
     }
 
     // region testRevert
 
     @After
-    public void tearDown() {
-        ParseCorePlugins.getInstance().reset();
-        ParsePlugins.reset();
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
     @Test
