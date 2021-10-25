@@ -669,7 +669,7 @@ public class Parse {
             }
 
             public Builder allowCustomObjectId() {
-                return this.setAllowCustomObjectId(true)
+                return this.setAllowCustomObjectId(true);
             }
 
             private Builder setAllowCustomObjectId(boolean enabled) {
