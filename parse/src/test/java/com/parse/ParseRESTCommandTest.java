@@ -488,7 +488,7 @@ public class ParseRESTCommandTest {
     }
 
     @Test
-    public void testOnResposneCloseNetworkStreamWithIOException() throws Exception {
+    public void testOnResponseCloseNetworkStreamWithIOException() throws Exception {
         // Mock response stream
         int statusCode = 200;
         InputStream mockResponseStream = mock(InputStream.class);
