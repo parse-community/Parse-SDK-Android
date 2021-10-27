@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -524,22 +523,23 @@ public class ParseRESTCommandTest {
         ParseObject.State state = mock(ParseObject.State.class);
         when(state.className()).thenReturn("TestObject");
         when(state.objectId()).thenReturn("test_id");
-        when(state.createdAt()).thenReturn(System.currentTimeMillis()/1000L);
-        when(state.updatedAt()).thenReturn(System.currentTimeMillis()/1000L);
+        when(state.createdAt()).thenReturn(System.currentTimeMillis() / 1000L);
+        when(state.updatedAt()).thenReturn(System.currentTimeMillis() / 1000L);
         when(state.keySet()).thenReturn(Collections.singleton("foo"));
         when(state.get("foo")).thenReturn("bar");
         ParseObject parseObject = ParseObject.from(state);
 
-        ParseRESTObjectCommand command = ParseRESTObjectCommand.saveObjectCommand(parseObject.getState(), null, null);
+        ParseRESTObjectCommand command =
+                ParseRESTObjectCommand.saveObjectCommand(parseObject.getState(), null, null);
         assertEquals(command.method, ParseHttpRequest.Method.PUT);
 
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(RuntimeEnvironment.application)
-                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
-                .server("https://api.parse.com/1")
-                .enableLocalDataStore()
-                .allowCustomObjectId()
-                .build();
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
         ParsePlugins plugins = mock(ParsePlugins.class);
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
