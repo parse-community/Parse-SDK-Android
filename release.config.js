@@ -78,8 +78,12 @@ async function config() {
       ['@semantic-release/changelog', {
         'changelogFile': changelogFile,
       }],
+      "gradle-semantic-release-plugin",
+      ['@semantic-release/npm', {
+        'npmPublish': false,
+      }],
       ['@semantic-release/git', {
-        assets: [changelogFile],
+        assets: [changelogFile, 'package.json', 'package-lock.json', 'gradle.properties'],
       }],
       ['@semantic-release/github', {
         successComment: getReleaseComment(),
@@ -105,7 +109,7 @@ async function readFile(filePath) {
 
 function getReleaseComment() {
   const url = repositoryUrl + '/releases/tag/${nextRelease.gitTag}';
-  let comment = '🎉 This pull request has been released in version [${nextRelease.version}](' + url + ')';
+  let comment = '🎉 This change has been released in version [${nextRelease.version}](' + url + ')';
   return comment;
 }
 

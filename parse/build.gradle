@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: "maven-publish"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
@@ -8,8 +9,6 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
         consumerProguardFiles "release-proguard.pro"
     }
 
@@ -19,10 +18,6 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude '**/BuildConfig.class'
-    }
-
     lintOptions {
         abortOnError false
     }
@@ -30,6 +25,13 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled = true
+            buildConfigField("String","PARSE_VERSION","\"${version}\"")
+        }
+        release {
+            minifyEnabled false
+            testCoverageEnabled = false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            buildConfigField("String","PARSE_VERSION","\"${version}\"")
         }
     }
 
@@ -55,6 +57,16 @@ dependencies {
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
     testImplementation "org.mockito:mockito-core:3.9.0"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
 }
 
 //region Code Coverage

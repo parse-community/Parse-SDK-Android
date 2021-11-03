@@ -230,6 +230,8 @@ public class ParseInstallation extends ParseObject {
             } catch (PackageManager.NameNotFoundException e) {
                 PLog.w(TAG, "Cannot load package info; will not be saved to installation");
             }
+
+            performPut(KEY_PARSE_VERSION, BuildConfig.PARSE_VERSION);
         }
     }
 

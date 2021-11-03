@@ -590,7 +590,9 @@ public class ParseObject implements Parcelable {
                 // Check for cycles of new objects. Any such cycle means it will be
                 // impossible to save this collection of objects, so throw an exception.
                 if (object.getObjectId() != null) {
-                    seenNew = new HashSet<>();
+                    if (!seenNew.isEmpty()) {
+                        seenNew = new HashSet<>();
+                    }
                 } else {
                     if (seenNew.contains(object)) {
                         throw new RuntimeException("Found a circular dependency while saving.");
@@ -605,7 +607,6 @@ public class ParseObject implements Parcelable {
                 if (seen.contains(object)) {
                     return true;
                 }
-                seen = new HashSet<>(seen);
                 seen.add(object);
 
                 // Recurse into this object's children looking for dirty children.
@@ -1474,6 +1475,9 @@ public class ParseObject implements Parcelable {
     /**
      * Returns a set view of the keys contained in this object. This does not include createdAt,
      * updatedAt, authData, or objectId. It does include things like username and ACL.
+     *
+     * <p>Note that while the returned set is unmodifiable, it is in fact not thread-safe, and
+     * creating a copy is recommended before iterating over it.
      */
     public Set<String> keySet() {
         synchronized (mutex) {
