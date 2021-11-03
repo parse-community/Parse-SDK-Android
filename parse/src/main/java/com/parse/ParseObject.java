@@ -590,7 +590,9 @@ public class ParseObject implements Parcelable {
                 // Check for cycles of new objects. Any such cycle means it will be
                 // impossible to save this collection of objects, so throw an exception.
                 if (object.getObjectId() != null) {
-                    seenNew = new HashSet<>();
+                    if (!seenNew.isEmpty()) {
+                        seenNew = new HashSet<>();
+                    }
                 } else {
                     if (seenNew.contains(object)) {
                         throw new RuntimeException("Found a circular dependency while saving.");
@@ -605,7 +607,6 @@ public class ParseObject implements Parcelable {
                 if (seen.contains(object)) {
                     return true;
                 }
-                seen = new HashSet<>(seen);
                 seen.add(object);
 
                 // Recurse into this object's children looking for dirty children.
