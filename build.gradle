@@ -63,10 +63,10 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 31
+    compileSdkVersion = 30
 
     minSdkVersion = 16
-    targetSdkVersion = 31
+    targetSdkVersion = 30
 }
 
 task createSpotlessPreCommitHook() {
