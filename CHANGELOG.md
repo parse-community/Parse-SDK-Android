@@ -1,3 +1,10 @@
+## [2.0.4](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.3...2.0.4) (2021-11-03)
+
+
+### Performance Improvements
+
+* remove unnecessary extra child traversal in collectDirtyChildren ([#1058](https://github.com/parse-community/Parse-SDK-Android/issues/1058)) ([1844b3e](https://github.com/parse-community/Parse-SDK-Android/commit/1844b3ee9557a9f12983a573dc6d02ef0ec79910))
+
 ## [2.0.3](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.2...2.0.3) (2021-10-18)
 
 
