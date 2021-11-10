@@ -959,7 +959,7 @@ public class ParseUserTest extends ResetPluginsParseTest {
         ParseTaskUtils.wait(partialMockUser.saveAsync("sessionToken", Task.<Void>forResult(null)));
 
         // Make sure we clean authData
-        assertFalse(partialMockUser.getAuthData().containsKey("facebook"));
+        assertFalse(partialMockUser.getState().authData().containsKey("facebook"));
         // Make sure we save new currentUser
         verify(currentUserController, times(1)).setAsync(partialMockUser);
     }

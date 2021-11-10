@@ -757,7 +757,7 @@ public class ParseUser extends ParseObject {
 
     /* package */ void putAuthData(String authType, Map<String, String> authData) {
         synchronized (mutex) {
-            Map<String, Map<String, String>> newAuthData = getAuthData();
+            Map<String, Map<String, String>> newAuthData = new HashMap<>(getAuthData());
             newAuthData.put(authType, authData);
             performPut(KEY_AUTH_DATA, newAuthData);
         }
@@ -765,7 +765,7 @@ public class ParseUser extends ParseObject {
 
     private void removeAuthData(String authType) {
         synchronized (mutex) {
-            Map<String, Map<String, String>> newAuthData = getAuthData();
+            Map<String, Map<String, String>> newAuthData = new HashMap<>(getAuthData());
             newAuthData.remove(authType);
             performPut(KEY_AUTH_DATA, newAuthData);
         }
