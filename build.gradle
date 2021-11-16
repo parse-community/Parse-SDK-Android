@@ -11,13 +11,13 @@ buildscript {
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "io.freefair.gradle:android-gradle-plugins:4.2.0-m1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:6.0.0"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.17.1"
     }
 }
 
 plugins {
     id "com.github.ben-manes.versions" version "0.28.0"
-    id "com.diffplug.spotless" version "6.0.0"
+    id "com.diffplug.spotless" version "5.17.1"
 }
 
 allprojects {
