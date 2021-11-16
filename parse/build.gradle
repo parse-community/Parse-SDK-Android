@@ -59,6 +59,8 @@ dependencies {
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
 
+//region Publishing
+
 afterEvaluate {
     publishing {
         publications {
@@ -68,6 +70,8 @@ afterEvaluate {
         }
     }
 }
+
+//endregion
 
 //region Code Coverage
 
@@ -90,13 +94,5 @@ jacocoAndroidUnitTestReport {
     html.enabled true
     xml.enabled true
 }
-
-//endregion
-
-//region Coveralls
-
-apply plugin: "com.github.kt3k.coveralls"
-
-coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion

@@ -11,6 +11,11 @@ dependencies {
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 
 task sourcesJar(type: Jar) {
@@ -26,6 +31,18 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+//region Publishing
+
+afterEvaluate {
+    publishing {
+        publications {
+            boltsPublication(MavenPublication) {
+                from components.java
+            }
+        }
+    }
 }
 
 //endregion
@@ -45,17 +62,3 @@ jacocoTestReport {
 
 //endregion
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            boltsPublication(MavenPublication) {
-                from components.java
-            }
-        }
-    }
-}
