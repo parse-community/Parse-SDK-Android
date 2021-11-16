@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,14 @@ public class ParsePushBroadcastReceiverTest extends ResetPluginsParseTest {
         when(plugins.configuration()).thenReturn(configuration);
         when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
         Parse.initialize(configuration, plugins);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        Parse.destroy();
     }
 
     @Test
