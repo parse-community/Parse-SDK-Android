@@ -22,6 +22,8 @@ import com.facebook.FacebookSdk;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -92,7 +94,7 @@ class FacebookController {
                             "Unable to authenticate when another authentication is in process"));
         }
 
-        final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<Map<String, String>> tcs = new TaskCompletionSource<>();
         LoginManager manager = facebookSdkDelegate.getLoginManager();
 
         callbackManager = facebookSdkDelegate.createCallbackManager();
@@ -119,13 +121,13 @@ class FacebookController {
 
         if (LoginAuthorizationType.PUBLISH.equals(authorizationType)) {
             if (fragment != null) {
-                manager.logInWithPublishPermissions(fragment, permissions);
+                manager.logInWithPublishPermissions(fragment, callbackManager, permissions);
             } else {
                 manager.logInWithPublishPermissions(activity, permissions);
             }
         } else {
             if (fragment != null) {
-                manager.logInWithReadPermissions(fragment, permissions);
+                manager.logInWithReadPermissions(fragment, callbackManager, permissions);
             } else {
                 manager.logInWithReadPermissions(activity, permissions);
             }
