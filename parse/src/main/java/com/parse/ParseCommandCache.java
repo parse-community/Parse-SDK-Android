@@ -144,7 +144,9 @@ class ParseCommandCache extends ParseEventuallyQueue {
     public void onDestroy() {
         // TODO (grantland): pause #6484855
 
-        notifier.removeListener(listener);
+        if (notifier != null) {
+            notifier.removeListener(listener);
+        }
     }
 
     // Set the maximum number of times to retry before assuming disconnection.
