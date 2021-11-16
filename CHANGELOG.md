@@ -1,3 +1,10 @@
+## [2.0.6](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.5...2.0.6) (2021-11-16)
+
+
+### Bug Fixes
+
+* missing pending intents mutability for Android 12+ ([#1139](https://github.com/parse-community/Parse-SDK-Android/issues/1139)) ([fbe8d87](https://github.com/parse-community/Parse-SDK-Android/commit/fbe8d87cc0604c4c34866815307c07e99a125f45))
+
 ## [2.0.5](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.4...2.0.5) (2021-11-10)
 
 
