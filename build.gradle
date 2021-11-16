@@ -63,10 +63,10 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 30
+    compileSdkVersion = 31
 
     minSdkVersion = 19
-    targetSdkVersion = 30
+    targetSdkVersion = 31
 
     mockitoCoreVersion = "3.12.4"
     junitVersion = "4.13.2"
