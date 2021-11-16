@@ -130,15 +130,6 @@ public final class ParseTwitterUtils {
     }
 
     /**
-     * @deprecated Please use {@link ParseTwitterUtils#linkInBackground(Context, ParseUser)}
-     *     instead.
-     */
-    @Deprecated
-    public static void link(ParseUser user, Context context) {
-        link(user, context, null);
-    }
-
-    /**
      * Links a ParseUser to a Twitter account, allowing you to use Twitter for authentication, and
      * providing access to Twitter data for the user. A dialog will be shown to the user for Twitter
      * authentication.
@@ -176,20 +167,6 @@ public final class ParseTwitterUtils {
                 getTwitterController()
                         .getAuthData(twitterId, screenName, authToken, authTokenSecret);
         return user.linkWithInBackground(AUTH_TYPE, authData);
-    }
-
-    /**
-     * @deprecated Please use {@link ParseTwitterUtils#linkInBackground(ParseUser, String, String,
-     *     String, String)} instead.
-     */
-    @Deprecated
-    public static void link(
-            ParseUser user,
-            String twitterId,
-            String screenName,
-            String authToken,
-            String authTokenSecret) {
-        link(user, twitterId, screenName, authToken, authTokenSecret, null);
     }
 
     /**

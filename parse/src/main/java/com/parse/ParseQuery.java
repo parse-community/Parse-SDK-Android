@@ -1392,7 +1392,6 @@ public class ParseQuery<T extends ParseObject> {
      * values can either be actual values to compare with for equality, or instances of {@link
      * KeyConstraints}.
      */
-    @SuppressWarnings("serial")
     /* package */ static class QueryConstraints extends HashMap<String, Object> {
 
         public QueryConstraints() {
@@ -1409,7 +1408,6 @@ public class ParseQuery<T extends ParseObject> {
      * special operators, such as $greaterThan or $nin. The values are the actual values to compare
      * against.
      */
-    @SuppressWarnings("serial")
     /* package */ static class KeyConstraints extends HashMap<String, Object> {}
 
     /** Constraint for a $relatedTo query. */
@@ -1588,6 +1586,7 @@ public class ParseQuery<T extends ParseObject> {
             return params;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return String.format(

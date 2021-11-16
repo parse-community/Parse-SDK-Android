@@ -98,7 +98,7 @@ class ParseTaskUtils {
         if (callback == null) {
             return task;
         }
-        final TaskCompletionSource<T> tcs = new TaskCompletionSource();
+        final TaskCompletionSource<T> tcs = new TaskCompletionSource<>();
         task.continueWith(
                 (Continuation<T, Void>)
                         task1 -> {

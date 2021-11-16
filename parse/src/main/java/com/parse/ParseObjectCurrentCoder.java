@@ -130,17 +130,11 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
             }
             if (json.has(KEY_OLD_CREATED_AT)) {
                 String createdAtString = json.getString(KEY_OLD_CREATED_AT);
-                if (createdAtString != null) {
-                    builder.createdAt(
-                            ParseImpreciseDateFormat.getInstance().parse(createdAtString));
-                }
+                builder.createdAt(ParseImpreciseDateFormat.getInstance().parse(createdAtString));
             }
             if (json.has(KEY_OLD_UPDATED_AT)) {
                 String updatedAtString = json.getString(KEY_OLD_UPDATED_AT);
-                if (updatedAtString != null) {
-                    builder.updatedAt(
-                            ParseImpreciseDateFormat.getInstance().parse(updatedAtString));
-                }
+                builder.updatedAt(ParseImpreciseDateFormat.getInstance().parse(updatedAtString));
             }
             if (json.has(KEY_OLD_POINTERS)) {
                 JSONObject newPointers = json.getJSONObject(KEY_OLD_POINTERS);

@@ -69,7 +69,7 @@ final class ParseTestUtils {
         File parseDir = createFileDir(applicationContext.getDir("Parse", Context.MODE_PRIVATE));
         when(parsePlugins.installationId())
                 .thenReturn(new InstallationId(new File(parseDir, "installationId")));
-        when(parsePlugins.getParseDir()).thenReturn(parseDir);
+        when(parsePlugins.getFilesDir()).thenReturn(parseDir);
         when(parsePlugins.getCacheDir())
                 .thenReturn(createFileDir(new File(applicationContext.getCacheDir(), "com.parse")));
         when(parsePlugins.getFilesDir())

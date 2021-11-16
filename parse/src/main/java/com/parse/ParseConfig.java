@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import androidx.annotation.NonNull;
 import com.parse.boltsinternal.Task;
 import java.util.Collections;
 import java.util.Date;
@@ -502,6 +503,7 @@ public class ParseConfig {
         return (value instanceof String) ? (String) value : defaultValue;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ParseConfig[" + params.toString() + "]";

@@ -8,7 +8,6 @@ package com.parse.boltsinternal;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -100,29 +99,5 @@ public class AggregateException extends Exception {
             throwable.printStackTrace(err);
             err.append("\n");
         }
-    }
-
-    /** @deprecated Please use {@link #getInnerThrowables()} instead. */
-    @Deprecated
-    public List<Exception> getErrors() {
-        List<Exception> errors = new ArrayList<>();
-        if (innerThrowables == null) {
-            return errors;
-        }
-
-        for (Throwable cause : innerThrowables) {
-            if (cause instanceof Exception) {
-                errors.add((Exception) cause);
-            } else {
-                errors.add(new Exception(cause));
-            }
-        }
-        return errors;
-    }
-
-    /** @deprecated Please use {@link #getInnerThrowables()} instead. */
-    @Deprecated
-    public Throwable[] getCauses() {
-        return innerThrowables.toArray(new Throwable[0]);
     }
 }

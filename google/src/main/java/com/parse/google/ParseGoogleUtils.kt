@@ -13,6 +13,7 @@ import com.parse.ParseUser
 import com.parse.SaveCallback
 import com.parse.boltsinternal.Continuation
 import com.parse.boltsinternal.Task
+import com.parse.boltsinternal.TaskCompletionSource
 
 /**
  * Provides a set of utilities for using Parse with Google.
@@ -221,7 +222,7 @@ object ParseGoogleUtils {
         if (callback == null) {
             return task
         }
-        val tcs: Task<T>.TaskCompletionSource = Task.create()
+        val tcs: TaskCompletionSource<T> = TaskCompletionSource<T>()
         task.continueWith<Void>(
             Continuation { task ->
                 if (task.isCancelled && !reportCancellation) {

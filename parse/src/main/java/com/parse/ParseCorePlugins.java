@@ -128,7 +128,7 @@ class ParseCorePlugins {
 
     public ParseCurrentUserController getCurrentUserController() {
         if (currentUserController.get() == null) {
-            File file = new File(Parse.getParseDir(), FILENAME_CURRENT_USER);
+            File file = new File(Parse.getParseFilesDir(), FILENAME_CURRENT_USER);
             FileObjectStore<ParseUser> fileStore =
                     new FileObjectStore<>(ParseUser.class, file, ParseUserCurrentCoder.get());
             ParseObjectStore<ParseUser> store =
@@ -227,7 +227,7 @@ class ParseCorePlugins {
     public ParseConfigController getConfigController() {
         if (configController.get() == null) {
             // TODO(mengyan): Do not rely on Parse global
-            File file = new File(ParsePlugins.get().getParseDir(), FILENAME_CURRENT_CONFIG);
+            File file = new File(ParsePlugins.get().getFilesDir(), FILENAME_CURRENT_CONFIG);
             ParseCurrentConfigController currentConfigController =
                     new ParseCurrentConfigController(file);
             configController.compareAndSet(
@@ -277,7 +277,7 @@ class ParseCorePlugins {
 
     public ParseCurrentInstallationController getCurrentInstallationController() {
         if (currentInstallationController.get() == null) {
-            File file = new File(ParsePlugins.get().getParseDir(), FILENAME_CURRENT_INSTALLATION);
+            File file = new File(ParsePlugins.get().getFilesDir(), FILENAME_CURRENT_INSTALLATION);
             FileObjectStore<ParseInstallation> fileStore =
                     new FileObjectStore<>(
                             ParseInstallation.class, file, ParseObjectCurrentCoder.get());
@@ -338,7 +338,7 @@ class ParseCorePlugins {
 
     public LocalIdManager getLocalIdManager() {
         if (localIdManager.get() == null) {
-            LocalIdManager manager = new LocalIdManager(Parse.getParseDir());
+            LocalIdManager manager = new LocalIdManager(Parse.getParseFilesDir());
             localIdManager.compareAndSet(null, manager);
         }
         return localIdManager.get();

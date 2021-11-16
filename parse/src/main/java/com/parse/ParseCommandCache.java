@@ -127,7 +127,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
 
     private static File getCacheDir() {
         // Construct the path to the cache directory.
-        File cacheDir = new File(Parse.getParseDir(), "CommandCache");
+        File cacheDir = new File(Parse.getParseCacheDir(), "CommandCache");
         cacheDir.mkdirs();
 
         return cacheDir;
@@ -522,13 +522,11 @@ class ParseCommandCache extends ParseEventuallyQueue {
                                                     String localId = command.getLocalId();
                                                     Exception error = task.getError();
                                                     if (error != null) {
-                                                        if (error instanceof ParseException
-                                                                && ((ParseException) error)
+                                                        if (!(error instanceof ParseException)
+                                                                || ((ParseException) error)
                                                                                 .getCode()
-                                                                        == ParseException
+                                                                        != ParseException
                                                                                 .CONNECTION_FAILED) {
-                                                            // do nothing
-                                                        } else {
                                                             if (tcs != null) {
                                                                 tcs.setError(error);
                                                             }
