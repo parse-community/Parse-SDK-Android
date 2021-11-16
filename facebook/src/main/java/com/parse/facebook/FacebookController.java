@@ -23,7 +23,6 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

@@ -17,6 +17,7 @@ import com.parse.SaveCallback;
 import com.parse.boltsinternal.AggregateException;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 
@@ -391,7 +392,7 @@ public final class ParseTwitterUtils {
         if (callback == null) {
             return task;
         }
-        final Task<T>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<T> tcs = new TaskCompletionSource();
         task.continueWith(
                 (Continuation<T, Void>)
                         task1 -> {

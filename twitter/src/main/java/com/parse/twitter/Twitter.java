@@ -107,6 +107,7 @@ public class Twitter {
         final OkHttpOAuthConsumer consumer =
                 new OkHttpOAuthConsumer(getConsumerKey(), getConsumerSecret());
 
+        // https://stackoverflow.com/a/64969640/1274974
         AsyncTask<Void, Void, String> task =
                 new AsyncTask<Void, Void, String>() {
                     private Throwable error;

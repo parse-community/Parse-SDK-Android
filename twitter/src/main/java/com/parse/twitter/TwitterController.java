@@ -11,6 +11,7 @@ package com.parse.twitter;
 import android.content.Context;
 import com.parse.ParseException;
 import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ class TwitterController {
     private static final String AUTH_TOKEN_SECRET_KEY = "auth_token_secret";
 
     private final Twitter twitter;
-    private Task<Map<String, String>>.TaskCompletionSource currentTcs;
+    private TaskCompletionSource<Map<String, String>> currentTcs;
 
     TwitterController() {
         this(new Twitter("", "", ""));
@@ -44,7 +45,7 @@ class TwitterController {
     }
 
     public Task<Map<String, String>> authenticateAsync(Context context) {
-        final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<Map<String, String>> tcs = new TaskCompletionSource<>();
         if (currentTcs != null) {
             handleCancel(currentTcs);
         }
@@ -100,7 +101,7 @@ class TwitterController {
         return tcs.getTask();
     }
 
-    private void handleCancel(Task<Map<String, String>>.TaskCompletionSource callback) {
+    private void handleCancel(TaskCompletionSource<Map<String, String>> callback) {
         // Ensure that the operation being cancelled is actually the current
         // operation (so that if one had already been cancelled but still
         // invokes this method, it doesn't cancel the "real" current operation).

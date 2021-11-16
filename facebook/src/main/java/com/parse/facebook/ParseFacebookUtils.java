@@ -21,7 +21,6 @@ import com.parse.SaveCallback;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
