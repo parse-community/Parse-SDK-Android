@@ -12,6 +12,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenSource;
@@ -113,7 +114,7 @@ class FacebookController {
                     }
 
                     @Override
-                    public void onError(FacebookException e) {
+                    public void onError(@NonNull FacebookException e) {
                         tcs.trySetError(e);
                     }
                 });

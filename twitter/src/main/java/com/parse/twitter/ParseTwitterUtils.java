@@ -369,7 +369,7 @@ public final class ParseTwitterUtils {
         if (callback == null) {
             return task;
         }
-        final TaskCompletionSource<T> tcs = new TaskCompletionSource();
+        final TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
         task.continueWith(
                 (Continuation<T, Void>)
                         task1 -> {
