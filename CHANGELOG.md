@@ -1,3 +1,24 @@
+## [2.0.6](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.5...2.0.6) (2021-11-16)
+
+
+### Bug Fixes
+
+* missing pending intents mutability for Android 12+ ([#1139](https://github.com/parse-community/Parse-SDK-Android/issues/1139)) ([fbe8d87](https://github.com/parse-community/Parse-SDK-Android/commit/fbe8d87cc0604c4c34866815307c07e99a125f45))
+
+## [2.0.5](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.4...2.0.5) (2021-11-10)
+
+
+### Bug Fixes
+
+* failed signup attempt with anonymous ParseUser leaves it in inconsistent state ([#1136](https://github.com/parse-community/Parse-SDK-Android/issues/1136)) ([ac6d9e0](https://github.com/parse-community/Parse-SDK-Android/commit/ac6d9e0734d1ea9c0bc26ddd7bfa8dea21a8c693))
+
+## [2.0.4](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.3...2.0.4) (2021-11-03)
+
+
+### Performance Improvements
+
+* remove unnecessary extra child traversal in collectDirtyChildren ([#1058](https://github.com/parse-community/Parse-SDK-Android/issues/1058)) ([1844b3e](https://github.com/parse-community/Parse-SDK-Android/commit/1844b3ee9557a9f12983a573dc6d02ef0ec79910))
+
 ## [2.0.3](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.2...2.0.3) (2021-10-18)
 
 

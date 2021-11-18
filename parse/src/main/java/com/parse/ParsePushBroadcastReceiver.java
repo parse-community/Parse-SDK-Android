@@ -426,18 +426,17 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
 
         Intent deleteIntent = getDeleteIntent(extras, packageName);
 
+        int pendingIntentFlags =
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                        ? PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                        : PendingIntent.FLAG_UPDATE_CURRENT;
+
         PendingIntent pContentIntent =
                 PendingIntent.getBroadcast(
-                        context,
-                        contentIntentRequestCode,
-                        contentIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                        context, contentIntentRequestCode, contentIntent, pendingIntentFlags);
         PendingIntent pDeleteIntent =
                 PendingIntent.getBroadcast(
-                        context,
-                        deleteIntentRequestCode,
-                        deleteIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                        context, deleteIntentRequestCode, deleteIntent, pendingIntentFlags);
 
         String channelId = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
