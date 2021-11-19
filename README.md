@@ -25,12 +25,28 @@ A library that gives you access to the powerful Parse Server backend from your A
 ---
 
 - [Getting Started](#getting-started)
+  - [Compatibility](#compatibility)
   - [Add Dependency](#add-dependency)
   - [Setup](#setup)
 - [Contributing](#contributing)
 - [More Parse Android Projects](#more-parse-android-projects)
 
 # Getting Started
+
+## Compatibility
+
+The Android API versions compatibility is defined as follow:
+
+- Target API level - Try awlays to target the latest available stable one
+- Minimum API level - Bump to API 21 starting from 2.1.0 and increment as high as possible, but cover at least 95% of devices. The increment will be done only if some of the dependent libraries requires it or if the statistics points that this API level covers at least 95% of the devices. All API changes will be marked in the release notes.
+
+| SDK version | Minimum API level | Targeting API level | AGP[^1] |
+| ----------- | ----------------- | ------------------- | ------- |
+| 1.26        | < API 16          | API 29              | 3.6.2   |
+| 2.0         | >= API 16         | API 30              | 4.2.2   |
+| 2.1+        | >= API 21         | API 31              | 7.0.3   |
+
+[^1]: AGP stand for [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin)
 
 ## Add Dependency
 
@@ -46,6 +62,7 @@ allprojects {
 ```
 
 Then, add the library to your project `build.gradle`
+
 ```gradle
 ext {
    parseVersion = "latest.version.here"
@@ -104,6 +121,7 @@ The custom `Application` class must be registered in `AndroidManifest.xml`:
     ...
 </application>
 ```
+
 Note that if you are testing with a server using `http`, you will need to add `android:usesCleartextTraffic="true"` to your above `<application>` definition, but you should only do this while testing and should use `https` for your final product.
 
 See the [guide][guide] for the rest of the SDK usage.
@@ -113,6 +131,7 @@ See the [guide][guide] for the rest of the SDK usage.
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
 
 # More Parse Android Projects
+
 These are other official libraries we made that can help you create your Parse app.
 
 - [ParseGoogleUtils](/google) - Google login/signup.
