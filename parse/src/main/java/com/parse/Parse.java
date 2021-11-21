@@ -668,6 +668,11 @@ public class Parse {
                 return this;
             }
 
+            /**
+             * Enable the possibility to set a custom objectId for your ParseObjects.
+             *
+             * @return The same builder, for easy chaining.
+             */
             public Builder allowCustomObjectId() {
                 return this.setAllowCustomObjectId(true);
             }
