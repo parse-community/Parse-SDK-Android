@@ -670,7 +670,7 @@ public class Parse {
             }
 
             /**
-             * Enable the possibility to set a custom objectId for your ParseObjects.
+             * Allow to set a custom objectId for ParseObjects.
              *
              * @return The same builder, for easy chaining.
              */
