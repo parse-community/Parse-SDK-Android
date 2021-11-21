@@ -111,7 +111,10 @@ public class Parse {
         return isLocalDatastoreEnabled;
     }
 
-    /** @return {@code True} if {@link Configuration.Builder#allowCustomObjectId()} has been called, otherwise {@code false}. */
+    /**
+     * @return {@code True} if {@link Configuration.Builder#allowCustomObjectId()} has been called,
+     *     otherwise {@code false}.
+     */
     public static boolean isAllowCustomObjectId() {
         return allowCustomObjectId;
     }
