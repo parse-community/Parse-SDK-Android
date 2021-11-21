@@ -49,6 +49,7 @@ public class Parse {
     private static final Object MUTEX_CALLBACKS = new Object();
     static ParseEventuallyQueue eventuallyQueue = null;
     private static boolean isLocalDatastoreEnabled;
+    private static boolean allowCustomObjectId = false;
 
     // endregion
     private static OfflineStore offlineStore;
@@ -111,6 +112,14 @@ public class Parse {
     }
 
     /**
+     * @return {@code True} if {@link Configuration.Builder#allowCustomObjectId()} has been called,
+     *     otherwise {@code false}.
+     */
+    public static boolean isAllowCustomObjectId() {
+        return allowCustomObjectId;
+    }
+
+    /**
      * Authenticates this client as belonging to your application. This must be called before your
      * application can use the Parse library. The recommended way is to put a call to {@code
      * Parse.initialize} in your {@code Application}'s {@code onCreate} method:
@@ -139,6 +148,8 @@ public class Parse {
         // NOTE (richardross): We will need this here, as ParsePlugins uses the return value of
         // isLocalDataStoreEnabled() to perform additional behavior.
         isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
+
+        allowCustomObjectId = configuration.allowCustomObjectId;
 
         if (parsePlugins == null) {
             ParsePlugins.initialize(configuration.context, configuration);
@@ -271,6 +282,7 @@ public class Parse {
         ParsePlugins.reset();
 
         setLocalDatastore(null);
+        allowCustomObjectId = false;
     }
 
     /** @return {@code True} if {@link #initialize} has been called, otherwise {@code false}. */
@@ -573,6 +585,7 @@ public class Parse {
         final String clientKey;
         final String server;
         final boolean localDataStoreEnabled;
+        final boolean allowCustomObjectId;
         final OkHttpClient.Builder clientBuilder;
         final int maxRetries;
 
@@ -582,6 +595,7 @@ public class Parse {
             this.clientKey = builder.clientKey;
             this.server = builder.server;
             this.localDataStoreEnabled = builder.localDataStoreEnabled;
+            this.allowCustomObjectId = builder.allowCustomObjectId;
             this.clientBuilder = builder.clientBuilder;
             this.maxRetries = builder.maxRetries;
         }
@@ -593,6 +607,7 @@ public class Parse {
             private String clientKey;
             private String server;
             private boolean localDataStoreEnabled;
+            private boolean allowCustomObjectId;
             private OkHttpClient.Builder clientBuilder;
             private int maxRetries = DEFAULT_MAX_RETRIES;
 
@@ -654,6 +669,20 @@ public class Parse {
 
             private Builder setLocalDatastoreEnabled(boolean enabled) {
                 localDataStoreEnabled = enabled;
+                return this;
+            }
+
+            /**
+             * Allow to set a custom objectId for ParseObjects.
+             *
+             * @return The same builder, for easy chaining.
+             */
+            public Builder allowCustomObjectId() {
+                return this.setAllowCustomObjectId(true);
+            }
+
+            private Builder setAllowCustomObjectId(boolean enabled) {
+                allowCustomObjectId = enabled;
                 return this;
             }
 
