@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -53,11 +53,10 @@ public class ParseAnalyticsTest {
 
         // Mock ParseAnalyticsController
         controller = mock(ParseAnalyticsController.class);
-        when(controller.trackEventInBackground(
-                        anyString(), anyMapOf(String.class, String.class), anyString()))
-                .thenReturn(Task.<Void>forResult(null));
+        when(controller.trackEventInBackground(anyString(), anyMap(), anyString()))
+                .thenReturn(Task.forResult(null));
         when(controller.trackAppOpenedInBackground(anyString(), anyString()))
-                .thenReturn(Task.<Void>forResult(null));
+                .thenReturn(Task.forResult(null));
 
         ParseCorePlugins.getInstance().registerAnalyticsController(controller);
     }
@@ -94,8 +93,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test"));
 
         verify(controller, times(1))
-                .trackEventInBackground(
-                        eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
     }
 
     @Test
@@ -104,8 +102,7 @@ public class ParseAnalyticsTest {
                 ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
 
         verify(controller, times(1))
-                .trackEventInBackground(
-                        eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
     }
 
     @Test
@@ -169,8 +166,7 @@ public class ParseAnalyticsTest {
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
         verify(controller, times(1))
-                .trackEventInBackground(
-                        eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
     }
 
     // endregion

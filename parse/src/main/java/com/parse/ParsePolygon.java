@@ -10,6 +10,7 @@ package com.parse;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
 import java.util.List;
 import java.util.Locale;
 import org.json.JSONArray;
@@ -197,6 +198,7 @@ public class ParsePolygon implements Parcelable {
         return isEqual;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(Locale.US, "ParsePolygon: %s", coordinates);

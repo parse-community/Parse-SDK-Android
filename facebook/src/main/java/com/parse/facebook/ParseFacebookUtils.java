@@ -20,6 +20,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -565,7 +566,7 @@ public final class ParseFacebookUtils {
         if (callback == null) {
             return task;
         }
-        final Task<T>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
         task.continueWith(
                 (Continuation<T, Void>)
                         task1 -> {

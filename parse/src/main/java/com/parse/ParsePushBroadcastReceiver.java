@@ -221,19 +221,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
         }
 
         activityIntent.putExtras(intent.getExtras());
-        /*
-         In order to remove dependency on android-support-library-v4
-         The reason why we differentiate between versions instead of just using context.startActivity
-         for all devices is because in API 11 the recommended conventions for app navigation using
-         the back key changed.
-        */
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            TaskStackBuilderHelper.startActivities(context, cls, activityIntent);
-        } else {
-            activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            activityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            context.startActivity(activityIntent);
-        }
+        TaskStackBuilderHelper.startActivities(context, cls, activityIntent);
     }
 
     /**
@@ -464,9 +452,7 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
                 // from system defaults
                 .setDefaults(Notification.DEFAULT_ALL);
 
-        if (alert != null
-                && alert.length()
-                        > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
+        if (alert.length() > ParsePushBroadcastReceiver.SMALL_NOTIFICATION_MAX_CHARACTER_LIMIT) {
             notificationBuilder.setStyle(new NotificationCompat.BigTextStyle().bigText(alert));
         }
         return notificationBuilder;

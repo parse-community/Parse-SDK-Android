@@ -45,3 +45,4 @@ jacoco.exec
 # Node
 node_modules/
 npm-debug.log
+*.hprof

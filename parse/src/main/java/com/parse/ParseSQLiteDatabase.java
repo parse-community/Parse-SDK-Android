@@ -217,9 +217,7 @@ class ParseSQLiteDatabase {
                                     dbExecutor)
                             .onSuccess(
                                     task12 -> {
-                                        Cursor cursor =
-                                                ParseSQLiteCursor.create(
-                                                        task12.getResult(), dbExecutor);
+                                        Cursor cursor = task12.getResult();
                                         /* Ensure the cursor window is filled on the dbExecutor thread. We need to do this because
                                          * the cursor cannot be filled from a different thread than it was created on.
                                          */
@@ -335,9 +333,7 @@ class ParseSQLiteDatabase {
                     current.onSuccess(task13 -> db.rawQuery(sql, args), dbExecutor)
                             .onSuccess(
                                     task12 -> {
-                                        Cursor cursor =
-                                                ParseSQLiteCursor.create(
-                                                        task12.getResult(), dbExecutor);
+                                        Cursor cursor = task12.getResult();
                                         // Ensure the cursor window is filled on the dbExecutor
                                         // thread. We need to do this because
                                         // the cursor cannot be filled from a different thread than

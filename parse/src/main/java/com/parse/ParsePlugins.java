@@ -168,21 +168,10 @@ public class ParsePlugins {
     InstallationId installationId() {
         synchronized (lock) {
             if (installationId == null) {
-                //noinspection deprecation
                 installationId =
-                        new InstallationId(new File(getParseDir(), INSTALLATION_ID_LOCATION));
+                        new InstallationId(new File(getFilesDir(), INSTALLATION_ID_LOCATION));
             }
             return installationId;
-        }
-    }
-
-    @Deprecated
-    File getParseDir() {
-        synchronized (lock) {
-            if (parseDir == null) {
-                parseDir = applicationContext.getDir("Parse", Context.MODE_PRIVATE);
-            }
-            return createFileDir(parseDir);
         }
     }
 

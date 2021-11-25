@@ -20,6 +20,7 @@ import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -834,9 +835,7 @@ class OfflineStore {
         }
 
         String[] placeholders = new String[uuids.size()];
-        for (int i = 0; i < placeholders.length; i++) {
-            placeholders[i] = "?";
-        }
+        Arrays.fill(placeholders, "?");
         String where =
                 OfflineSQLiteOpenHelper.KEY_UUID
                         + " IN ("

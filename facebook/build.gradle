@@ -35,12 +35,13 @@ android {
 }
 
 dependencies {
-    api "com.facebook.android:facebook-login:8.2.0"
+    api "com.facebook.android:facebook-login:12.1.0"
     implementation project(":parse")
 
-    testImplementation "junit:junit:4.13.2"
-    testImplementation "org.mockito:mockito-core:3.9.0"
-    testImplementation "org.robolectric:robolectric:4.6"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoCoreVersion"
+    testImplementation "org.mockito:mockito-inline:$rootProject.ext.mockitoCoreVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.robolectricVersion"
 }
 
 afterEvaluate {

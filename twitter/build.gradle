@@ -40,8 +40,8 @@ dependencies {
     api "se.akerfeldt:okhttp-signpost:1.1.0"
     implementation project(":parse")
 
-    testImplementation "junit:junit:4.13.2"
-    testImplementation "org.mockito:mockito-core:3.9.0"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoCoreVersion"
 }
 
 afterEvaluate {

@@ -86,9 +86,7 @@ import org.json.JSONObject;
         ParseRESTCommand command = null;
         if (ParseRESTCommand.isValidCommandJSONObject(json)) {
             command = ParseRESTCommand.fromJSONObject(json);
-        } else if (ParseRESTCommand.isValidOldFormatCommandJSONObject(json)) {
-            // do nothing
-        } else {
+        } else if (!ParseRESTCommand.isValidOldFormatCommandJSONObject(json)) {
             throw new JSONException("Failed to load command from JSON.");
         }
         return command;

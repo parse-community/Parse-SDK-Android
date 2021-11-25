@@ -314,14 +314,16 @@ public class FacebookControllerTest {
                 verify(loginManager).logInWithPublishPermissions(activity, permissions);
             }
             if (fragment != null) {
-                verify(loginManager).logInWithPublishPermissions(fragment, permissions);
+                verify(loginManager)
+                        .logInWithPublishPermissions(fragment, callbackManager, permissions);
             }
         } else {
             if (activity != null) {
                 verify(loginManager).logInWithReadPermissions(activity, permissions);
             }
             if (fragment != null) {
-                verify(loginManager).logInWithReadPermissions(fragment, permissions);
+                verify(loginManager)
+                        .logInWithReadPermissions(fragment, callbackManager, permissions);
             }
         }
 

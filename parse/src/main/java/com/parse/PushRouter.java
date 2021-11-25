@@ -29,7 +29,6 @@ import org.json.JSONObject;
  */
 public class PushRouter {
     private static final String TAG = "com.parse.ParsePushRouter";
-    private static final String LEGACY_STATE_LOCATION = "pushState";
     private static final String STATE_LOCATION = "push";
     private static final int MAX_HISTORY_LENGTH = 10;
 
@@ -45,8 +44,7 @@ public class PushRouter {
     public static synchronized PushRouter getInstance() {
         if (instance == null) {
             File diskState = new File(ParsePlugins.get().getFilesDir(), STATE_LOCATION);
-            File oldDiskState = new File(ParsePlugins.get().getParseDir(), LEGACY_STATE_LOCATION);
-            instance = pushRouterFromState(diskState, oldDiskState, MAX_HISTORY_LENGTH);
+            instance = pushRouterFromState(diskState, MAX_HISTORY_LENGTH);
         }
 
         return instance;
@@ -59,33 +57,11 @@ public class PushRouter {
     }
 
     /* package for tests */
-    static PushRouter pushRouterFromState(File diskState, File oldDiskState, int maxHistoryLength) {
+    static PushRouter pushRouterFromState(File diskState, int maxHistoryLength) {
         JSONObject state = readJSONFileQuietly(diskState);
         JSONObject historyJSON = (state != null) ? state.optJSONObject("history") : null;
         PushHistory history = new PushHistory(maxHistoryLength, historyJSON);
-
-        // If the deserialized push history object doesn't have a last timestamp, we might have to
-        // migrate the last timestamp from the legacy pushState file instead.
-        boolean didMigrate = false;
-        if (history.getLastReceivedTimestamp() == null) {
-            JSONObject oldState = readJSONFileQuietly(oldDiskState);
-            if (oldState != null) {
-                String lastTime = oldState.optString("lastTime", null);
-                if (lastTime != null) {
-                    history.setLastReceivedTimestamp(lastTime);
-                }
-                didMigrate = true;
-            }
-        }
-
-        PushRouter router = new PushRouter(diskState, history);
-
-        if (didMigrate) {
-            router.saveStateToDisk();
-            ParseFileUtils.deleteQuietly(oldDiskState);
-        }
-
-        return router;
+        return new PushRouter(diskState, history);
     }
 
     private static JSONObject readJSONFileQuietly(File file) {

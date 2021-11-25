@@ -8,7 +8,6 @@ package com.parse.boltsinternal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -1130,53 +1129,6 @@ public class TaskTest {
 
         thrown.expect(IllegalStateException.class);
         tcs.setCancelled();
-    }
-
-    // endregion
-
-    // region deprecated
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testDeprecatedTaskCompletionSource() {
-        Task<Void>.TaskCompletionSource tcsA = Task.create();
-        tcsA.setResult(null);
-        assertTrue(tcsA.getTask().isCompleted());
-
-        TaskCompletionSource<Void> tcsB = Task.create();
-        tcsB.setResult(null);
-        assertTrue(tcsA.getTask().isCompleted());
-    }
-
-    @SuppressWarnings("deprecation")
-    @Test
-    public void testDeprecatedAggregateExceptionMethods() {
-        final Exception error0 = new Exception("This is an exception (0).");
-        final Exception error1 = new Exception("This is an exception (1).");
-        final Error error2 = new Error("This is an error.");
-
-        List<Exception> exceptions = new ArrayList<>();
-        exceptions.add(error0);
-        exceptions.add(error1);
-
-        // Test old functionality
-        AggregateException aggregate = new AggregateException(exceptions);
-        assertEquals("There were multiple errors.", aggregate.getMessage());
-        assertEquals(2, aggregate.getErrors().size());
-        assertEquals(error0, aggregate.getErrors().get(0));
-        assertEquals(error1, aggregate.getErrors().get(1));
-        assertEquals(2, aggregate.getCauses().length);
-        assertEquals(error0, aggregate.getCauses()[0]);
-        assertEquals(error1, aggregate.getCauses()[1]);
-
-        // Test deprecated getErrors method returns sane results with non-Exceptions
-        aggregate = new AggregateException("message", new Throwable[] {error0, error1, error2});
-        assertEquals("message", aggregate.getMessage());
-        assertEquals(3, aggregate.getErrors().size());
-        assertEquals(error0, aggregate.getErrors().get(0));
-        assertEquals(error1, aggregate.getErrors().get(1));
-        assertNotSame(error2, aggregate.getErrors().get(2));
-        assertEquals(error2, aggregate.getErrors().get(2).getCause());
     }
 
     // endregion

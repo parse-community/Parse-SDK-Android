@@ -16,7 +16,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -56,7 +55,7 @@ public class ParseFacebookUtilsTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         ParseFacebookUtils.controller = controller;
         ParseFacebookUtils.userDelegate = userDelegate;
     }
@@ -117,9 +116,7 @@ public class ParseFacebookUtilsTest {
                 .registerAuthenticationCallback(eq("facebook"), callbackCaptor.capture());
         AuthenticationCallback callback = callbackCaptor.getValue();
         Map<String, String> authData = new HashMap<>();
-        doThrow(new RuntimeException())
-                .when(controller)
-                .setAuthData(anyMapOf(String.class, String.class));
+        doThrow(new RuntimeException()).when(controller).setAuthData(anyMap());
 
         assertFalse(callback.onRestore(authData));
         verify(controller).setAuthData(authData);
@@ -160,7 +157,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
         AccessToken token = TestUtils.newAccessToken();
         Task<ParseUser> task = ParseFacebookUtils.logInInBackground(token);
@@ -225,7 +222,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
         Task<ParseUser> task;
         if (FacebookController.LoginAuthorizationType.PUBLISH.equals(type)) {
@@ -266,8 +263,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.forResult(null));
+        when(user.linkWithInBackground(anyString(), anyMap())).thenReturn(Task.forResult(null));
         AccessToken token = TestUtils.newAccessToken();
         Task<Void> task = ParseFacebookUtils.linkInBackground(user, token);
         verify(controller).getAuthData(token);

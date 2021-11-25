@@ -6,7 +6,7 @@
 [![Snyk Badge](https://snyk.io/test/github/parse-community/Parse-SDK-Android/badge.svg)](https://snyk.io/test/github/parse-community/Parse-SDK-Android)
 [![codecov](https://codecov.io/gh/parse-community/Parse-SDK-Android/branch/master/graph/badge.svg)](https://codecov.io/gh/parse-community/Parse-SDK-Android)
 
-[![android min api](https://img.shields.io/badge/Android_API->=16-66c718.svg)](https://github.com/parse-community/parse-dashboard/releases)
+[![android min api](https://img.shields.io/badge/Android_API->=21-66c718.svg)](https://github.com/parse-community/parse-dashboard/releases)
 [![auto-release](https://img.shields.io/badge/%F0%9F%9A%80-auto--release-9e34eb.svg)](https://github.com/parse-community/parse-dashboard/releases)
 
 [![](https://jitpack.io/v/parse-community/Parse-SDK-Android.svg)](https://jitpack.io/#parse-community/Parse-SDK-Android)
@@ -25,12 +25,23 @@ A library that gives you access to the powerful Parse Server backend from your A
 ---
 
 - [Getting Started](#getting-started)
+  - [Compatibility](#compatibility)
   - [Add Dependency](#add-dependency)
   - [Setup](#setup)
 - [Contributing](#contributing)
 - [More Parse Android Projects](#more-parse-android-projects)
 
 # Getting Started
+
+## Compatibility
+
+The Parse Android SDK has the following Android API and [Gradle Plugin][gradle-plugin] compatibility.
+
+| SDK version | Minimum API level | Targeting API level | Gradle Plugin |
+|-------------|-------------------|---------------------|---------------|
+| 1.26        | < API 16          | API 29              | 3.6.2         |
+| 2.0         | >= API 16         | API 30              | 4.2.2         |
+| 2.1         | >= API 21         | API 31              | 7.0.3         |
 
 ## Add Dependency
 
@@ -46,6 +57,7 @@ allprojects {
 ```
 
 Then, add the library to your project `build.gradle`
+
 ```gradle
 ext {
    parseVersion = "latest.version.here"
@@ -104,6 +116,7 @@ The custom `Application` class must be registered in `AndroidManifest.xml`:
     ...
 </application>
 ```
+
 Note that if you are testing with a server using `http`, you will need to add `android:usesCleartextTraffic="true"` to your above `<application>` definition, but you should only do this while testing and should use `https` for your final product.
 
 See the [guide][guide] for the rest of the SDK usage.
@@ -113,6 +126,7 @@ See the [guide][guide] for the rest of the SDK usage.
 We want to make contributing to this project as easy and transparent as possible. Please refer to the [Contribution Guidelines](CONTRIBUTING.md).
 
 # More Parse Android Projects
+
 These are other official libraries we made that can help you create your Parse app.
 
 - [ParseGoogleUtils](/google) - Google login/signup.
@@ -131,3 +145,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 
 [guide]: http://docs.parseplatform.org/android/guide/
 [open-collective-link]: https://opencollective.com/parse-server
+[gradle-plugin]: https://developer.android.com/studio/releases/gradle-plugin

@@ -321,15 +321,6 @@ public class Parse {
         return true;
     }
 
-    /**
-     * @deprecated Please use {@link #getParseCacheDir(String)} or {@link #getParseFilesDir(String)}
-     *     instead.
-     */
-    @Deprecated
-    static File getParseDir() {
-        return ParsePlugins.get().getParseDir();
-    }
-
     static File getParseCacheDir() {
         return ParsePlugins.get().getCacheDir();
     }

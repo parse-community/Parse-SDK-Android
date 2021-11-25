@@ -17,6 +17,7 @@ import com.parse.SaveCallback;
 import com.parse.boltsinternal.AggregateException;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 
@@ -129,15 +130,6 @@ public final class ParseTwitterUtils {
     }
 
     /**
-     * @deprecated Please use {@link ParseTwitterUtils#linkInBackground(Context, ParseUser)}
-     *     instead.
-     */
-    @Deprecated
-    public static void link(ParseUser user, Context context) {
-        link(user, context, null);
-    }
-
-    /**
      * Links a ParseUser to a Twitter account, allowing you to use Twitter for authentication, and
      * providing access to Twitter data for the user. A dialog will be shown to the user for Twitter
      * authentication.
@@ -175,20 +167,6 @@ public final class ParseTwitterUtils {
                 getTwitterController()
                         .getAuthData(twitterId, screenName, authToken, authTokenSecret);
         return user.linkWithInBackground(AUTH_TYPE, authData);
-    }
-
-    /**
-     * @deprecated Please use {@link ParseTwitterUtils#linkInBackground(ParseUser, String, String,
-     *     String, String)} instead.
-     */
-    @Deprecated
-    public static void link(
-            ParseUser user,
-            String twitterId,
-            String screenName,
-            String authToken,
-            String authTokenSecret) {
-        link(user, twitterId, screenName, authToken, authTokenSecret, null);
     }
 
     /**
@@ -391,7 +369,7 @@ public final class ParseTwitterUtils {
         if (callback == null) {
             return task;
         }
-        final Task<T>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<T> tcs = new TaskCompletionSource<T>();
         task.continueWith(
                 (Continuation<T, Void>)
                         task1 -> {

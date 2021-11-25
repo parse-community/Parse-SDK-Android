@@ -81,12 +81,6 @@ public class Task<TResult> {
         unobservedExceptionHandler = eh;
     }
 
-    /** @deprecated Please use {@link com.parse.boltsinternal.TaskCompletionSource ()} instead. */
-    public static <TResult> Task<TResult>.TaskCompletionSource create() {
-        Task<TResult> task = new Task<>();
-        return task.new TaskCompletionSource();
-    }
-
     /** Creates a completed task with the given value. */
     @SuppressWarnings("unchecked")
     public static <TResult> Task<TResult> forResult(TResult value) {
@@ -987,12 +981,5 @@ public class Task<TResult> {
          * @param e the exception
          */
         void unobservedException(Task<?> t, UnobservedTaskException e);
-    }
-
-    /** @deprecated Please use {@link com.parse.boltsinternal.TaskCompletionSource} instead. */
-    public class TaskCompletionSource
-            extends com.parse.boltsinternal.TaskCompletionSource<TResult> {
-
-        /* package */ TaskCompletionSource() {}
     }
 }
