@@ -1,13 +1,7 @@
 # Contributing to Parse SDK for Android
 We want to make contributing to this project as easy and transparent as possible.
 
-## Our Development Process
-Most of our work will be done in public directly on GitHub. There may be changes done through our internal source control, but it will be rare and only as needed.
-
-### `master` is unsafe
-Our goal is to keep `master` stable, but there may be changes that your application may not be compatible with. We'll do our best to publicize any breaking changes, but try to use our specific releases in any production environment.
-
-### Pull Requests
+## Pull Requests
 We actively welcome your pull requests. When we get one, we'll run some Parse-specific integration tests on it first. From here, we'll need to get a core member to sign off on the changes and then merge the pull request. For API changes we may need to fix internal uses, which could cause some delay. We'll do our best to provide updates and feedback throughout the process.
 
 1. Fork the repo and create your branch from `master`.
@@ -16,13 +10,13 @@ We actively welcome your pull requests. When we get one, we'll run some Parse-sp
 4. Ensure the test suite passes.
 5. Make sure your code lints by running `./gradlew spotlessApply`.
 
-## Bugs
-Although we try to keep developing on Parse easy, you still may run into some issues. Technical questions should be asked on [Stack Overflow][stack-overflow], and for everything else we'll be using GitHub issues.
+## Android API compatibility
 
-### Known Issues
-We use GitHub issues to track public bugs. We will keep a close eye on this and try to make it clear when we have an internal fix in progress. Before filing a new issue, try to make sure your problem doesn't already exist.
+Consider the following to ensure a consistent Android API compatibility for the Parse Android SDK:
+- Target API level: Target the latest available stable API version.
+- Minimum API level: Cover at least ~90% of devices. The increment will be done only if dependencies requires it, if the statistics points that the API level covers at least ~90% of devices, or if a currently supported Android API level does not receive security updates anymore. Minimum API level changes must be marked in the release notes as breaking changes.
 
-### Reporting New Issues
+## Reporting an Issue
 Not all issues are SDK issues. If you're unsure whether your bug is with the SDK or backend, you can test to see if it reproduces with our [REST API][rest-api] and [Parse API Console][parse-api-console]. If it does, you can report backend bugs [here][bug-reports].
 
 To view the REST API network requests issued by the Parse SDK and responses from the Parse backend, please check out [OkHttp Interceptors][network-debugging-tool].  With this tool, you can either log network requests/responses to Android logcat, or log them to Chrome Debugger via Stetho.
@@ -41,10 +35,10 @@ This project adheres to the [Contributor Covenant Code of Conduct](https://githu
 ## License
 By contributing to Parse Android SDK, you agree that your contributions will be licensed under its license.
 
- [stack-overflow]: http://stackoverflow.com/tags/parse.com
- [bug-reports]: https://github.com/parse-community/parse-server
- [rest-api]: http://docs.parseplatform.org/rest/guide/
- [network-debugging-tool]: https://github.com/square/okhttp/wiki/Interceptors
- [parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
- [stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
- [tests-dir]: /parse/src/test/java/com/parse
+[stack-overflow]: http://stackoverflow.com/tags/parse.com
+[bug-reports]: https://github.com/parse-community/parse-server
+[rest-api]: http://docs.parseplatform.org/rest/guide/
+[network-debugging-tool]: https://github.com/square/okhttp/wiki/Interceptors
+[parse-api-console]: http://blog.parseplatform.org/announcements/introducing-the-parse-api-console/
+[stacktrace-or-gtfo]: http://i.imgur.com/jacoj.jpg
+[tests-dir]: /parse/src/test/java/com/parse

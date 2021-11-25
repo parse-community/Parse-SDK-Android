@@ -35,18 +35,13 @@ A library that gives you access to the powerful Parse Server backend from your A
 
 ## Compatibility
 
-The Android API versions compatibility is defined as follow:
+The Parse Android SDK has the following Android API and [Gradle Plugin][gradle-plugin] compatibility.
 
-- Target API level - Try awlays to target the latest available stable one
-- Minimum API level - Bump to API 21 starting from 2.1.0 and increment as high as possible, but cover at least 95% of devices. The increment will be done only if some of the dependent libraries requires it or if the statistics points that this API level covers at least 95% of the devices. All API changes will be marked in the release notes.
-
-| SDK version | Minimum API level | Targeting API level | AGP[^1] |
-| ----------- | ----------------- | ------------------- | ------- |
-| 1.26        | < API 16          | API 29              | 3.6.2   |
-| 2.0         | >= API 16         | API 30              | 4.2.2   |
-| 2.1+        | >= API 21         | API 31              | 7.0.3   |
-
-[^1]: AGP stand for [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin)
+| SDK version | Minimum API level | Targeting API level | Gradle Plugin |
+|-------------|-------------------|---------------------|---------------|
+| 1.26        | < API 16          | API 29              | 3.6.2         |
+| 2.0         | >= API 16         | API 30              | 4.2.2         |
+| 2.1         | >= API 21         | API 31              | 7.0.3         |
 
 ## Add Dependency
 
@@ -150,3 +145,4 @@ As of April 5, 2017, Parse, LLC has transferred this code to the parse-community
 
 [guide]: http://docs.parseplatform.org/android/guide/
 [open-collective-link]: https://opencollective.com/parse-server
+[gradle-plugin]: https://developer.android.com/studio/releases/gradle-plugin
