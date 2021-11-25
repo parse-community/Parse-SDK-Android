@@ -1,3 +1,15 @@
+# [3.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/2.1.0...3.0.0) (2021-11-25)
+
+
+### Features
+
+* update project dependencies and code refactoring ([#1147](https://github.com/parse-community/Parse-SDK-Android/issues/1147)) ([7d0faa3](https://github.com/parse-community/Parse-SDK-Android/commit/7d0faa38bf3ccc85b715dc61965d5b82103c19a4))
+
+
+### BREAKING CHANGES
+
+* The required minimum API level changes from 16 to 21. The following deprecated methods are removed: `Parse.getParseDir()` (use `getParseCacheDir(String)` or `getParseFilesDir(String)` instead), `ParseTwitterUtils.link(ParseUser, Context)` (use `linkInBackground(Context, ParseUser)` instead), `ParseTwitterUtils.link(ParseUser, String, String, String, String)` (use `linkInBackground(ParseUser, String, String, String, String)` instead). ([7d0faa3](7d0faa3))
+
 # [2.1.0](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.6...2.1.0) (2021-11-21)
 
 
