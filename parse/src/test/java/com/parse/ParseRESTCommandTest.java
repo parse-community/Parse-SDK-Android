@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -38,6 +39,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 // For org.json
@@ -488,7 +490,7 @@ public class ParseRESTCommandTest {
     }
 
     @Test
-    public void testOnResposneCloseNetworkStreamWithIOException() throws Exception {
+    public void testOnResponseCloseNetworkStreamWithIOException() throws Exception {
         // Mock response stream
         int statusCode = 200;
         InputStream mockResponseStream = mock(InputStream.class);
@@ -514,5 +516,40 @@ public class ParseRESTCommandTest {
         assertTrue(responseTask.getError() instanceof IOException);
         assertEquals("Error", responseTask.getError().getMessage());
         verify(mockResponseStream, times(1)).close();
+    }
+
+    @Test
+    public void testSaveObjectCommandUpdate() {
+        ParseObject.State state = mock(ParseObject.State.class);
+        when(state.className()).thenReturn("TestObject");
+        when(state.objectId()).thenReturn("test_id");
+        when(state.createdAt()).thenReturn(System.currentTimeMillis() / 1000L);
+        when(state.updatedAt()).thenReturn(System.currentTimeMillis() / 1000L);
+        when(state.keySet()).thenReturn(Collections.singleton("foo"));
+        when(state.get("foo")).thenReturn("bar");
+        ParseObject parseObject = ParseObject.from(state);
+
+        ParseRESTObjectCommand command =
+                ParseRESTObjectCommand.saveObjectCommand(parseObject.getState(), null, null);
+        assertEquals(command.method, ParseHttpRequest.Method.PUT);
+
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .allowCustomObjectId()
+                        .build();
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.configuration()).thenReturn(configuration);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        Parse.initialize(configuration, plugins);
+
+        command = ParseRESTObjectCommand.saveObjectCommand(parseObject.getState(), null, null);
+        assertEquals(command.method, ParseHttpRequest.Method.PUT);
+
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        Parse.destroy();
     }
 }

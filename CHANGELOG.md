@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.6...2.1.0) (2021-11-21)
+
+
+### Features
+
+* add support for custom objectId ([#1088](https://github.com/parse-community/Parse-SDK-Android/issues/1088)) ([d420371](https://github.com/parse-community/Parse-SDK-Android/commit/d420371e761b07fac02f8ad747de0191817db5fa))
+
 ## [2.0.6](https://github.com/parse-community/Parse-SDK-Android/compare/2.0.5...2.0.6) (2021-11-16)
 
 
