@@ -1256,8 +1256,7 @@ public class ParseQuery<T extends ParseObject> {
     /**
      * Controls the maximum number of results that are returned.
      *
-     * <p>Setting a negative limit denotes retrieval without a limit. The default limit is {@code
-     * 100}, with a maximum of {@code 1000} results being returned at a time.
+     * <p>The default limit is {@code 100}, there is no maximum limit.
      *
      * @param newLimit The new limit.
      * @return this, so you can chain this call.
