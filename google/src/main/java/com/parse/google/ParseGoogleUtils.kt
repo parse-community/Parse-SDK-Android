@@ -64,7 +64,7 @@ object ParseGoogleUtils {
      * @param callback The [LogInCallback] which is invoked on log in success or error
      * @param launcher The ActivityResultLauncher<Intent> from AndroidX for Example:
      *
-     *      val luancher: ActivityResultLauncher<Intent> = registerForActivityResult(
+     *      val launcher: ActivityResultLauncher<Intent> = registerForActivityResult(
      *       ActivityResultContracts.StartActivityForResult()) { result ->
      *       ParseGoogleUtils.onActivityResult(result.resultCode, result.data!!)
      *      }
