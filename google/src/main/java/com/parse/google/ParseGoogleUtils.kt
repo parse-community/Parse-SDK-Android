@@ -70,7 +70,7 @@ object ParseGoogleUtils {
      *      }
      */
     @JvmStatic
-    fun logIn(activity: Activity, callback: LogInCallback, launcher: ActivityResultLauncher<Intent>) {
+    fun logIn(activity: Activity, launcher: ActivityResultLauncher<Intent>, callback: LogInCallback) {
         checkInitialization()
         this.currentCallback = callback
         val googleSignInClient = buildGoogleSignInClient(activity)
