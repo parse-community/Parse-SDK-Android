@@ -76,7 +76,6 @@ object ParseGoogleUtils {
         val googleSignInClient = buildGoogleSignInClient(activity)
         this.googleSignInClient = googleSignInClient
         launcher.launch(googleSignInClient.signInIntent)
-
     }
 
     /**
