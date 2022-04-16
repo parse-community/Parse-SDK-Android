@@ -40,13 +40,13 @@ android {
 }
 
 ext {
-    coroutinesVersion = "1.5.2"
+    coroutinesVersion = "1.6.1"
 }
 
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt"
-    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1-native-mt'
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
     implementation project(":parse")
 }
 
