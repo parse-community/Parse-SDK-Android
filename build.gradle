@@ -1,12 +1,12 @@
 buildscript {
-    ext.kotlin_version = "1.5.31"
+    ext.kotlin_version = "1.6.20"
     ext.jacocoVersion = '0.8.7'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.3"
+        classpath "com.android.tools.build:gradle:7.0.4"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
@@ -66,7 +66,7 @@ ext {
     minSdkVersion = 21
     targetSdkVersion = 31
 
-    mockitoCoreVersion = "3.12.4"
+    mockitoCoreVersion = '4.4.0'
     junitVersion = "4.13.2"
     robolectricVersion = "4.7"
 }
