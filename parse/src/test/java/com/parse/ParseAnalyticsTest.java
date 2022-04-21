@@ -91,8 +91,7 @@ public class ParseAnalyticsTest {
     public void testTrackEventInBackgroundNormalName() throws Exception {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test"));
 
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(null),  isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     @Test
@@ -100,8 +99,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(
                 ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
 
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(null),  isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     @Test
@@ -109,8 +107,7 @@ public class ParseAnalyticsTest {
         Map<String, String> dimensions = new HashMap<>();
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions),  isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -119,8 +116,7 @@ public class ParseAnalyticsTest {
         dimensions.put("key", "value");
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -128,8 +124,7 @@ public class ParseAnalyticsTest {
         Map<String, String> dimensions = new HashMap<>();
         ParseAnalytics.trackEventInBackground("test", dimensions, null);
 
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions),  isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -149,8 +144,7 @@ public class ParseAnalyticsTest {
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
 
         final Semaphore doneAgain = new Semaphore(0);
         ParseAnalytics.trackEventInBackground(
@@ -164,8 +158,7 @@ public class ParseAnalyticsTest {
 
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(null), isNull());
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     // endregion
@@ -176,8 +169,7 @@ public class ParseAnalyticsTest {
     public void testTrackAppOpenedInBackgroundNullIntent() throws Exception {
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(null));
 
-        verify(controller, times(1))
-                .trackAppOpenedInBackground(isNull(), isNull());
+        verify(controller, times(1)).trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
@@ -185,8 +177,7 @@ public class ParseAnalyticsTest {
         Intent intent = new Intent();
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1))
-                .trackAppOpenedInBackground(isNull(), isNull());
+        verify(controller, times(1)).trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
