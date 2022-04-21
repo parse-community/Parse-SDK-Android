@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -20,7 +21,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Matchers;
 
 public class ParseAuthenticationManagerTest {
 
@@ -71,7 +71,7 @@ public class ParseAuthenticationManagerTest {
     @Test
     public void testRestoreAuthentication() throws ParseException {
         when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-        when(provider.onRestore(Matchers.<Map<String, String>>any())).thenReturn(true);
+        when(provider.onRestore(any())).thenReturn(true);
         manager.register("test_provider", provider);
 
         Map<String, String> authData = new HashMap<>();

@@ -36,7 +36,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.LooperMode;
 
@@ -93,7 +92,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test"));
 
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(null),  isNull());
     }
 
     @Test
@@ -102,7 +101,7 @@ public class ParseAnalyticsTest {
                 ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
 
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(null),  isNull());
     }
 
     @Test
@@ -111,7 +110,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(dimensions),  isNull());
     }
 
     @Test
@@ -121,7 +120,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -130,7 +129,7 @@ public class ParseAnalyticsTest {
         ParseAnalytics.trackEventInBackground("test", dimensions, null);
 
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(dimensions),  isNull());
     }
 
     @Test
@@ -151,7 +150,7 @@ public class ParseAnalyticsTest {
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), eq(dimensions), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(dimensions), isNull());
 
         final Semaphore doneAgain = new Semaphore(0);
         ParseAnalytics.trackEventInBackground(
@@ -166,7 +165,7 @@ public class ParseAnalyticsTest {
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
         verify(controller, times(1))
-                .trackEventInBackground(eq("test"), Matchers.eq(null), isNull(String.class));
+                .trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     // endregion
@@ -178,7 +177,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(null));
 
         verify(controller, times(1))
-                .trackAppOpenedInBackground(isNull(String.class), isNull(String.class));
+                .trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
@@ -187,7 +186,7 @@ public class ParseAnalyticsTest {
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
         verify(controller, times(1))
-                .trackAppOpenedInBackground(isNull(String.class), isNull(String.class));
+                .trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
@@ -195,7 +194,7 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
@@ -203,11 +202,11 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
 
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
@@ -215,7 +214,7 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseAnalytics.trackAppOpenedInBackground(intent, null);
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
@@ -233,7 +232,7 @@ public class ParseAnalyticsTest {
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     // endregion

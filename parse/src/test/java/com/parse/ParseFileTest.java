@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
@@ -145,7 +144,7 @@ public class ParseFileTest {
                         any(byte[].class),
                         any(String.class),
                         any(ProgressCallback.class),
-                        Matchers.<Task<Void>>any());
+                        any());
     }
 
     @Test
@@ -168,7 +167,7 @@ public class ParseFileTest {
                         any(byte[].class),
                         any(String.class),
                         any(ProgressCallback.class),
-                        Matchers.<Task<Void>>any());
+                        any());
     }
 
     @Test
