@@ -1,5 +1,8 @@
 # [3.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/2.1.0...3.0.0) (2021-11-25)
 
+### ⚠️ Warning
+
+This version contains a bug that ignores SDK-internal data that is already stored locally on the client side. This includes for example the Parse SDK session token, so an already logged-in user will be required to log in again. If you are not starting with a new app but are considering upgrading an existing app you may want to skip this version and wait for a fix in a future version. (#1158)
 
 ### Features
 
