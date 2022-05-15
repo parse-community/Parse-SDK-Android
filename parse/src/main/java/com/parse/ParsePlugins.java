@@ -178,7 +178,17 @@ public class ParsePlugins {
     File getCacheDir() {
         synchronized (lock) {
             if (cacheDir == null) {
-                cacheDir = new File(applicationContext.getCacheDir(), "com.parse");
+                /*
+                Check for old reference file before migration to v3.0.0.
+                If old reference found, copy the ref to new directory and delete the ref.
+                 */
+                File oldRef = applicationContext.getDir("Parse", Context.MODE_PRIVATE);
+                if (oldRef.exists()) {
+                    cacheDir = new File(oldRef, "com.parse");
+                    oldRef.deleteOnExit();
+                } else {
+                    cacheDir = new File(applicationContext.getCacheDir(), "com.parse");
+                }
             }
             return createFileDir(cacheDir);
         }
@@ -187,7 +197,17 @@ public class ParsePlugins {
     File getFilesDir() {
         synchronized (lock) {
             if (filesDir == null) {
-                filesDir = new File(applicationContext.getFilesDir(), "com.parse");
+                /*
+                Check for old reference file before migration to v3.0.0.
+                If old reference found, copy the ref to new directory and delete the ref.
+                 */
+                File oldRef = applicationContext.getDir("Parse", Context.MODE_PRIVATE);
+                if (oldRef.exists()) {
+                    filesDir = new File(oldRef, "com.parse");
+                    oldRef.deleteOnExit();
+                } else {
+                    filesDir = new File(applicationContext.getFilesDir(), "com.parse");
+                }
             }
             return createFileDir(filesDir);
         }
