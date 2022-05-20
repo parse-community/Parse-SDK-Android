@@ -16,6 +16,7 @@
  */
 package com.parse;
 
+import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -345,6 +347,24 @@ public class ParseFileUtils {
         if (preserveFileDate) {
             destFile.setLastModified(srcFile.lastModified());
         }
+    }
+
+    /**
+     * Get all files path from an given directory (including sub-directory).
+     *
+     * @param directoryName given directory name.
+     * @param files where all the files will be stored.
+     */
+    public static void getAllNestedFiles(@NonNull String directoryName, @NonNull List<File> files) {
+        File[] directoryItems = new File(directoryName).listFiles();
+        if (directoryItems != null)
+            for (File item : directoryItems) {
+                if (item.isFile()) {
+                    files.add(item);
+                } else if (item.isDirectory()) {
+                    getAllNestedFiles(item.getAbsolutePath(), files);
+                }
+            }
     }
 
     // -----------------------------------------------------------------------
