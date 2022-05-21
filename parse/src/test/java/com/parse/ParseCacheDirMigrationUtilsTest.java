@@ -1,50 +1,62 @@
 package com.parse;
 
 import android.content.Context;
+
 import androidx.test.platform.app.InstrumentationRegistry;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+
 import java.io.File;
 import java.util.ArrayList;
 
 @RunWith(RobolectricTestRunner.class)
-public class ParseCacheDirMigrationTest {
+public class ParseCacheDirMigrationUtilsTest {
     ArrayList<File> writtenFiles = new ArrayList<>();
+    private ParseCacheDirMigrationUtils utils;
 
     @Before
     public void setUp() throws Exception {
-        Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        ParsePlugins.reset();
-        Parse.Configuration configuration =
-            new Parse.Configuration.Builder(context).applicationId("1234").build();
-        ParsePlugins.initialize(context, configuration);
+        utils = new ParseCacheDirMigrationUtils(InstrumentationRegistry.getInstrumentation().getContext());
         writtenFiles.clear();
     }
 
     @After
     public void tearDown() throws Exception {
-        ParsePlugins.reset();
         writtenFiles.clear();
     }
 
     @Test
-    public void manualMigrationBeforeAccessNewCacheAPIs() {
+    public void testMigrationOnParseSDKInitialization() {
         prepareForMockFilesWriting();
-        writtenFiles.addAll(writeSomeMockFiles(false));
+        writtenFiles.addAll(writeSomeMockFiles(true));
+        Parse.Configuration configuration =
+            new Parse.Configuration.Builder(InstrumentationRegistry.getInstrumentation().getContext())
+                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                .server("https://api.parse.com/1")
+                .enableLocalDataStore()
+                .build();
+        Parse.initialize(configuration);
+    }
 
-        //Run migration manually.
-        ParsePlugins.get().runSilentMigration();
+    @Test
+    public void testMockMigration() {
+        prepareForMockFilesWriting();
+        writtenFiles.addAll(writeSomeMockFiles(true));
+
+        //Run migration.
+        utils.runMigrations();
 
         //Check for cache file after migration.
-        File cacheDir = ParsePlugins.get().getCacheDir();
+        File cacheDir = InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
         ArrayList<File> migratedCaches = new ArrayList<>();
         ParseFileUtils.getAllNestedFiles(cacheDir.getAbsolutePath(), migratedCaches);
 
         //Check for files file after migration.
-        File filesDir = ParsePlugins.get().getFilesDir();
+        File filesDir = InstrumentationRegistry.getInstrumentation().getContext().getFilesDir();
         ArrayList<File> migratedFiles = new ArrayList<>();
         ParseFileUtils.getAllNestedFiles(filesDir.getAbsolutePath(), migratedFiles);
 
@@ -57,62 +69,21 @@ public class ParseCacheDirMigrationTest {
         assert sizeBeforeMigrations == sizeAfterMigration;
     }
 
-    @Test
-    public void autoMigrationBeforeAccessFilesDir() {
-        prepareForMockFilesWriting();
-        writtenFiles.addAll(writeSomeMockFiles(false));
-        ArrayList<File> migratedFiles = new ArrayList<>();
-        //Auto migration
-        File filesDir = ParsePlugins.get().getFilesDir(true);
-        ParseFileUtils.getAllNestedFiles(filesDir.getAbsolutePath(), migratedFiles);
-        assert !migratedFiles.isEmpty();
-    }
-
-    @Test
-    public void autoMigrationBeforeAccessCacheDir() {
-        prepareForMockFilesWriting();
-        writtenFiles.addAll(writeSomeMockFiles(false));
-        ArrayList<File> migratedCaches = new ArrayList<>();
-        //Auto migration
-        File cacheDir = ParsePlugins.get().getCacheDir(true);
-        ParseFileUtils.getAllNestedFiles(cacheDir.getAbsolutePath(), migratedCaches);
-        assert !migratedCaches.isEmpty();
-    }
-
-    @Test
-    public void autoMigrationBeforeAccessCacheOrFilesDirBySolvingFileConflicts() {
-        prepareForMockFilesWriting();
-        //Set some existing files in new location so that there could be file conflict.
-        writtenFiles.addAll(writeSomeMockFiles(true));
-
-        //Auto migration for files
-        ArrayList<File> migratedFiles = new ArrayList<>();
-        File filesDir = ParsePlugins.get().getFilesDir(true);
-        ParseFileUtils.getAllNestedFiles(filesDir.getAbsolutePath(), migratedFiles);
-
-        /*
-        Auto migration for caches.
-        Although migration already completed when accessed `ParsePlugins.get().getFilesDir(true)` or `ParsePlugins.get().getCacheDir(true)` API.
-         */
-        ArrayList<File> migratedCaches = new ArrayList<>();
-        File cacheDir = ParsePlugins.get().getCacheDir(true);
-        ParseFileUtils.getAllNestedFiles(cacheDir.getAbsolutePath(), migratedCaches);
-
-        assert !migratedFiles.isEmpty();
-        assert !migratedCaches.isEmpty();
-    }
-
     private void prepareForMockFilesWriting() {
         //Delete `"app_Parse"` dir including nested dir and files.
-        ParsePlugins.get().deleteOldParseDirSilently();
+        try {
+            ParseFileUtils.deleteDirectory(InstrumentationRegistry.getInstrumentation().getContext().getDir("Parse", Context.MODE_PRIVATE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         writtenFiles.clear();
         //Create new `"app_Parse"` dir to write some files.
-        createFileDir(ParsePlugins.get().getCacheDir());
+        createFileDir(InstrumentationRegistry.getInstrumentation().getContext().getCacheDir());
     }
 
     private ArrayList<File> writeSomeMockFiles(Boolean checkForExistingFile) {
         ArrayList<File> fileToReturn = new ArrayList<>();
-        File oldRef = ParsePlugins.get().getOldParseDir();
+        File oldRef = InstrumentationRegistry.getInstrumentation().getContext().getDir("Parse", Context.MODE_PRIVATE);
 
         //Writing some config & random files for migration process.
         File config = new File(oldRef + "/config/", "config");
@@ -147,7 +118,7 @@ public class ParseCacheDirMigrationTest {
         //To create a file conflict scenario during migration by creating an existing file to the new files dir ("*/files/com.parse/*").
         if (checkForExistingFile) {
             try {
-                ParseFileUtils.writeStringToFile(new File(ParsePlugins.get().getFilesDir() + "/CommandCache/", "installationId"), "gger", "UTF-8");
+                ParseFileUtils.writeStringToFile(new File(InstrumentationRegistry.getInstrumentation().getContext().getFilesDir() + "/com.parse/CommandCache/", "installationId"), "gger", "UTF-8");
             } catch (Exception e) {
                 e.printStackTrace();
             }
