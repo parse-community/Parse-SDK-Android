@@ -1,17 +1,14 @@
 package com.parse;
 
 import android.content.Context;
-
 import androidx.test.platform.app.InstrumentationRegistry;
-
+import java.io.File;
+import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.io.File;
-import java.util.ArrayList;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseCacheDirMigrationUtilsTest {
@@ -20,7 +17,9 @@ public class ParseCacheDirMigrationUtilsTest {
 
     @Before
     public void setUp() throws Exception {
-        utils = new ParseCacheDirMigrationUtils(InstrumentationRegistry.getInstrumentation().getContext());
+        utils =
+                new ParseCacheDirMigrationUtils(
+                        InstrumentationRegistry.getInstrumentation().getContext());
         writtenFiles.clear();
     }
 
@@ -34,11 +33,12 @@ public class ParseCacheDirMigrationUtilsTest {
         prepareForMockFilesWriting();
         writtenFiles.addAll(writeSomeMockFiles(true));
         Parse.Configuration configuration =
-            new Parse.Configuration.Builder(InstrumentationRegistry.getInstrumentation().getContext())
-                .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
-                .server("https://api.parse.com/1")
-                .enableLocalDataStore()
-                .build();
+                new Parse.Configuration.Builder(
+                                InstrumentationRegistry.getInstrumentation().getContext())
+                        .applicationId(BuildConfig.LIBRARY_PACKAGE_NAME)
+                        .server("https://api.parse.com/1")
+                        .enableLocalDataStore()
+                        .build();
         Parse.initialize(configuration);
     }
 
@@ -47,20 +47,20 @@ public class ParseCacheDirMigrationUtilsTest {
         prepareForMockFilesWriting();
         writtenFiles.addAll(writeSomeMockFiles(true));
 
-        //Run migration.
+        // Run migration.
         utils.runMigrations();
 
-        //Check for cache file after migration.
+        // Check for cache file after migration.
         File cacheDir = InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
         ArrayList<File> migratedCaches = new ArrayList<>();
         ParseFileUtils.getAllNestedFiles(cacheDir.getAbsolutePath(), migratedCaches);
 
-        //Check for files file after migration.
+        // Check for files file after migration.
         File filesDir = InstrumentationRegistry.getInstrumentation().getContext().getFilesDir();
         ArrayList<File> migratedFiles = new ArrayList<>();
         ParseFileUtils.getAllNestedFiles(filesDir.getAbsolutePath(), migratedFiles);
 
-        //To check migrations result
+        // To check migrations result
         int sizeAfterMigration = (migratedCaches.size() + migratedFiles.size());
         int sizeBeforeMigrations = writtenFiles.size();
 
@@ -70,22 +70,28 @@ public class ParseCacheDirMigrationUtilsTest {
     }
 
     private void prepareForMockFilesWriting() {
-        //Delete `"app_Parse"` dir including nested dir and files.
+        // Delete `"app_Parse"` dir including nested dir and files.
         try {
-            ParseFileUtils.deleteDirectory(InstrumentationRegistry.getInstrumentation().getContext().getDir("Parse", Context.MODE_PRIVATE));
+            ParseFileUtils.deleteDirectory(
+                    InstrumentationRegistry.getInstrumentation()
+                            .getContext()
+                            .getDir("Parse", Context.MODE_PRIVATE));
         } catch (Exception e) {
             e.printStackTrace();
         }
         writtenFiles.clear();
-        //Create new `"app_Parse"` dir to write some files.
+        // Create new `"app_Parse"` dir to write some files.
         createFileDir(InstrumentationRegistry.getInstrumentation().getContext().getCacheDir());
     }
 
     private ArrayList<File> writeSomeMockFiles(Boolean checkForExistingFile) {
         ArrayList<File> fileToReturn = new ArrayList<>();
-        File oldRef = InstrumentationRegistry.getInstrumentation().getContext().getDir("Parse", Context.MODE_PRIVATE);
+        File oldRef =
+                InstrumentationRegistry.getInstrumentation()
+                        .getContext()
+                        .getDir("Parse", Context.MODE_PRIVATE);
 
-        //Writing some config & random files for migration process.
+        // Writing some config & random files for migration process.
         File config = new File(oldRef + "/config/", "config");
         fileToReturn.add(config);
         File installationId = new File(oldRef + "/CommandCache/", "installationId");
@@ -107,7 +113,7 @@ public class ParseCacheDirMigrationUtilsTest {
         File user = new File(oldRef + "/user/", "user_config");
         fileToReturn.add(user);
 
-        //Write all listed files to the app cache ("app_Parse") directory.
+        // Write all listed files to the app cache ("app_Parse") directory.
         for (File item : fileToReturn) {
             try {
                 ParseFileUtils.writeStringToFile(item, "gger", "UTF-8");
@@ -115,10 +121,19 @@ public class ParseCacheDirMigrationUtilsTest {
                 e.printStackTrace();
             }
         }
-        //To create a file conflict scenario during migration by creating an existing file to the new files dir ("*/files/com.parse/*").
+        // To create a file conflict scenario during migration by creating an existing file to the
+        // new files dir ("*/files/com.parse/*").
         if (checkForExistingFile) {
             try {
-                ParseFileUtils.writeStringToFile(new File(InstrumentationRegistry.getInstrumentation().getContext().getFilesDir() + "/com.parse/CommandCache/", "installationId"), "gger", "UTF-8");
+                ParseFileUtils.writeStringToFile(
+                        new File(
+                                InstrumentationRegistry.getInstrumentation()
+                                                .getContext()
+                                                .getFilesDir()
+                                        + "/com.parse/CommandCache/",
+                                "installationId"),
+                        "gger",
+                        "UTF-8");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -134,5 +149,4 @@ public class ParseCacheDirMigrationUtilsTest {
         }
         return file;
     }
-
 }

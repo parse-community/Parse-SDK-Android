@@ -18,7 +18,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -105,11 +104,11 @@ public class ParseFileUtilsTest {
     }
 
     @Test
-    public void testGetAllFilesFromAGivenPath(){
+    public void testGetAllFilesFromAGivenPath() {
         ArrayList<File> filesListToSave = new ArrayList<>();
-        File oldRef = new File(temporaryFolder.getRoot()+"/ParseFileUtilsTest/");
+        File oldRef = new File(temporaryFolder.getRoot() + "/ParseFileUtilsTest/");
 
-        //Writing some files to the `*/ParseFileUtilsTest/*` dir.
+        // Writing some files to the `*/ParseFileUtilsTest/*` dir.
         File config = new File(oldRef + "/config/", "config");
         filesListToSave.add(config);
         File installationId = new File(oldRef + "/CommandCache/", "installationId");
@@ -121,7 +120,7 @@ public class ParseFileUtilsTest {
         File pushState = new File(oldRef + "/push/", "pushState");
         filesListToSave.add(pushState);
 
-        //Write all listed files to the temp (oldRef) directory.
+        // Write all listed files to the temp (oldRef) directory.
         for (File item : filesListToSave) {
             try {
                 ParseFileUtils.writeStringToFile(item, "gger", "UTF-8");
@@ -130,11 +129,11 @@ public class ParseFileUtilsTest {
             }
         }
 
-        //Get all the written files under `*/ParseFileUtilsTest/*`.
+        // Get all the written files under `*/ParseFileUtilsTest/*`.
         ArrayList<File> allWrittenFiles = new ArrayList<>();
         ParseFileUtils.getAllNestedFiles(oldRef.getAbsolutePath(), allWrittenFiles);
 
-        //Check if they both matches or not.
+        // Check if they both matches or not.
         assertEquals(filesListToSave.size(), allWrittenFiles.size());
     }
 }

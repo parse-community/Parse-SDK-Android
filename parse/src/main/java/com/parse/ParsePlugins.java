@@ -111,50 +111,50 @@ public class ParsePlugins {
                 }
                 // add it as the first interceptor
                 clientBuilder
-                    .interceptors()
-                    .add(
-                        0,
-                        chain -> {
-                            Request request = chain.request();
-                            Headers.Builder headersBuilder =
-                                request.headers()
-                                    .newBuilder()
-                                    .set(
-                                        ParseRESTCommand.HEADER_APPLICATION_ID,
-                                        configuration.applicationId)
-                                    .set(
-                                        ParseRESTCommand
-                                            .HEADER_APP_BUILD_VERSION,
-                                        String.valueOf(
-                                            ManifestInfo.getVersionCode()))
-                                    .set(
-                                        ParseRESTCommand
-                                            .HEADER_APP_DISPLAY_VERSION,
-                                        ManifestInfo.getVersionName())
-                                    .set(
-                                        ParseRESTCommand.HEADER_OS_VERSION,
-                                        Build.VERSION.RELEASE)
-                                    .set(ParseRESTCommand.USER_AGENT, userAgent());
-                            if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID)
-                                == null) {
-                                // We can do this synchronously since the caller is already
-                                // on a background thread
-                                headersBuilder.set(
-                                    ParseRESTCommand.HEADER_INSTALLATION_ID,
-                                    installationId().get());
-                            }
-                            // client key can be null with self-hosted Parse Server
-                            if (configuration.clientKey != null) {
-                                headersBuilder.set(
-                                    ParseRESTCommand.HEADER_CLIENT_KEY,
-                                    configuration.clientKey);
-                            }
-                            request =
-                                request.newBuilder()
-                                    .headers(headersBuilder.build())
-                                    .build();
-                            return chain.proceed(request);
-                        });
+                        .interceptors()
+                        .add(
+                                0,
+                                chain -> {
+                                    Request request = chain.request();
+                                    Headers.Builder headersBuilder =
+                                            request.headers()
+                                                    .newBuilder()
+                                                    .set(
+                                                            ParseRESTCommand.HEADER_APPLICATION_ID,
+                                                            configuration.applicationId)
+                                                    .set(
+                                                            ParseRESTCommand
+                                                                    .HEADER_APP_BUILD_VERSION,
+                                                            String.valueOf(
+                                                                    ManifestInfo.getVersionCode()))
+                                                    .set(
+                                                            ParseRESTCommand
+                                                                    .HEADER_APP_DISPLAY_VERSION,
+                                                            ManifestInfo.getVersionName())
+                                                    .set(
+                                                            ParseRESTCommand.HEADER_OS_VERSION,
+                                                            Build.VERSION.RELEASE)
+                                                    .set(ParseRESTCommand.USER_AGENT, userAgent());
+                                    if (request.header(ParseRESTCommand.HEADER_INSTALLATION_ID)
+                                            == null) {
+                                        // We can do this synchronously since the caller is already
+                                        // on a background thread
+                                        headersBuilder.set(
+                                                ParseRESTCommand.HEADER_INSTALLATION_ID,
+                                                installationId().get());
+                                    }
+                                    // client key can be null with self-hosted Parse Server
+                                    if (configuration.clientKey != null) {
+                                        headersBuilder.set(
+                                                ParseRESTCommand.HEADER_CLIENT_KEY,
+                                                configuration.clientKey);
+                                    }
+                                    request =
+                                            request.newBuilder()
+                                                    .headers(headersBuilder.build())
+                                                    .build();
+                                    return chain.proceed(request);
+                                });
                 restClient = ParseHttpClient.createClient(clientBuilder);
             }
             return restClient;
@@ -169,7 +169,7 @@ public class ParsePlugins {
         synchronized (lock) {
             if (installationId == null) {
                 installationId =
-                    new InstallationId(new File(getFilesDir(), INSTALLATION_ID_LOCATION));
+                        new InstallationId(new File(getFilesDir(), INSTALLATION_ID_LOCATION));
             }
             return installationId;
         }
