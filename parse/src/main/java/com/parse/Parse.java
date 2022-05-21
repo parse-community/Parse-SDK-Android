@@ -12,10 +12,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -75,7 +79,7 @@ public class Parse {
      *   }
      * }
      * </pre>
-     *
+     * <p>
      * See <a
      * href="https://github.com/parse-community/Parse-SDK-Android/issues/279">https://github.com/parse-community/Parse-SDK-Android/issues/279</a>
      * for a discussion on performance of local datastore, and if it is right for your project.
@@ -85,8 +89,8 @@ public class Parse {
     public static void enableLocalDatastore(Context context) {
         if (isInitialized()) {
             throw new IllegalStateException(
-                    "`Parse#enableLocalDatastore(Context)` must be invoked "
-                            + "before `Parse#initialize(Context)`");
+                "`Parse#enableLocalDatastore(Context)` must be invoked "
+                    + "before `Parse#initialize(Context)`");
         }
         isLocalDatastoreEnabled = true;
     }
@@ -113,7 +117,7 @@ public class Parse {
 
     /**
      * @return {@code True} if {@link Configuration.Builder#allowCustomObjectId()} has been called,
-     *     otherwise {@code false}.
+     * otherwise {@code false}.
      */
     public static boolean isAllowCustomObjectId() {
         return allowCustomObjectId;
@@ -145,6 +149,9 @@ public class Parse {
             PLog.w(TAG, "Parse is already initialized");
             return;
         }
+        // Perform old dir migration on initialize.
+        new ParseCacheDirMigrationUtils(configuration.context).runMigrations();
+
         // NOTE (richardross): We will need this here, as ParsePlugins uses the return value of
         // isLocalDataStoreEnabled() to perform additional behavior.
         isLocalDatastoreEnabled = configuration.localDataStoreEnabled;
@@ -176,32 +183,32 @@ public class Parse {
         checkCacheApplicationId();
         final Context context = configuration.context;
         Task.callInBackground(
-                (Callable<Void>)
-                        () -> {
-                            getEventuallyQueue(context);
-                            return null;
-                        });
+            (Callable<Void>)
+                () -> {
+                    getEventuallyQueue(context);
+                    return null;
+                });
 
         ParseFieldOperations.registerDefaultDecoders();
 
         if (!allParsePushIntentReceiversInternal()) {
             throw new SecurityException(
-                    "To prevent external tampering to your app's notifications, "
-                            + "all receivers registered to handle the following actions must have "
-                            + "their exported attributes set to false: com.parse.push.intent.RECEIVE, "
-                            + "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
+                "To prevent external tampering to your app's notifications, "
+                    + "all receivers registered to handle the following actions must have "
+                    + "their exported attributes set to false: com.parse.push.intent.RECEIVE, "
+                    + "com.parse.push.intent.OPEN, com.parse.push.intent.DELETE");
         }
 
         ParseUser.getCurrentUserAsync()
-                .makeVoid()
-                .continueWith(
-                        (Continuation<Void, Void>)
-                                task -> {
-                                    // Prime config in the background
-                                    ParseConfig.getCurrentConfig();
-                                    return null;
-                                },
-                        Task.BACKGROUND_EXECUTOR);
+            .makeVoid()
+            .continueWith(
+                (Continuation<Void, Void>)
+                    task -> {
+                        // Prime config in the background
+                        ParseConfig.getCurrentConfig();
+                        return null;
+                    },
+                Task.BACKGROUND_EXECUTOR);
 
         dispatchOnParseInitialized();
 
@@ -213,8 +220,11 @@ public class Parse {
 
     // region Server URL
 
-    /** Returns the current server URL. */
-    public static @Nullable String getServer() {
+    /**
+     * Returns the current server URL.
+     */
+    public static @Nullable
+    String getServer() {
         URL server = ParseRESTCommand.server;
         return server == null ? null : server.toString();
     }
@@ -248,7 +258,8 @@ public class Parse {
      * @param server The server URL to validate.
      * @return The validated server URL.
      */
-    private static @Nullable String validateServerUrl(@Nullable String server) {
+    private static @Nullable
+    String validateServerUrl(@Nullable String server) {
 
         // Add an extra trailing slash so that Parse REST commands include
         // the path as part of the server URL (i.e. http://api.myhost.com/parse)
@@ -285,7 +296,9 @@ public class Parse {
         allowCustomObjectId = false;
     }
 
-    /** @return {@code True} if {@link #initialize} has been called, otherwise {@code false}. */
+    /**
+     * @return {@code True} if {@link #initialize} has been called, otherwise {@code false}.
+     */
     static boolean isInitialized() {
         return ParsePlugins.get() != null;
     }
@@ -308,10 +321,10 @@ public class Parse {
      */
     private static boolean allParsePushIntentReceiversInternal() {
         List<ResolveInfo> intentReceivers =
-                ManifestInfo.getIntentReceivers(
-                        ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE,
-                        ParsePushBroadcastReceiver.ACTION_PUSH_DELETE,
-                        ParsePushBroadcastReceiver.ACTION_PUSH_OPEN);
+            ManifestInfo.getIntentReceivers(
+                ParsePushBroadcastReceiver.ACTION_PUSH_RECEIVE,
+                ParsePushBroadcastReceiver.ACTION_PUSH_DELETE,
+                ParsePushBroadcastReceiver.ACTION_PUSH_OPEN);
 
         for (ResolveInfo resolveInfo : intentReceivers) {
             if (resolveInfo.activityInfo.exported) {
@@ -414,15 +427,15 @@ public class Parse {
         synchronized (MUTEX) {
             boolean isLocalDatastoreEnabled = Parse.isLocalDatastoreEnabled();
             if (eventuallyQueue == null
-                    || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
-                    || (!isLocalDatastoreEnabled
-                            && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
+                || (isLocalDatastoreEnabled && eventuallyQueue instanceof ParseCommandCache)
+                || (!isLocalDatastoreEnabled
+                && eventuallyQueue instanceof ParsePinningEventuallyQueue)) {
                 checkContext();
                 ParseHttpClient httpClient = ParsePlugins.get().restClient();
                 eventuallyQueue =
-                        isLocalDatastoreEnabled
-                                ? new ParsePinningEventuallyQueue(context, httpClient)
-                                : new ParseCommandCache(context, httpClient);
+                    isLocalDatastoreEnabled
+                        ? new ParsePinningEventuallyQueue(context, httpClient)
+                        : new ParseCommandCache(context, httpClient);
 
                 // We still need to clear out the old command cache even if we're using Pinning in
                 // case
@@ -436,33 +449,35 @@ public class Parse {
         }
     }
 
-    /** Used by Parse LiveQuery */
+    /**
+     * Used by Parse LiveQuery
+     */
     public static void checkInit() {
         if (ParsePlugins.get() == null) {
             throw new RuntimeException(
-                    "You must call Parse.initialize(Context)" + " before using the Parse library.");
+                "You must call Parse.initialize(Context)" + " before using the Parse library.");
         }
 
         if (ParsePlugins.get().applicationId() == null) {
             throw new RuntimeException(
-                    "applicationId is null. "
-                            + "You must call Parse.initialize(Context)"
-                            + " before using the Parse library.");
+                "applicationId is null. "
+                    + "You must call Parse.initialize(Context)"
+                    + " before using the Parse library.");
         }
     }
 
     static void checkContext() {
         if (ParsePlugins.get().applicationContext() == null) {
             throw new RuntimeException(
-                    "applicationContext is null. "
-                            + "You must call Parse.initialize(Context)"
-                            + " before using the Parse library.");
+                "applicationContext is null. "
+                    + "You must call Parse.initialize(Context)"
+                    + " before using the Parse library.");
         }
     }
 
     static boolean hasPermission(String permission) {
         return (getApplicationContext().checkCallingOrSelfPermission(permission)
-                == PackageManager.PERMISSION_GRANTED);
+            == PackageManager.PERMISSION_GRANTED);
     }
 
     // endregion
@@ -472,10 +487,10 @@ public class Parse {
     static void requirePermission(String permission) {
         if (!hasPermission(permission)) {
             throw new IllegalStateException(
-                    "To use this functionality, add this to your AndroidManifest.xml:\n"
-                            + "<uses-permission android:name=\""
-                            + permission
-                            + "\" />");
+                "To use this functionality, add this to your AndroidManifest.xml:\n"
+                    + "<uses-permission android:name=\""
+                    + permission
+                    + "\" />");
         }
     }
 
@@ -489,7 +504,7 @@ public class Parse {
     static void registerParseCallbacks(ParseCallbacks listener) {
         if (isInitialized()) {
             throw new IllegalStateException(
-                    "You must register callbacks before Parse.initialize(Context)");
+                "You must register callbacks before Parse.initialize(Context)");
         }
 
         synchronized (MUTEX_CALLBACKS) {
@@ -537,7 +552,9 @@ public class Parse {
         return callbacks;
     }
 
-    /** Returns the level of logging that will be displayed. */
+    /**
+     * Returns the level of logging that will be displayed.
+     */
     public static int getLogLevel() {
         return PLog.getLogLevel();
     }
@@ -569,7 +586,9 @@ public class Parse {
         void onParseInitialized();
     }
 
-    /** Represents an opaque configuration for the {@code Parse} SDK configuration. */
+    /**
+     * Represents an opaque configuration for the {@code Parse} SDK configuration.
+     */
     public static final class Configuration {
         final Context context;
         final String applicationId;
@@ -591,7 +610,9 @@ public class Parse {
             this.maxRetries = builder.maxRetries;
         }
 
-        /** Allows for simple constructing of a {@code Configuration} object. */
+        /**
+         * Allows for simple constructing of a {@code Configuration} object.
+         */
         public static final class Builder {
             private final Context context;
             private String applicationId;
