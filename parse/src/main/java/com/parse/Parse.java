@@ -76,7 +76,7 @@ public class Parse {
      * }
      * </pre>
      *
-     * See <a
+     * <p>See <a
      * href="https://github.com/parse-community/Parse-SDK-Android/issues/279">https://github.com/parse-community/Parse-SDK-Android/issues/279</a>
      * for a discussion on performance of local datastore, and if it is right for your project.
      *
@@ -145,6 +145,9 @@ public class Parse {
             PLog.w(TAG, "Parse is already initialized");
             return;
         }
+        // Perform old dir migration on initialize.
+        new ParseCacheDirMigrationUtils(configuration.context).runMigrations();
+
         // NOTE (richardross): We will need this here, as ParsePlugins uses the return value of
         // isLocalDataStoreEnabled() to perform additional behavior.
         isLocalDatastoreEnabled = configuration.localDataStoreEnabled;

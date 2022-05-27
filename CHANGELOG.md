@@ -1,3 +1,10 @@
+## [3.0.1](https://github.com/parse-community/Parse-SDK-Android/compare/3.0.0...3.0.1) (2022-05-26)
+
+
+### Bug Fixes
+
+* users logged out after SDK upgrade due to different cache path; this fixes the bug that was introduced with release 3.0.0 which ignores SDK-internal data that is stored locally on the client side ([#1168](https://github.com/parse-community/Parse-SDK-Android/issues/1168)) ([ec7bd03](https://github.com/parse-community/Parse-SDK-Android/commit/ec7bd03eb98310dd63d15398be344b0f5e5fd54f))
+
 # [3.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/2.1.0...3.0.0) (2021-11-25)
 
 ### ⚠️ Warning
