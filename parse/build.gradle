@@ -47,10 +47,11 @@ ext {
 
 dependencies {
     api "androidx.annotation:annotation:1.3.0"
-    api "androidx.core:core:1.7.0"
+    api "androidx.core:core:1.8.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
+    testImplementation "org.junit.jupiter:junit-jupiter:$rootProject.ext.jupiterVersion"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoCoreVersion"
@@ -86,6 +87,10 @@ tasks.withType(Test) {
     testLogging {
         events "failed"
     }
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
 }
 
 jacocoAndroidUnitTestReport {
