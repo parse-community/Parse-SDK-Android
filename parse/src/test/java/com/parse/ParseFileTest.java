@@ -13,8 +13,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
@@ -145,7 +144,7 @@ public class ParseFileTest {
                         any(byte[].class),
                         any(String.class),
                         any(ProgressCallback.class),
-                        Matchers.<Task<Void>>any());
+                        any());
     }
 
     @Test
@@ -168,7 +167,7 @@ public class ParseFileTest {
                         any(byte[].class),
                         any(String.class),
                         any(ProgressCallback.class),
-                        Matchers.<Task<Void>>any());
+                        any());
     }
 
     @Test

@@ -40,7 +40,7 @@ android {
 }
 
 ext {
-    coroutinesVersion = "1.5.2"
+    coroutinesVersion = "1.6.1"
 }
 
 dependencies {
