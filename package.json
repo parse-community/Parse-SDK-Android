@@ -1,6 +1,6 @@
 {
   "name": "parse-sdk-android",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parse-community/Parse-SDK-Android.git"

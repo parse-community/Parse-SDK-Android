@@ -1,3 +1,15 @@
+# [4.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/3.0.1...4.0.0) (2022-06-10)
+
+
+### Features
+
+* update various dependencies ([#1172](https://github.com/parse-community/Parse-SDK-Android/issues/1172)) ([779dc0b](https://github.com/parse-community/Parse-SDK-Android/commit/779dc0b9d635a2b14f142e7eb2788f938ccc6134))
+
+
+### BREAKING CHANGES
+
+* The Facebook Login SDK is upgraded to 13.x; this is a transitive dependency, so if you are directly calling the Facebook Login SDK in your app then this may be a braking change; this release of the Parse Android SDK adds a version range to the Facebook Login SDK dependency for correct gradle dependency resolving ([779dc0b](779dc0b))
+
 ## [3.0.1](https://github.com/parse-community/Parse-SDK-Android/compare/3.0.0...3.0.1) (2022-05-26)
 
 
