@@ -8,14 +8,10 @@
  */
 package com.parse;
 
-/**
- * Static utility methods pertaining to {@link Number} instances.
- */
+/** Static utility methods pertaining to {@link Number} instances. */
 class Numbers {
 
-    /**
-     * Add two {@link Number} instances.
-     */
+    /** Add two {@link Number} instances. */
     /* package */
     static Number add(Number first, Number second) {
         if (first instanceof Double || second instanceof Double) {
@@ -35,9 +31,7 @@ class Numbers {
         }
     }
 
-    /**
-     * Subtract two {@link Number} instances.
-     */
+    /** Subtract two {@link Number} instances. */
     /* package */
     static Number subtract(Number first, Number second) {
         if (first instanceof Double || second instanceof Double) {
@@ -57,9 +51,7 @@ class Numbers {
         }
     }
 
-    /**
-     * Compare two {@link Number} instances.
-     */
+    /** Compare two {@link Number} instances. */
     /* package */
     static int compare(Number first, Number second) {
         if (first instanceof Double || second instanceof Double) {

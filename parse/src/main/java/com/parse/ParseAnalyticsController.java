@@ -9,10 +9,8 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-
 import java.util.Map;
+import org.json.JSONObject;
 
 class ParseAnalyticsController {
 
@@ -22,18 +20,18 @@ class ParseAnalyticsController {
         this.eventuallyQueue = eventuallyQueue;
     }
 
-    public Task<Void> trackEventInBackground(final String name,
-                                             Map<String, String> dimensions, String sessionToken) {
-        ParseRESTCommand command = ParseRESTAnalyticsCommand.trackEventCommand(name, dimensions,
-                sessionToken);
+    public Task<Void> trackEventInBackground(
+            final String name, Map<String, String> dimensions, String sessionToken) {
+        ParseRESTCommand command =
+                ParseRESTAnalyticsCommand.trackEventCommand(name, dimensions, sessionToken);
 
         Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
         return eventuallyTask.makeVoid();
     }
 
     public Task<Void> trackAppOpenedInBackground(String pushHash, String sessionToken) {
-        ParseRESTCommand command = ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushHash,
-                sessionToken);
+        ParseRESTCommand command =
+                ParseRESTAnalyticsCommand.trackAppOpenedCommand(pushHash, sessionToken);
 
         Task<JSONObject> eventuallyTask = eventuallyQueue.enqueueEventuallyAsync(command, null);
         return eventuallyTask.makeVoid();

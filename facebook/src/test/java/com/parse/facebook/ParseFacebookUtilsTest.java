@@ -11,14 +11,13 @@ package com.parse.facebook;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -28,14 +27,15 @@ import static org.mockito.Mockito.when;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-
 import androidx.fragment.app.Fragment;
-
 import com.facebook.AccessToken;
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
 import com.parse.boltsinternal.Task;
-
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,26 +46,18 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
 @Config(manifest = Config.NONE)
 @RunWith(RobolectricTestRunner.class)
 public class ParseFacebookUtilsTest {
 
-    @Mock
-    private FacebookController controller;
-    @Mock
-    private ParseFacebookUtils.ParseUserDelegate userDelegate;
+    @Mock private FacebookController controller;
+    @Mock private ParseFacebookUtils.ParseUserDelegate userDelegate;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         ParseFacebookUtils.controller = controller;
         ParseFacebookUtils.userDelegate = userDelegate;
-
     }
 
     @After
@@ -74,7 +66,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.userDelegate = null;
     }
 
-    //region testInitialize
+    // region testInitialize
 
     @Test
     public void testInitialize() {
@@ -97,16 +89,17 @@ public class ParseFacebookUtilsTest {
         assertTrue(ParseFacebookUtils.isInitialized);
     }
 
-    //endregion
+    // endregion
 
-    //region testRestoreAuthentication
+    // region testRestoreAuthentication
 
     @Test
     public void testRestoreAuthentication() throws java.text.ParseException {
         ParseFacebookUtils.initialize(null);
         ArgumentCaptor<AuthenticationCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AuthenticationCallback.class);
-        verify(userDelegate).registerAuthenticationCallback(eq("facebook"), callbackCaptor.capture());
+        verify(userDelegate)
+                .registerAuthenticationCallback(eq("facebook"), callbackCaptor.capture());
         AuthenticationCallback callback = callbackCaptor.getValue();
         Map<String, String> authData = new HashMap<>();
 
@@ -119,18 +112,17 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.initialize(null);
         ArgumentCaptor<AuthenticationCallback> callbackCaptor =
                 ArgumentCaptor.forClass(AuthenticationCallback.class);
-        verify(userDelegate).registerAuthenticationCallback(eq("facebook"), callbackCaptor.capture());
+        verify(userDelegate)
+                .registerAuthenticationCallback(eq("facebook"), callbackCaptor.capture());
         AuthenticationCallback callback = callbackCaptor.getValue();
         Map<String, String> authData = new HashMap<>();
-        doThrow(new RuntimeException())
-                .when(controller)
-                .setAuthData(anyMapOf(String.class, String.class));
+        doThrow(new RuntimeException()).when(controller).setAuthData(anyMap());
 
         assertFalse(callback.onRestore(authData));
         verify(controller).setAuthData(authData);
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testIsLinked() {
@@ -156,7 +148,7 @@ public class ParseFacebookUtilsTest {
         verify(controller).onActivityResult(requestCode, resultCode, data);
     }
 
-    //region testLogIn
+    // region testLogIn
 
     @Test
     public void testLogInWithAccessToken() {
@@ -165,7 +157,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
         AccessToken token = TestUtils.newAccessToken();
         Task<ParseUser> task = ParseFacebookUtils.logInInBackground(token);
@@ -217,31 +209,41 @@ public class ParseFacebookUtilsTest {
             Collection<String> permissions,
             FacebookController.LoginAuthorizationType type) {
         assertFalse(
-                "Cannot run test with both Activity and Fragment", activity != null && fragment != null);
+                "Cannot run test with both Activity and Fragment",
+                activity != null && fragment != null);
 
         Map<String, String> authData = new HashMap<>();
         when(controller.authenticateAsync(
-                nullable(Activity.class),
-                nullable(Fragment.class),
-                any(FacebookController.LoginAuthorizationType.class),
-                anyList())).thenReturn(Task.forResult(authData));
+                        nullable(Activity.class),
+                        nullable(Fragment.class),
+                        any(FacebookController.LoginAuthorizationType.class),
+                        anyList()))
+                .thenReturn(Task.forResult(authData));
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
         Task<ParseUser> task;
         if (FacebookController.LoginAuthorizationType.PUBLISH.equals(type)) {
             if (activity != null) {
-                task = ParseFacebookUtils.logInWithPublishPermissionsInBackground(activity, permissions);
+                task =
+                        ParseFacebookUtils.logInWithPublishPermissionsInBackground(
+                                activity, permissions);
             } else {
-                task = ParseFacebookUtils.logInWithPublishPermissionsInBackground(fragment, permissions);
+                task =
+                        ParseFacebookUtils.logInWithPublishPermissionsInBackground(
+                                fragment, permissions);
             }
         } else {
             if (activity != null) {
-                task = ParseFacebookUtils.logInWithReadPermissionsInBackground(activity, permissions);
+                task =
+                        ParseFacebookUtils.logInWithReadPermissionsInBackground(
+                                activity, permissions);
             } else {
-                task = ParseFacebookUtils.logInWithReadPermissionsInBackground(fragment, permissions);
+                task =
+                        ParseFacebookUtils.logInWithReadPermissionsInBackground(
+                                fragment, permissions);
             }
         }
         verify(controller).authenticateAsync(activity, fragment, type, permissions);
@@ -250,9 +252,9 @@ public class ParseFacebookUtilsTest {
         assertEquals(user, task.getResult());
     }
 
-    //endregion
+    // endregion
 
-    //region testLink
+    // region testLink
 
     @Test
     public void testLinkWithAccessToken() {
@@ -261,8 +263,7 @@ public class ParseFacebookUtilsTest {
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.forResult(null));
+        when(user.linkWithInBackground(anyString(), anyMap())).thenReturn(Task.forResult(null));
         AccessToken token = TestUtils.newAccessToken();
         Task<Void> task = ParseFacebookUtils.linkInBackground(user, token);
         verify(controller).getAuthData(token);
@@ -312,33 +313,40 @@ public class ParseFacebookUtilsTest {
             Collection<String> permissions,
             FacebookController.LoginAuthorizationType type) {
         assertFalse(
-                "Cannot run test with both Activity and Fragment", activity != null && fragment != null);
+                "Cannot run test with both Activity and Fragment",
+                activity != null && fragment != null);
 
         Map<String, String> authData = new HashMap<>();
         when(controller.authenticateAsync(
-                nullable(Activity.class),
-                nullable(Fragment.class),
-                any(FacebookController.LoginAuthorizationType.class),
-                anyList())).thenReturn(Task.forResult(authData));
+                        nullable(Activity.class),
+                        nullable(Fragment.class),
+                        any(FacebookController.LoginAuthorizationType.class),
+                        anyList()))
+                .thenReturn(Task.forResult(authData));
         ParseFacebookUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMap()))
-                .thenReturn(Task.forResult(null));
+        when(user.linkWithInBackground(anyString(), anyMap())).thenReturn(Task.forResult(null));
         Task<Void> task;
         if (FacebookController.LoginAuthorizationType.PUBLISH.equals(type)) {
             if (activity != null) {
-                task = ParseFacebookUtils.linkWithPublishPermissionsInBackground(
-                        user, activity, permissions);
+                task =
+                        ParseFacebookUtils.linkWithPublishPermissionsInBackground(
+                                user, activity, permissions);
             } else {
-                task = ParseFacebookUtils.linkWithPublishPermissionsInBackground(
-                        user, fragment, permissions);
+                task =
+                        ParseFacebookUtils.linkWithPublishPermissionsInBackground(
+                                user, fragment, permissions);
             }
         } else {
             if (activity != null) {
-                task = ParseFacebookUtils.linkWithReadPermissionsInBackground(user, activity, permissions);
+                task =
+                        ParseFacebookUtils.linkWithReadPermissionsInBackground(
+                                user, activity, permissions);
             } else {
-                task = ParseFacebookUtils.linkWithReadPermissionsInBackground(user, fragment, permissions);
+                task =
+                        ParseFacebookUtils.linkWithReadPermissionsInBackground(
+                                user, fragment, permissions);
             }
         }
         verify(controller).authenticateAsync(activity, fragment, type, permissions);
@@ -346,7 +354,7 @@ public class ParseFacebookUtilsTest {
         assertTrue(task.isCompleted());
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testUnlinkInBackground() {

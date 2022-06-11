@@ -8,21 +8,18 @@
  */
 package com.parse;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONObject;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import org.json.JSONObject;
 
 final class ParseTestUtils {
 
@@ -49,14 +46,16 @@ final class ParseTestUtils {
     }
 
     static void updateMockParseHttpClientWithResponse(
-            ParseHttpClient client, JSONObject content, int statusCode, String reasonPhrase) throws IOException {
+            ParseHttpClient client, JSONObject content, int statusCode, String reasonPhrase)
+            throws IOException {
         byte[] contentBytes = content.toString().getBytes();
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(contentBytes))
-                .setStatusCode(statusCode)
-                .setTotalSize(contentBytes.length)
-                .setContentType("application/json")
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(contentBytes))
+                        .setStatusCode(statusCode)
+                        .setTotalSize(contentBytes.length)
+                        .setContentType("application/json")
+                        .build();
         when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
     }
 
@@ -69,16 +68,12 @@ final class ParseTestUtils {
         when(parsePlugins.applicationContext()).thenReturn(applicationContext);
         File parseDir = createFileDir(applicationContext.getDir("Parse", Context.MODE_PRIVATE));
         when(parsePlugins.installationId())
-                .thenReturn(
-                        new InstallationId(new File(parseDir, "installationId")));
-        when(parsePlugins.getParseDir())
-                .thenReturn(parseDir);
+                .thenReturn(new InstallationId(new File(parseDir, "installationId")));
+        when(parsePlugins.getFilesDir()).thenReturn(parseDir);
         when(parsePlugins.getCacheDir())
-                .thenReturn(createFileDir(
-                        new File(applicationContext.getCacheDir(), "com.parse")));
+                .thenReturn(createFileDir(new File(applicationContext.getCacheDir(), "com.parse")));
         when(parsePlugins.getFilesDir())
-                .thenReturn(createFileDir(
-                        new File(applicationContext.getFilesDir(), "com.parse")));
+                .thenReturn(createFileDir(new File(applicationContext.getFilesDir(), "com.parse")));
         return parsePlugins;
     }
 

@@ -16,24 +16,21 @@ import static org.junit.Assert.assertTrue;
 
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
-
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
+import org.json.JSONObject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseHttpClientTest {
@@ -51,7 +48,10 @@ public class ParseHttpClientTest {
     @Test
     public void testParseOkHttpClientExecuteWithErrorResponse() throws Exception {
         doSingleParseHttpClientExecuteWithResponse(
-                404, "NOT FOUND", "Error", ParseHttpClient.createClient(new OkHttpClient.Builder()));
+                404,
+                "NOT FOUND",
+                "Error",
+                ParseHttpClient.createClient(new OkHttpClient.Builder()));
     }
 
     // TODO(mengyan): Add testParseURLConnectionHttpClientExecuteWithGzipResponse, right now we can
@@ -64,15 +64,17 @@ public class ParseHttpClientTest {
                 200, "OK", "Success", ParseHttpClient.createClient(new OkHttpClient.Builder()));
     }
 
-    private void doSingleParseHttpClientExecuteWithResponse(int responseCode, String responseStatus,
-                                                            String responseContent, ParseHttpClient client) throws Exception {
+    private void doSingleParseHttpClientExecuteWithResponse(
+            int responseCode, String responseStatus, String responseContent, ParseHttpClient client)
+            throws Exception {
         MockWebServer server = new MockWebServer();
 
         // Make mock response
         int responseContentLength = responseContent.length();
-        MockResponse mockResponse = new MockResponse()
-                .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
-                .setBody(responseContent);
+        MockResponse mockResponse =
+                new MockResponse()
+                        .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
+                        .setBody(responseContent);
 
         // Start mock server
         server.enqueue(mockResponse);
@@ -88,12 +90,13 @@ public class ParseHttpClientTest {
         String requestContent = json.toString();
         int requestContentLength = requestContent.length();
         String requestContentType = "application/json";
-        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-                .setUrl(requestUrl)
-                .setMethod(ParseHttpRequest.Method.POST)
-                .setBody(new ParseByteArrayHttpBody(requestContent, requestContentType))
-                .setHeaders(requestHeaders)
-                .build();
+        ParseHttpRequest parseRequest =
+                new ParseHttpRequest.Builder()
+                        .setUrl(requestUrl)
+                        .setMethod(ParseHttpRequest.Method.POST)
+                        .setBody(new ParseByteArrayHttpBody(requestContent, requestContentType))
+                        .setHeaders(requestHeaders)
+                        .build();
 
         // Execute request
         ParseHttpResponse parseResponse = client.execute(parseRequest);
@@ -103,7 +106,8 @@ public class ParseHttpClientTest {
         // Verify request method
         assertEquals(ParseHttpRequest.Method.POST.toString(), recordedApacheRequest.getMethod());
 
-        // Verify request headers, since http library automatically adds some headers, we only need to
+        // Verify request headers, since http library automatically adds some headers, we only need
+        // to
         // verify all parseRequest headers are in recordedRequest headers.
         Headers recordedApacheHeaders = recordedApacheRequest.getHeaders();
         Set<String> recordedApacheHeadersNames = recordedApacheHeaders.names();
@@ -114,7 +118,8 @@ public class ParseHttpClientTest {
 
         // Verify request body
         assertEquals(requestContentLength, recordedApacheRequest.getBodySize());
-        assertArrayEquals(requestContent.getBytes(), recordedApacheRequest.getBody().readByteArray());
+        assertArrayEquals(
+                requestContent.getBytes(), recordedApacheRequest.getBody().readByteArray());
 
         // Verify response status code
         assertEquals(responseCode, parseResponse.getStatusCode());
@@ -136,7 +141,10 @@ public class ParseHttpClientTest {
     }
 
     private void doSingleParseHttpClientExecuteWithGzipResponse(
-            int responseCode, String responseStatus, final String responseContent, ParseHttpClient client)
+            int responseCode,
+            String responseStatus,
+            final String responseContent,
+            ParseHttpClient client)
             throws Exception {
         MockWebServer server = new MockWebServer();
 
@@ -147,10 +155,11 @@ public class ParseHttpClientTest {
         gzipOut.write(responseContent.getBytes());
         gzipOut.close();
         buffer.write(byteOut.toByteArray());
-        MockResponse mockResponse = new MockResponse()
-                .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
-                .setBody(buffer)
-                .setHeader("Content-Encoding", "gzip");
+        MockResponse mockResponse =
+                new MockResponse()
+                        .setStatus("HTTP/1.1 " + responseCode + " " + responseStatus)
+                        .setBody(buffer)
+                        .setHeader("Content-Encoding", "gzip");
 
         // Start mock server
         server.enqueue(mockResponse);
@@ -158,10 +167,11 @@ public class ParseHttpClientTest {
 
         // We do not need to add Accept-Encoding header manually, httpClient library should do that.
         String requestUrl = server.url("/").toString();
-        ParseHttpRequest parseRequest = new ParseHttpRequest.Builder()
-                .setUrl(requestUrl)
-                .setMethod(ParseHttpRequest.Method.GET)
-                .build();
+        ParseHttpRequest parseRequest =
+                new ParseHttpRequest.Builder()
+                        .setUrl(requestUrl)
+                        .setMethod(ParseHttpRequest.Method.GET)
+                        .build();
 
         // Execute request
         ParseHttpResponse parseResponse = client.execute(parseRequest);

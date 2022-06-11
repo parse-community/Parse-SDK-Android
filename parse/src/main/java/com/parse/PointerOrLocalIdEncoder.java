@@ -12,12 +12,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Encodes {@link ParseObject}s as pointers. If the object does not have an objectId, uses a
- * local id.
+ * Encodes {@link ParseObject}s as pointers. If the object does not have an objectId, uses a local
+ * id.
  */
 public class PointerOrLocalIdEncoder extends ParseEncoder {
 
-    // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
+    // This class isn't really a Singleton, but since it has no state, it's more efficient to get
+    // the
     // default instance.
     private static final PointerOrLocalIdEncoder INSTANCE = new PointerOrLocalIdEncoder();
 

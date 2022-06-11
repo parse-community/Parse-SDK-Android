@@ -12,10 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,23 +25,19 @@ import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.content.Intent;
 import android.os.Bundle;
-
 import com.parse.boltsinternal.Task;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.LooperMode;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 // For android.os.BaseBundle
 @RunWith(RobolectricTestRunner.class)
@@ -56,13 +52,10 @@ public class ParseAnalyticsTest {
 
         // Mock ParseAnalyticsController
         controller = mock(ParseAnalyticsController.class);
-        when(controller.trackEventInBackground(
-                anyString(),
-                anyMapOf(String.class, String.class),
-                anyString())).thenReturn(Task.<Void>forResult(null));
-        when(controller.trackAppOpenedInBackground(
-                anyString(),
-                anyString())).thenReturn(Task.<Void>forResult(null));
+        when(controller.trackEventInBackground(anyString(), anyMap(), anyString()))
+                .thenReturn(Task.forResult(null));
+        when(controller.trackAppOpenedInBackground(anyString(), anyString()))
+                .thenReturn(Task.forResult(null));
 
         ParseCorePlugins.getInstance().registerAnalyticsController(controller);
     }
@@ -82,7 +75,7 @@ public class ParseAnalyticsTest {
         assertSame(controller, ParseAnalytics.getAnalyticsController());
     }
 
-    //region trackEventInBackground
+    // region trackEventInBackground
 
     @Test(expected = IllegalArgumentException.class)
     public void testTrackEventInBackgroundNullName() throws Exception {
@@ -98,16 +91,15 @@ public class ParseAnalyticsTest {
     public void testTrackEventInBackgroundNormalName() throws Exception {
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test"));
 
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     @Test
     public void testTrackEventInBackgroundNullParameters() throws Exception {
-        ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
+        ParseTaskUtils.wait(
+                ParseAnalytics.trackEventInBackground("test", (Map<String, String>) null));
 
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
     @Test
@@ -115,8 +107,7 @@ public class ParseAnalyticsTest {
         Map<String, String> dimensions = new HashMap<>();
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), eq(dimensions), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -125,8 +116,7 @@ public class ParseAnalyticsTest {
         dimensions.put("key", "value");
         ParseTaskUtils.wait(ParseAnalytics.trackEventInBackground("test", dimensions));
 
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), eq(dimensions), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
 
     @Test
@@ -134,17 +124,17 @@ public class ParseAnalyticsTest {
         Map<String, String> dimensions = new HashMap<>();
         ParseAnalytics.trackEventInBackground("test", dimensions, null);
 
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), eq(dimensions), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
     }
-
 
     @Test
     public void testTrackEventInBackgroundNormalCallback() throws Exception {
         final Map<String, String> dimensions = new HashMap<>();
         dimensions.put("key", "value");
         final Semaphore done = new Semaphore(0);
-        ParseAnalytics.trackEventInBackground("test", dimensions,
+        ParseAnalytics.trackEventInBackground(
+                "test",
+                dimensions,
                 e -> {
                     assertNull(e);
                     done.release();
@@ -154,33 +144,32 @@ public class ParseAnalyticsTest {
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).trackEventInBackground(
-                eq("test"), eq(dimensions), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(dimensions), isNull());
 
         final Semaphore doneAgain = new Semaphore(0);
-        ParseAnalytics.trackEventInBackground("test", e -> {
-            assertNull(e);
-            doneAgain.release();
-        });
+        ParseAnalytics.trackEventInBackground(
+                "test",
+                e -> {
+                    assertNull(e);
+                    doneAgain.release();
+                });
 
         shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(doneAgain.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).trackEventInBackground
-                (eq("test"), Matchers.<Map<String, String>>eq(null), isNull(String.class));
+        verify(controller, times(1)).trackEventInBackground(eq("test"), eq(null), isNull());
     }
 
-    //endregion
+    // endregion
 
-    //region testTrackAppOpenedInBackground
+    // region testTrackAppOpenedInBackground
 
     @Test
     public void testTrackAppOpenedInBackgroundNullIntent() throws Exception {
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(null));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(isNull(String.class),
-                isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
@@ -188,8 +177,7 @@ public class ParseAnalyticsTest {
         Intent intent = new Intent();
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(isNull(String.class),
-                isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(isNull(), isNull());
     }
 
     @Test
@@ -197,7 +185,7 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
@@ -205,11 +193,11 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
 
         ParseTaskUtils.wait(ParseAnalytics.trackAppOpenedInBackground(intent));
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
@@ -217,28 +205,30 @@ public class ParseAnalyticsTest {
         Intent intent = makeIntentWithParseData("test");
         ParseAnalytics.trackAppOpenedInBackground(intent, null);
 
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
     @Test
     public void testTrackAppOpenedInBackgroundNormalCallback() throws Exception {
         Intent intent = makeIntentWithParseData("test");
         final Semaphore done = new Semaphore(0);
-        ParseAnalytics.trackAppOpenedInBackground(intent, e -> {
-            assertNull(e);
-            done.release();
-        });
+        ParseAnalytics.trackAppOpenedInBackground(
+                intent,
+                e -> {
+                    assertNull(e);
+                    done.release();
+                });
 
         shadowMainLooper().idle();
 
         // Make sure the callback is called
         assertTrue(done.tryAcquire(1, 10, TimeUnit.SECONDS));
-        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull(String.class));
+        verify(controller, times(1)).trackAppOpenedInBackground(eq("test"), isNull());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetPushHashFromIntent
+    // region testGetPushHashFromIntent
 
     @Test
     public void testGetPushHashFromIntentNullIntent() {
@@ -296,7 +286,7 @@ public class ParseAnalyticsTest {
         assertEquals("test", pushHash);
     }
 
-    //endregion
+    // endregion
 
     private Intent makeIntentWithParseData(String pushHash) throws JSONException {
         Intent intent = new Intent();

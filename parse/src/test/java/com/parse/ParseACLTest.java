@@ -13,8 +13,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -22,7 +22,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.Parcel;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -31,13 +32,10 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RunWith(RobolectricTestRunner.class)
 public class ParseACLTest {
 
-    private final static String UNRESOLVED_KEY = "*unresolved";
+    private static final String UNRESOLVED_KEY = "*unresolved";
     private static final String READ_PERMISSION = "read";
     private static final String WRITE_PERMISSION = "write";
 
@@ -53,7 +51,7 @@ public class ParseACLTest {
         ParseObject.registerSubclass(ParseUser.class);
     }
 
-    //region testConstructor
+    // region testConstructor
 
     @After
     public void tearDown() {
@@ -68,9 +66,9 @@ public class ParseACLTest {
         assertEquals(0, acl.getPermissionsById().size());
     }
 
-    //endregion
+    // endregion
 
-    //region testCopy
+    // region testCopy
 
     @Test
     public void testConstructorWithUser() {
@@ -105,9 +103,9 @@ public class ParseACLTest {
         verify(unresolvedUser, times(1)).registerSaveListener(any(GetCallback.class));
     }
 
-    //endregion
+    // endregion
 
-    //region toJson
+    // region toJson
 
     @Test
     public void testCopyWithSaveListener() {
@@ -145,9 +143,9 @@ public class ParseACLTest {
         assertNull(copiedACL.getUnresolvedUser());
     }
 
-    //endregion
+    // endregion
 
-    //region parcelable
+    // region parcelable
 
     @Test
     public void testToJson() throws Exception {
@@ -193,9 +191,9 @@ public class ParseACLTest {
         assertFalse(acl.getPublicWriteAccess());
     }
 
-    //endregion
+    // endregion
 
-    //region testCreateACLFromJSONObject
+    // region testCreateACLFromJSONObject
 
     @Test
     public void testParcelableWithUnresolvedUser() {
@@ -216,9 +214,9 @@ public class ParseACLTest {
         assertTrue(acl.getReadAccess(unresolved));
     }
 
-    //endregion
+    // endregion
 
-    //region testResolveUser
+    // region testResolveUser
 
     @Test
     public void testCreateACLFromJSONObject() throws Exception {
@@ -259,9 +257,9 @@ public class ParseACLTest {
         assertSame(unresolvedUser, acl.getUnresolvedUser());
     }
 
-    //endregion
+    // endregion
 
-    //region testSetAccess
+    // region testSetAccess
 
     @Test
     public void testResolveUserWithUnresolvedUser() {
@@ -470,9 +468,9 @@ public class ParseACLTest {
         assertTrue(acl.getWriteAccess(user));
         assertEquals(1, acl.getPermissionsById().size());
     }
-    //endregion
+    // endregion
 
-    //region testGetAccess
+    // region testGetAccess
 
     @Test
     public void testSetUserWriteAccessWithNormalUser() {
@@ -586,7 +584,8 @@ public class ParseACLTest {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);
-        // Since user is a lazy user, this will set the acl's unresolved user and give it read access
+        // Since user is a lazy user, this will set the acl's unresolved user and give it read
+        // access
         acl.setReadAccess(user, true);
 
         assertTrue(acl.getReadAccess(user));
@@ -624,7 +623,8 @@ public class ParseACLTest {
         ParseACL acl = new ParseACL();
         ParseUser user = new ParseUser();
         setLazy(user);
-        // Since user is a lazy user, this will set the acl's unresolved user and give it write access
+        // Since user is a lazy user, this will set the acl's unresolved user and give it write
+        // access
         acl.setWriteAccess(user, true);
 
         assertTrue(acl.getWriteAccess(user));
@@ -647,9 +647,9 @@ public class ParseACLTest {
         assertFalse(acl.getWriteAccess(user));
     }
 
-    //endregion
+    // endregion
 
-    //region testGetter/Setter
+    // region testGetter/Setter
 
     @Test
     public void testGetUserWriteAccessWithNormalUser() {
@@ -669,7 +669,7 @@ public class ParseACLTest {
         assertTrue(acl.isShared());
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testUnresolvedUser() {

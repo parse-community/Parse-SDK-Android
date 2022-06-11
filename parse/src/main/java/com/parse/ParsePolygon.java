@@ -10,19 +10,19 @@ package com.parse;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
+import androidx.annotation.NonNull;
+import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.util.List;
-import java.util.Locale;
-
 /**
- * {@code ParsePolygon} represents a set of coordinates that may be associated with a key
- * in a {@link ParseObject} or used as a reference point for geo queries. This allows proximity
- * based queries on the key.
- * <p>
- * Example:
+ * {@code ParsePolygon} represents a set of coordinates that may be associated with a key in a
+ * {@link ParseObject} or used as a reference point for geo queries. This allows proximity based
+ * queries on the key.
+ *
+ * <p>Example:
+ *
  * <pre>
  * List<ParseGeoPoint> points = new ArrayList<ParseGeoPoint>();
  * points.add(new ParseGeoPoint(0,0));
@@ -37,17 +37,18 @@ import java.util.Locale;
  */
 public class ParsePolygon implements Parcelable {
 
-    public final static Creator<ParsePolygon> CREATOR = new Creator<ParsePolygon>() {
-        @Override
-        public ParsePolygon createFromParcel(Parcel source) {
-            return new ParsePolygon(source, ParseParcelDecoder.get());
-        }
+    public static final Creator<ParsePolygon> CREATOR =
+            new Creator<ParsePolygon>() {
+                @Override
+                public ParsePolygon createFromParcel(Parcel source) {
+                    return new ParsePolygon(source, ParseParcelDecoder.get());
+                }
 
-        @Override
-        public ParsePolygon[] newArray(int size) {
-            return new ParsePolygon[size];
-        }
-    };
+                @Override
+                public ParsePolygon[] newArray(int size) {
+                    return new ParsePolygon[size];
+                }
+            };
     private List<ParseGeoPoint> coordinates;
 
     /**
@@ -70,8 +71,8 @@ public class ParsePolygon implements Parcelable {
 
     /**
      * Creates a new point instance from a {@link Parcel} source. This is used when unparceling a
-     * ParsePolygon. Subclasses that need Parcelable behavior should provide their own
-     * {@link android.os.Parcelable.Creator} and override this constructor.
+     * ParsePolygon. Subclasses that need Parcelable behavior should provide their own {@link
+     * android.os.Parcelable.Creator} and override this constructor.
      *
      * @param source The recovered parcel.
      */
@@ -79,22 +80,19 @@ public class ParsePolygon implements Parcelable {
         this(source, ParseParcelDecoder.get());
     }
 
-
     /**
-     * Creates a new point instance from a {@link Parcel} using the given {@link ParseParcelDecoder}.
-     * The decoder is currently unused, but it might be in the future, plus this is the pattern we
-     * are using in parcelable classes.
+     * Creates a new point instance from a {@link Parcel} using the given {@link
+     * ParseParcelDecoder}. The decoder is currently unused, but it might be in the future, plus
+     * this is the pattern we are using in parcelable classes.
      *
-     * @param source  the parcel
+     * @param source the parcel
      * @param decoder the decoder
      */
     ParsePolygon(Parcel source, ParseParcelDecoder decoder) {
         setCoordinates(source.readArrayList(null));
     }
 
-    /**
-     * Throws exception for invalid coordinates.
-     */
+    /** Throws exception for invalid coordinates. */
     static List<ParseGeoPoint> validate(List<ParseGeoPoint> coords) {
         if (coords.size() < 3) {
             throw new IllegalArgumentException("Polygon must have at least 3 GeoPoints");
@@ -102,16 +100,13 @@ public class ParsePolygon implements Parcelable {
         return coords;
     }
 
-    /**
-     * Get coordinates.
-     */
+    /** Get coordinates. */
     public List<ParseGeoPoint> getCoordinates() {
         return coordinates;
     }
 
     /**
-     * Set coordinates. Valid are Array of GeoPoint, ParseGeoPoint or Location
-     * at least 3 points
+     * Set coordinates. Valid are Array of GeoPoint, ParseGeoPoint or Location at least 3 points
      *
      * @param coords The polygon's coordinates.
      */
@@ -119,9 +114,7 @@ public class ParsePolygon implements Parcelable {
         this.coordinates = ParsePolygon.validate(coords);
     }
 
-    /**
-     * Get converts coordinate to JSONArray.
-     */
+    /** Get converts coordinate to JSONArray. */
     protected JSONArray coordinatesToJSONArray() throws JSONException {
         JSONArray points = new JSONArray();
         for (ParseGeoPoint coordinate : coordinates) {
@@ -133,9 +126,7 @@ public class ParsePolygon implements Parcelable {
         return points;
     }
 
-    /**
-     * Checks if this {@code ParsePolygon}; contains {@link ParseGeoPoint}.
-     */
+    /** Checks if this {@code ParsePolygon}; contains {@link ParseGeoPoint}. */
     public boolean containsPoint(ParseGeoPoint point) {
         double minX = coordinates.get(0).getLatitude();
         double maxX = coordinates.get(0).getLatitude();
@@ -150,7 +141,11 @@ public class ParsePolygon implements Parcelable {
             maxY = Math.max(geoPoint.getLongitude(), maxY);
         }
 
-        boolean outside = point.getLatitude() < minX || point.getLatitude() > maxX || point.getLongitude() < minY || point.getLongitude() > maxY;
+        boolean outside =
+                point.getLatitude() < minX
+                        || point.getLatitude() > maxX
+                        || point.getLongitude() < minY
+                        || point.getLongitude() > maxY;
         if (outside) {
             return false;
         }
@@ -162,8 +157,13 @@ public class ParsePolygon implements Parcelable {
             double endX = coordinates.get(j).getLatitude();
             double endY = coordinates.get(j).getLongitude();
 
-            boolean intersect = ((startY > point.getLongitude()) != (endY > point.getLongitude()) &&
-                    point.getLatitude() < (endX - startX) * (point.getLongitude() - startY) / (endY - startY) + startX);
+            boolean intersect =
+                    ((startY > point.getLongitude()) != (endY > point.getLongitude())
+                            && point.getLatitude()
+                                    < (endX - startX)
+                                                    * (point.getLongitude() - startY)
+                                                    / (endY - startY)
+                                            + startX);
 
             if (intersect) {
                 inside = !inside;
@@ -188,8 +188,9 @@ public class ParsePolygon implements Parcelable {
 
         boolean isEqual = true;
         for (int i = 0; i < coordinates.size(); i += 1) {
-            if (coordinates.get(i).getLatitude() != other.getCoordinates().get(i).getLatitude() ||
-                    coordinates.get(i).getLongitude() != other.getCoordinates().get(i).getLongitude()) {
+            if (coordinates.get(i).getLatitude() != other.getCoordinates().get(i).getLatitude()
+                    || coordinates.get(i).getLongitude()
+                            != other.getCoordinates().get(i).getLongitude()) {
                 isEqual = false;
                 break;
             }
@@ -197,6 +198,7 @@ public class ParsePolygon implements Parcelable {
         return isEqual;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return String.format(Locale.US, "ParsePolygon: %s", coordinates);

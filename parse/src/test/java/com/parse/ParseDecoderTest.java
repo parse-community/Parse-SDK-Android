@@ -15,6 +15,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,17 +28,11 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 // For android.util.Base64
 @RunWith(RobolectricTestRunner.class)
 public class ParseDecoderTest extends ResetPluginsParseTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testJSONArray() {
@@ -315,7 +313,6 @@ public class ParseDecoderTest extends ResetPluginsParseTest {
     public void testOfflineObject() throws JSONException {
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("An unexpected offline pointer was encountered.");
-
 
         JSONObject json = new JSONObject();
         json.put("__type", "OfflineObject");

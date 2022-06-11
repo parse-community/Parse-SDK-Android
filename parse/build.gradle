@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: "maven-publish"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
@@ -8,8 +9,6 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
         consumerProguardFiles "release-proguard.pro"
     }
 
@@ -19,10 +18,6 @@ android {
         }
     }
 
-    packagingOptions {
-        exclude '**/BuildConfig.class'
-    }
-
     lintOptions {
         abortOnError false
     }
@@ -30,6 +25,13 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled = true
+            buildConfigField("String","PARSE_VERSION","\"${version}\"")
+        }
+        release {
+            minifyEnabled false
+            testCoverageEnabled = false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            buildConfigField("String","PARSE_VERSION","\"${version}\"")
         }
     }
 
@@ -40,22 +42,36 @@ android {
 }
 
 ext {
-    // Note: Don't update past 3.12.x, as it sets the minSdk to Android 5.0
-    okhttpVersion = "3.12.10"
+    okhttpVersion = "4.9.1"
 }
 
 dependencies {
-    api "androidx.annotation:annotation:1.2.0"
-    api "androidx.core:core:1.6.0"
+    api "androidx.annotation:annotation:1.3.0"
+    api "androidx.core:core:1.8.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation "org.robolectric:robolectric:4.6"
+    testImplementation "org.junit.jupiter:junit-jupiter:$rootProject.ext.jupiterVersion"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
-    testImplementation "org.mockito:mockito-core:3.9.0"
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoCoreVersion"
+    testImplementation "org.robolectric:robolectric:$rootProject.ext.robolectricVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 }
+
+//region Publishing
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+            }
+        }
+    }
+}
+
+//endregion
 
 //region Code Coverage
 
@@ -69,8 +85,12 @@ tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
     testLogging {
-        events "passed", "skipped", "failed", "standardOut", "standardError"
+        events "failed"
     }
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
 }
 
 jacocoAndroidUnitTestReport {
@@ -78,13 +98,5 @@ jacocoAndroidUnitTestReport {
     html.enabled true
     xml.enabled true
 }
-
-//endregion
-
-//region Coveralls
-
-apply plugin: "com.github.kt3k.coveralls"
-
-coveralls.jacocoReportPath = "${buildDir}/jacoco/jacoco.xml"
 
 //endregion

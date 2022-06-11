@@ -9,41 +9,40 @@
 package com.parse;
 
 import android.os.Parcel;
-
-import org.json.JSONObject;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * A {@code ParseParcelableEncoder} can be used to parcel objects into a {@link android.os.Parcel}.
- * <p>
- * This is capable of parceling {@link ParseObject}s, but the result can likely be a
- * {@link StackOverflowError} due to circular references in the objects tree.
- * When needing to parcel {@link ParseObject}, use the stateful {@link ParseObjectParcelEncoder}.
+ *
+ * <p>This is capable of parceling {@link ParseObject}s, but the result can likely be a {@link
+ * StackOverflowError} due to circular references in the objects tree. When needing to parcel {@link
+ * ParseObject}, use the stateful {@link ParseObjectParcelEncoder}.
  *
  * @see ParseParcelDecoder
  * @see ParseObjectParcelEncoder
  */
 /* package */ class ParseParcelEncoder {
 
-    /* package */ final static String TYPE_OBJECT = "Object";
-    /* package */ final static String TYPE_POINTER = "Pointer";
-    /* package */ final static String TYPE_DATE = "Date";
-    /* package */ final static String TYPE_BYTES = "Bytes";
-    /* package */ final static String TYPE_ACL = "Acl";
-    /* package */ final static String TYPE_RELATION = "Relation";
-    /* package */ final static String TYPE_MAP = "Map";
-    /* package */ final static String TYPE_COLLECTION = "Collection";
-    /* package */ final static String TYPE_JSON_NULL = "JsonNull";
-    /* package */ final static String TYPE_NULL = "Null";
-    /* package */ final static String TYPE_NATIVE = "Native";
-    /* package */ final static String TYPE_OP = "Operation";
-    /* package */ final static String TYPE_FILE = "File";
-    /* package */ final static String TYPE_GEOPOINT = "GeoPoint";
-    /* package */ final static String TYPE_POLYGON = "Polygon";
-    // This class isn't really a Singleton, but since it has no state, it's more efficient to get the
+    /* package */ static final String TYPE_OBJECT = "Object";
+    /* package */ static final String TYPE_POINTER = "Pointer";
+    /* package */ static final String TYPE_DATE = "Date";
+    /* package */ static final String TYPE_BYTES = "Bytes";
+    /* package */ static final String TYPE_ACL = "Acl";
+    /* package */ static final String TYPE_RELATION = "Relation";
+    /* package */ static final String TYPE_MAP = "Map";
+    /* package */ static final String TYPE_COLLECTION = "Collection";
+    /* package */ static final String TYPE_JSON_NULL = "JsonNull";
+    /* package */ static final String TYPE_NULL = "Null";
+    /* package */ static final String TYPE_NATIVE = "Native";
+    /* package */ static final String TYPE_OP = "Operation";
+    /* package */ static final String TYPE_FILE = "File";
+    /* package */ static final String TYPE_GEOPOINT = "GeoPoint";
+    /* package */ static final String TYPE_POLYGON = "Polygon";
+    // This class isn't really a Singleton, but since it has no state, it's more efficient to get
+    // the
     // default instance.
     private static final ParseParcelEncoder INSTANCE = new ParseParcelEncoder();
 
@@ -126,13 +125,14 @@ import java.util.Map;
                 dest.writeValue(object);
 
             } else {
-                throw new IllegalArgumentException("Could not encode this object into Parcel. "
-                        + object.getClass().toString());
+                throw new IllegalArgumentException(
+                        "Could not encode this object into Parcel. "
+                                + object.getClass().toString());
             }
 
         } catch (Exception e) {
-            throw new IllegalArgumentException("Could not encode this object into Parcel. "
-                    + object.getClass().toString());
+            throw new IllegalArgumentException(
+                    "Could not encode this object into Parcel. " + object.getClass().toString());
         }
     }
 

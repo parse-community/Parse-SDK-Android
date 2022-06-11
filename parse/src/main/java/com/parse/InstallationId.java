@@ -17,8 +17,8 @@ import java.util.UUID;
  * Since we cannot save dirty ParseObjects to disk and we must be able to persist UUIDs across
  * restarts even if the ParseInstallation is not saved, we use this legacy file still as a
  * bootstrapping environment as well until the full ParseInstallation is cached to disk.
- * <p>
- * TODO: Allow dirty objects to be saved to disk.
+ *
+ * <p>TODO: Allow dirty objects to be saved to disk.
  */
 /* package */ class InstallationId {
 
@@ -42,7 +42,9 @@ import java.util.UUID;
                 try {
                     installationId = ParseFileUtils.readFileToString(file, "UTF-8");
                 } catch (FileNotFoundException e) {
-                    PLog.i(TAG, "Couldn't find existing installationId file. Creating one instead.");
+                    PLog.i(
+                            TAG,
+                            "Couldn't find existing installationId file. Creating one instead.");
                 } catch (IOException e) {
                     PLog.e(TAG, "Unexpected exception reading installation id from disk", e);
                 }
@@ -56,13 +58,10 @@ import java.util.UUID;
         return installationId;
     }
 
-    /**
-     * Sets the installationId and persists it to disk.
-     */
+    /** Sets the installationId and persists it to disk. */
     public void set(String newInstallationId) {
         synchronized (lock) {
-            if (ParseTextUtils.isEmpty(newInstallationId)
-                    || newInstallationId.equals(get())) {
+            if (ParseTextUtils.isEmpty(newInstallationId) || newInstallationId.equals(get())) {
                 return;
             }
             setInternal(newInstallationId);

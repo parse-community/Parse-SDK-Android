@@ -11,32 +11,28 @@ package com.parse.twitter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-
 import com.parse.boltsinternal.Task;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TwitterControllerTest {
 
-    @Mock
-    private Twitter twitter;
+    @Mock private Twitter twitter;
 
     @Before
     public void setUp() {
@@ -59,7 +55,7 @@ public class TwitterControllerTest {
         assertSame(twitter, controller.getTwitter());
     }
 
-    //region testAuthenticateAsync
+    // region testAuthenticateAsync
 
     @Test
     public void testAuthenticateAsync() {
@@ -113,9 +109,9 @@ public class TwitterControllerTest {
         assertTrue(task.isFaulted());
     }
 
-    //endregion
+    // endregion
 
-    //region testSetAuthData
+    // region testSetAuthData
 
     @Test
     public void testSetAuthData() {
@@ -146,5 +142,5 @@ public class TwitterControllerTest {
         verifyNoMoreInteractions(twitter);
     }
 
-    //endregion
+    // endregion
 }

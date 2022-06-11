@@ -10,32 +10,31 @@ package com.parse;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A class that is used to access all of the children of a many-to-many relationship. Each instance
  * of Parse.Relation is associated with a particular parent object and key.
  */
 public class ParseRelation<T extends ParseObject> implements Parcelable {
-    public final static Creator<ParseRelation> CREATOR = new Creator<ParseRelation>() {
-        @Override
-        public ParseRelation createFromParcel(Parcel source) {
-            return new ParseRelation(source, new ParseObjectParcelDecoder());
-        }
+    public static final Creator<ParseRelation> CREATOR =
+            new Creator<ParseRelation>() {
+                @Override
+                public ParseRelation createFromParcel(Parcel source) {
+                    return new ParseRelation(source, new ParseObjectParcelDecoder());
+                }
 
-        @Override
-        public ParseRelation[] newArray(int size) {
-            return new ParseRelation[size];
-        }
-    };
+                @Override
+                public ParseRelation[] newArray(int size) {
+                    return new ParseRelation[size];
+                }
+            };
     private final Object mutex = new Object();
     // For offline caching, we keep track of every object we've known to be in the relation.
     private final Set<ParseObject> knownObjects = new HashSet<>();
@@ -66,9 +65,7 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
         this.targetClass = targetClass;
     }
 
-    /**
-     * Parses a relation from JSON with the given decoder.
-     */
+    /** Parses a relation from JSON with the given decoder. */
     /* package */ ParseRelation(JSONObject jsonObject, ParseDecoder decoder) {
         this.parent = null;
         this.parentObjectId = null;
@@ -83,9 +80,7 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
         }
     }
 
-    /**
-     * Creates a ParseRelation from a Parcel with the given decoder.
-     */
+    /** Creates a ParseRelation from a Parcel with the given decoder. */
     /* package */ ParseRelation(Parcel source, ParseParcelDecoder decoder) {
         if (source.readByte() == 1) this.key = source.readString();
         if (source.readByte() == 1) this.targetClass = source.readString();
@@ -161,8 +156,9 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
         synchronized (mutex) {
             ParseQuery.State.Builder<T> builder;
             if (targetClass == null) {
-                builder = new ParseQuery.State.Builder<T>(parentClassName)
-                        .redirectClassNameForKey(key);
+                builder =
+                        new ParseQuery.State.Builder<T>(parentClassName)
+                                .redirectClassNameForKey(key);
             } else {
                 builder = new ParseQuery.State.Builder<>(targetClass);
             }
@@ -181,7 +177,8 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
                 try {
                     knownObjectsArray.put(objectEncoder.encodeRelatedObject(knownObject));
                 } catch (Exception e) {
-                    // This is just for caching, so if an object can't be encoded for any reason, drop it.
+                    // This is just for caching, so if an object can't be encoded for any reason,
+                    // drop it.
                 }
             }
             relation.put("objects", knownObjectsArray);
@@ -201,9 +198,7 @@ public class ParseRelation<T extends ParseObject> implements Parcelable {
         }
     }
 
-    /**
-     * Adds an object that is known to be in the relation. This is used for offline caching.
-     */
+    /** Adds an object that is known to be in the relation. This is used for offline caching. */
     /* package */ void addKnownObject(ParseObject object) {
         synchronized (mutex) {
             knownObjects.add(object);

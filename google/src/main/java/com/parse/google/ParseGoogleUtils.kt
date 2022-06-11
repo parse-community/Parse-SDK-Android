@@ -3,6 +3,7 @@ package com.parse.google
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -13,6 +14,7 @@ import com.parse.ParseUser
 import com.parse.SaveCallback
 import com.parse.boltsinternal.Continuation
 import com.parse.boltsinternal.Task
+import com.parse.boltsinternal.TaskCompletionSource
 
 /**
  * Provides a set of utilities for using Parse with Google.
@@ -21,12 +23,12 @@ import com.parse.boltsinternal.Task
 object ParseGoogleUtils {
 
     private const val AUTH_TYPE = "google"
-    private var clientId: String? = null
+    private lateinit var clientId: String
 
     private val lock = Any()
 
     private var isInitialized = false
-    private var googleSignInClient: GoogleSignInClient? = null
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     /**
      * Just hope this doesn't clash I guess...
@@ -60,33 +62,35 @@ object ParseGoogleUtils {
      *
      * @param activity The activity which passes along the result via [onActivityResult]
      * @param callback The [LogInCallback] which is invoked on log in success or error
+     * @param launcher The ActivityResultLauncher<Intent> from AndroidX for Example:
+     *
+     *      val launcher: ActivityResultLauncher<Intent> = registerForActivityResult(
+     *       ActivityResultContracts.StartActivityForResult()) { result ->
+     *       ParseGoogleUtils.onActivityResult(result.resultCode, result.data!!)
+     *      }
      */
     @JvmStatic
-    fun logIn(activity: Activity, callback: LogInCallback) {
+    fun logIn(activity: Activity, launcher: ActivityResultLauncher<Intent>, callback: LogInCallback) {
         checkInitialization()
         this.currentCallback = callback
         val googleSignInClient = buildGoogleSignInClient(activity)
         this.googleSignInClient = googleSignInClient
-        activity.startActivityForResult(
-            googleSignInClient.signInIntent,
-            REQUEST_CODE_GOOGLE_SIGN_IN
-        )
+        launcher.launch(googleSignInClient.signInIntent)
     }
 
     /**
      * The method that should be called from the Activity's or Fragment's onActivityResult method.
      *
-     * @param requestCode The request code that's received by the Activity or Fragment.
      * @param resultCode  The result code that's received by the Activity or Fragment.
      * @param data        The result data that's received by the Activity or Fragment.
      * @return true if the result could be handled.
      */
     @JvmStatic
-    fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        if (requestCode != REQUEST_CODE_GOOGLE_SIGN_IN) {
+    fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
+        if (resultCode != Activity.RESULT_OK) {
             return false
         }
-        if (requestCode == REQUEST_CODE_GOOGLE_SIGN_IN) {
+        if (resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 handleSignInResult(data)
             } else {
@@ -150,7 +154,7 @@ object ParseGoogleUtils {
     }
 
     private fun onSignedIn(account: GoogleSignInAccount) {
-        googleSignInClient?.signOut()?.addOnCompleteListener {}
+        googleSignInClient.signOut().addOnCompleteListener {}
         val authData: Map<String, String> = getAuthData(account)
         ParseUser.logInWithInBackground(AUTH_TYPE, authData)
             .continueWith { task ->
@@ -201,7 +205,9 @@ object ParseGoogleUtils {
      * with the same result as the input task after the callback has been run.
      */
     private fun <T> callbackOnMainThreadAsync(
-        task: Task<T>, callback: SaveCallback, reportCancellation: Boolean
+        task: Task<T>,
+        callback: SaveCallback,
+        reportCancellation: Boolean
     ): Task<T> {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation)
     }
@@ -212,46 +218,50 @@ object ParseGoogleUtils {
      * is false, the callback will not be called if the task was cancelled.
      */
     private fun <T> callbackOnMainThreadInternalAsync(
-        task: Task<T>, callback: Any?, reportCancellation: Boolean
+        task: Task<T>,
+        callback: Any?,
+        reportCancellation: Boolean
     ): Task<T> {
         if (callback == null) {
             return task
         }
-        val tcs: Task<T>.TaskCompletionSource = Task.create()
-        task.continueWith<Void>(Continuation { task ->
-            if (task.isCancelled && !reportCancellation) {
-                tcs.setCancelled()
-                return@Continuation null
-            }
-            Task.UI_THREAD_EXECUTOR.execute {
-                try {
-                    var error = task.error
-                    if (error != null && error !is ParseException) {
-                        error = ParseException(error)
-                    }
-                    if (callback is SaveCallback) {
-                        callback.done(error as? ParseException)
-                    } else if (callback is LogInCallback) {
-                        callback.done(
-                            task.result as? ParseUser, error as? ParseException
-                        )
-                    }
-                } finally {
-                    when {
-                        task.isCancelled -> {
-                            tcs.setCancelled()
+        val tcs: TaskCompletionSource<T> = TaskCompletionSource<T>()
+        task.continueWith<Void>(
+            Continuation { task2 ->
+                if (task2.isCancelled && !reportCancellation) {
+                    tcs.setCancelled()
+                    return@Continuation null
+                }
+                Task.UI_THREAD_EXECUTOR.execute {
+                    try {
+                        var error = task2.error
+                        if (error != null && error !is ParseException) {
+                            error = ParseException(error)
                         }
-                        task.isFaulted -> {
-                            tcs.setError(task.error)
+                        if (callback is SaveCallback) {
+                            callback.done(error as? ParseException)
+                        } else if (callback is LogInCallback) {
+                            callback.done(
+                                task2.result as? ParseUser, error as? ParseException
+                            )
                         }
-                        else -> {
-                            tcs.setResult(task.result)
+                    } finally {
+                        when {
+                            task2.isCancelled -> {
+                                tcs.setCancelled()
+                            }
+                            task2.isFaulted -> {
+                                tcs.setError(task2.error)
+                            }
+                            else -> {
+                                tcs.setResult(task2.result)
+                            }
                         }
                     }
                 }
+                null
             }
-            null
-        })
+        )
         return tcs.task
     }
 }

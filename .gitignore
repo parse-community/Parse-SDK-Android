@@ -45,4 +45,4 @@ jacoco.exec
 # Node
 node_modules/
 npm-debug.log
-package-lock.json
+*.hprof

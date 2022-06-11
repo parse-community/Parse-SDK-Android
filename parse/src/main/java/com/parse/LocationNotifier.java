@@ -14,11 +14,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-
 import com.parse.boltsinternal.Capture;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -27,8 +25,8 @@ import java.util.concurrent.TimeUnit;
  * and Network LocationProviders by default (printStackTrace()'ing if, for example, the app doesn't
  * have the correct permissions in its AndroidManifest.xml). This class is intended to be used for a
  * <i>single</i> location update.
- * <p>
- * When testing, if a fakeLocation is provided (via setFakeLocation()), we don't wait for the
+ *
+ * <p>When testing, if a fakeLocation is provided (via setFakeLocation()), we don't wait for the
  * LocationManager to fire or for the timer to run out; instead, we build a local LocationListener,
  * then call the onLocationChanged() method manually.
  */
@@ -37,63 +35,70 @@ class LocationNotifier {
 
     /**
      * Asynchronously gets the current location of the device.
-     * <p>
-     * This will request location updates from the best provider that match the given criteria
-     * and return the first location received.
-     * <p>
-     * You can customize the criteria to meet your specific needs.
-     * * For higher accuracy, you can set {@link Criteria#setAccuracy(int)}, however result in longer
-     * times for a fix.
-     * * For better battery efficiency and faster location fixes, you can set
-     * {@link Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
      *
-     * @param context  The context used to request location updates.
-     * @param timeout  The number of milliseconds to allow before timing out.
+     * <p>This will request location updates from the best provider that match the given criteria
+     * and return the first location received.
+     *
+     * <p>You can customize the criteria to meet your specific needs. * For higher accuracy, you can
+     * set {@link Criteria#setAccuracy(int)}, however result in longer times for a fix. * For better
+     * battery efficiency and faster location fixes, you can set {@link
+     * Criteria#setPowerRequirement(int)}, however, this will result in lower accuracy.
+     *
+     * @param context The context used to request location updates.
+     * @param timeout The number of milliseconds to allow before timing out.
      * @param criteria The application criteria for selecting a location provider.
      * @see android.location.LocationManager#getBestProvider(android.location.Criteria, boolean)
-     * @see android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener)
+     * @see android.location.LocationManager#requestLocationUpdates(String, long, float,
+     *     android.location.LocationListener)
      */
     /* package */
-    static Task<Location> getCurrentLocationAsync(Context context,
-                                                  long timeout, Criteria criteria) {
+    static Task<Location> getCurrentLocationAsync(
+            Context context, long timeout, Criteria criteria) {
         final TaskCompletionSource<Location> tcs = new TaskCompletionSource<>();
         final Capture<ScheduledFuture<?>> timeoutFuture = new Capture<>();
         final LocationManager manager =
                 (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        final LocationListener listener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-                if (location == null) {
-                    return;
-                }
+        final LocationListener listener =
+                new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        if (location == null) {
+                            return;
+                        }
 
-                timeoutFuture.get().cancel(true);
+                        timeoutFuture.get().cancel(true);
 
-                tcs.trySetResult(location);
-                manager.removeUpdates(this);
-            }
+                        tcs.trySetResult(location);
+                        manager.removeUpdates(this);
+                    }
 
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
+                    @Override
+                    public void onProviderDisabled(String provider) {}
 
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
+                    @Override
+                    public void onProviderEnabled(String provider) {}
 
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-        };
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {}
+                };
 
-        timeoutFuture.set(ParseExecutors.scheduled().schedule(() -> {
-            tcs.trySetError(new ParseException(ParseException.TIMEOUT, "Location fetch timed out."));
-            manager.removeUpdates(listener);
-        }, timeout, TimeUnit.MILLISECONDS));
+        timeoutFuture.set(
+                ParseExecutors.scheduled()
+                        .schedule(
+                                () -> {
+                                    tcs.trySetError(
+                                            new ParseException(
+                                                    ParseException.TIMEOUT,
+                                                    "Location fetch timed out."));
+                                    manager.removeUpdates(listener);
+                                },
+                                timeout,
+                                TimeUnit.MILLISECONDS));
 
         String provider = manager.getBestProvider(criteria, true);
         if (provider != null) {
-            manager.requestLocationUpdates(provider, /* minTime */ 0, /* minDistance */ 0.0f, listener);
+            manager.requestLocationUpdates(
+                    provider, /* minTime */ 0, /* minDistance */ 0.0f, listener);
         }
 
         if (fakeLocation != null) {
@@ -103,9 +108,7 @@ class LocationNotifier {
         return tcs.getTask();
     }
 
-    /**
-     * Helper method for testing.
-     */
+    /** Helper method for testing. */
     /* package */
     static void setFakeLocation(Location location) {
         fakeLocation = location;

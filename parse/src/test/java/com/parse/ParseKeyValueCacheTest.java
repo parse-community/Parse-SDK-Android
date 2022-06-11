@@ -14,21 +14,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.parse.boltsinternal.Task;
-
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ParseKeyValueCacheTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
     private File keyValueCacheDir;
 
     @Before
@@ -40,8 +37,10 @@ public class ParseKeyValueCacheTest {
     @After
     public void tearDown() {
         ParseKeyValueCache.clearKeyValueCacheDir();
-        ParseKeyValueCache.maxKeyValueCacheBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
-        ParseKeyValueCache.maxKeyValueCacheFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
+        ParseKeyValueCache.maxKeyValueCacheBytes =
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
+        ParseKeyValueCache.maxKeyValueCacheFiles =
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
     }
 
     @Test
@@ -56,10 +55,13 @@ public class ParseKeyValueCacheTest {
 
         List<Task<Void>> tasks = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            tasks.add(Task.call(() -> {
-                ParseKeyValueCache.saveToKeyValueCache("foo", "test");
-                return null;
-            }, Task.BACKGROUND_EXECUTOR));
+            tasks.add(
+                    Task.call(
+                            () -> {
+                                ParseKeyValueCache.saveToKeyValueCache("foo", "test");
+                                return null;
+                            },
+                            Task.BACKGROUND_EXECUTOR));
         }
         ParseTaskUtils.wait(Task.whenAll(tasks));
     }
@@ -77,7 +79,8 @@ public class ParseKeyValueCacheTest {
         // Verify cache file is correct
         assertEquals(1, keyValueCacheDir.listFiles().length);
         assertArrayEquals(
-                "value".getBytes(), ParseFileUtils.readFileToByteArray(keyValueCacheDir.listFiles()[0]));
+                "value".getBytes(),
+                ParseFileUtils.readFileToByteArray(keyValueCacheDir.listFiles()[0]));
     }
 
     @Test

@@ -9,10 +9,9 @@
 package com.parse.twitter;
 
 import android.content.Context;
-
 import com.parse.ParseException;
 import com.parse.boltsinternal.Task;
-
+import com.parse.boltsinternal.TaskCompletionSource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ class TwitterController {
     private static final String AUTH_TOKEN_SECRET_KEY = "auth_token_secret";
 
     private final Twitter twitter;
-    private Task<Map<String, String>>.TaskCompletionSource currentTcs;
+    private TaskCompletionSource<Map<String, String>> currentTcs;
 
     TwitterController() {
         this(new Twitter("", "", ""));
@@ -46,7 +45,7 @@ class TwitterController {
     }
 
     public Task<Map<String, String>> authenticateAsync(Context context) {
-        final Task<Map<String, String>>.TaskCompletionSource tcs = Task.create();
+        final TaskCompletionSource<Map<String, String>> tcs = new TaskCompletionSource<>();
         if (currentTcs != null) {
             handleCancel(currentTcs);
         }
@@ -56,50 +55,53 @@ class TwitterController {
             throw new IllegalStateException(
                     "Context must be non-null for Twitter authentication to proceed.");
         }
-        twitter.authorize(context, new AsyncCallback() {
-            @Override
-            public void onCancel() {
-                handleCancel(tcs);
-            }
-
-            @Override
-            public void onFailure(Throwable error) {
-                if (currentTcs != tcs) {
-                    return;
-                }
-                try {
-                    if (error instanceof Exception) {
-                        tcs.trySetError((Exception) error);
-                    } else {
-                        tcs.trySetError(new ParseException(error));
+        twitter.authorize(
+                context,
+                new AsyncCallback() {
+                    @Override
+                    public void onCancel() {
+                        handleCancel(tcs);
                     }
-                } finally {
-                    currentTcs = null;
-                }
-            }
 
-            @Override
-            public void onSuccess(Object result) {
-                if (currentTcs != tcs) {
-                    return;
-                }
-                try {
-                    Map<String, String> authData = getAuthData(
-                            twitter.getUserId(),
-                            twitter.getScreenName(),
-                            twitter.getAuthToken(),
-                            twitter.getAuthTokenSecret());
-                    tcs.trySetResult(authData);
-                } finally {
-                    currentTcs = null;
-                }
-            }
-        });
+                    @Override
+                    public void onFailure(Throwable error) {
+                        if (currentTcs != tcs) {
+                            return;
+                        }
+                        try {
+                            if (error instanceof Exception) {
+                                tcs.trySetError((Exception) error);
+                            } else {
+                                tcs.trySetError(new ParseException(error));
+                            }
+                        } finally {
+                            currentTcs = null;
+                        }
+                    }
+
+                    @Override
+                    public void onSuccess(Object result) {
+                        if (currentTcs != tcs) {
+                            return;
+                        }
+                        try {
+                            Map<String, String> authData =
+                                    getAuthData(
+                                            twitter.getUserId(),
+                                            twitter.getScreenName(),
+                                            twitter.getAuthToken(),
+                                            twitter.getAuthTokenSecret());
+                            tcs.trySetResult(authData);
+                        } finally {
+                            currentTcs = null;
+                        }
+                    }
+                });
 
         return tcs.getTask();
     }
 
-    private void handleCancel(Task<Map<String, String>>.TaskCompletionSource callback) {
+    private void handleCancel(TaskCompletionSource<Map<String, String>> callback) {
         // Ensure that the operation being cancelled is actually the current
         // operation (so that if one had already been cancelled but still
         // invokes this method, it doesn't cancel the "real" current operation).
@@ -114,10 +116,7 @@ class TwitterController {
     }
 
     public Map<String, String> getAuthData(
-            String userId,
-            String screenName,
-            String authToken,
-            String authTokenSecret) {
+            String userId, String screenName, String authToken, String authTokenSecret) {
         Map<String, String> authData = new HashMap<>();
         authData.put(CONSUMER_KEY_KEY, twitter.getConsumerKey());
         authData.put(CONSUMER_SECRET_KEY, twitter.getConsumerSecret());

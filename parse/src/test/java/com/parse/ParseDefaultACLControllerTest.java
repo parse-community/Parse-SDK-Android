@@ -13,20 +13,18 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
-
+import java.lang.ref.WeakReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.lang.ref.WeakReference;
 
 public class ParseDefaultACLControllerTest {
 
@@ -41,7 +39,7 @@ public class ParseDefaultACLControllerTest {
         ParseCorePlugins.getInstance().reset();
     }
 
-    //region testSetDefaultACL
+    // region testSetDefaultACL
 
     @Test
     public void testSetDefaultACLWithACL() {
@@ -70,9 +68,9 @@ public class ParseDefaultACLControllerTest {
         assertNull(controller.defaultACL);
     }
 
-    //endregion
+    // endregion
 
-    //region testGetDefaultACL
+    // region testGetDefaultACL
 
     @Test
     public void testGetDefaultACLWithNoDefaultACL() {
@@ -103,7 +101,8 @@ public class ParseDefaultACLControllerTest {
         controller.defaultACLUsesCurrentUser = true;
         // Register currentUser
         ParseCurrentUserController currentUserController = mock(ParseCurrentUserController.class);
-        when(currentUserController.getAsync(anyBoolean())).thenReturn(Task.<ParseUser>forResult(null));
+        when(currentUserController.getAsync(anyBoolean()))
+                .thenReturn(Task.<ParseUser>forResult(null));
         ParseCorePlugins.getInstance().registerCurrentUserController(currentUserController);
 
         ParseACL defaultACL = controller.get();
@@ -157,5 +156,5 @@ public class ParseDefaultACLControllerTest {
         assertSame(copiedACL, defaultACL);
     }
 
-    //endregion
+    // endregion
 }

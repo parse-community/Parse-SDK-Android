@@ -11,6 +11,13 @@ package com.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
 import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
@@ -18,21 +25,13 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-
 @RunWith(RobolectricTestRunner.class)
 public class ParseFileUtilsTest {
 
     private static final String TEST_STRING = "this is a test string";
     private static final String TEST_JSON = "{ \"foo\": \"bar\" }";
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testReadFileToString() throws Exception {
@@ -102,5 +101,39 @@ public class ParseFileUtilsTest {
         JSONObject json = new JSONObject(content);
         assertNotNull(json);
         assertEquals("bar", json.getString("foo"));
+    }
+
+    @Test
+    public void testGetAllFilesFromAGivenPath() {
+        ArrayList<File> filesListToSave = new ArrayList<>();
+        File oldRef = new File(temporaryFolder.getRoot() + "/ParseFileUtilsTest/");
+
+        // Writing some files to the `*/ParseFileUtilsTest/*` dir.
+        File config = new File(oldRef + "/config/", "config");
+        filesListToSave.add(config);
+        File installationId = new File(oldRef + "/CommandCache/", "installationId");
+        filesListToSave.add(installationId);
+        File currentConfig = new File(oldRef + "/", "currentConfig");
+        filesListToSave.add(currentConfig);
+        File currentInstallation = new File(oldRef + "/", "currentInstallation");
+        filesListToSave.add(currentInstallation);
+        File pushState = new File(oldRef + "/push/", "pushState");
+        filesListToSave.add(pushState);
+
+        // Write all listed files to the temp (oldRef) directory.
+        for (File item : filesListToSave) {
+            try {
+                ParseFileUtils.writeStringToFile(item, "gger", "UTF-8");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Get all the written files under `*/ParseFileUtilsTest/*`.
+        ArrayList<File> allWrittenFiles = new ArrayList<>();
+        ParseFileUtils.getAllNestedFiles(oldRef.getAbsolutePath(), allWrittenFiles);
+
+        // Check if they both matches or not.
+        assertEquals(filesListToSave.size(), allWrittenFiles.size());
     }
 }

@@ -9,10 +9,8 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-
 import java.util.Map;
+import org.json.JSONObject;
 
 class ParseCloudCodeController {
 
@@ -22,17 +20,17 @@ class ParseCloudCodeController {
         this.restClient = restClient;
     }
 
-    public <T> Task<T> callFunctionInBackground(final String name,
-                                                final Map<String, ?> params, String sessionToken) {
-        ParseRESTCommand command = ParseRESTCloudCommand.callFunctionCommand(
-                name,
-                params,
-                sessionToken);
-        return command.executeAsync(restClient).onSuccess(task -> {
-            @SuppressWarnings("unchecked")
-            T result = (T) convertCloudResponse(task.getResult());
-            return result;
-        });
+    public <T> Task<T> callFunctionInBackground(
+            final String name, final Map<String, ?> params, String sessionToken) {
+        ParseRESTCommand command =
+                ParseRESTCloudCommand.callFunctionCommand(name, params, sessionToken);
+        return command.executeAsync(restClient)
+                .onSuccess(
+                        task -> {
+                            @SuppressWarnings("unchecked")
+                            T result = (T) convertCloudResponse(task.getResult());
+                            return result;
+                        });
     }
 
     /*

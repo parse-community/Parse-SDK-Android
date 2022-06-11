@@ -16,9 +16,7 @@
  */
 package com.parse;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,30 +26,24 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-/**
- * General file manipulation utilities.
- */
+/** General file manipulation utilities. */
 public class ParseFileUtils {
 
-    /**
-     * The number of bytes in a kilobyte.
-     */
+    /** The number of bytes in a kilobyte. */
     public static final long ONE_KB = 1024;
 
-    /**
-     * The number of bytes in a megabyte.
-     */
+    /** The number of bytes in a megabyte. */
     public static final long ONE_MB = ONE_KB * ONE_KB;
 
-    /**
-     * The file copy buffer size (30 MB)
-     */
+    /** The file copy buffer size (30 MB) */
     private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30;
 
     /**
-     * Reads the contents of a file into a byte array.
-     * The file is always closed.
+     * Reads the contents of a file into a byte array. The file is always closed.
      *
      * @param file the file to read, must not be <code>null</code>
      * @return the file contents, never <code>null</code>
@@ -68,24 +60,24 @@ public class ParseFileUtils {
         }
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
 
     /**
-     * Opens a {@link FileInputStream} for the specified file, providing better
-     * error messages than simply calling <code>new FileInputStream(file)</code>.
-     * <p>
-     * At the end of the method either the stream will be successfully opened,
-     * or an exception will have been thrown.
-     * <p>
-     * An exception is thrown if the file does not exist.
-     * An exception is thrown if the file object exists but is a directory.
-     * An exception is thrown if the file exists but cannot be read.
+     * Opens a {@link FileInputStream} for the specified file, providing better error messages than
+     * simply calling <code>new FileInputStream(file)</code>.
+     *
+     * <p>At the end of the method either the stream will be successfully opened, or an exception
+     * will have been thrown.
+     *
+     * <p>An exception is thrown if the file does not exist. An exception is thrown if the file
+     * object exists but is a directory. An exception is thrown if the file exists but cannot be
+     * read.
      *
      * @param file the file to open for input, must not be <code>null</code>
      * @return a new {@link FileInputStream} for the specified file
      * @throws FileNotFoundException if the file does not exist
-     * @throws IOException           if the file object is a directory
-     * @throws IOException           if the file cannot be read
+     * @throws IOException if the file object is a directory
+     * @throws IOException if the file cannot be read
      * @since Commons IO 1.3
      */
     public static FileInputStream openInputStream(File file) throws IOException {
@@ -104,9 +96,9 @@ public class ParseFileUtils {
 
     /**
      * Writes a byte array to a file creating the file if it does not exist.
-     * <p>
-     * NOTE: As from v1.3, the parent directories of the file will be created
-     * if they do not exist.
+     *
+     * <p>NOTE: As from v1.3, the parent directories of the file will be created if they do not
+     * exist.
      *
      * @param file the file to write to
      * @param data the content to write to the file
@@ -123,20 +115,19 @@ public class ParseFileUtils {
         }
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
 
     /**
-     * Opens a {@link FileOutputStream} for the specified file, checking and
-     * creating the parent directory if it does not exist.
-     * <p>
-     * At the end of the method either the stream will be successfully opened,
-     * or an exception will have been thrown.
-     * <p>
-     * The parent directory will be created if it does not exist.
-     * The file will be created if it does not exist.
-     * An exception is thrown if the file object exists but is a directory.
-     * An exception is thrown if the file exists but cannot be written to.
-     * An exception is thrown if the parent directory cannot be created.
+     * Opens a {@link FileOutputStream} for the specified file, checking and creating the parent
+     * directory if it does not exist.
+     *
+     * <p>At the end of the method either the stream will be successfully opened, or an exception
+     * will have been thrown.
+     *
+     * <p>The parent directory will be created if it does not exist. The file will be created if it
+     * does not exist. An exception is thrown if the file object exists but is a directory. An
+     * exception is thrown if the file exists but cannot be written to. An exception is thrown if
+     * the parent directory cannot be created.
      *
      * @param file the file to open for output, must not be <code>null</code>
      * @return a new {@link FileOutputStream} for the specified file
@@ -166,14 +157,14 @@ public class ParseFileUtils {
 
     /**
      * Moves a file.
-     * <p>
-     * When the destination file is on another file system, do a "copy and delete".
      *
-     * @param srcFile  the file to be moved
+     * <p>When the destination file is on another file system, do a "copy and delete".
+     *
+     * @param srcFile the file to be moved
      * @param destFile the destination file
      * @throws NullPointerException if source or destination is {@code null}
-     * @throws IOException          if source or destination is invalid
-     * @throws IOException          if an IO error occurs moving the file
+     * @throws IOException if source or destination is invalid
+     * @throws IOException if an IO error occurs moving the file
      * @since 1.4
      */
     public static void moveFile(final File srcFile, final File destFile) throws IOException {
@@ -200,31 +191,34 @@ public class ParseFileUtils {
             copyFile(srcFile, destFile);
             if (!srcFile.delete()) {
                 ParseFileUtils.deleteQuietly(destFile);
-                throw new IOException("Failed to delete original file '" + srcFile +
-                        "' after copy to '" + destFile + "'");
+                throw new IOException(
+                        "Failed to delete original file '"
+                                + srcFile
+                                + "' after copy to '"
+                                + destFile
+                                + "'");
             }
         }
     }
 
     /**
      * Copies a file to a new location preserving the file date.
-     * <p>
-     * This method copies the contents of the specified source file to the
-     * specified destination file. The directory holding the destination file is
-     * created if it does not exist. If the destination file exists, then this
-     * method will overwrite it.
-     * <p>
-     * <strong>Note:</strong> This method tries to preserve the file's last
-     * modified date/times using {@link File#setLastModified(long)}, however
-     * it is not guaranteed that the operation will succeed.
-     * If the modification operation fails, no indication is provided.
      *
-     * @param srcFile  an existing file to copy, must not be {@code null}
+     * <p>This method copies the contents of the specified source file to the specified destination
+     * file. The directory holding the destination file is created if it does not exist. If the
+     * destination file exists, then this method will overwrite it.
+     *
+     * <p><strong>Note:</strong> This method tries to preserve the file's last modified date/times
+     * using {@link File#setLastModified(long)}, however it is not guaranteed that the operation
+     * will succeed. If the modification operation fails, no indication is provided.
+     *
+     * @param srcFile an existing file to copy, must not be {@code null}
      * @param destFile the new file, must not be {@code null}
      * @throws NullPointerException if source or destination is {@code null}
-     * @throws IOException          if source or destination is invalid
-     * @throws IOException          if an IO error occurs during copying
-     * @throws IOException          if the output file length is not the same as the input file length after the copy completes
+     * @throws IOException if source or destination is invalid
+     * @throws IOException if an IO error occurs during copying
+     * @throws IOException if the output file length is not the same as the input file length after
+     *     the copy completes
      * @see #copyFile(File, File, boolean)
      */
     public static void copyFile(final File srcFile, final File destFile) throws IOException {
@@ -233,30 +227,29 @@ public class ParseFileUtils {
 
     /**
      * Copies a file to a new location.
-     * <p>
-     * This method copies the contents of the specified source file
-     * to the specified destination file.
-     * The directory holding the destination file is created if it does not exist.
-     * If the destination file exists, then this method will overwrite it.
-     * <p>
-     * <strong>Note:</strong> Setting <code>preserveFileDate</code> to
-     * {@code true} tries to preserve the file's last modified
-     * date/times using {@link File#setLastModified(long)}, however it is
-     * not guaranteed that the operation will succeed.
-     * If the modification operation fails, no indication is provided.
      *
-     * @param srcFile          an existing file to copy, must not be {@code null}
-     * @param destFile         the new file, must not be {@code null}
-     * @param preserveFileDate true if the file date of the copy
-     *                         should be the same as the original
+     * <p>This method copies the contents of the specified source file to the specified destination
+     * file. The directory holding the destination file is created if it does not exist. If the
+     * destination file exists, then this method will overwrite it.
+     *
+     * <p><strong>Note:</strong> Setting <code>preserveFileDate</code> to {@code true} tries to
+     * preserve the file's last modified date/times using {@link File#setLastModified(long)},
+     * however it is not guaranteed that the operation will succeed. If the modification operation
+     * fails, no indication is provided.
+     *
+     * @param srcFile an existing file to copy, must not be {@code null}
+     * @param destFile the new file, must not be {@code null}
+     * @param preserveFileDate true if the file date of the copy should be the same as the original
      * @throws NullPointerException if source or destination is {@code null}
-     * @throws IOException          if source or destination is invalid
-     * @throws IOException          if an IO error occurs during copying
-     * @throws IOException          if the output file length is not the same as the input file length after the copy completes
+     * @throws IOException if source or destination is invalid
+     * @throws IOException if an IO error occurs during copying
+     * @throws IOException if the output file length is not the same as the input file length after
+     *     the copy completes
      * @see #doCopyFile(File, File, boolean)
      */
-    public static void copyFile(final File srcFile, final File destFile,
-                                final boolean preserveFileDate) throws IOException {
+    public static void copyFile(
+            final File srcFile, final File destFile, final boolean preserveFileDate)
+            throws IOException {
         if (srcFile == null) {
             throw new NullPointerException("Source must not be null");
         }
@@ -270,12 +263,14 @@ public class ParseFileUtils {
             throw new IOException("Source '" + srcFile + "' exists but is a directory");
         }
         if (srcFile.getCanonicalPath().equals(destFile.getCanonicalPath())) {
-            throw new IOException("Source '" + srcFile + "' and destination '" + destFile + "' are the same");
+            throw new IOException(
+                    "Source '" + srcFile + "' and destination '" + destFile + "' are the same");
         }
         final File parentFile = destFile.getParentFile();
         if (parentFile != null) {
             if (!parentFile.mkdirs() && !parentFile.isDirectory()) {
-                throw new IOException("Destination '" + parentFile + "' directory cannot be created");
+                throw new IOException(
+                        "Destination '" + parentFile + "' directory cannot be created");
             }
         }
         if (destFile.exists() && !destFile.canWrite()) {
@@ -285,21 +280,24 @@ public class ParseFileUtils {
     }
 
     /**
-     * Internal copy file method.
-     * This caches the original file length, and throws an IOException
-     * if the output file length is different from the current input file length.
-     * So it may fail if the file changes size.
-     * It may also fail with "IllegalArgumentException: Negative size" if the input file is truncated part way
-     * through copying the data and the new file size is less than the current position.
+     * Internal copy file method. This caches the original file length, and throws an IOException if
+     * the output file length is different from the current input file length. So it may fail if the
+     * file changes size. It may also fail with "IllegalArgumentException: Negative size" if the
+     * input file is truncated part way through copying the data and the new file size is less than
+     * the current position.
      *
-     * @param srcFile          the validated source file, must not be {@code null}
-     * @param destFile         the validated destination file, must not be {@code null}
+     * @param srcFile the validated source file, must not be {@code null}
+     * @param destFile the validated destination file, must not be {@code null}
      * @param preserveFileDate whether to preserve the file date
-     * @throws IOException              if an error occurs
-     * @throws IOException              if the output file length is not the same as the input file length after the copy completes
-     * @throws IllegalArgumentException "Negative size" if the file is truncated so that the size is less than the position
+     * @throws IOException if an error occurs
+     * @throws IOException if the output file length is not the same as the input file length after
+     *     the copy completes
+     * @throws IllegalArgumentException "Negative size" if the file is truncated so that the size is
+     *     less than the position
      */
-    private static void doCopyFile(final File srcFile, final File destFile, final boolean preserveFileDate) throws IOException {
+    private static void doCopyFile(
+            final File srcFile, final File destFile, final boolean preserveFileDate)
+            throws IOException {
         if (destFile.exists() && destFile.isDirectory()) {
             throw new IOException("Destination '" + destFile + "' exists but is a directory");
         }
@@ -318,9 +316,10 @@ public class ParseFileUtils {
             long count;
             while (pos < size) {
                 final long remain = size - pos;
-                count = remain > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : remain;
+                count = Math.min(remain, FILE_COPY_BUFFER_SIZE);
                 final long bytesCopied = output.transferFrom(input, pos, count);
-                if (bytesCopied == 0) { // IO-385 - can happen if file is truncated after caching the size
+                if (bytesCopied
+                        == 0) { // IO-385 - can happen if file is truncated after caching the size
                     break; // ensure we don't loop forever
                 }
                 pos += bytesCopied;
@@ -335,15 +334,40 @@ public class ParseFileUtils {
         final long srcLen = srcFile.length(); // TODO See IO-386
         final long dstLen = destFile.length(); // TODO See IO-386
         if (srcLen != dstLen) {
-            throw new IOException("Failed to copy full contents from '" +
-                    srcFile + "' to '" + destFile + "' Expected length: " + srcLen + " Actual: " + dstLen);
+            throw new IOException(
+                    "Failed to copy full contents from '"
+                            + srcFile
+                            + "' to '"
+                            + destFile
+                            + "' Expected length: "
+                            + srcLen
+                            + " Actual: "
+                            + dstLen);
         }
         if (preserveFileDate) {
             destFile.setLastModified(srcFile.lastModified());
         }
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Get all files path from an given directory (including sub-directory).
+     *
+     * @param directoryName given directory name.
+     * @param files where all the files will be stored.
+     */
+    public static void getAllNestedFiles(@NonNull String directoryName, @NonNull List<File> files) {
+        File[] directoryItems = new File(directoryName).listFiles();
+        if (directoryItems != null)
+            for (File item : directoryItems) {
+                if (item.isFile()) {
+                    files.add(item);
+                } else if (item.isDirectory()) {
+                    getAllNestedFiles(item.getAbsolutePath(), files);
+                }
+            }
+    }
+
+    // -----------------------------------------------------------------------
 
     /**
      * Deletes a directory recursively.
@@ -361,24 +385,24 @@ public class ParseFileUtils {
         }
 
         if (!directory.delete()) {
-            final String message =
-                    "Unable to delete directory " + directory + ".";
+            final String message = "Unable to delete directory " + directory + ".";
             throw new IOException(message);
         }
     }
 
     /**
-     * Deletes a file, never throwing an exception. If file is a directory, delete it and all sub-directories.
-     * <p>
-     * The difference between File.delete() and this method are:
+     * Deletes a file, never throwing an exception. If file is a directory, delete it and all
+     * sub-directories.
+     *
+     * <p>The difference between File.delete() and this method are:
+     *
      * <ul>
-     * <li>A directory to be deleted does not have to be empty.</li>
-     * <li>No exceptions are thrown when a file or directory cannot be deleted.</li>
+     *   <li>A directory to be deleted does not have to be empty.
+     *   <li>No exceptions are thrown when a file or directory cannot be deleted.
      * </ul>
      *
      * @param file file or directory to delete, can be {@code null}
-     * @return {@code true} if the file or directory was deleted, otherwise
-     * {@code false}
+     * @return {@code true} if the file or directory was deleted, otherwise {@code false}
      * @since 1.4
      */
     public static boolean deleteQuietly(final File file) {
@@ -417,7 +441,7 @@ public class ParseFileUtils {
         }
 
         final File[] files = directory.listFiles();
-        if (files == null) {  // null if security restricted
+        if (files == null) { // null if security restricted
             throw new IOException("Failed to list contents of " + directory);
         }
 
@@ -435,22 +459,23 @@ public class ParseFileUtils {
         }
     }
 
-    //-----------------------------------------------------------------------
+    // -----------------------------------------------------------------------
 
     /**
      * Deletes a file. If file is a directory, delete it and all sub-directories.
-     * <p>
-     * The difference between File.delete() and this method are:
+     *
+     * <p>The difference between File.delete() and this method are:
+     *
      * <ul>
-     * <li>A directory to be deleted does not have to be empty.</li>
-     * <li>You get exceptions when a file or directory cannot be deleted.
-     * (java.io.File methods returns a boolean)</li>
+     *   <li>A directory to be deleted does not have to be empty.
+     *   <li>You get exceptions when a file or directory cannot be deleted. (java.io.File methods
+     *       returns a boolean)
      * </ul>
      *
      * @param file file or directory to delete, must not be {@code null}
-     * @throws NullPointerException  if the directory is {@code null}
+     * @throws NullPointerException if the directory is {@code null}
      * @throws FileNotFoundException if the file was not found
-     * @throws IOException           in case deletion is unsuccessful
+     * @throws IOException in case deletion is unsuccessful
      */
     public static void forceDelete(final File file) throws IOException {
         if (file.isDirectory()) {
@@ -461,8 +486,7 @@ public class ParseFileUtils {
                 if (!filePresent) {
                     throw new FileNotFoundException("File does not exist: " + file);
                 }
-                final String message =
-                        "Unable to delete file: " + file;
+                final String message = "Unable to delete file: " + file;
                 throw new IOException(message);
             }
         }
@@ -470,12 +494,11 @@ public class ParseFileUtils {
 
     /**
      * Determines whether the specified file is a Symbolic Link rather than an actual file.
-     * <p>
-     * Will not return true if there is a Symbolic Link anywhere in the path,
-     * only if the specific file is.
-     * <p>
-     * For code that runs on Java 1.7 or later, use the following method instead:
-     * <br>
+     *
+     * <p>Will not return true if there is a Symbolic Link anywhere in the path, only if the
+     * specific file is.
+     *
+     * <p>For code that runs on Java 1.7 or later, use the following method instead: <br>
      * {@code boolean java.nio.file.Files.isSymbolicLink(Path path)}
      *
      * @param file the file to check
@@ -487,9 +510,9 @@ public class ParseFileUtils {
         if (file == null) {
             throw new NullPointerException("File must not be null");
         }
-//    if (FilenameUtils.isSystemWindows()) {
-//      return false;
-//    }
+        //    if (FilenameUtils.isSystemWindows()) {
+        //      return false;
+        //    }
         File fileInCanonicalDir;
         if (file.getParent() == null) {
             fileInCanonicalDir = file;
@@ -501,7 +524,7 @@ public class ParseFileUtils {
         return !fileInCanonicalDir.getCanonicalFile().equals(fileInCanonicalDir.getAbsoluteFile());
     }
 
-    //region String
+    // region String
 
     public static String readFileToString(File file, Charset encoding) throws IOException {
         return new String(readFileToByteArray(file), encoding);
@@ -521,24 +544,20 @@ public class ParseFileUtils {
         writeStringToFile(file, string, Charset.forName(encoding));
     }
 
-    //endregion
+    // endregion
 
-    //region JSONObject
+    // region JSONObject
 
-    /**
-     * Reads the contents of a file into a {@link JSONObject}. The file is always closed.
-     */
+    /** Reads the contents of a file into a {@link JSONObject}. The file is always closed. */
     public static JSONObject readFileToJSONObject(File file) throws IOException, JSONException {
         String content = readFileToString(file, "UTF-8");
         return new JSONObject(content);
     }
 
-    /**
-     * Writes a {@link JSONObject} to a file creating the file if it does not exist.
-     */
+    /** Writes a {@link JSONObject} to a file creating the file if it does not exist. */
     public static void writeJSONObjectToFile(File file, JSONObject json) throws IOException {
         ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes("UTF-8"));
     }
 
-    //endregion
+    // endregion
 }

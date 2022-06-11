@@ -17,7 +17,6 @@ class LongParseDelegate(private val name: String?) {
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Long) {
         parseObject.put(name ?: property.name, value)
     }
-
 }
 
 /**

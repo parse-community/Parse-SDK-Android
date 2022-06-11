@@ -9,12 +9,10 @@
 package com.parse;
 
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 class ParseCurrentConfigController {
 
@@ -27,32 +25,36 @@ class ParseCurrentConfigController {
     }
 
     public Task<Void> setCurrentConfigAsync(final ParseConfig config) {
-        return Task.call(() -> {
-            synchronized (currentConfigMutex) {
-                currentConfig = config;
-                saveToDisk(config);
-            }
-            return null;
-        }, ParseExecutors.io());
+        return Task.call(
+                () -> {
+                    synchronized (currentConfigMutex) {
+                        currentConfig = config;
+                        saveToDisk(config);
+                    }
+                    return null;
+                },
+                ParseExecutors.io());
     }
 
     public Task<ParseConfig> getCurrentConfigAsync() {
-        return Task.call(() -> {
-            synchronized (currentConfigMutex) {
-                if (currentConfig == null) {
-                    ParseConfig config = getFromDisk();
-                    currentConfig = (config != null) ? config : new ParseConfig();
-                }
-            }
-            return currentConfig;
-        }, ParseExecutors.io());
+        return Task.call(
+                () -> {
+                    synchronized (currentConfigMutex) {
+                        if (currentConfig == null) {
+                            ParseConfig config = getFromDisk();
+                            currentConfig = (config != null) ? config : new ParseConfig();
+                        }
+                    }
+                    return currentConfig;
+                },
+                ParseExecutors.io());
     }
 
     /**
      * Retrieves a {@code ParseConfig} from a file on disk.
      *
      * @return The {@code ParseConfig} that was retrieved. If the file wasn't found, or the contents
-     * of the file is an invalid {@code ParseConfig}, returns null.
+     *     of the file is an invalid {@code ParseConfig}, returns null.
      */
     /* package for test */ ParseConfig getFromDisk() {
         JSONObject json;
@@ -86,7 +88,7 @@ class ParseCurrentConfigController {
         try {
             ParseFileUtils.writeJSONObjectToFile(currentConfigFile, object);
         } catch (IOException e) {
-            //TODO (grantland): We should do something if this fails...
+            // TODO (grantland): We should do something if this fails...
         }
     }
 }

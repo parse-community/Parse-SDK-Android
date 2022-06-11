@@ -12,15 +12,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
-
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -28,11 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 // For android.net.Uri
 @RunWith(RobolectricTestRunner.class)
@@ -48,7 +46,7 @@ public class ParseAnalyticsControllerTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testConstructor
+    // region testConstructor
 
     @Test
     public void testConstructor() {
@@ -57,9 +55,9 @@ public class ParseAnalyticsControllerTest {
         assertSame(queue, controller.eventuallyQueue);
     }
 
-    //endregion
+    // endregion
 
-    //region trackEventInBackground
+    // region trackEventInBackground
 
     @Test
     public void testTrackEvent() throws Exception {
@@ -91,9 +89,9 @@ public class ParseAnalyticsControllerTest {
         assertEquals(1, jsonDimensions.length());
     }
 
-    //endregion
+    // endregion
 
-    //region trackAppOpenedInBackground
+    // region trackAppOpenedInBackground
 
     @Test
     public void testTrackAppOpened() throws Exception {
@@ -114,13 +112,13 @@ public class ParseAnalyticsControllerTest {
         // Verify eventuallyQueue.enqueueEventuallyAsync object parameter
         assertNull(object.getValue());
 
-
         // Verify eventuallyQueue.enqueueEventuallyAsync command parameter
         assertTrue(command.getValue() instanceof ParseRESTAnalyticsCommand);
-        assertTrue(command.getValue().httpPath.contains(ParseRESTAnalyticsCommand.EVENT_APP_OPENED));
+        assertTrue(
+                command.getValue().httpPath.contains(ParseRESTAnalyticsCommand.EVENT_APP_OPENED));
         assertEquals("sessionToken", command.getValue().getSessionToken());
         assertEquals("pushHash", command.getValue().jsonParameters.get("push_hash"));
     }
 
-    //endregion
+    // endregion
 }

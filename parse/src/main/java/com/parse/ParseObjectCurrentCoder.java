@@ -8,12 +8,11 @@
  */
 package com.parse;
 
+import java.util.Date;
+import java.util.Iterator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Date;
-import java.util.Iterator;
 
 /**
  * Handles encoding/decoding ParseObjects to/from /2 format JSON. /2 format json is only used for
@@ -39,8 +38,7 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
     private static final String KEY_OLD_UPDATED_AT = "updated_at";
     private static final String KEY_OLD_POINTERS = "pointers";
 
-    private static final ParseObjectCurrentCoder INSTANCE =
-            new ParseObjectCurrentCoder();
+    private static final ParseObjectCurrentCoder INSTANCE = new ParseObjectCurrentCoder();
 
     /* package */ ParseObjectCurrentCoder() {
         // do nothing
@@ -52,7 +50,9 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
 
     /**
      * Converts a {@code ParseObject} to /2/ JSON representation suitable for saving to disk.
+     *
      * <p>
+     *
      * <pre>
      * {
      *   data: {
@@ -62,8 +62,8 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
      *   operations: { } // operations per field
      * }
      * </pre>
-     * <p>
-     * All keys are included, regardless of whether they are dirty.
+     *
+     * <p>All keys are included, regardless of whether they are dirty.
      *
      * @see #decode(ParseObject.State.Init, JSONObject, ParseDecoder)
      */
@@ -84,15 +84,18 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
                 Object object = state.get(key);
                 dataJSON.put(key, encoder.encode(object));
 
-                // TODO(grantland): Use cached value from hashedObjects, but only if we're not dirty.
+                // TODO(grantland): Use cached value from hashedObjects, but only if we're not
+                // dirty.
             }
 
             if (state.createdAt() > 0) {
-                dataJSON.put(KEY_CREATED_AT,
+                dataJSON.put(
+                        KEY_CREATED_AT,
                         ParseDateFormat.getInstance().format(new Date(state.createdAt())));
             }
             if (state.updatedAt() > 0) {
-                dataJSON.put(KEY_UPDATED_AT,
+                dataJSON.put(
+                        KEY_UPDATED_AT,
                         ParseDateFormat.getInstance().format(new Date(state.updatedAt())));
             }
             if (state.objectId() != null) {
@@ -110,8 +113,8 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
 
     /**
      * Decodes from /2/ JSON.
-     * <p>
-     * This is only used to read ParseObjects stored on disk in JSON.
+     *
+     * <p>This is only used to read ParseObjects stored on disk in JSON.
      *
      * @see #encode(ParseObject.State, ParseOperationSet, ParseEncoder)
      */
@@ -126,28 +129,23 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
                 builder.objectId(newObjectId);
             }
             if (json.has(KEY_OLD_CREATED_AT)) {
-                String createdAtString =
-                        json.getString(KEY_OLD_CREATED_AT);
-                if (createdAtString != null) {
-                    builder.createdAt(ParseImpreciseDateFormat.getInstance().parse(createdAtString));
-                }
+                String createdAtString = json.getString(KEY_OLD_CREATED_AT);
+                builder.createdAt(ParseImpreciseDateFormat.getInstance().parse(createdAtString));
             }
             if (json.has(KEY_OLD_UPDATED_AT)) {
-                String updatedAtString =
-                        json.getString(KEY_OLD_UPDATED_AT);
-                if (updatedAtString != null) {
-                    builder.updatedAt(ParseImpreciseDateFormat.getInstance().parse(updatedAtString));
-                }
+                String updatedAtString = json.getString(KEY_OLD_UPDATED_AT);
+                builder.updatedAt(ParseImpreciseDateFormat.getInstance().parse(updatedAtString));
             }
             if (json.has(KEY_OLD_POINTERS)) {
-                JSONObject newPointers =
-                        json.getJSONObject(KEY_OLD_POINTERS);
+                JSONObject newPointers = json.getJSONObject(KEY_OLD_POINTERS);
                 Iterator<?> keys = newPointers.keys();
                 while (keys.hasNext()) {
                     String key = (String) keys.next();
                     JSONArray pointerArray = newPointers.getJSONArray(key);
-                    builder.put(key, ParseObject.createWithoutData(pointerArray.optString(0),
-                            pointerArray.optString(1)));
+                    builder.put(
+                            key,
+                            ParseObject.createWithoutData(
+                                    pointerArray.optString(0), pointerArray.optString(1)));
                 }
             }
 
@@ -162,13 +160,17 @@ class ParseObjectCurrentCoder extends ParseObjectCoder {
                             builder.objectId(newObjectId);
                             break;
                         case KEY_CREATED_AT:
-                            builder.createdAt(ParseDateFormat.getInstance().parse(data.getString(key)));
+                            builder.createdAt(
+                                    ParseDateFormat.getInstance().parse(data.getString(key)));
                             break;
                         case KEY_UPDATED_AT:
-                            builder.updatedAt(ParseDateFormat.getInstance().parse(data.getString(key)));
+                            builder.updatedAt(
+                                    ParseDateFormat.getInstance().parse(data.getString(key)));
                             break;
                         case KEY_ACL:
-                            ParseACL acl = ParseACL.createACLFromJSONObject(data.getJSONObject(key), decoder);
+                            ParseACL acl =
+                                    ParseACL.createACLFromJSONObject(
+                                            data.getJSONObject(key), decoder);
                             builder.put(KEY_ACL, acl);
                             break;
                         default:

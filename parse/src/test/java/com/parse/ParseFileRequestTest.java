@@ -8,18 +8,16 @@
  */
 package com.parse;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import junit.framework.TestCase;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import junit.framework.TestCase;
 
 public class ParseFileRequestTest extends TestCase {
 
@@ -32,14 +30,15 @@ public class ParseFileRequestTest extends TestCase {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void test4XXThrowsException() throws Exception {
         ParseRequest.setDefaultInitialRetryDelay(1L);
-        InputStream mockInputStream = new ByteArrayInputStream(
-                "An Error occurred while saving".getBytes());
-        ParseHttpResponse mockResponse = new ParseHttpResponse.Builder()
-                .setStatusCode(400)
-                .setTotalSize(0L)
-                .setReasonPhrase("Bad Request")
-                .setContent(mockInputStream)
-                .build();
+        InputStream mockInputStream =
+                new ByteArrayInputStream("An Error occurred while saving".getBytes());
+        ParseHttpResponse mockResponse =
+                new ParseHttpResponse.Builder()
+                        .setStatusCode(400)
+                        .setTotalSize(0L)
+                        .setReasonPhrase("Bad Request")
+                        .setContent(mockInputStream)
+                        .build();
 
         ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
         when(mockHttpClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);

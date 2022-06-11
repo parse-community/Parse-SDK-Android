@@ -3,29 +3,46 @@
 // This source code is licensed under the MIT license found in the/
 // LICENSE file in the root directory of this source tree.
 
-apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
 
 dependencies {
     compileOnly 'com.google.android:android:4.1.1.4'
-    testImplementation 'junit:junit:4.13.2'
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 javadoc.options.addStringOption('Xdoclint:none', '-quiet')
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from sourceSets.main.allJava
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
 artifacts {
     archives sourcesJar
     archives javadocJar
+}
+
+//region Publishing
+
+afterEvaluate {
+    publishing {
+        publications {
+            boltsPublication(MavenPublication) {
+                from components.java
+            }
+        }
+    }
 }
 
 //endregion
@@ -44,8 +61,3 @@ jacocoTestReport {
 }
 
 //endregion
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}

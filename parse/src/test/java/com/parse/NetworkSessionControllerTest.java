@@ -11,6 +11,9 @@ package com.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -18,10 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
 
 // For Uri.encode
 @RunWith(RobolectricTestRunner.class)
@@ -53,25 +52,25 @@ public class NetworkSessionControllerTest {
                 ((Map<String, String>) state.get("createdWith")).get("action"));
     }
 
-    //region testGetSessionAsync
+    // region testGetSessionAsync
 
     @Before
     public void setUp() throws MalformedURLException {
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
     }
 
-    //endregion
+    // endregion
 
-    //region testUpgradeToRevocable
+    // region testUpgradeToRevocable
 
     @After
     public void tearDown() {
         ParseRESTCommand.server = null;
     }
 
-    //endregion
+    // endregion
 
-    //region testRevokeAsync
+    // region testRevokeAsync
 
     @Test
     public void testGetSessionAsync() throws Exception {
@@ -90,10 +89,9 @@ public class NetworkSessionControllerTest {
         assertEquals("39c8e8a4-6dd0-4c39-ac85-7fd61425083b", newState.get("installationId"));
 
         assertTrue(newState.isComplete());
-
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testUpgradeToRevocable() throws Exception {
@@ -110,7 +108,6 @@ public class NetworkSessionControllerTest {
         verifyBasicSessionState(mockResponse, newState);
 
         assertTrue(newState.isComplete());
-
     }
 
     @Test

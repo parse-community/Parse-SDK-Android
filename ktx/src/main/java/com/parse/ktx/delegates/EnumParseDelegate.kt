@@ -31,7 +31,6 @@ class EnumParseDelegate<T : Enum<T>>(
     operator fun setValue(parseObject: ParseObject, property: KProperty<*>, t: T) {
         parseObject.put(name ?: property.name, t.name.lowercase())
     }
-
 }
 
 /**

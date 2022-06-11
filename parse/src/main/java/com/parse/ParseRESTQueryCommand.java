@@ -9,24 +9,22 @@
 package com.parse;
 
 import com.parse.http.ParseHttpRequest;
-
-import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONObject;
 
 class ParseRESTQueryCommand extends ParseRESTCommand {
 
-    /* package */ final static String KEY_ORDER = "order";
-    /* package */ final static String KEY_WHERE = "where";
-    /* package */ final static String KEY_KEYS = "keys";
-    /* package */ final static String KEY_INCLUDE = "include";
-    /* package */ final static String KEY_LIMIT = "limit";
-    /* package */ final static String KEY_COUNT = "count";
-    /* package */ final static String KEY_SKIP = "skip";
-    /* package */ final static String KEY_TRACE = "trace";
+    /* package */ static final String KEY_ORDER = "order";
+    /* package */ static final String KEY_WHERE = "where";
+    /* package */ static final String KEY_KEYS = "keys";
+    /* package */ static final String KEY_INCLUDE = "include";
+    /* package */ static final String KEY_LIMIT = "limit";
+    /* package */ static final String KEY_COUNT = "count";
+    /* package */ static final String KEY_SKIP = "skip";
+    /* package */ static final String KEY_TRACE = "trace";
 
     private ParseRESTQueryCommand(
             String httpPath,
@@ -64,8 +62,7 @@ class ParseRESTQueryCommand extends ParseRESTCommand {
 
         ParseQuery.QueryConstraints conditions = state.constraints();
         if (!conditions.isEmpty()) {
-            JSONObject encodedConditions =
-                    (JSONObject) encoder.encode(conditions);
+            JSONObject encodedConditions = (JSONObject) encoder.encode(conditions);
             parameters.put(KEY_WHERE, encodedConditions.toString());
         }
 

@@ -8,14 +8,11 @@
  */
 package com.parse;
 
+import java.util.Iterator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
-
-/**
- * Handles encoding/decoding ParseObjects to/from REST JSON.
- */
+/** Handles encoding/decoding ParseObjects to/from REST JSON. */
 class ParseObjectCoder {
 
     private static final String KEY_OBJECT_ID = "objectId";
@@ -36,14 +33,14 @@ class ParseObjectCoder {
 
     /**
      * Converts a {@code ParseObject.State} to REST JSON for saving.
-     * <p>
-     * Only dirty keys from {@code operations} are represented in the data. Non-dirty keys such as
-     * {@code updatedAt}, {@code createdAt}, etc. are not included.
      *
-     * @param state      {@link ParseObject.State} of the type of {@link ParseObject} that will be returned.
-     *                   Properties are completely ignored.
+     * <p>Only dirty keys from {@code operations} are represented in the data. Non-dirty keys such
+     * as {@code updatedAt}, {@code createdAt}, etc. are not included.
+     *
+     * @param state {@link ParseObject.State} of the type of {@link ParseObject} that will be
+     *     returned. Properties are completely ignored.
      * @param operations Dirty operations that are to be saved.
-     * @param encoder    Encoder instance that will be used to encode the request.
+     * @param encoder Encoder instance that will be used to encode the request.
      * @return A REST formatted {@link JSONObject} that will be used for saving.
      */
     public <T extends ParseObject.State> JSONObject encode(
@@ -71,15 +68,15 @@ class ParseObjectCoder {
 
     /**
      * Converts REST JSON response to {@link ParseObject.State.Init}.
-     * <p>
-     * This returns Builder instead of a State since we'll probably want to set some additional
+     *
+     * <p>This returns Builder instead of a State since we'll probably want to set some additional
      * properties on it after decoding such as {@link ParseObject.State.Init#isComplete()}, etc.
      *
-     * @param builder A {@link ParseObject.State.Init} instance that will have the server JSON applied
-     *                (mutated) to it. This will generally be a instance created by clearing a mutable
-     *                copy of a {@link ParseObject.State} to ensure it's an instance of the correct
-     *                subclass: {@code state.newBuilder().clear()}
-     * @param json    JSON response in REST format from the server.
+     * @param builder A {@link ParseObject.State.Init} instance that will have the server JSON
+     *     applied (mutated) to it. This will generally be a instance created by clearing a mutable
+     *     copy of a {@link ParseObject.State} to ensure it's an instance of the correct subclass:
+     *     {@code state.newBuilder().clear()}
+     * @param json JSON response in REST format from the server.
      * @param decoder Decoder instance that will be used to decode the server response.
      * @return The same Builder instance passed in after the JSON is applied.
      */
@@ -89,10 +86,10 @@ class ParseObjectCoder {
             Iterator<?> keys = json.keys();
             while (keys.hasNext()) {
                 String key = (String) keys.next();
-        /*
-        __type:       Returned by queries and cloud functions to designate body is a ParseObject
-        __className:  Used by fromJSON, should be stripped out by the time it gets here...
-         */
+                /*
+                __type:       Returned by queries and cloud functions to designate body is a ParseObject
+                __className:  Used by fromJSON, should be stripped out by the time it gets here...
+                 */
                 if (key.equals("__type") || key.equals(KEY_CLASS_NAME)) {
                     continue;
                 }
@@ -110,7 +107,8 @@ class ParseObjectCoder {
                     continue;
                 }
                 if (key.equals(KEY_ACL)) {
-                    ParseACL acl = ParseACL.createACLFromJSONObject(json.getJSONObject(key), decoder);
+                    ParseACL acl =
+                            ParseACL.createACLFromJSONObject(json.getJSONObject(key), decoder);
                     builder.put(KEY_ACL, acl);
                     continue;
                 }

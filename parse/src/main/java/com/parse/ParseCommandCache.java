@@ -11,15 +11,10 @@ package com.parse;
 import android.Manifest;
 import android.content.Context;
 import android.net.ConnectivityManager;
-
 import com.parse.boltsinternal.Capture;
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
 import com.parse.boltsinternal.TaskCompletionSource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +24,8 @@ import java.util.HashMap;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * ParseCommandCache manages an on-disk cache of commands to be executed, and a thread with a
@@ -38,39 +35,47 @@ import java.util.logging.Logger;
  */
 class ParseCommandCache extends ParseEventuallyQueue {
     private static final String TAG = "com.parse.ParseCommandCache";
-    // Lock guards access to the file system and all of the instance variables above. It is static so
+    // Lock guards access to the file system and all of the instance variables above. It is static
+    // so
     // that if somehow there are two instances of ParseCommandCache, they won't step on each others'
-    // toes while using the file system. A thread with lock should *not* try to get runningLock, under
+    // toes while using the file system. A thread with lock should *not* try to get runningLock,
+    // under
     // penalty of deadlock. Only the run loop (runLoop) thread should ever wait on this lock. Other
-    // threads should notify on this lock whenever the run loop should wake up and try to execute more
+    // threads should notify on this lock whenever the run loop should wake up and try to execute
+    // more
     // commands.
     private static final Object lock = new Object();
     // order.
     private static int filenameCounter = 0; // Appended to temp file names so we know their creation
-    final ConnectivityNotifier.ConnectivityListener listener = (context, intent) -> {
-        final boolean connectionLost =
-                intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-        final boolean isConnected = ConnectivityNotifier.isConnected(context);
+    final ConnectivityNotifier.ConnectivityListener listener =
+            (context, intent) -> {
+                final boolean connectionLost =
+                        intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+                final boolean isConnected = ConnectivityNotifier.isConnected(context);
 
-  /*
-   Hack to avoid blocking the UI thread with disk I/O
+                /*
+                Hack to avoid blocking the UI thread with disk I/O
 
-   setConnected uses the same lock we use for synchronizing disk I/O, so there's a possibility
-   that we can block the UI thread on disk I/O, so we're going to bump the lock usage to a
-   different thread.
+                setConnected uses the same lock we use for synchronizing disk I/O, so there's a possibility
+                that we can block the UI thread on disk I/O, so we're going to bump the lock usage to a
+                different thread.
 
-   TODO(grantland): Convert to TaskQueue, similar to ParsePinningEventuallyQueue
-    */
-        Task.call((Callable<Void>) () -> {
-            if (connectionLost) {
-                setConnected(false);
-            } else {
-                setConnected(isConnected);
-            }
-            return null;
-        }, ParseExecutors.io());
-    };
-    // Guards access to running. Gets a broadcast whenever running changes. A thread should only wait
+                TODO(grantland): Convert to TaskQueue, similar to ParsePinningEventuallyQueue
+                 */
+                Task.call(
+                        (Callable<Void>)
+                                () -> {
+                                    if (connectionLost) {
+                                        setConnected(false);
+                                    } else {
+                                        setConnected(isConnected);
+                                    }
+                                    return null;
+                                },
+                        ParseExecutors.io());
+            };
+    // Guards access to running. Gets a broadcast whenever running changes. A thread should only
+    // wait
     // on runningLock if it's sure the value of running is going to change. Only the run loop
     // (runLoop) thread should ever notify on runningLock. It's perfectly fine for a thread that has
     // runningLock to then also try to acquire the other lock.
@@ -83,8 +88,10 @@ class ParseCommandCache extends ParseEventuallyQueue {
     private final HashMap<File, TaskCompletionSource<JSONObject>> pendingTasks = new HashMap<>();
     private final Logger log; // Why is there a custom logger? To prevent Mockito deadlock!
     ConnectivityNotifier notifier;
-    private int timeoutMaxRetries = 5; // Don't retry more than 5 times before assuming disconnection.
-    private double timeoutRetryWaitSeconds = 600.0f; // Wait 10 minutes before retrying after network
+    private int timeoutMaxRetries =
+            5; // Don't retry more than 5 times before assuming disconnection.
+    private double timeoutRetryWaitSeconds =
+            600.0f; // Wait 10 minutes before retrying after network
     // timeout.
     private int maxCacheSizeBytes = 10 * 1024 * 1024; // Don't consume more than N bytes of storage.
     // processed by the run loop?
@@ -106,7 +113,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
         cachePath = getCacheDir();
 
         if (!Parse.hasPermission(Manifest.permission.ACCESS_NETWORK_STATE)) {
-            // The command cache only works if the user has granted us permission to monitor the network.
+            // The command cache only works if the user has granted us permission to monitor the
+            // network.
             return;
         }
 
@@ -119,7 +127,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
 
     private static File getCacheDir() {
         // Construct the path to the cache directory.
-        File cacheDir = new File(Parse.getParseDir(), "CommandCache");
+        File cacheDir = new File(Parse.getParseCacheDir(), "CommandCache");
         cacheDir.mkdirs();
 
         return cacheDir;
@@ -134,9 +142,11 @@ class ParseCommandCache extends ParseEventuallyQueue {
 
     @Override
     public void onDestroy() {
-        //TODO (grantland): pause #6484855
+        // TODO (grantland): pause #6484855
 
-        notifier.removeListener(listener);
+        if (notifier != null) {
+            notifier.removeListener(listener);
+        }
     }
 
     // Set the maximum number of times to retry before assuming disconnection.
@@ -206,9 +216,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
         }
     }
 
-    /**
-     * Removes a file from the file system and any internal caches.
-     */
+    /** Removes a file from the file system and any internal caches. */
     private void removeFile(File file) {
         synchronized (lock) {
             // Remove the data in memory for this command.
@@ -232,8 +240,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
     }
 
     /**
-     * Makes this command cache forget all the state it keeps during a single run of the app. This is
-     * only for testing purposes.
+     * Makes this command cache forget all the state it keeps during a single run of the app. This
+     * is only for testing purposes.
      */
     void simulateReboot() {
         synchronized (lock) {
@@ -242,8 +250,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
     }
 
     /**
-     * Fakes an object update notification for use in tests. This is used by saveEventually to make it
-     * look like test code has updated an object through the command cache even if it actually
+     * Fakes an object update notification for use in tests. This is used by saveEventually to make
+     * it look like test code has updated an object through the command cache even if it actually
      * avoided executing update by determining the object wasn't dirty.
      */
     void fakeObjectUpdate() {
@@ -253,27 +261,27 @@ class ParseCommandCache extends ParseEventuallyQueue {
     }
 
     @Override
-    public Task<JSONObject> enqueueEventuallyAsync(ParseRESTCommand command,
-                                                   ParseObject object) {
+    public Task<JSONObject> enqueueEventuallyAsync(ParseRESTCommand command, ParseObject object) {
         return enqueueEventuallyAsync(command, false, object);
     }
 
     /**
-     * Attempts to run the given command and any pending commands. Adds the command to the pending set
-     * if it can't be run yet.
+     * Attempts to run the given command and any pending commands. Adds the command to the pending
+     * set if it can't be run yet.
      *
-     * @param command      - The command to run.
-     * @param preferOldest - When the disk is full, if preferOldest, drop new commands. Otherwise, the oldest
-     *                     commands will be deleted to make room.
-     * @param object       - See runEventually.
+     * @param command - The command to run.
+     * @param preferOldest - When the disk is full, if preferOldest, drop new commands. Otherwise,
+     *     the oldest commands will be deleted to make room.
+     * @param object - See runEventually.
      */
-    private Task<JSONObject> enqueueEventuallyAsync(ParseRESTCommand command, boolean preferOldest,
-                                                    ParseObject object) {
+    private Task<JSONObject> enqueueEventuallyAsync(
+            ParseRESTCommand command, boolean preferOldest, ParseObject object) {
         Parse.requirePermission(Manifest.permission.ACCESS_NETWORK_STATE);
         TaskCompletionSource<JSONObject> tcs = new TaskCompletionSource<>();
         byte[] json;
         try {
-            // If this object doesn't have an objectId yet, store the localId so we can remap it to the
+            // If this object doesn't have an objectId yet, store the localId so we can remap it to
+            // the
             // objectId after the save completes.
             if (object != null && object.getObjectId() == null) {
                 command.setLocalId(object.getOrCreateLocalId());
@@ -315,7 +323,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
                     if (size > maxCacheSizeBytes) {
                         if (preferOldest) {
                             if (Parse.LOG_LEVEL_WARNING >= Parse.getLogLevel()) {
-                                log.warning("Unable to save command for later because storage is full.");
+                                log.warning(
+                                        "Unable to save command for later because storage is full.");
                             }
                             return Task.forResult(null);
                         } else {
@@ -340,7 +349,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
                     prefix1 = new String(zeroes) + prefix1;
                 }
 
-                // Then add another incrementing number in case we enqueue items faster than the system's
+                // Then add another incrementing number in case we enqueue items faster than the
+                // system's
                 // time granularity.
                 String prefix2 = Integer.toHexString(filenameCounter++);
                 if (prefix2.length() < 8) {
@@ -373,17 +383,13 @@ class ParseCommandCache extends ParseEventuallyQueue {
         return tcs.getTask();
     }
 
-    /**
-     * Returns the number of commands currently in the set waiting to be run.
-     */
+    /** Returns the number of commands currently in the set waiting to be run. */
     @Override
     public int pendingCount() {
         return getPendingCount();
     }
 
-    /**
-     * Gets rid of all pending commands.
-     */
+    /** Gets rid of all pending commands. */
     public void clear() {
         synchronized (lock) {
             File[] files = cachePath.listFiles();
@@ -397,9 +403,7 @@ class ParseCommandCache extends ParseEventuallyQueue {
         }
     }
 
-    /**
-     * Manually sets the network connection status.
-     */
+    /** Manually sets the network connection status. */
     public void setConnected(boolean connected) {
         synchronized (lock) {
             if (isConnected() != connected) {
@@ -418,13 +422,16 @@ class ParseCommandCache extends ParseEventuallyQueue {
     private <T> T waitForTaskWithoutLock(Task<T> task) throws ParseException {
         synchronized (lock) {
             final Capture<Boolean> finished = new Capture<>(false);
-            task.continueWith((Continuation<T, Void>) task1 -> {
-                finished.set(true);
-                synchronized (lock) {
-                    lock.notifyAll();
-                }
-                return null;
-            }, Task.BACKGROUND_EXECUTOR);
+            task.continueWith(
+                    (Continuation<T, Void>)
+                            task1 -> {
+                                finished.set(true);
+                                synchronized (lock) {
+                                    lock.notifyAll();
+                                }
+                                return null;
+                            },
+                    Task.BACKGROUND_EXECUTOR);
             while (!finished.get()) {
                 try {
                     lock.wait();
@@ -432,16 +439,16 @@ class ParseCommandCache extends ParseEventuallyQueue {
                     shouldStop = true;
                 }
             }
-            return ParseTaskUtils.wait(task);  // Just to get the return value and maybe rethrow.
+            return ParseTaskUtils.wait(task); // Just to get the return value and maybe rethrow.
         }
     }
 
     /**
-     * Attempts to run every command in the disk queue in order, synchronously. If there is no network
-     * connection, returns immediately without doing anything. If there is supposedly a connection,
-     * but parse can't be reached, waits timeoutRetryWaitSeconds before retrying up to
-     * retriesRemaining times. Blocks until either there's a connection, or the retries are exhausted.
-     * If any command fails, just deletes it and moves on to the next one.
+     * Attempts to run every command in the disk queue in order, synchronously. If there is no
+     * network connection, returns immediately without doing anything. If there is supposedly a
+     * connection, but parse can't be reached, waits timeoutRetryWaitSeconds before retrying up to
+     * retriesRemaining times. Blocks until either there's a connection, or the retries are
+     * exhausted. If any command fails, just deletes it and moves on to the next one.
      */
     private void maybeRunAllCommandsNow(int retriesRemaining) {
         synchronized (lock) {
@@ -508,34 +515,41 @@ class ParseCommandCache extends ParseEventuallyQueue {
                         }
                         notifyTestHelper(TestHelper.COMMAND_OLD_FORMAT_DISCARDED);
                     } else {
-                        commandTask = command.executeAsync(httpClient).continueWithTask(task -> {
-                            String localId = command.getLocalId();
-                            Exception error = task.getError();
-                            if (error != null) {
-                                if (error instanceof ParseException
-                                        && ((ParseException) error).getCode() == ParseException.CONNECTION_FAILED) {
-                                    // do nothing
-                                } else {
-                                    if (tcs != null) {
-                                        tcs.setError(error);
-                                    }
-                                }
-                                return task;
-                            }
+                        commandTask =
+                                command.executeAsync(httpClient)
+                                        .continueWithTask(
+                                                task -> {
+                                                    String localId = command.getLocalId();
+                                                    Exception error = task.getError();
+                                                    if (error != null) {
+                                                        if (!(error instanceof ParseException)
+                                                                || ((ParseException) error)
+                                                                                .getCode()
+                                                                        != ParseException
+                                                                                .CONNECTION_FAILED) {
+                                                            if (tcs != null) {
+                                                                tcs.setError(error);
+                                                            }
+                                                        }
+                                                        return task;
+                                                    }
 
-                            JSONObject json1 = task.getResult();
-                            if (tcs != null) {
-                                tcs.setResult(json1);
-                            } else if (localId != null) {
-                                // If this command created a new objectId, add it to the map.
-                                String objectId = json1.optString("objectId", null);
-                                if (objectId != null) {
-                                    ParseCorePlugins.getInstance()
-                                            .getLocalIdManager().setObjectId(localId, objectId);
-                                }
-                            }
-                            return task;
-                        });
+                                                    JSONObject json1 = task.getResult();
+                                                    if (tcs != null) {
+                                                        tcs.setResult(json1);
+                                                    } else if (localId != null) {
+                                                        // If this command created a new objectId,
+                                                        // add it to the map.
+                                                        String objectId =
+                                                                json1.optString("objectId", null);
+                                                        if (objectId != null) {
+                                                            ParseCorePlugins.getInstance()
+                                                                    .getLocalIdManager()
+                                                                    .setObjectId(localId, objectId);
+                                                        }
+                                                    }
+                                                    return task;
+                                                });
                     }
 
                     waitForTaskWithoutLock(commandTask);
@@ -549,11 +563,17 @@ class ParseCommandCache extends ParseEventuallyQueue {
                 } catch (ParseException e) {
                     if (e.getCode() == ParseException.CONNECTION_FAILED) {
                         if (retriesRemaining > 0) {
-                            // Reachability says we have a network connection, but we can't actually contact
-                            // Parse. Wait N minutes, or until we get signaled again before doing anything else.
+                            // Reachability says we have a network connection, but we can't actually
+                            // contact
+                            // Parse. Wait N minutes, or until we get signaled again before doing
+                            // anything else.
                             if (Parse.LOG_LEVEL_INFO >= Parse.getLogLevel()) {
-                                log.info("Network timeout in command cache. Waiting for " + timeoutRetryWaitSeconds
-                                        + " seconds and then retrying " + retriesRemaining + " times.");
+                                log.info(
+                                        "Network timeout in command cache. Waiting for "
+                                                + timeoutRetryWaitSeconds
+                                                + " seconds and then retrying "
+                                                + retriesRemaining
+                                                + " times.");
                             }
                             long currentTime = System.currentTimeMillis();
                             long waitUntil = currentTime + (long) (timeoutRetryWaitSeconds * 1000);
@@ -562,7 +582,8 @@ class ParseCommandCache extends ParseEventuallyQueue {
                                 // or should stop, just quit.
                                 if (!isConnected() || shouldStop) {
                                     if (Parse.LOG_LEVEL_INFO >= Parse.getLogLevel()) {
-                                        log.info("Aborting wait because runEventually thread should stop.");
+                                        log.info(
+                                                "Aborting wait because runEventually thread should stop.");
                                     }
                                     return;
                                 }
@@ -572,9 +593,12 @@ class ParseCommandCache extends ParseEventuallyQueue {
                                     shouldStop = true;
                                 }
                                 currentTime = System.currentTimeMillis();
-                                if (currentTime < (waitUntil - (long) (timeoutRetryWaitSeconds * 1000))) {
-                                    // This situation should be impossible, so it must mean the clock changed.
-                                    currentTime = (waitUntil - (long) (timeoutRetryWaitSeconds * 1000));
+                                if (currentTime
+                                        < (waitUntil - (long) (timeoutRetryWaitSeconds * 1000))) {
+                                    // This situation should be impossible, so it must mean the
+                                    // clock changed.
+                                    currentTime =
+                                            (waitUntil - (long) (timeoutRetryWaitSeconds * 1000));
                                 }
                             }
                             maybeRunAllCommandsNow(retriesRemaining - 1);
@@ -599,11 +623,11 @@ class ParseCommandCache extends ParseEventuallyQueue {
 
     /**
      * The main function of the run loop thread. This function basically loops forever (unless pause
-     * is called). On each iteration, if it hasn't been told to stop, it calls maybeRunAllCommandsNow
-     * to try to execute everything queued up on disk. Then it waits until it gets signaled again by
-     * lock.notify(). Usually that happens as a result of either (1) Parse being initialized, (2)
-     * runEventually being called, or (3) the OS notifying that the network connection has been
-     * re-established.
+     * is called). On each iteration, if it hasn't been told to stop, it calls
+     * maybeRunAllCommandsNow to try to execute everything queued up on disk. Then it waits until it
+     * gets signaled again by lock.notify(). Usually that happens as a result of either (1) Parse
+     * being initialized, (2) runEventually being called, or (3) the OS notifying that the network
+     * connection has been re-established.
      */
     private void runLoop() {
         if (Parse.LOG_LEVEL_INFO >= Parse.getLogLevel()) {

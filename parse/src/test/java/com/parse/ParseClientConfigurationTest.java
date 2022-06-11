@@ -25,12 +25,14 @@ public class ParseClientConfigurationTest {
         builder.applicationId("foo");
         builder.clientKey("bar");
         builder.enableLocalDataStore();
+        builder.allowCustomObjectId();
         Parse.Configuration configuration = builder.build();
 
         assertNull(configuration.context);
         assertEquals(configuration.applicationId, "foo");
         assertEquals(configuration.clientKey, "bar");
         assertTrue(configuration.localDataStoreEnabled);
+        assertEquals(configuration.allowCustomObjectId, true);
     }
 
     @Test

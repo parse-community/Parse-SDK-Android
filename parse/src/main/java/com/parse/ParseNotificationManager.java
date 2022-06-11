@@ -11,12 +11,9 @@ package com.parse;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * A utility class for building and showing notifications.
- */
+/** A utility class for building and showing notifications. */
 class ParseNotificationManager {
     private final AtomicInteger notificationCount = new AtomicInteger(0);
 

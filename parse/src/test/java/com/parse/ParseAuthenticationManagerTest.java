@@ -8,26 +8,23 @@
  */
 package com.parse;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.parse.boltsinternal.Task;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.Matchers;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class ParseAuthenticationManagerTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    @Rule public final ExpectedException thrown = ExpectedException.none();
 
     private ParseAuthenticationManager manager;
     private ParseCurrentUserController controller;
@@ -40,7 +37,7 @@ public class ParseAuthenticationManagerTest {
         provider = mock(AuthenticationCallback.class);
     }
 
-    //region testRegister
+    // region testRegister
 
     @Test
     public void testRegisterMultipleShouldThrow() {
@@ -69,13 +66,12 @@ public class ParseAuthenticationManagerTest {
         verify(user).synchronizeAuthDataAsync("test_provider");
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testRestoreAuthentication() throws ParseException {
         when(controller.getAsync(false)).thenReturn(Task.<ParseUser>forResult(null));
-        when(provider.onRestore(Matchers.<Map<String, String>>any()))
-                .thenReturn(true);
+        when(provider.onRestore(any())).thenReturn(true);
         manager.register("test_provider", provider);
 
         Map<String, String> authData = new HashMap<>();

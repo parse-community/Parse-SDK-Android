@@ -25,7 +25,6 @@ class MapParseDelegate<V>(private val name: String?) {
     ) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
-
 }
 
 /**

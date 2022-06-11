@@ -8,7 +8,6 @@ package com.parse.boltsinternal;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,33 +25,37 @@ public class AggregateException extends Exception {
     private final List<Throwable> innerThrowables;
 
     /**
-     * Constructs a new {@code AggregateException} with the current stack trace, the specified detail
-     * message and with references to the inner throwables that are the cause of this exception.
+     * Constructs a new {@code AggregateException} with the current stack trace, the specified
+     * detail message and with references to the inner throwables that are the cause of this
+     * exception.
      *
-     * @param detailMessage   The detail message for this exception.
+     * @param detailMessage The detail message for this exception.
      * @param innerThrowables The exceptions that are the cause of the current exception.
      */
     public AggregateException(String detailMessage, Throwable[] innerThrowables) {
         this(detailMessage, Arrays.asList(innerThrowables));
     }
 
-
     /**
-     * Constructs a new {@code AggregateException} with the current stack trace, the specified detail
-     * message and with references to the inner throwables that are the cause of this exception.
+     * Constructs a new {@code AggregateException} with the current stack trace, the specified
+     * detail message and with references to the inner throwables that are the cause of this
+     * exception.
      *
-     * @param detailMessage   The detail message for this exception.
+     * @param detailMessage The detail message for this exception.
      * @param innerThrowables The exceptions that are the cause of the current exception.
      */
     public AggregateException(String detailMessage, List<? extends Throwable> innerThrowables) {
-        super(detailMessage,
-                innerThrowables != null && innerThrowables.size() > 0 ? innerThrowables.get(0) : null);
+        super(
+                detailMessage,
+                innerThrowables != null && innerThrowables.size() > 0
+                        ? innerThrowables.get(0)
+                        : null);
         this.innerThrowables = Collections.unmodifiableList(innerThrowables);
     }
 
     /**
-     * Constructs a new {@code AggregateException} with the current stack trace and with references to
-     * the inner throwables that are the cause of this exception.
+     * Constructs a new {@code AggregateException} with the current stack trace and with references
+     * to the inner throwables that are the cause of this exception.
      *
      * @param innerThrowables The exceptions that are the cause of the current exception.
      */
@@ -97,33 +100,4 @@ public class AggregateException extends Exception {
             err.append("\n");
         }
     }
-
-    /**
-     * @deprecated Please use {@link #getInnerThrowables()} instead.
-     */
-    @Deprecated
-    public List<Exception> getErrors() {
-        List<Exception> errors = new ArrayList<>();
-        if (innerThrowables == null) {
-            return errors;
-        }
-
-        for (Throwable cause : innerThrowables) {
-            if (cause instanceof Exception) {
-                errors.add((Exception) cause);
-            } else {
-                errors.add(new Exception(cause));
-            }
-        }
-        return errors;
-    }
-
-    /**
-     * @deprecated Please use {@link #getInnerThrowables()} instead.
-     */
-    @Deprecated
-    public Throwable[] getCauses() {
-        return innerThrowables.toArray(new Throwable[0]);
-    }
-
 }

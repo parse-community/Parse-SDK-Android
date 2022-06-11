@@ -23,7 +23,6 @@ class StringParseDelegate<S : String?>(
             parseObject.put(name ?: property.name, filter.invoke(value))
         }
     }
-
 }
 
 /**

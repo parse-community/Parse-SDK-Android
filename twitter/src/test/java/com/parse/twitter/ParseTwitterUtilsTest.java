@@ -10,10 +10,10 @@ package com.parse.twitter;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,29 +21,24 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-
 import com.parse.AuthenticationCallback;
 import com.parse.ParseUser;
 import com.parse.boltsinternal.Task;
-
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ParseTwitterUtilsTest {
 
-    @Mock
-    private TwitterController controller;
-    @Mock
-    private ParseTwitterUtils.ParseUserDelegate userDelegate;
+    @Mock private TwitterController controller;
+    @Mock private ParseTwitterUtils.ParseUserDelegate userDelegate;
 
     @Before
     public void setUp() {
@@ -67,7 +62,7 @@ public class ParseTwitterUtilsTest {
                 .registerAuthenticationCallback(eq("twitter"), any(AuthenticationCallback.class));
     }
 
-    //region testRestoreAuthentication
+    // region testRestoreAuthentication
 
     @Test
     public void testRestoreAuthentication() {
@@ -89,16 +84,14 @@ public class ParseTwitterUtilsTest {
                 ArgumentCaptor.forClass(AuthenticationCallback.class);
         verify(userDelegate).registerAuthenticationCallback(eq("twitter"), captor.capture());
 
-        doThrow(new RuntimeException())
-                .when(controller)
-                .setAuthData(anyMapOf(String.class, String.class));
+        doThrow(new RuntimeException()).when(controller).setAuthData(anyMap());
         AuthenticationCallback callback = captor.getValue();
         Map<String, String> authData = new HashMap<>();
         assertFalse(callback.onRestore(authData));
         verify(controller).setAuthData(authData);
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testIsLinked() {
@@ -109,24 +102,24 @@ public class ParseTwitterUtilsTest {
         verify(user).isLinked("twitter");
     }
 
-    //region testLogIn
+    // region testLogIn
 
     @Test
     @SuppressWarnings("unchecked")
     public void testLogInWithToken() {
         ParseTwitterUtils.isInitialized = true;
         ParseUser user = mock(ParseUser.class);
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
 
         String twitterId = "test_id";
         String screenName = "test_screen_name";
         String authToken = "test_token";
         String authSecret = "test_secret";
-        Task<ParseUser> task = ParseTwitterUtils.logInInBackground(
-                twitterId, screenName, authToken, authSecret);
+        Task<ParseUser> task =
+                ParseTwitterUtils.logInInBackground(twitterId, screenName, authToken, authSecret);
         verify(controller).getAuthData(twitterId, screenName, authToken, authSecret);
-        verify(userDelegate).logInWithInBackground(eq("twitter"), anyMapOf(String.class, String.class));
+        verify(userDelegate).logInWithInBackground(eq("twitter"), anyMap());
         assertTrue(task.isCompleted());
     }
 
@@ -137,7 +130,7 @@ public class ParseTwitterUtilsTest {
         ParseUser user = mock(ParseUser.class);
         Map<String, String> authData = new HashMap<>();
         when(controller.authenticateAsync(any(Context.class))).thenReturn(Task.forResult(authData));
-        when(userDelegate.logInWithInBackground(anyString(), anyMapOf(String.class, String.class)))
+        when(userDelegate.logInWithInBackground(anyString(), anyMap()))
                 .thenReturn(Task.forResult(user));
 
         Context context = mock(Context.class);
@@ -147,9 +140,9 @@ public class ParseTwitterUtilsTest {
         assertTrue(task.isCompleted());
     }
 
-    //endregion
+    // endregion
 
-    //region testLink
+    // region testLink
 
     @Test
     @SuppressWarnings("unchecked")
@@ -157,16 +150,16 @@ public class ParseTwitterUtilsTest {
         ParseTwitterUtils.isInitialized = true;
 
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.<Void>forResult(null));
+        when(user.linkWithInBackground(anyString(), anyMap())).thenReturn(Task.forResult(null));
         String twitterId = "test_id";
         String screenName = "test_screen_name";
         String authToken = "test_token";
         String authSecret = "test_secret";
-        Task<Void> task = ParseTwitterUtils.linkInBackground(
-                user, twitterId, screenName, authToken, authSecret);
+        Task<Void> task =
+                ParseTwitterUtils.linkInBackground(
+                        user, twitterId, screenName, authToken, authSecret);
         verify(controller).getAuthData(twitterId, screenName, authToken, authSecret);
-        verify(user).linkWithInBackground(eq("twitter"), anyMapOf(String.class, String.class));
+        verify(user).linkWithInBackground(eq("twitter"), anyMap());
         assertTrue(task.isCompleted());
     }
 
@@ -179,21 +172,20 @@ public class ParseTwitterUtilsTest {
 
         Context context = mock(Context.class);
         ParseUser user = mock(ParseUser.class);
-        when(user.linkWithInBackground(anyString(), anyMapOf(String.class, String.class)))
-                .thenReturn(Task.<Void>forResult(null));
+        when(user.linkWithInBackground(anyString(), any())).thenReturn(Task.forResult(null));
         Task<Void> task = ParseTwitterUtils.linkInBackground(context, user);
         verify(controller).authenticateAsync(context);
         verify(user).linkWithInBackground("twitter", authData);
         assertTrue(task.isCompleted());
     }
 
-    //endregion
+    // endregion
 
     @Test
     public void testUnlink() {
         ParseTwitterUtils.isInitialized = true;
         ParseUser user = mock(ParseUser.class);
-        when(user.unlinkFromInBackground(anyString())).thenReturn(Task.<Void>forResult(null));
+        when(user.unlinkFromInBackground(anyString())).thenReturn(Task.forResult(null));
         Task<Void> task = ParseTwitterUtils.unlinkInBackground(user);
         verify(user).unlinkFromInBackground("twitter");
         verifyNoMoreInteractions(user);

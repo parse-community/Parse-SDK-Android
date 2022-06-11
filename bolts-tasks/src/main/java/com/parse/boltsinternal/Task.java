@@ -26,20 +26,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <TResult> The type of the result of the task.
  */
 public class Task<TResult> {
-    /**
-     * An {@link java.util.concurrent.Executor} that executes tasks in parallel.
-     */
+    /** An {@link java.util.concurrent.Executor} that executes tasks in parallel. */
     public static final ExecutorService BACKGROUND_EXECUTOR = BoltsExecutors.background();
-    /**
-     * An {@link java.util.concurrent.Executor} that executes tasks on the UI thread.
-     */
+    /** An {@link java.util.concurrent.Executor} that executes tasks on the UI thread. */
     public static final Executor UI_THREAD_EXECUTOR = AndroidExecutors.uiThread();
     /**
-     * An {@link java.util.concurrent.Executor} that executes tasks in the current thread unless
-     * the stack runs too deep, at which point it will delegate to {@link Task#BACKGROUND_EXECUTOR} in
+     * An {@link java.util.concurrent.Executor} that executes tasks in the current thread unless the
+     * stack runs too deep, at which point it will delegate to {@link Task#BACKGROUND_EXECUTOR} in
      * order to trim the stack.
      */
     private static final Executor IMMEDIATE_EXECUTOR = BoltsExecutors.immediate();
+
     private static final Task<?> TASK_NULL = new Task<>(null);
     private static final Task<Boolean> TASK_TRUE = new Task<>((Boolean) true);
     private static final Task<Boolean> TASK_FALSE = new Task<>((Boolean) false);
@@ -55,8 +52,7 @@ public class Task<TResult> {
     private UnobservedErrorNotifier unobservedErrorNotifier;
     private List<Continuation<TResult, Void>> continuations = new ArrayList<>();
 
-    /* package */ Task() {
-    }
+    /* package */ Task() {}
 
     private Task(TResult result) {
         trySetResult(result);
@@ -70,10 +66,7 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * Returns the handler invoked when a task has an unobserved
-     * exception or {@code null}.
-     */
+    /** Returns the handler invoked when a task has an unobserved exception or {@code null}. */
     public static UnobservedExceptionHandler getUnobservedExceptionHandler() {
         return unobservedExceptionHandler;
     }
@@ -81,24 +74,14 @@ public class Task<TResult> {
     /**
      * Set the handler invoked when a task has an unobserved exception.
      *
-     * @param eh the object to use as an unobserved exception handler. If
-     *           <tt>null</tt> then unobserved exceptions will be ignored.
+     * @param eh the object to use as an unobserved exception handler. If <tt>null</tt> then
+     *     unobserved exceptions will be ignored.
      */
     public static void setUnobservedExceptionHandler(UnobservedExceptionHandler eh) {
         unobservedExceptionHandler = eh;
     }
 
-    /**
-     * @deprecated Please use {@link com.parse.boltsinternal.TaskCompletionSource ()} instead.
-     */
-    public static <TResult> Task<TResult>.TaskCompletionSource create() {
-        Task<TResult> task = new Task<>();
-        return task.new TaskCompletionSource();
-    }
-
-    /**
-     * Creates a completed task with the given value.
-     */
+    /** Creates a completed task with the given value. */
     @SuppressWarnings("unchecked")
     public static <TResult> Task<TResult> forResult(TResult value) {
         if (value == null) {
@@ -107,23 +90,21 @@ public class Task<TResult> {
         if (value instanceof Boolean) {
             return (Task<TResult>) ((Boolean) value ? TASK_TRUE : TASK_FALSE);
         }
-        com.parse.boltsinternal.TaskCompletionSource<TResult> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
+        com.parse.boltsinternal.TaskCompletionSource<TResult> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         tcs.setResult(value);
         return tcs.getTask();
     }
 
-    /**
-     * Creates a faulted task with the given error.
-     */
+    /** Creates a faulted task with the given error. */
     public static <TResult> Task<TResult> forError(Exception error) {
-        com.parse.boltsinternal.TaskCompletionSource<TResult> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
+        com.parse.boltsinternal.TaskCompletionSource<TResult> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         tcs.setError(error);
         return tcs.getTask();
     }
 
-    /**
-     * Creates a cancelled task.
-     */
+    /** Creates a cancelled task. */
     @SuppressWarnings("unchecked")
     public static <TResult> Task<TResult> cancelled() {
         return (Task<TResult>) TASK_CANCELLED;
@@ -133,7 +114,7 @@ public class Task<TResult> {
      * Creates a task that completes after a time delay.
      *
      * @param delay The number of milliseconds to wait before completing the returned task. Zero and
-     *              negative values are treated as requests for immediate execution.
+     *     negative values are treated as requests for immediate execution.
      */
     public static Task<Void> delay(long delay) {
         return delay(delay, BoltsExecutors.scheduled(), null);
@@ -142,17 +123,20 @@ public class Task<TResult> {
     /**
      * Creates a task that completes after a time delay.
      *
-     * @param delay             The number of milliseconds to wait before completing the returned task. Zero and
-     *                          negative values are treated as requests for immediate execution.
+     * @param delay The number of milliseconds to wait before completing the returned task. Zero and
+     *     negative values are treated as requests for immediate execution.
      * @param cancellationToken The optional cancellation token that will be checked prior to
-     *                          completing the returned task.
+     *     completing the returned task.
      */
     public static Task<Void> delay(long delay, CancellationToken cancellationToken) {
         return delay(delay, BoltsExecutors.scheduled(), cancellationToken);
     }
 
     /* package */
-    static Task<Void> delay(long delay, ScheduledExecutorService executor, final CancellationToken cancellationToken) {
+    static Task<Void> delay(
+            long delay,
+            ScheduledExecutorService executor,
+            final CancellationToken cancellationToken) {
         if (cancellationToken != null && cancellationToken.isCancellationRequested()) {
             return Task.cancelled();
         }
@@ -161,16 +145,22 @@ public class Task<TResult> {
             return Task.forResult(null);
         }
 
-        final com.parse.boltsinternal.TaskCompletionSource<Void> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
-        final ScheduledFuture<?> scheduled = executor.schedule(() -> {
-            tcs.trySetResult(null);
-        }, delay, TimeUnit.MILLISECONDS);
+        final com.parse.boltsinternal.TaskCompletionSource<Void> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
+        final ScheduledFuture<?> scheduled =
+                executor.schedule(
+                        () -> {
+                            tcs.trySetResult(null);
+                        },
+                        delay,
+                        TimeUnit.MILLISECONDS);
 
         if (cancellationToken != null) {
-            cancellationToken.register(() -> {
-                scheduled.cancel(true);
-                tcs.trySetCancelled();
-            });
+            cancellationToken.register(
+                    () -> {
+                        scheduled.cancel(true);
+                        tcs.trySetCancelled();
+                    });
         }
 
         return tcs.getTask();
@@ -178,52 +168,54 @@ public class Task<TResult> {
 
     /**
      * Invokes the callable on a background thread, returning a Task to represent the operation.
-     * <p>
-     * If you want to cancel the resulting Task throw a {@link java.util.concurrent.CancellationException}
-     * from the callable.
+     *
+     * <p>If you want to cancel the resulting Task throw a {@link
+     * java.util.concurrent.CancellationException} from the callable.
      */
     public static <TResult> Task<TResult> callInBackground(Callable<TResult> callable) {
         return call(callable, BACKGROUND_EXECUTOR, null);
     }
 
-    /**
-     * Invokes the callable on a background thread, returning a Task to represent the operation.
-     */
-    public static <TResult> Task<TResult> callInBackground(Callable<TResult> callable, CancellationToken ct) {
+    /** Invokes the callable on a background thread, returning a Task to represent the operation. */
+    public static <TResult> Task<TResult> callInBackground(
+            Callable<TResult> callable, CancellationToken ct) {
         return call(callable, BACKGROUND_EXECUTOR, ct);
     }
 
     /**
      * Invokes the callable using the given executor, returning a Task to represent the operation.
-     * <p>
-     * If you want to cancel the resulting Task throw a {@link java.util.concurrent.CancellationException}
-     * from the callable.
+     *
+     * <p>If you want to cancel the resulting Task throw a {@link
+     * java.util.concurrent.CancellationException} from the callable.
      */
-    public static <TResult> Task<TResult> call(final Callable<TResult> callable, Executor executor) {
+    public static <TResult> Task<TResult> call(
+            final Callable<TResult> callable, Executor executor) {
         return call(callable, executor, null);
     }
 
     /**
      * Invokes the callable using the given executor, returning a Task to represent the operation.
      */
-    public static <TResult> Task<TResult> call(final Callable<TResult> callable, Executor executor,
-                                               final CancellationToken ct) {
-        final com.parse.boltsinternal.TaskCompletionSource<TResult> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
+    public static <TResult> Task<TResult> call(
+            final Callable<TResult> callable, Executor executor, final CancellationToken ct) {
+        final com.parse.boltsinternal.TaskCompletionSource<TResult> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         try {
-            executor.execute(() -> {
-                if (ct != null && ct.isCancellationRequested()) {
-                    tcs.setCancelled();
-                    return;
-                }
+            executor.execute(
+                    () -> {
+                        if (ct != null && ct.isCancellationRequested()) {
+                            tcs.setCancelled();
+                            return;
+                        }
 
-                try {
-                    tcs.setResult(callable.call());
-                } catch (CancellationException e) {
-                    tcs.setCancelled();
-                } catch (Exception e) {
-                    tcs.setError(e);
-                }
-            });
+                        try {
+                            tcs.setResult(callable.call());
+                        } catch (CancellationException e) {
+                            tcs.setCancelled();
+                        } catch (Exception e) {
+                            tcs.setError(e);
+                        }
+                    });
         } catch (Exception e) {
             tcs.setError(new ExecutorException(e));
         }
@@ -233,63 +225,68 @@ public class Task<TResult> {
 
     /**
      * Invokes the callable on the current thread, producing a Task.
-     * <p>
-     * If you want to cancel the resulting Task throw a {@link java.util.concurrent.CancellationException}
-     * from the callable.
+     *
+     * <p>If you want to cancel the resulting Task throw a {@link
+     * java.util.concurrent.CancellationException} from the callable.
      */
     public static <TResult> Task<TResult> call(final Callable<TResult> callable) {
         return call(callable, IMMEDIATE_EXECUTOR, null);
     }
 
-    /**
-     * Invokes the callable on the current thread, producing a Task.
-     */
-    public static <TResult> Task<TResult> call(final Callable<TResult> callable, CancellationToken ct) {
+    /** Invokes the callable on the current thread, producing a Task. */
+    public static <TResult> Task<TResult> call(
+            final Callable<TResult> callable, CancellationToken ct) {
         return call(callable, IMMEDIATE_EXECUTOR, ct);
     }
 
     /**
      * Creates a task that will complete when any of the supplied tasks have completed.
-     * <p/>
-     * The returned task will complete when any of the supplied tasks has completed. The returned task
-     * will always end in the completed state with its result set to the first task to complete. This
-     * is true even if the first task to complete ended in the canceled or faulted state.
+     *
+     * <p>The returned task will complete when any of the supplied tasks has completed. The returned
+     * task will always end in the completed state with its result set to the first task to
+     * complete. This is true even if the first task to complete ended in the canceled or faulted
+     * state.
      *
      * @param tasks The tasks to wait on for completion.
-     * @return A task that represents the completion of one of the supplied tasks.
-     * The return task's result is the task that completed.
+     * @return A task that represents the completion of one of the supplied tasks. The return task's
+     *     result is the task that completed.
      */
-    public static <TResult> Task<Task<TResult>> whenAnyResult(Collection<? extends Task<TResult>> tasks) {
+    public static <TResult> Task<Task<TResult>> whenAnyResult(
+            Collection<? extends Task<TResult>> tasks) {
         if (tasks.size() == 0) {
             return Task.forResult(null);
         }
 
-        final com.parse.boltsinternal.TaskCompletionSource<Task<TResult>> firstCompleted = new com.parse.boltsinternal.TaskCompletionSource<>();
+        final com.parse.boltsinternal.TaskCompletionSource<Task<TResult>> firstCompleted =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         final AtomicBoolean isAnyTaskComplete = new AtomicBoolean(false);
 
         for (Task<TResult> task : tasks) {
-            task.continueWith((Continuation<TResult, Void>) task1 -> {
-                if (isAnyTaskComplete.compareAndSet(false, true)) {
-                    firstCompleted.setResult(task1);
-                } else {
-                    Throwable ensureObserved = task1.getError();
-                }
-                return null;
-            });
+            task.continueWith(
+                    (Continuation<TResult, Void>)
+                            task1 -> {
+                                if (isAnyTaskComplete.compareAndSet(false, true)) {
+                                    firstCompleted.setResult(task1);
+                                } else {
+                                    Throwable ensureObserved = task1.getError();
+                                }
+                                return null;
+                            });
         }
         return firstCompleted.getTask();
     }
 
     /**
      * Creates a task that will complete when any of the supplied tasks have completed.
-     * <p/>
-     * The returned task will complete when any of the supplied tasks has completed. The returned task
-     * will always end in the completed state with its result set to the first task to complete. This
-     * is true even if the first task to complete ended in the canceled or faulted state.
+     *
+     * <p>The returned task will complete when any of the supplied tasks has completed. The returned
+     * task will always end in the completed state with its result set to the first task to
+     * complete. This is true even if the first task to complete ended in the canceled or faulted
+     * state.
      *
      * @param tasks The tasks to wait on for completion.
-     * @return A task that represents the completion of one of the supplied tasks.
-     * The return task's Result is the task that completed.
+     * @return A task that represents the completion of one of the supplied tasks. The return task's
+     *     Result is the task that completed.
      */
     @SuppressWarnings("unchecked")
     public static Task<Task<?>> whenAny(Collection<? extends Task<?>> tasks) {
@@ -297,77 +294,85 @@ public class Task<TResult> {
             return Task.forResult(null);
         }
 
-        final com.parse.boltsinternal.TaskCompletionSource<Task<?>> firstCompleted = new com.parse.boltsinternal.TaskCompletionSource<>();
+        final com.parse.boltsinternal.TaskCompletionSource<Task<?>> firstCompleted =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         final AtomicBoolean isAnyTaskComplete = new AtomicBoolean(false);
 
         for (Task<?> task : tasks) {
-            ((Task<Object>) task).continueWith((Continuation<Object, Void>) task1 -> {
-                if (isAnyTaskComplete.compareAndSet(false, true)) {
-                    firstCompleted.setResult(task1);
-                } else {
-                    Throwable ensureObserved = task1.getError();
-                }
-                return null;
-            });
+            ((Task<Object>) task)
+                    .continueWith(
+                            (Continuation<Object, Void>)
+                                    task1 -> {
+                                        if (isAnyTaskComplete.compareAndSet(false, true)) {
+                                            firstCompleted.setResult(task1);
+                                        } else {
+                                            Throwable ensureObserved = task1.getError();
+                                        }
+                                        return null;
+                                    });
         }
         return firstCompleted.getTask();
     }
 
     /**
      * Creates a task that completes when all of the provided tasks are complete.
-     * <p/>
-     * If any of the supplied tasks completes in a faulted state, the returned task will also complete
-     * in a faulted state, where its exception will resolve to that {@link java.lang.Exception} if a
-     * single task fails or an {@link AggregateException} of all the {@link java.lang.Exception}s
-     * if multiple tasks fail.
-     * <p/>
-     * If none of the supplied tasks faulted but at least one of them was cancelled, the returned
+     *
+     * <p>If any of the supplied tasks completes in a faulted state, the returned task will also
+     * complete in a faulted state, where its exception will resolve to that {@link
+     * java.lang.Exception} if a single task fails or an {@link AggregateException} of all the
+     * {@link java.lang.Exception}s if multiple tasks fail.
+     *
+     * <p>If none of the supplied tasks faulted but at least one of them was cancelled, the returned
      * task will end as cancelled.
-     * <p/>
-     * If none of the tasks faulted and none of the tasks were cancelled, the resulting task will end
-     * completed. The result of the returned task will be set to a list containing all of the results
-     * of the supplied tasks in the same order as they were provided (e.g. if the input tasks collection
-     * contained t1, t2, t3, the output task's result will return an {@code List&lt;TResult&gt;}
-     * where {@code list.get(0) == t1.getResult(), list.get(1) == t2.getResult(), and
-     * list.get(2) == t3.getResult()}).
-     * <p/>
-     * If the supplied collection contains no tasks, the returned task will immediately transition to
-     * a completed state before it's returned to the caller.
-     * The returned {@code List&lt;TResult&gt;} will contain 0 elements.
+     *
+     * <p>If none of the tasks faulted and none of the tasks were cancelled, the resulting task will
+     * end completed. The result of the returned task will be set to a list containing all of the
+     * results of the supplied tasks in the same order as they were provided (e.g. if the input
+     * tasks collection contained t1, t2, t3, the output task's result will return an {@code
+     * List&lt;TResult&gt;} where {@code list.get(0) == t1.getResult(), list.get(1) ==
+     * t2.getResult(), and list.get(2) == t3.getResult()}).
+     *
+     * <p>If the supplied collection contains no tasks, the returned task will immediately
+     * transition to a completed state before it's returned to the caller. The returned {@code
+     * List&lt;TResult&gt;} will contain 0 elements.
      *
      * @param tasks The tasks that the return value will wait for before completing.
-     * @return A Task that will resolve to {@code List&lt;TResult&gt;} when all the tasks are resolved.
+     * @return A Task that will resolve to {@code List&lt;TResult&gt;} when all the tasks are
+     *     resolved.
      */
-    public static <TResult> Task<List<TResult>> whenAllResult(final Collection<? extends Task<TResult>> tasks) {
-        return whenAll(tasks).onSuccess(task -> {
-            if (tasks.size() == 0) {
-                return Collections.emptyList();
-            }
+    public static <TResult> Task<List<TResult>> whenAllResult(
+            final Collection<? extends Task<TResult>> tasks) {
+        return whenAll(tasks)
+                .onSuccess(
+                        task -> {
+                            if (tasks.size() == 0) {
+                                return Collections.emptyList();
+                            }
 
-            List<TResult> results = new ArrayList<>();
-            for (Task<TResult> individualTask : tasks) {
-                results.add(individualTask.getResult());
-            }
-            return results;
-        });
+                            List<TResult> results = new ArrayList<>();
+                            for (Task<TResult> individualTask : tasks) {
+                                results.add(individualTask.getResult());
+                            }
+                            return results;
+                        });
     }
 
     /**
      * Creates a task that completes when all of the provided tasks are complete.
-     * <p/>
-     * If any of the supplied tasks completes in a faulted state, the returned task will also complete
-     * in a faulted state, where its exception will resolve to that {@link java.lang.Exception} if a
-     * single task fails or an {@link AggregateException} of all the {@link java.lang.Exception}s
-     * if multiple tasks fail.
-     * <p/>
-     * If none of the supplied tasks faulted but at least one of them was cancelled, the returned
+     *
+     * <p>If any of the supplied tasks completes in a faulted state, the returned task will also
+     * complete in a faulted state, where its exception will resolve to that {@link
+     * java.lang.Exception} if a single task fails or an {@link AggregateException} of all the
+     * {@link java.lang.Exception}s if multiple tasks fail.
+     *
+     * <p>If none of the supplied tasks faulted but at least one of them was cancelled, the returned
      * task will end as cancelled.
-     * <p/>
-     * If none of the tasks faulted and none of the tasks were canceled, the resulting task will
+     *
+     * <p>If none of the tasks faulted and none of the tasks were canceled, the resulting task will
      * end in the completed state.
-     * <p/>
-     * If the supplied collection contains no tasks, the returned task will immediately transition
-     * to a completed state before it's returned to the caller.
+     *
+     * <p>If the supplied collection contains no tasks, the returned task will immediately
+     * transition to a completed state before it's returned to the caller.
      *
      * @param tasks The tasks that the return value will wait for before completing.
      * @return A Task that will resolve to {@code Void} when all the tasks are resolved.
@@ -377,7 +382,8 @@ public class Task<TResult> {
             return Task.forResult(null);
         }
 
-        final com.parse.boltsinternal.TaskCompletionSource<Void> allFinished = new com.parse.boltsinternal.TaskCompletionSource<>();
+        final com.parse.boltsinternal.TaskCompletionSource<Void> allFinished =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         final ArrayList<Exception> causes = new ArrayList<>();
         final Object errorLock = new Object();
         final AtomicInteger count = new AtomicInteger(tasks.size());
@@ -386,71 +392,79 @@ public class Task<TResult> {
         for (Task<?> task : tasks) {
             @SuppressWarnings("unchecked")
             Task<Object> t = (Task<Object>) task;
-            t.continueWith((Continuation<Object, Void>) task1 -> {
-                if (task1.isFaulted()) {
-                    synchronized (errorLock) {
-                        causes.add(task1.getError());
-                    }
-                }
+            t.continueWith(
+                    (Continuation<Object, Void>)
+                            task1 -> {
+                                if (task1.isFaulted()) {
+                                    synchronized (errorLock) {
+                                        causes.add(task1.getError());
+                                    }
+                                }
 
-                if (task1.isCancelled()) {
-                    isCancelled.set(true);
-                }
+                                if (task1.isCancelled()) {
+                                    isCancelled.set(true);
+                                }
 
-                if (count.decrementAndGet() == 0) {
-                    if (causes.size() != 0) {
-                        if (causes.size() == 1) {
-                            allFinished.setError(causes.get(0));
-                        } else {
-                            Exception error = new AggregateException(
-                                    String.format("There were %d exceptions.", causes.size()),
-                                    causes);
-                            allFinished.setError(error);
-                        }
-                    } else if (isCancelled.get()) {
-                        allFinished.setCancelled();
-                    } else {
-                        allFinished.setResult(null);
-                    }
-                }
-                return null;
-            });
+                                if (count.decrementAndGet() == 0) {
+                                    if (causes.size() != 0) {
+                                        if (causes.size() == 1) {
+                                            allFinished.setError(causes.get(0));
+                                        } else {
+                                            Exception error =
+                                                    new AggregateException(
+                                                            String.format(
+                                                                    "There were %d exceptions.",
+                                                                    causes.size()),
+                                                            causes);
+                                            allFinished.setError(error);
+                                        }
+                                    } else if (isCancelled.get()) {
+                                        allFinished.setCancelled();
+                                    } else {
+                                        allFinished.setResult(null);
+                                    }
+                                }
+                                return null;
+                            });
         }
 
         return allFinished.getTask();
     }
 
     /**
-     * Handles the non-async (i.e. the continuation doesn't return a Task) continuation case, passing
-     * the results of the given Task through to the given continuation and using the results of that
-     * call to set the result of the TaskContinuationSource.
+     * Handles the non-async (i.e. the continuation doesn't return a Task) continuation case,
+     * passing the results of the given Task through to the given continuation and using the results
+     * of that call to set the result of the TaskContinuationSource.
      *
-     * @param tcs          The TaskContinuationSource that will be orchestrated by this call.
+     * @param tcs The TaskContinuationSource that will be orchestrated by this call.
      * @param continuation The non-async continuation.
-     * @param task         The task being completed.
-     * @param executor     The executor to use when running the continuation (allowing the continuation to be
-     *                     scheduled on a different thread).
+     * @param task The task being completed.
+     * @param executor The executor to use when running the continuation (allowing the continuation
+     *     to be scheduled on a different thread).
      */
     private static <TContinuationResult, TResult> void completeImmediately(
             final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs,
-            final Continuation<TResult, TContinuationResult> continuation, final Task<TResult> task,
-            Executor executor, final CancellationToken ct) {
+            final Continuation<TResult, TContinuationResult> continuation,
+            final Task<TResult> task,
+            Executor executor,
+            final CancellationToken ct) {
         try {
-            executor.execute(() -> {
-                if (ct != null && ct.isCancellationRequested()) {
-                    tcs.setCancelled();
-                    return;
-                }
+            executor.execute(
+                    () -> {
+                        if (ct != null && ct.isCancellationRequested()) {
+                            tcs.setCancelled();
+                            return;
+                        }
 
-                try {
-                    TContinuationResult result = continuation.then(task);
-                    tcs.setResult(result);
-                } catch (CancellationException e) {
-                    tcs.setCancelled();
-                } catch (Exception e) {
-                    tcs.setError(e);
-                }
-            });
+                        try {
+                            TContinuationResult result = continuation.then(task);
+                            tcs.setResult(result);
+                        } catch (CancellationException e) {
+                            tcs.setCancelled();
+                        } catch (Exception e) {
+                            tcs.setError(e);
+                        }
+                    });
         } catch (Exception e) {
             tcs.setError(new ExecutorException(e));
         }
@@ -462,59 +476,64 @@ public class Task<TResult> {
      * TaskCompletionSource's results are only set when the new Task has completed, unwrapping the
      * results of the task returned by the continuation.
      *
-     * @param tcs          The TaskContinuationSource that will be orchestrated by this call.
+     * @param tcs The TaskContinuationSource that will be orchestrated by this call.
      * @param continuation The async continuation.
-     * @param task         The task being completed.
-     * @param executor     The executor to use when running the continuation (allowing the continuation to be
-     *                     scheduled on a different thread).
+     * @param task The task being completed.
+     * @param executor The executor to use when running the continuation (allowing the continuation
+     *     to be scheduled on a different thread).
      */
     private static <TContinuationResult, TResult> void completeAfterTask(
             final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs,
             final Continuation<TResult, Task<TContinuationResult>> continuation,
-            final Task<TResult> task, final Executor executor,
+            final Task<TResult> task,
+            final Executor executor,
             final CancellationToken ct) {
         try {
-            executor.execute(() -> {
-                if (ct != null && ct.isCancellationRequested()) {
-                    tcs.setCancelled();
-                    return;
-                }
+            executor.execute(
+                    () -> {
+                        if (ct != null && ct.isCancellationRequested()) {
+                            tcs.setCancelled();
+                            return;
+                        }
 
-                try {
-                    Task<TContinuationResult> result = continuation.then(task);
-                    if (result == null) {
-                        tcs.setResult(null);
-                    } else {
-                        result.continueWith((Continuation<TContinuationResult, Void>) task1 -> {
-                            if (ct != null && ct.isCancellationRequested()) {
-                                tcs.setCancelled();
-                                return null;
-                            }
-
-                            if (task1.isCancelled()) {
-                                tcs.setCancelled();
-                            } else if (task1.isFaulted()) {
-                                tcs.setError(task1.getError());
+                        try {
+                            Task<TContinuationResult> result = continuation.then(task);
+                            if (result == null) {
+                                tcs.setResult(null);
                             } else {
-                                tcs.setResult(task1.getResult());
+                                result.continueWith(
+                                        (Continuation<TContinuationResult, Void>)
+                                                task1 -> {
+                                                    if (ct != null
+                                                            && ct.isCancellationRequested()) {
+                                                        tcs.setCancelled();
+                                                        return null;
+                                                    }
+
+                                                    if (task1.isCancelled()) {
+                                                        tcs.setCancelled();
+                                                    } else if (task1.isFaulted()) {
+                                                        tcs.setError(task1.getError());
+                                                    } else {
+                                                        tcs.setResult(task1.getResult());
+                                                    }
+                                                    return null;
+                                                });
                             }
-                            return null;
-                        });
-                    }
-                } catch (CancellationException e) {
-                    tcs.setCancelled();
-                } catch (Exception e) {
-                    tcs.setError(e);
-                }
-            });
+                        } catch (CancellationException e) {
+                            tcs.setCancelled();
+                        } catch (Exception e) {
+                            tcs.setError(e);
+                        }
+                    });
         } catch (Exception e) {
             tcs.setError(new ExecutorException(e));
         }
     }
 
     /**
-     * @return {@code true} if the task completed (has a result, an error, or was cancelled.
-     * {@code false} otherwise.
+     * @return {@code true} if the task completed (has a result, an error, or was cancelled. {@code
+     *     false} otherwise.
      */
     public boolean isCompleted() {
         synchronized (lock) {
@@ -522,36 +541,28 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * @return {@code true} if the task was cancelled, {@code false} otherwise.
-     */
+    /** @return {@code true} if the task was cancelled, {@code false} otherwise. */
     public boolean isCancelled() {
         synchronized (lock) {
             return cancelled;
         }
     }
 
-    /**
-     * @return {@code true} if the task has an error, {@code false} otherwise.
-     */
+    /** @return {@code true} if the task has an error, {@code false} otherwise. */
     public boolean isFaulted() {
         synchronized (lock) {
             return getError() != null;
         }
     }
 
-    /**
-     * @return The result of the task, if set. {@code null} otherwise.
-     */
+    /** @return The result of the task, if set. {@code null} otherwise. */
     public TResult getResult() {
         synchronized (lock) {
             return result;
         }
     }
 
-    /**
-     * @return The error for the task, if set. {@code null} otherwise.
-     */
+    /** @return The error for the task, if set. {@code null} otherwise. */
     public Exception getError() {
         synchronized (lock) {
             if (error != null) {
@@ -565,9 +576,7 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * Blocks until the task is complete.
-     */
+    /** Blocks until the task is complete. */
     public void waitForCompletion() throws InterruptedException {
         synchronized (lock) {
             if (!isCompleted()) {
@@ -579,8 +588,8 @@ public class Task<TResult> {
     /**
      * Blocks until the task is complete or times out.
      *
-     * @return {@code true} if the task completed (has a result, an error, or was cancelled).
-     * {@code false} otherwise.
+     * @return {@code true} if the task completed (has a result, an error, or was cancelled). {@code
+     *     false} otherwise.
      */
     public boolean waitForCompletion(long duration, TimeUnit timeUnit) throws InterruptedException {
         synchronized (lock) {
@@ -601,68 +610,74 @@ public class Task<TResult> {
         return task;
     }
 
-    /**
-     * Turns a Task<T> into a Task<Void>, dropping any result.
-     */
+    /** Turns a Task<T> into a Task<Void>, dropping any result. */
     public Task<Void> makeVoid() {
-        return this.continueWithTask(task -> {
-            if (task.isCancelled()) {
-                return Task.cancelled();
-            }
-            if (task.isFaulted()) {
-                return Task.forError(task.getError());
-            }
-            return Task.forResult(null);
-        });
+        return this.continueWithTask(
+                task -> {
+                    if (task.isCancelled()) {
+                        return Task.cancelled();
+                    }
+                    if (task.isFaulted()) {
+                        return Task.forError(task.getError());
+                    }
+                    return Task.forResult(null);
+                });
     }
 
     /**
-     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop is
-     * a task continuation.
+     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop
+     * is a task continuation.
      */
-    public Task<Void> continueWhile(Callable<Boolean> predicate,
-                                    Continuation<Void, Task<Void>> continuation) {
+    public Task<Void> continueWhile(
+            Callable<Boolean> predicate, Continuation<Void, Task<Void>> continuation) {
         return continueWhile(predicate, continuation, IMMEDIATE_EXECUTOR, null);
     }
 
     /**
-     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop is
-     * a task continuation.
+     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop
+     * is a task continuation.
      */
-    public Task<Void> continueWhile(Callable<Boolean> predicate,
-                                    Continuation<Void, Task<Void>> continuation, CancellationToken ct) {
+    public Task<Void> continueWhile(
+            Callable<Boolean> predicate,
+            Continuation<Void, Task<Void>> continuation,
+            CancellationToken ct) {
         return continueWhile(predicate, continuation, IMMEDIATE_EXECUTOR, ct);
     }
 
     /**
-     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop is
-     * a task continuation.
+     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop
+     * is a task continuation.
      */
-    public Task<Void> continueWhile(final Callable<Boolean> predicate,
-                                    final Continuation<Void, Task<Void>> continuation, final Executor executor) {
+    public Task<Void> continueWhile(
+            final Callable<Boolean> predicate,
+            final Continuation<Void, Task<Void>> continuation,
+            final Executor executor) {
         return continueWhile(predicate, continuation, executor, null);
     }
 
     /**
-     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop is
-     * a task continuation.
+     * Continues a task with the equivalent of a Task-based while loop, where the body of the loop
+     * is a task continuation.
      */
-    public Task<Void> continueWhile(final Callable<Boolean> predicate,
-                                    final Continuation<Void, Task<Void>> continuation, final Executor executor,
-                                    final CancellationToken ct) {
-        final Capture<Continuation<Void, Task<Void>>> predicateContinuation =
-                new Capture<>();
-        predicateContinuation.set(task -> {
-            if (ct != null && ct.isCancellationRequested()) {
-                return Task.cancelled();
-            }
+    public Task<Void> continueWhile(
+            final Callable<Boolean> predicate,
+            final Continuation<Void, Task<Void>> continuation,
+            final Executor executor,
+            final CancellationToken ct) {
+        final Capture<Continuation<Void, Task<Void>>> predicateContinuation = new Capture<>();
+        predicateContinuation.set(
+                task -> {
+                    if (ct != null && ct.isCancellationRequested()) {
+                        return Task.cancelled();
+                    }
 
-            if (predicate.call()) {
-                return Task.<Void>forResult(null).onSuccessTask(continuation, executor)
-                        .onSuccessTask(predicateContinuation.get(), executor);
-            }
-            return Task.forResult(null);
-        });
+                    if (predicate.call()) {
+                        return Task.<Void>forResult(null)
+                                .onSuccessTask(continuation, executor)
+                                .onSuccessTask(predicateContinuation.get(), executor);
+                    }
+                    return Task.forResult(null);
+                });
         return makeVoid().continueWithTask(predicateContinuation.get(), executor);
     }
 
@@ -672,7 +687,8 @@ public class Task<TResult> {
      * scheduled on different thread.
      */
     public <TContinuationResult> Task<TContinuationResult> continueWith(
-            final Continuation<TResult, TContinuationResult> continuation, final Executor executor) {
+            final Continuation<TResult, TContinuationResult> continuation,
+            final Executor executor) {
         return continueWith(continuation, executor, null);
     }
 
@@ -682,17 +698,20 @@ public class Task<TResult> {
      * scheduled on different thread.
      */
     public <TContinuationResult> Task<TContinuationResult> continueWith(
-            final Continuation<TResult, TContinuationResult> continuation, final Executor executor,
+            final Continuation<TResult, TContinuationResult> continuation,
+            final Executor executor,
             final CancellationToken ct) {
         boolean completed;
-        final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
+        final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         synchronized (lock) {
             completed = this.isCompleted();
             if (!completed) {
-                this.continuations.add(task -> {
-                    completeImmediately(tcs, continuation, task, executor, ct);
-                    return null;
-                });
+                this.continuations.add(
+                        task -> {
+                            completeImmediately(tcs, continuation, task, executor, ct);
+                            return null;
+                        });
             }
         }
         if (completed) {
@@ -721,29 +740,35 @@ public class Task<TResult> {
 
     /**
      * Adds an Task-based continuation to this task that will be scheduled using the executor,
-     * returning a new task that completes after the task returned by the continuation has completed.
+     * returning a new task that completes after the task returned by the continuation has
+     * completed.
      */
     public <TContinuationResult> Task<TContinuationResult> continueWithTask(
-            final Continuation<TResult, Task<TContinuationResult>> continuation, final Executor executor) {
+            final Continuation<TResult, Task<TContinuationResult>> continuation,
+            final Executor executor) {
         return continueWithTask(continuation, executor, null);
     }
 
     /**
      * Adds an Task-based continuation to this task that will be scheduled using the executor,
-     * returning a new task that completes after the task returned by the continuation has completed.
+     * returning a new task that completes after the task returned by the continuation has
+     * completed.
      */
     public <TContinuationResult> Task<TContinuationResult> continueWithTask(
-            final Continuation<TResult, Task<TContinuationResult>> continuation, final Executor executor,
+            final Continuation<TResult, Task<TContinuationResult>> continuation,
+            final Executor executor,
             final CancellationToken ct) {
         boolean completed;
-        final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs = new com.parse.boltsinternal.TaskCompletionSource<>();
+        final com.parse.boltsinternal.TaskCompletionSource<TContinuationResult> tcs =
+                new com.parse.boltsinternal.TaskCompletionSource<>();
         synchronized (lock) {
             completed = this.isCompleted();
             if (!completed) {
-                this.continuations.add(task -> {
-                    completeAfterTask(tcs, continuation, task, executor, ct);
-                    return null;
-                });
+                this.continuations.add(
+                        task -> {
+                            completeAfterTask(tcs, continuation, task, executor, ct);
+                            return null;
+                        });
             }
         }
         if (completed) {
@@ -771,8 +796,8 @@ public class Task<TResult> {
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception} or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception} or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccess(
             final Continuation<TResult, TContinuationResult> continuation, Executor executor) {
@@ -780,30 +805,33 @@ public class Task<TResult> {
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception} or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception} or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccess(
-            final Continuation<TResult, TContinuationResult> continuation, Executor executor,
+            final Continuation<TResult, TContinuationResult> continuation,
+            Executor executor,
             final CancellationToken ct) {
-        return continueWithTask(task -> {
-            if (ct != null && ct.isCancellationRequested()) {
-                return Task.cancelled();
-            }
+        return continueWithTask(
+                task -> {
+                    if (ct != null && ct.isCancellationRequested()) {
+                        return Task.cancelled();
+                    }
 
-            if (task.isFaulted()) {
-                return Task.forError(task.getError());
-            } else if (task.isCancelled()) {
-                return Task.cancelled();
-            } else {
-                return task.continueWith(continuation);
-            }
-        }, executor);
+                    if (task.isFaulted()) {
+                        return Task.forError(task.getError());
+                    } else if (task.isCancelled()) {
+                        return Task.cancelled();
+                    } else {
+                        return task.continueWith(continuation);
+                    }
+                },
+                executor);
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccess(
             final Continuation<TResult, TContinuationResult> continuation) {
@@ -811,8 +839,8 @@ public class Task<TResult> {
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccess(
             final Continuation<TResult, TContinuationResult> continuation, CancellationToken ct) {
@@ -820,39 +848,43 @@ public class Task<TResult> {
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccessTask(
-            final Continuation<TResult, Task<TContinuationResult>> continuation, Executor executor) {
+            final Continuation<TResult, Task<TContinuationResult>> continuation,
+            Executor executor) {
         return onSuccessTask(continuation, executor, null);
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccessTask(
-            final Continuation<TResult, Task<TContinuationResult>> continuation, Executor executor,
+            final Continuation<TResult, Task<TContinuationResult>> continuation,
+            Executor executor,
             final CancellationToken ct) {
-        return continueWithTask(task -> {
-            if (ct != null && ct.isCancellationRequested()) {
-                return Task.cancelled();
-            }
+        return continueWithTask(
+                task -> {
+                    if (ct != null && ct.isCancellationRequested()) {
+                        return Task.cancelled();
+                    }
 
-            if (task.isFaulted()) {
-                return Task.forError(task.getError());
-            } else if (task.isCancelled()) {
-                return Task.cancelled();
-            } else {
-                return task.continueWithTask(continuation);
-            }
-        }, executor);
+                    if (task.isFaulted()) {
+                        return Task.forError(task.getError());
+                    } else if (task.isCancelled()) {
+                        return Task.cancelled();
+                    } else {
+                        return task.continueWithTask(continuation);
+                    }
+                },
+                executor);
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccessTask(
             final Continuation<TResult, Task<TContinuationResult>> continuation) {
@@ -860,8 +892,8 @@ public class Task<TResult> {
     }
 
     /**
-     * Runs a continuation when a task completes successfully, forwarding along
-     * {@link java.lang.Exception}s or cancellation.
+     * Runs a continuation when a task completes successfully, forwarding along {@link
+     * java.lang.Exception}s or cancellation.
      */
     public <TContinuationResult> Task<TContinuationResult> onSuccessTask(
             final Continuation<TResult, Task<TContinuationResult>> continuation,
@@ -884,9 +916,7 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * Sets the cancelled flag on the Task if the Task hasn't already been completed.
-     */
+    /** Sets the cancelled flag on the Task if the Task hasn't already been completed. */
     /* package */ boolean trySetCancelled() {
         synchronized (lock) {
             if (complete) {
@@ -900,9 +930,7 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * Sets the result on the Task if the Task hasn't already been completed.
-     */
+    /** Sets the result on the Task if the Task hasn't already been completed. */
     /* package */ boolean trySetResult(TResult result) {
         synchronized (lock) {
             if (complete) {
@@ -916,9 +944,7 @@ public class Task<TResult> {
         }
     }
 
-    /**
-     * Sets the error on the Task if the Task hasn't already been completed.
-     */
+    /** Sets the error on the Task if the Task hasn't already been completed. */
     /* package */ boolean trySetError(Exception error) {
         synchronized (lock) {
             if (complete) {
@@ -936,12 +962,11 @@ public class Task<TResult> {
     }
 
     /**
-     * Interface for handlers invoked when a failed {@code Task} is about to be
-     * finalized, but the exception has not been consumed.
+     * Interface for handlers invoked when a failed {@code Task} is about to be finalized, but the
+     * exception has not been consumed.
      *
-     * <p>The handler will execute in the GC thread, so if the handler needs to do
-     * anything time consuming or complex it is a good idea to fire off a {@code Task}
-     * to handle the exception.
+     * <p>The handler will execute in the GC thread, so if the handler needs to do anything time
+     * consuming or complex it is a good idea to fire off a {@code Task} to handle the exception.
      *
      * @see #getUnobservedExceptionHandler
      * @see #setUnobservedExceptionHandler
@@ -949,20 +974,12 @@ public class Task<TResult> {
     public interface UnobservedExceptionHandler {
         /**
          * Method invoked when the given task has an unobserved exception.
+         *
          * <p>Any exception thrown by this method will be ignored.
          *
          * @param t the task
          * @param e the exception
          */
         void unobservedException(Task<?> t, UnobservedTaskException e);
-    }
-
-    /**
-     * @deprecated Please use {@link com.parse.boltsinternal.TaskCompletionSource} instead.
-     */
-    public class TaskCompletionSource extends com.parse.boltsinternal.TaskCompletionSource<TResult> {
-
-        /* package */ TaskCompletionSource() {
-        }
     }
 }

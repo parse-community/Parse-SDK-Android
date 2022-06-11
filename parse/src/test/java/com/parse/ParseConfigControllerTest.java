@@ -15,8 +15,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,14 +25,6 @@ import static org.mockito.Mockito.when;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONObject;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -42,11 +34,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ParseConfigControllerTest {
 
-    @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() throws MalformedURLException {
@@ -58,56 +55,73 @@ public class ParseConfigControllerTest {
         ParseRESTCommand.server = null;
     }
 
-    //region testConstructor
+    // region testConstructor
 
     @Test
     public void testConstructor() {
         ParseHttpClient restClient = mock(ParseHttpClient.class);
-        ParseCurrentConfigController currentConfigController = mock(ParseCurrentConfigController.class);
-        ParseConfigController controller = new ParseConfigController(restClient,
-                currentConfigController);
+        ParseCurrentConfigController currentConfigController =
+                mock(ParseCurrentConfigController.class);
+        ParseConfigController controller =
+                new ParseConfigController(restClient, currentConfigController);
 
         assertSame(currentConfigController, controller.getCurrentConfigController());
     }
 
-    //endregion
+    // endregion
 
-    //region testGetAsync
+    // region testGetAsync
 
     @Test
     public void testGetAsyncSuccess() throws Exception {
         // Construct sample response from server
         final Date date = new Date();
-        final ParseFile file = new ParseFile(
-                new ParseFile.State.Builder().name("image.png").url("http://yarr.com/image.png").build());
+        final ParseFile file =
+                new ParseFile(
+                        new ParseFile.State.Builder()
+                                .name("image.png")
+                                .url("http://yarr.com/image.png")
+                                .build());
         final ParseGeoPoint geoPoint = new ParseGeoPoint(44.484, 26.029);
-        final List<Object> list = new ArrayList<Object>() {{
-            add("foo");
-            add("bar");
-            add("baz");
-        }};
-        final Map<String, Object> map = new HashMap<String, Object>() {{
-            put("first", "foo");
-            put("second", "bar");
-            put("third", "baz");
-        }};
+        final List<Object> list =
+                new ArrayList<Object>() {
+                    {
+                        add("foo");
+                        add("bar");
+                        add("baz");
+                    }
+                };
+        final Map<String, Object> map =
+                new HashMap<String, Object>() {
+                    {
+                        put("first", "foo");
+                        put("second", "bar");
+                        put("third", "baz");
+                    }
+                };
 
-        final Map<String, Object> sampleConfigParameters = new HashMap<String, Object>() {{
-            put("string", "value");
-            put("int", 42);
-            put("double", 0.2778);
-            put("trueBool", true);
-            put("falseBool", false);
-            put("date", date);
-            put("file", file);
-            put("geoPoint", geoPoint);
-            put("array", list);
-            put("object", map);
-        }};
+        final Map<String, Object> sampleConfigParameters =
+                new HashMap<String, Object>() {
+                    {
+                        put("string", "value");
+                        put("int", 42);
+                        put("double", 0.2778);
+                        put("trueBool", true);
+                        put("falseBool", false);
+                        put("date", date);
+                        put("file", file);
+                        put("geoPoint", geoPoint);
+                        put("array", list);
+                        put("object", map);
+                    }
+                };
 
-        JSONObject responseJson = new JSONObject() {{
-            put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
-        }};
+        JSONObject responseJson =
+                new JSONObject() {
+                    {
+                        put("params", NoObjectsEncoder.get().encode(sampleConfigParameters));
+                    }
+                };
 
         // Make ParseConfigController and call getAsync
         ParseHttpClient restClient = mockParseHttpClientWithResponse(responseJson, 200, "OK");
@@ -172,25 +186,27 @@ public class ParseConfigControllerTest {
         verify(currentConfigController, times(0)).setCurrentConfigAsync(any(ParseConfig.class));
     }
 
-    //endregion
+    // endregion
 
     private ParseCurrentConfigController mockParseCurrentConfigController() {
-        ParseCurrentConfigController currentConfigController = mock(ParseCurrentConfigController.class);
+        ParseCurrentConfigController currentConfigController =
+                mock(ParseCurrentConfigController.class);
         when(currentConfigController.setCurrentConfigAsync(any(ParseConfig.class)))
                 .thenReturn(Task.<Void>forResult(null));
         return currentConfigController;
     }
 
-    //TODO(mengyan) Create unit test helper and move all similar methods to the class
-    private ParseHttpClient mockParseHttpClientWithResponse(JSONObject content, int statusCode,
-                                                            String reasonPhrase) throws IOException {
+    // TODO(mengyan) Create unit test helper and move all similar methods to the class
+    private ParseHttpClient mockParseHttpClientWithResponse(
+            JSONObject content, int statusCode, String reasonPhrase) throws IOException {
         byte[] contentBytes = content.toString().getBytes();
-        ParseHttpResponse response = new ParseHttpResponse.Builder()
-                .setContent(new ByteArrayInputStream(contentBytes))
-                .setStatusCode(statusCode)
-                .setTotalSize(contentBytes.length)
-                .setContentType("application/json")
-                .build();
+        ParseHttpResponse response =
+                new ParseHttpResponse.Builder()
+                        .setContent(new ByteArrayInputStream(contentBytes))
+                        .setStatusCode(statusCode)
+                        .setTotalSize(contentBytes.length)
+                        .setContentType("application/json")
+                        .build();
         ParseHttpClient client = mock(ParseHttpClient.class);
         when(client.execute(any(ParseHttpRequest.class))).thenReturn(response);
         return client;

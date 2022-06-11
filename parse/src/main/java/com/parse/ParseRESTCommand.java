@@ -12,12 +12,6 @@ import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONStringer;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -26,10 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
-/**
- * A helper object to send requests to the server.
- */
+/** A helper object to send requests to the server. */
 class ParseRESTCommand extends ParseRequest<JSONObject> {
 
     /* package */ static final String HEADER_APPLICATION_ID = "X-Parse-Application-Id";
@@ -79,7 +75,8 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
             String httpPath,
             ParseHttpRequest.Method httpMethod,
             JSONObject jsonParameters,
-            String localId, String sessionToken) {
+            String localId,
+            String sessionToken) {
         super(httpMethod, createUrl(httpPath));
 
         this.httpPath = httpPath;
@@ -137,7 +134,8 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
         return stringer.toString();
     }
 
-    // Uses the provided JSONStringer to encode this object to JSON, but ensures that JSONObjects and
+    // Uses the provided JSONStringer to encode this object to JSON, but ensures that JSONObjects
+    // and
     // nested JSONObjects are encoded with keys in alphabetical order.
     private static void addToStringer(JSONStringer stringer, Object o) throws JSONException {
         if (o instanceof JSONObject) {
@@ -221,13 +219,11 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
 
     @Override
     protected ParseHttpRequest newRequest(
-            ParseHttpRequest.Method method,
-            String url,
-            ProgressCallback uploadProgressCallback) {
+            ParseHttpRequest.Method method, String url, ProgressCallback uploadProgressCallback) {
         ParseHttpRequest request;
-        if (jsonParameters != null &&
-                method != ParseHttpRequest.Method.POST &&
-                method != ParseHttpRequest.Method.PUT) {
+        if (jsonParameters != null
+                && method != ParseHttpRequest.Method.POST
+                && method != ParseHttpRequest.Method.PUT) {
             // The request URI may be too long to include parameters in the URI.
             // To avoid this problem we send the parameters in a POST request json-encoded body
             // and add a http method override parameter in newBody.
@@ -243,15 +239,16 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     @Override
     protected ParseHttpBody newBody(ProgressCallback uploadProgressCallback) {
         if (jsonParameters == null) {
-            String message = String.format("Trying to execute a %s command without body parameters.",
-                    method.toString());
+            String message =
+                    String.format(
+                            "Trying to execute a %s command without body parameters.",
+                            method.toString());
             throw new IllegalArgumentException(message);
         }
 
         try {
             JSONObject parameters = jsonParameters;
-            if (method == ParseHttpRequest.Method.GET ||
-                    method == ParseHttpRequest.Method.DELETE) {
+            if (method == ParseHttpRequest.Method.GET || method == ParseHttpRequest.Method.DELETE) {
                 // The request URI may be too long to include parameters in the URI.
                 // To avoid this problem we send the parameters in a POST request json-encoded body
                 // and add a http method override parameter.
@@ -276,8 +273,8 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     }
 
     @Override
-    protected Task<JSONObject> onResponseAsync(ParseHttpResponse response,
-                                               ProgressCallback downloadProgressCallback) {
+    protected Task<JSONObject> onResponseAsync(
+            ParseHttpResponse response, ProgressCallback downloadProgressCallback) {
         String content;
         InputStream responseStream = null;
         try {
@@ -300,9 +297,11 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
                 json = new JSONObject(content);
 
                 if (statusCode >= 400 && statusCode < 500) { // 4XX
-                    return Task.forError(newPermanentException(json.optInt("code"), json.optString("error")));
+                    return Task.forError(
+                            newPermanentException(json.optInt("code"), json.optString("error")));
                 } else if (statusCode >= 500) { // 5XX
-                    return Task.forError(newTemporaryException(json.optInt("code"), json.optString("error")));
+                    return Task.forError(
+                            newTemporaryException(json.optInt("code"), json.optString("error")));
                 }
 
                 return Task.forResult(json);
@@ -334,10 +333,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
 
         return String.format(
                 "ParseRESTCommand.%s.%s.%s",
-                method.toString(),
-                ParseDigestUtils.md5(httpPath),
-                ParseDigestUtils.md5(json)
-        );
+                method.toString(), ParseDigestUtils.md5(httpPath), ParseDigestUtils.md5(json));
     }
 
     public JSONObject toJSONObject() {
@@ -386,8 +382,8 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
      * If this was the second save on a new object while offline, then its objectId wasn't yet set
      * when the command was created, so it would have been considered a "create". But if the first
      * save succeeded, then there is an objectId now, and it will be mapped to the localId for this
-     * command's result. If so, change the "create" operation to an "update", and add the objectId to
-     * the command.
+     * command's result. If so, change the "create" operation to an "update", and add the objectId
+     * to the command.
      */
     private void maybeChangeServerOperation() {
         if (localId != null) {
@@ -467,7 +463,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
         }
     }
 
-    /* package */ static abstract class Init<T extends Init<T>> {
+    /* package */ abstract static class Init<T extends Init<T>> {
         public String masterKey;
         private String sessionToken;
         private String installationId;
@@ -524,7 +520,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
 
     public static class Builder extends Init<Builder> {
         @Override
-            /* package */ Builder self() {
+        /* package */ Builder self() {
             return this;
         }
 

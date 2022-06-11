@@ -11,13 +11,14 @@ package com.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
+import java.io.File;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,12 +27,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import java.io.File;
-
 public class FileObjectStoreTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() {
@@ -73,7 +71,10 @@ public class FileObjectStoreTest {
         ParseUser.State.Builder builder = new ParseUser.State.Builder();
         builder.put("foo", "bar");
         ParseUserCurrentCoder coder = mock(ParseUserCurrentCoder.class);
-        when(coder.decode(any(ParseUser.State.Builder.class), any(JSONObject.class), any(ParseDecoder.class)))
+        when(coder.decode(
+                        any(ParseUser.State.Builder.class),
+                        any(JSONObject.class),
+                        any(ParseDecoder.class)))
                 .thenReturn(builder);
         FileObjectStore<ParseUser> store = new FileObjectStore<>(ParseUser.class, file, coder);
 

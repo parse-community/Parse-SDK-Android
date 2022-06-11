@@ -10,14 +10,9 @@ package com.parse;
 
 import android.os.Bundle;
 import android.os.Parcel;
-
 import androidx.annotation.NonNull;
-
 import com.parse.boltsinternal.Continuation;
 import com.parse.boltsinternal.Task;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONObject;
 
 /**
  * The {@code ParseUser} is a local representation of user data that can be saved and retrieved from
@@ -41,8 +37,8 @@ public class ParseUser extends ParseObject {
     private static final String KEY_PASSWORD = "password";
     private static final String KEY_EMAIL = "email";
 
-    private static final List<String> READ_ONLY_KEYS = Collections.unmodifiableList(
-            Arrays.asList(KEY_SESSION_TOKEN, KEY_AUTH_DATA));
+    private static final List<String> READ_ONLY_KEYS =
+            Collections.unmodifiableList(Arrays.asList(KEY_SESSION_TOKEN, KEY_AUTH_DATA));
 
     private static final String PARCEL_KEY_IS_CURRENT_USER = "_isCurrentUser";
     private static final Object isAutoUserEnabledMutex = new Object();
@@ -83,10 +79,10 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Logs in a user with a username and password. On success, this saves the session to disk, so you
-     * can retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * This is preferable to using {@link #logIn}, unless your code is already running from a
+     * Logs in a user with a username and password. On success, this saves the session to disk, so
+     * you can retrieve the currently logged in user using {@link #getCurrentUser}.
+     *
+     * <p>This is preferable to using {@link #logIn}, unless your code is already running from a
      * background thread.
      *
      * @param username The username to log in with.
@@ -95,25 +91,30 @@ public class ParseUser extends ParseObject {
      */
     public static Task<ParseUser> logInInBackground(String username, String password) {
         if (username == null) {
-            throw new IllegalArgumentException("Must specify a username for the user to log in with");
+            throw new IllegalArgumentException(
+                    "Must specify a username for the user to log in with");
         }
         if (password == null) {
-            throw new IllegalArgumentException("Must specify a password for the user to log in with");
+            throw new IllegalArgumentException(
+                    "Must specify a password for the user to log in with");
         }
 
-        return getUserController().logInAsync(username, password).onSuccessTask(task -> {
-            State result = task.getResult();
-            final ParseUser newCurrent = ParseObject.from(result);
-            return saveCurrentUserAsync(newCurrent).onSuccess(task1 -> newCurrent);
-        });
+        return getUserController()
+                .logInAsync(username, password)
+                .onSuccessTask(
+                        task -> {
+                            State result = task.getResult();
+                            final ParseUser newCurrent = ParseObject.from(result);
+                            return saveCurrentUserAsync(newCurrent).onSuccess(task1 -> newCurrent);
+                        });
     }
 
     /**
-     * Logs in a user with a username and password. On success, this saves the session to disk, so you
-     * can retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * Typically, you should use {@link #logInInBackground} instead of this, unless you are managing
-     * your own threading.
+     * Logs in a user with a username and password. On success, this saves the session to disk, so
+     * you can retrieve the currently logged in user using {@link #getCurrentUser}.
+     *
+     * <p>Typically, you should use {@link #logInInBackground} instead of this, unless you are
+     * managing your own threading.
      *
      * @param username The username to log in with.
      * @param password The password to log in with.
@@ -125,26 +126,26 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Logs in a user with a username and password. On success, this saves the session to disk, so you
-     * can retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * This is preferable to using {@link #logIn}, unless your code is already running from a
+     * Logs in a user with a username and password. On success, this saves the session to disk, so
+     * you can retrieve the currently logged in user using {@link #getCurrentUser}.
+     *
+     * <p>This is preferable to using {@link #logIn}, unless your code is already running from a
      * background thread.
      *
      * @param username The username to log in with.
      * @param password The password to log in with.
      * @param callback callback.done(user, e) is called when the login completes.
      */
-    public static void logInInBackground(final String username, final String password,
-                                         LogInCallback callback) {
+    public static void logInInBackground(
+            final String username, final String password, LogInCallback callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(logInInBackground(username, password), callback);
     }
 
     /**
      * Authorize a user with a session token. On success, this saves the session to disk, so you can
      * retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * This is preferable to using {@link #become}, unless your code is already running from a
+     *
+     * <p>This is preferable to using {@link #become}, unless your code is already running from a
      * background thread.
      *
      * @param sessionToken The session token to authorize with.
@@ -152,23 +153,27 @@ public class ParseUser extends ParseObject {
      */
     public static Task<ParseUser> becomeInBackground(String sessionToken) {
         if (sessionToken == null) {
-            throw new IllegalArgumentException("Must specify a sessionToken for the user to log in with");
+            throw new IllegalArgumentException(
+                    "Must specify a sessionToken for the user to log in with");
         }
 
-        return getUserController().getUserAsync(sessionToken).onSuccessTask(task -> {
-            State result = task.getResult();
+        return getUserController()
+                .getUserAsync(sessionToken)
+                .onSuccessTask(
+                        task -> {
+                            State result = task.getResult();
 
-            final ParseUser user = ParseObject.from(result);
-            return saveCurrentUserAsync(user).onSuccess(task1 -> user);
-        });
+                            final ParseUser user = ParseObject.from(result);
+                            return saveCurrentUserAsync(user).onSuccess(task1 -> user);
+                        });
     }
 
     /**
      * Authorize a user with a session token. On success, this saves the session to disk, so you can
      * retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * Typically, you should use {@link #becomeInBackground} instead of this, unless you are managing
-     * your own threading.
+     *
+     * <p>Typically, you should use {@link #becomeInBackground} instead of this, unless you are
+     * managing your own threading.
      *
      * @param sessionToken The session token to authorize with.
      * @return The user if the authorization was successful.
@@ -181,18 +186,18 @@ public class ParseUser extends ParseObject {
     /**
      * Authorize a user with a session token. On success, this saves the session to disk, so you can
      * retrieve the currently logged in user using {@link #getCurrentUser}.
-     * <p/>
-     * This is preferable to using {@link #become}, unless your code is already running from a
+     *
+     * <p>This is preferable to using {@link #become}, unless your code is already running from a
      * background thread.
      *
      * @param sessionToken The session token to authorize with.
-     * @param callback     callback.done(user, e) is called when the authorization completes.
+     * @param callback callback.done(user, e) is called when the authorization completes.
      */
     public static void becomeInBackground(final String sessionToken, LogInCallback callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(becomeInBackground(sessionToken), callback);
     }
 
-    //TODO (grantland): Publicize
+    // TODO (grantland): Publicize
     /* package */
     static Task<ParseUser> getCurrentUserAsync() {
         return getCurrentUserController().getAsync();
@@ -212,25 +217,26 @@ public class ParseUser extends ParseObject {
      * This retrieves the currently logged in ParseUser with a valid session, either from memory or
      * disk if necessary.
      *
-     * @param shouldAutoCreateUser {@code true} to automatically create and set an anonymous user as current.
+     * @param shouldAutoCreateUser {@code true} to automatically create and set an anonymous user as
+     *     current.
      * @return The currently logged in ParseUser
      */
     private static ParseUser getCurrentUser(boolean shouldAutoCreateUser) {
         try {
             return ParseTaskUtils.wait(getCurrentUserController().getAsync(shouldAutoCreateUser));
         } catch (ParseException e) {
-            //TODO (grantland): Publicize this exception
+            // TODO (grantland): Publicize this exception
             return null;
         }
     }
 
-    //TODO (grantland): Make it throw ParseException and call #getCurrenSessionTokenInBackground()
+    // TODO (grantland): Make it throw ParseException and call #getCurrenSessionTokenInBackground()
     public static String getCurrentSessionToken() {
         ParseUser current = ParseUser.getCurrentUser();
         return current != null ? current.getSessionToken() : null;
     }
 
-    //region Getter/Setter helper methods
+    // region Getter/Setter helper methods
 
     public static Task<String> getCurrentSessionTokenAsync() {
         return getCurrentUserController().getCurrentSessionTokenAsync();
@@ -247,17 +253,19 @@ public class ParseUser extends ParseObject {
     /* package */
     static Task<Void> pinCurrentUserIfNeededAsync(ParseUser user) {
         if (!Parse.isLocalDatastoreEnabled()) {
-            throw new IllegalStateException("Method requires Local Datastore. " +
-                    "Please refer to `Parse#enableLocalDatastore(Context)`.");
+            throw new IllegalStateException(
+                    "Method requires Local Datastore. "
+                            + "Please refer to `Parse#enableLocalDatastore(Context)`.");
         }
         return getCurrentUserController().setIfNeededAsync(user);
     }
 
     /**
-     * Logs out the currently logged in user session. This will remove the session from disk, log out
-     * of linked services, and future calls to {@link #getCurrentUser()} will return {@code null}.
-     * <p/>
-     * This is preferable to using {@link #logOut}, unless your code is already running from a
+     * Logs out the currently logged in user session. This will remove the session from disk, log
+     * out of linked services, and future calls to {@link #getCurrentUser()} will return {@code
+     * null}.
+     *
+     * <p>This is preferable to using {@link #logOut}, unless your code is already running from a
      * background thread.
      *
      * @return A Task that is resolved when logging out completes.
@@ -267,10 +275,11 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Logs out the currently logged in user session. This will remove the session from disk, log out
-     * of linked services, and future calls to {@link #getCurrentUser()} will return {@code null}.
-     * <p/>
-     * This is preferable to using {@link #logOut}, unless your code is already running from a
+     * Logs out the currently logged in user session. This will remove the session from disk, log
+     * out of linked services, and future calls to {@link #getCurrentUser()} will return {@code
+     * null}.
+     *
+     * <p>This is preferable to using {@link #logOut}, unless your code is already running from a
      * background thread.
      */
     public static void logOutInBackground(LogOutCallback callback) {
@@ -278,13 +287,14 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Logs out the currently logged in user session. This will remove the session from disk, log out
-     * of linked services, and future calls to {@link #getCurrentUser()} will return {@code null}.
-     * <p/>
-     * Typically, you should use {@link #logOutInBackground()} instead of this, unless you are
+     * Logs out the currently logged in user session. This will remove the session from disk, log
+     * out of linked services, and future calls to {@link #getCurrentUser()} will return {@code
+     * null}.
+     *
+     * <p>Typically, you should use {@link #logOutInBackground()} instead of this, unless you are
      * managing your own threading.
-     * <p/>
-     * <strong>Note:</strong>: Any errors in the log out flow will be swallowed due to
+     *
+     * <p><strong>Note:</strong>: Any errors in the log out flow will be swallowed due to
      * backward-compatibility reasons. Please use {@link #logOutInBackground()} if you'd wish to
      * handle them.
      */
@@ -292,7 +302,8 @@ public class ParseUser extends ParseObject {
         try {
             ParseTaskUtils.wait(logOutInBackground());
         } catch (ParseException e) {
-            //TODO (grantland): We shouldn't swallow errors, but we need to for backwards compatibility.
+            // TODO (grantland): We shouldn't swallow errors, but we need to for backwards
+            // compatibility.
             // Change this in v2.
         }
     }
@@ -301,9 +312,9 @@ public class ParseUser extends ParseObject {
      * Requests a password reset email to be sent in a background thread to the specified email
      * address associated with the user account. This email allows the user to securely reset their
      * password on the Parse site.
-     * <p/>
-     * This is preferable to using {@link #requestPasswordReset(String)}, unless your code is already
-     * running from a background thread.
+     *
+     * <p>This is preferable to using {@link #requestPasswordReset(String)}, unless your code is
+     * already running from a background thread.
      *
      * @param email The email address associated with the user that forgot their password.
      * @return A Task that is resolved when the command completes.
@@ -315,13 +326,13 @@ public class ParseUser extends ParseObject {
     /**
      * Requests a password reset email to be sent to the specified email address associated with the
      * user account. This email allows the user to securely reset their password on the Parse site.
-     * <p/>
-     * Typically, you should use {@link #requestPasswordResetInBackground} instead of this, unless you
-     * are managing your own threading.
+     *
+     * <p>Typically, you should use {@link #requestPasswordResetInBackground} instead of this,
+     * unless you are managing your own threading.
      *
      * @param email The email address associated with the user that forgot their password.
-     * @throws ParseException Throws an exception if the server is inaccessible, or if an account with that email
-     *                        doesn't exist.
+     * @throws ParseException Throws an exception if the server is inaccessible, or if an account
+     *     with that email doesn't exist.
      */
     public static void requestPasswordReset(String email) throws ParseException {
         ParseTaskUtils.wait(requestPasswordResetInBackground(email));
@@ -331,23 +342,23 @@ public class ParseUser extends ParseObject {
      * Requests a password reset email to be sent in a background thread to the specified email
      * address associated with the user account. This email allows the user to securely reset their
      * password on the Parse site.
-     * <p/>
-     * This is preferable to using {@link #requestPasswordReset(String)}, unless your code is already
-     * running from a background thread.
      *
-     * @param email    The email address associated with the user that forgot their password.
+     * <p>This is preferable to using {@link #requestPasswordReset(String)}, unless your code is
+     * already running from a background thread.
+     *
+     * @param email The email address associated with the user that forgot their password.
      * @param callback callback.done(e) is called when the request completes.
      */
-    public static void requestPasswordResetInBackground(final String email,
-                                                        RequestPasswordResetCallback callback) {
+    public static void requestPasswordResetInBackground(
+            final String email, RequestPasswordResetCallback callback) {
         ParseTaskUtils.callbackOnMainThreadAsync(requestPasswordResetInBackground(email), callback);
     }
 
     /**
      * Registers a third party authentication callback.
-     * <p/>
-     * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
-     * library.
+     *
+     * <p><strong>Note:</strong> This shouldn't be called directly unless developing a third party
+     * authentication library.
      *
      * @param authType The name of the third party authentication source.
      * @param callback The third party authentication callback to be registered.
@@ -360,9 +371,9 @@ public class ParseUser extends ParseObject {
 
     /**
      * Logs in a user with third party authentication credentials.
-     * <p/>
-     * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
-     * library.
+     *
+     * <p><strong>Note:</strong> This shouldn't be called directly unless developing a third party
+     * authentication library.
      *
      * @param authType The name of the third party authentication source.
      * @param authData The user credentials of the third party authentication source.
@@ -375,77 +386,132 @@ public class ParseUser extends ParseObject {
             throw new IllegalArgumentException("Invalid authType: " + null);
         }
 
-        final Continuation<Void, Task<ParseUser>> logInWithTask = task -> getUserController().logInAsync(authType, authData).onSuccessTask(task15 -> {
-            State result = task15.getResult();
-            final ParseUser user = ParseObject.from(result);
-            return saveCurrentUserAsync(user).onSuccess(task14 -> user);
-        });
+        final Continuation<Void, Task<ParseUser>> logInWithTask =
+                task ->
+                        getUserController()
+                                .logInAsync(authType, authData)
+                                .onSuccessTask(
+                                        task15 -> {
+                                            State result = task15.getResult();
+                                            final ParseUser user = ParseObject.from(result);
+                                            return saveCurrentUserAsync(user)
+                                                    .onSuccess(task14 -> user);
+                                        });
 
         // Handle claiming of user.
-        return getCurrentUserController().getAsync(false).onSuccessTask(task -> {
-            final ParseUser user = task.getResult();
-            if (user != null) {
-                synchronized (user.mutex) {
-                    if (ParseAnonymousUtils.isLinked(user)) {
-                        if (user.isLazy()) {
-                            final Map<String, String> oldAnonymousData =
-                                    user.getAuthData(ParseAnonymousUtils.AUTH_TYPE);
-                            return user.taskQueue.enqueue(toAwait -> toAwait.continueWithTask(task13 -> {
+        return getCurrentUserController()
+                .getAsync(false)
+                .onSuccessTask(
+                        task -> {
+                            final ParseUser user = task.getResult();
+                            if (user != null) {
                                 synchronized (user.mutex) {
-                                    // Replace any anonymity with the new linked authData.
-                                    user.stripAnonymity();
-                                    user.putAuthData(authType, authData);
+                                    if (ParseAnonymousUtils.isLinked(user)) {
+                                        if (user.isLazy()) {
+                                            final Map<String, String> oldAnonymousData =
+                                                    user.getAuthData(ParseAnonymousUtils.AUTH_TYPE);
+                                            return user.taskQueue.enqueue(
+                                                    toAwait ->
+                                                            toAwait.continueWithTask(
+                                                                            task13 -> {
+                                                                                synchronized (
+                                                                                        user.mutex) {
+                                                                                    // Replace any
+                                                                                    // anonymity
+                                                                                    // with the new
+                                                                                    // linked
+                                                                                    // authData.
+                                                                                    user
+                                                                                            .stripAnonymity();
+                                                                                    user
+                                                                                            .putAuthData(
+                                                                                                    authType,
+                                                                                                    authData);
 
-                                    return user.resolveLazinessAsync(task13);
-                                }
-                            }).continueWithTask(task12 -> {
-                                synchronized (user.mutex) {
-                                    if (task12.isFaulted()) {
-                                        user.removeAuthData(authType);
-                                        user.restoreAnonymity(oldAnonymousData);
-                                        return Task.forError(task12.getError());
-                                    }
-                                    if (task12.isCancelled()) {
-                                        return Task.cancelled();
-                                    }
-                                    return Task.forResult(user);
-                                }
-                            }));
-                        } else {
-                            // Try to link the current user with third party user, unless a user is already linked
-                            // to that third party user, then we'll just create a new user and link it with the
-                            // third party user. New users will not be linked to the previous user's data.
-                            return user.linkWithInBackground(authType, authData)
-                                    .continueWithTask(task1 -> {
-                                        if (task1.isFaulted()) {
-                                            Exception error = task1.getError();
-                                            if (error instanceof ParseException
-                                                    && ((ParseException) error).getCode() == ParseException.ACCOUNT_ALREADY_LINKED) {
-                                                // An account that's linked to the given authData already exists, so log in
-                                                // instead of trying to claim.
-                                                return Task.<Void>forResult(null).continueWithTask(logInWithTask);
-                                            }
+                                                                                    return user
+                                                                                            .resolveLazinessAsync(
+                                                                                                    task13);
+                                                                                }
+                                                                            })
+                                                                    .continueWithTask(
+                                                                            task12 -> {
+                                                                                synchronized (
+                                                                                        user.mutex) {
+                                                                                    if (task12
+                                                                                            .isFaulted()) {
+                                                                                        user
+                                                                                                .removeAuthData(
+                                                                                                        authType);
+                                                                                        user
+                                                                                                .restoreAnonymity(
+                                                                                                        oldAnonymousData);
+                                                                                        return Task
+                                                                                                .forError(
+                                                                                                        task12
+                                                                                                                .getError());
+                                                                                    }
+                                                                                    if (task12
+                                                                                            .isCancelled()) {
+                                                                                        return Task
+                                                                                                .cancelled();
+                                                                                    }
+                                                                                    return Task
+                                                                                            .forResult(
+                                                                                                    user);
+                                                                                }
+                                                                            }));
+                                        } else {
+                                            // Try to link the current user with third party user,
+                                            // unless a user is already linked
+                                            // to that third party user, then we'll just create a
+                                            // new user and link it with the
+                                            // third party user. New users will not be linked to the
+                                            // previous user's data.
+                                            return user.linkWithInBackground(authType, authData)
+                                                    .continueWithTask(
+                                                            task1 -> {
+                                                                if (task1.isFaulted()) {
+                                                                    Exception error =
+                                                                            task1.getError();
+                                                                    if (error
+                                                                                    instanceof
+                                                                                    ParseException
+                                                                            && ((ParseException)
+                                                                                                    error)
+                                                                                            .getCode()
+                                                                                    == ParseException
+                                                                                            .ACCOUNT_ALREADY_LINKED) {
+                                                                        // An account that's linked
+                                                                        // to the given authData
+                                                                        // already exists, so log in
+                                                                        // instead of trying to
+                                                                        // claim.
+                                                                        return Task.<Void>forResult(
+                                                                                        null)
+                                                                                .continueWithTask(
+                                                                                        logInWithTask);
+                                                                    }
+                                                                }
+                                                                if (task1.isCancelled()) {
+                                                                    return Task.cancelled();
+                                                                }
+                                                                return Task.forResult(user);
+                                                            });
                                         }
-                                        if (task1.isCancelled()) {
-                                            return Task.cancelled();
-                                        }
-                                        return Task.forResult(user);
-                                    });
-                        }
-                    }
-                }
-            }
-            return Task.<Void>forResult(null).continueWithTask(logInWithTask);
-        });
+                                    }
+                                }
+                            }
+                            return Task.<Void>forResult(null).continueWithTask(logInWithTask);
+                        });
     }
 
     /**
-     * Enables automatic creation of anonymous users. After calling this method,
-     * {@link #getCurrentUser()} will always have a value. The user will only be created on the server
-     * once the user has been saved, or once an object with a relation to that user or an ACL that
-     * refers to the user has been saved.
-     * <p/>
-     * <strong>Note:</strong> {@link ParseObject#saveEventually()} will not work if an item being
+     * Enables automatic creation of anonymous users. After calling this method, {@link
+     * #getCurrentUser()} will always have a value. The user will only be created on the server once
+     * the user has been saved, or once an object with a relation to that user or an ACL that refers
+     * to the user has been saved.
+     *
+     * <p><strong>Note:</strong> {@link ParseObject#saveEventually()} will not work if an item being
      * saved has a relation to an automatic user that has never been saved.
      */
     public static void enableAutomaticUser() {
@@ -469,34 +535,38 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Enables revocable sessions. This method is only required if you wish to use
-     * {@link ParseSession} APIs and do not have revocable sessions enabled in your application
-     * settings on your parse server.
-     * <p/>
-     * Upon successful completion of this {@link Task}, {@link ParseSession} APIs will be available
-     * for use.
+     * Enables revocable sessions. This method is only required if you wish to use {@link
+     * ParseSession} APIs and do not have revocable sessions enabled in your application settings on
+     * your parse server.
+     *
+     * <p>Upon successful completion of this {@link Task}, {@link ParseSession} APIs will be
+     * available for use.
      *
      * @return A {@link Task} that will resolve when enabling revocable session
      */
     public static Task<Void> enableRevocableSessionInBackground() {
         // TODO(mengyan): Right now there is no way for us to add interceptor for this client,
         // so maybe we should move add interceptor steps to restClient()
-        ParseCorePlugins.getInstance().registerUserController(
-                new NetworkUserController(ParsePlugins.get().restClient(), true));
+        ParseCorePlugins.getInstance()
+                .registerUserController(
+                        new NetworkUserController(ParsePlugins.get().restClient(), true));
 
-        return getCurrentUserController().getAsync(false).onSuccessTask(task -> {
-            ParseUser user = task.getResult();
-            if (user == null) {
-                return Task.forResult(null);
-            }
-            return user.upgradeToRevocableSessionAsync();
-        });
+        return getCurrentUserController()
+                .getAsync(false)
+                .onSuccessTask(
+                        task -> {
+                            ParseUser user = task.getResult();
+                            if (user == null) {
+                                return Task.forResult(null);
+                            }
+                            return user.upgradeToRevocableSessionAsync();
+                        });
     }
 
-    //endregion
+    // endregion
 
     @Override
-        /* package */ boolean needsDefaultACL() {
+    /* package */ boolean needsDefaultACL() {
         return false;
     }
 
@@ -506,20 +576,21 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-        /* package */ State.Builder newStateBuilder(String className) {
+    /* package */ State.Builder newStateBuilder(String className) {
         return new State.Builder();
     }
 
     @Override
-        /* package */ State getState() {
+    /* package */ State getState() {
         return (State) super.getState();
     }
 
     @Override
-        /* package */ void setState(ParseObject.State newState) {
+    /* package */ void setState(ParseObject.State newState) {
         if (isCurrentUser()) {
             State.Builder newStateBuilder = newState.newBuilder();
-            // Avoid clearing sessionToken when updating the current user's State via ParseQuery result
+            // Avoid clearing sessionToken when updating the current user's State via ParseQuery
+            // result
             if (getSessionToken() != null && newState.get(KEY_SESSION_TOKEN) == null) {
                 newStateBuilder.put(KEY_SESSION_TOKEN, getSessionToken());
             }
@@ -534,8 +605,8 @@ public class ParseUser extends ParseObject {
 
     /**
      * @return {@code true} if this user was created with {@link #getCurrentUser()} when no current
-     * user previously existed and {@link #enableAutomaticUser()} is set, false if was created by any
-     * other means or if a previously "lazy" user was saved remotely.
+     *     user previously existed and {@link #enableAutomaticUser()} is set, false if was created
+     *     by any other means or if a previously "lazy" user was saved remotely.
      */
     /* package */ boolean isLazy() {
         synchronized (mutex) {
@@ -544,15 +615,15 @@ public class ParseUser extends ParseObject {
     }
 
     /**
-     * Whether the ParseUser has been authenticated on this device. This will be true if the ParseUser
-     * was obtained via a logIn or signUp method. Only an authenticated ParseUser can be saved (with
-     * altered attributes) and deleted.
+     * Whether the ParseUser has been authenticated on this device. This will be true if the
+     * ParseUser was obtained via a logIn or signUp method. Only an authenticated ParseUser can be
+     * saved (with altered attributes) and deleted.
      */
     public boolean isAuthenticated() {
         synchronized (mutex) {
             ParseUser current = ParseUser.getCurrentUser();
-            return isLazy() ||
-                    (getState().sessionToken() != null
+            return isLazy()
+                    || (getState().sessionToken() != null
                             && current != null
                             && getObjectId().equals(current.getObjectId()));
         }
@@ -567,7 +638,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-        /* package */ JSONObject toRest(
+    /* package */ JSONObject toRest(
             ParseObject.State state,
             List<ParseOperationSet> operationSetQueue,
             ParseEncoder objectEncoder) {
@@ -607,16 +678,14 @@ public class ParseUser extends ParseObject {
             }
         }
 
-        State newState = getState().newBuilder()
-                .authData(authData)
-                .build();
+        State newState = getState().newBuilder().authData(authData).build();
         setState(newState);
 
         return Task.whenAll(tasks);
     }
 
     @Override
-        /* package */ Task<Void> handleSaveResultAsync(
+    /* package */ Task<Void> handleSaveResultAsync(
             ParseObject.State result, ParseOperationSet operationsBeforeSave) {
         boolean success = result != null;
         if (success) {
@@ -627,7 +696,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-        /* package */ void validateSaveEventually() throws ParseException {
+    /* package */ void validateSaveEventually() throws ParseException {
         if (isDirty(KEY_PASSWORD)) {
             // TODO(mengyan): Unify the exception we throw when validate fails
             throw new ParseException(
@@ -648,9 +717,7 @@ public class ParseUser extends ParseObject {
         }
     }
 
-    /**
-     * @return the session token for a user, if they are logged in.
-     */
+    /** @return the session token for a user, if they are logged in. */
     public String getSessionToken() {
         return getState().sessionToken();
     }
@@ -663,8 +730,7 @@ public class ParseUser extends ParseObject {
                 return Task.forResult(null);
             }
 
-            State.Builder builder = state.newBuilder()
-                    .sessionToken(newSessionToken);
+            State.Builder builder = state.newBuilder().sessionToken(newSessionToken);
             setState(builder.build());
             return saveCurrentUserAsync(this);
         }
@@ -674,8 +740,10 @@ public class ParseUser extends ParseObject {
         synchronized (mutex) {
             Map<String, Map<String, String>> authData = getMap(KEY_AUTH_DATA);
             if (authData == null) {
-                // We'll always return non-null for now since we don't have any null checking in place.
-                // Be aware not to get and set without checking size or else we'll be adding a value that
+                // We'll always return non-null for now since we don't have any null checking in
+                // place.
+                // Be aware not to get and set without checking size or else we'll be adding a value
+                // that
                 // wasn't there in the first place.
                 authData = new HashMap<>();
             }
@@ -689,7 +757,7 @@ public class ParseUser extends ParseObject {
 
     /* package */ void putAuthData(String authType, Map<String, String> authData) {
         synchronized (mutex) {
-            Map<String, Map<String, String>> newAuthData = getAuthData();
+            Map<String, Map<String, String>> newAuthData = new HashMap<>(getAuthData());
             newAuthData.put(authType, authData);
             performPut(KEY_AUTH_DATA, newAuthData);
         }
@@ -697,15 +765,13 @@ public class ParseUser extends ParseObject {
 
     private void removeAuthData(String authType) {
         synchronized (mutex) {
-            Map<String, Map<String, String>> newAuthData = getAuthData();
+            Map<String, Map<String, String>> newAuthData = new HashMap<>(getAuthData());
             newAuthData.remove(authType);
             performPut(KEY_AUTH_DATA, newAuthData);
         }
     }
 
-    /**
-     * Retrieves the username.
-     */
+    /** Retrieves the username. */
     public String getUsername() {
         return getString(KEY_USERNAME);
     }
@@ -732,9 +798,7 @@ public class ParseUser extends ParseObject {
         put(KEY_PASSWORD, password);
     }
 
-    /**
-     * Retrieves the email address.
-     */
+    /** Retrieves the email address. */
     public String getEmail() {
         return getString(KEY_EMAIL);
     }
@@ -789,7 +853,7 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-        /* package */ void validateSave() {
+    /* package */ void validateSave() {
         synchronized (mutex) {
             if (getObjectId() == null) {
                 throw new IllegalArgumentException(
@@ -802,8 +866,10 @@ public class ParseUser extends ParseObject {
         }
 
         if (!Parse.isLocalDatastoreEnabled()) {
-            // This might be a different of instance of the currentUser, so we need to check objectIds
-            ParseUser current = ParseUser.getCurrentUser(); //TODO (grantland): possible blocking disk i/o
+            // This might be a different of instance of the currentUser, so we need to check
+            // objectIds
+            ParseUser current =
+                    ParseUser.getCurrentUser(); // TODO (grantland): possible blocking disk i/o
             if (current != null && getObjectId().equals(current.getObjectId())) {
                 return;
             }
@@ -813,11 +879,12 @@ public class ParseUser extends ParseObject {
     }
 
     @Override
-        /* package */ Task<Void> saveAsync(String sessionToken, Task<Void> toAwait) {
+    /* package */ Task<Void> saveAsync(String sessionToken, Task<Void> toAwait) {
         return saveAsync(sessionToken, isLazy(), toAwait);
     }
 
-    /* package for tests */ Task<Void> saveAsync(String sessionToken, boolean isLazy, Task<Void> toAwait) {
+    /* package for tests */ Task<Void> saveAsync(
+            String sessionToken, boolean isLazy, Task<Void> toAwait) {
         Task<Void> task;
         if (isLazy) {
             task = resolveLazinessAsync(toAwait);
@@ -827,18 +894,20 @@ public class ParseUser extends ParseObject {
 
         if (isCurrentUser()) {
             // If the user is the currently logged in user, we persist all data to disk
-            return task.onSuccessTask(task12 -> cleanUpAuthDataAsync()).onSuccessTask(task1 -> saveCurrentUserAsync(ParseUser.this));
+            return task.onSuccessTask(task12 -> cleanUpAuthDataAsync())
+                    .onSuccessTask(task1 -> saveCurrentUserAsync(ParseUser.this));
         }
 
         return task;
     }
 
     @Override
-        /* package */ void validateDelete() {
+    /* package */ void validateDelete() {
         synchronized (mutex) {
             super.validateDelete();
             if (!isAuthenticated() && isDirty()) {
-                throw new IllegalArgumentException("Cannot delete a ParseUser that is not authenticated.");
+                throw new IllegalArgumentException(
+                        "Cannot delete a ParseUser that is not authenticated.");
             }
         }
     }
@@ -851,9 +920,9 @@ public class ParseUser extends ParseObject {
 
     @SuppressWarnings("unchecked")
     @Override
-        /* package */ <T extends ParseObject> Task<T> fetchAsync(
+    /* package */ <T extends ParseObject> Task<T> fetchAsync(
             String sessionToken, Task<Void> toAwait) {
-        //TODO (grantland): It doesn't seem like we should do this.. Why don't we error like we do
+        // TODO (grantland): It doesn't seem like we should do this.. Why don't we error like we do
         // when fetching an unsaved ParseObject?
         if (isLazy()) {
             return Task.forResult((T) this);
@@ -862,22 +931,24 @@ public class ParseUser extends ParseObject {
         Task<T> task = super.fetchAsync(sessionToken, toAwait);
 
         if (isCurrentUser()) {
-            return task.onSuccessTask(fetchAsyncTask -> cleanUpAuthDataAsync()).onSuccessTask(task12 -> saveCurrentUserAsync(ParseUser.this)).onSuccess(task1 -> (T) ParseUser.this);
+            return task.onSuccessTask(fetchAsyncTask -> cleanUpAuthDataAsync())
+                    .onSuccessTask(task12 -> saveCurrentUserAsync(ParseUser.this))
+                    .onSuccess(task1 -> (T) ParseUser.this);
         }
 
         return task;
     }
 
-    //region Third party authentication
+    // region Third party authentication
 
     /**
      * Signs up a new user. You should call this instead of {@link #save} for new ParseUsers. This
-     * will create a new ParseUser on the server, and also persist the session on disk so that you can
-     * access the user using {@link #getCurrentUser}.
-     * <p/>
-     * A username and password must be set before calling signUp.
-     * <p/>
-     * This is preferable to using {@link #signUp}, unless your code is already running from a
+     * will create a new ParseUser on the server, and also persist the session on disk so that you
+     * can access the user using {@link #getCurrentUser}.
+     *
+     * <p>A username and password must be set before calling signUp.
+     *
+     * <p>This is preferable to using {@link #signUp}, unless your code is already running from a
      * background thread.
      *
      * @return A Task that is resolved when sign up completes.
@@ -887,15 +958,17 @@ public class ParseUser extends ParseObject {
     }
 
     /* package for tests */ Task<Void> signUpAsync(Task<Void> toAwait) {
-        final ParseUser user = getCurrentUser(); //TODO (grantland): convert to async
+        final ParseUser user = getCurrentUser(); // TODO (grantland): convert to async
         synchronized (mutex) {
             final String sessionToken = user != null ? user.getSessionToken() : null;
             if (ParseTextUtils.isEmpty(getUsername())) {
-                return Task.forError(new IllegalArgumentException("Username cannot be missing or blank"));
+                return Task.forError(
+                        new IllegalArgumentException("Username cannot be missing or blank"));
             }
 
             if (ParseTextUtils.isEmpty(getPassword())) {
-                return Task.forError(new IllegalArgumentException("Password cannot be missing or blank"));
+                return Task.forError(
+                        new IllegalArgumentException("Password cannot be missing or blank"));
             }
 
             if (getObjectId() != null) {
@@ -911,92 +984,108 @@ public class ParseUser extends ParseObject {
 
                 // Otherwise, throw.
                 return Task.forError(
-                        new IllegalArgumentException("Cannot sign up a user that has already signed up."));
+                        new IllegalArgumentException(
+                                "Cannot sign up a user that has already signed up."));
             }
 
-            // If the operationSetQueue is has operation sets in it, then a save or signUp is in progress.
+            // If the operationSetQueue is has operation sets in it, then a save or signUp is in
+            // progress.
             // If there is a signUp or save already in progress, don't allow another one to start.
             if (operationSetQueue.size() > 1) {
                 return Task.forError(
-                        new IllegalArgumentException("Cannot sign up a user that is already signing up."));
+                        new IllegalArgumentException(
+                                "Cannot sign up a user that is already signing up."));
             }
 
-            // If the current user is an anonymous user, merge this object's data into the anonymous user
+            // If the current user is an anonymous user, merge this object's data into the anonymous
+            // user
             // and save.
             if (user != null && ParseAnonymousUtils.isLinked(user)) {
-                // this doesn't have any outstanding saves, so we can safely merge its operations into the
+                // this doesn't have any outstanding saves, so we can safely merge its operations
+                // into the
                 // current user.
 
                 if (this == user) {
                     return Task.forError(
-                            new IllegalArgumentException("Attempt to merge currentUser with itself."));
+                            new IllegalArgumentException(
+                                    "Attempt to merge currentUser with itself."));
                 }
 
                 boolean isLazy = user.isLazy();
                 final String oldUsername = user.getUsername();
                 final String oldPassword = user.getPassword();
-                final Map<String, String> anonymousData = user.getAuthData(ParseAnonymousUtils.AUTH_TYPE);
+                final Map<String, String> anonymousData =
+                        user.getAuthData(ParseAnonymousUtils.AUTH_TYPE);
 
                 user.copyChangesFrom(this);
                 user.setUsername(getUsername());
                 user.setPassword(getPassword());
                 revert();
 
-                return user.saveAsync(sessionToken, isLazy, toAwait).continueWithTask(task -> {
-                    if (task.isCancelled() || task.isFaulted()) { // Error
-                        synchronized (user.mutex) {
-                            if (oldUsername != null) {
-                                user.setUsername(oldUsername);
-                            } else {
-                                user.revert(KEY_USERNAME);
-                            }
-                            if (oldPassword != null) {
-                                user.setPassword(oldPassword);
-                            } else {
-                                user.revert(KEY_PASSWORD);
-                            }
-                            user.restoreAnonymity(anonymousData);
-                        }
-                        return task;
-                    } else { // Success
-                        user.revert(KEY_PASSWORD);
-                        revert(KEY_PASSWORD);
-                    }
+                return user.saveAsync(sessionToken, isLazy, toAwait)
+                        .continueWithTask(
+                                task -> {
+                                    if (task.isCancelled() || task.isFaulted()) { // Error
+                                        synchronized (user.mutex) {
+                                            if (oldUsername != null) {
+                                                user.setUsername(oldUsername);
+                                            } else {
+                                                user.revert(KEY_USERNAME);
+                                            }
+                                            if (oldPassword != null) {
+                                                user.setPassword(oldPassword);
+                                            } else {
+                                                user.revert(KEY_PASSWORD);
+                                            }
+                                            user.restoreAnonymity(anonymousData);
+                                        }
+                                        return task;
+                                    } else { // Success
+                                        user.revert(KEY_PASSWORD);
+                                        revert(KEY_PASSWORD);
+                                    }
 
-                    mergeFromObject(user);
-                    return saveCurrentUserAsync(ParseUser.this);
-                });
+                                    mergeFromObject(user);
+                                    return saveCurrentUserAsync(ParseUser.this);
+                                });
             }
 
             final ParseOperationSet operations = startSave();
 
-            return toAwait.onSuccessTask(task -> getUserController().signUpAsync(
-                    getState(), operations, sessionToken
-            ).continueWithTask(signUpTask -> {
-                State result = signUpTask.getResult();
-                return handleSaveResultAsync(result,
-                        operations).continueWithTask(task1 -> {
-                    if (!signUpTask.isCancelled() && !signUpTask.isFaulted()) {
-                        return saveCurrentUserAsync(ParseUser.this);
-                    }
-                    return signUpTask.makeVoid();
-                });
-            }));
+            return toAwait.onSuccessTask(
+                    task ->
+                            getUserController()
+                                    .signUpAsync(getState(), operations, sessionToken)
+                                    .continueWithTask(
+                                            signUpTask -> {
+                                                State result = signUpTask.getResult();
+                                                return handleSaveResultAsync(result, operations)
+                                                        .continueWithTask(
+                                                                task1 -> {
+                                                                    if (!signUpTask.isCancelled()
+                                                                            && !signUpTask
+                                                                                    .isFaulted()) {
+                                                                        return saveCurrentUserAsync(
+                                                                                ParseUser.this);
+                                                                    }
+                                                                    return signUpTask.makeVoid();
+                                                                });
+                                            }));
         }
     }
 
     /**
      * Signs up a new user. You should call this instead of {@link #save} for new ParseUsers. This
-     * will create a new ParseUser on the server, and also persist the session on disk so that you can
-     * access the user using {@link #getCurrentUser}.
-     * <p/>
-     * A username and password must be set before calling signUp.
-     * <p/>
-     * Typically, you should use {@link #signUpInBackground} instead of this, unless you are managing
-     * your own threading.
+     * will create a new ParseUser on the server, and also persist the session on disk so that you
+     * can access the user using {@link #getCurrentUser}.
      *
-     * @throws ParseException Throws an exception if the server is inaccessible, or if the username has already
-     *                        been taken.
+     * <p>A username and password must be set before calling signUp.
+     *
+     * <p>Typically, you should use {@link #signUpInBackground} instead of this, unless you are
+     * managing your own threading.
+     *
+     * @throws ParseException Throws an exception if the server is inaccessible, or if the username
+     *     has already been taken.
      */
     public void signUp() throws ParseException {
         ParseTaskUtils.wait(signUpInBackground());
@@ -1004,12 +1093,12 @@ public class ParseUser extends ParseObject {
 
     /**
      * Signs up a new user. You should call this instead of {@link #save} for new ParseUsers. This
-     * will create a new ParseUser on the server, and also persist the session on disk so that you can
-     * access the user using {@link #getCurrentUser}.
-     * <p/>
-     * A username and password must be set before calling signUp.
-     * <p/>
-     * This is preferable to using {@link #signUp}, unless your code is already running from a
+     * will create a new ParseUser on the server, and also persist the session on disk so that you
+     * can access the user using {@link #getCurrentUser}.
+     *
+     * <p>A username and password must be set before calling signUp.
+     *
+     * <p>This is preferable to using {@link #signUp}, unless your code is already running from a
      * background thread.
      *
      * @param callback callback.done(user, e) is called when the signUp completes.
@@ -1018,7 +1107,7 @@ public class ParseUser extends ParseObject {
         ParseTaskUtils.callbackOnMainThreadAsync(signUpInBackground(), callback);
     }
 
-    //TODO (grantland): Add to taskQueue
+    // TODO (grantland): Add to taskQueue
     /* package */ Task<Void> logOutAsync() {
         return logOutAsync(true);
     }
@@ -1035,10 +1124,7 @@ public class ParseUser extends ParseObject {
                 tasks.add(controller.deauthenticateAsync(entry.getKey()));
             }
 
-            State newState = getState().newBuilder()
-                    .sessionToken(null)
-                    .isNew(false)
-                    .build();
+            State newState = getState().newBuilder().sessionToken(null).isNew(false).build();
             isCurrentUser = false;
             setState(newState);
         }
@@ -1058,9 +1144,9 @@ public class ParseUser extends ParseObject {
 
     /**
      * Indicates whether this user is linked with a third party authentication source.
-     * <p/>
-     * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
-     * library.
+     *
+     * <p><strong>Note:</strong> This shouldn't be called directly unless developing a third party
+     * authentication library.
      *
      * @param authType The name of the third party authentication source.
      * @return {@code true} if linked, otherwise {@code false}.
@@ -1101,17 +1187,21 @@ public class ParseUser extends ParseObject {
         return synchronizeAuthDataAsync(getAuthenticationManager(), authType, authData);
     }
 
-    //endregion
+    // endregion
 
     private Task<Void> synchronizeAuthDataAsync(
-            ParseAuthenticationManager manager, final String authType, Map<String, String> authData) {
-        return manager.restoreAuthenticationAsync(authType, authData).continueWithTask(task -> {
-            boolean success = !task.isFaulted() && task.getResult();
-            if (!success) {
-                return unlinkFromInBackground(authType);
-            }
-            return task.makeVoid();
-        });
+            ParseAuthenticationManager manager,
+            final String authType,
+            Map<String, String> authData) {
+        return manager.restoreAuthenticationAsync(authType, authData)
+                .continueWithTask(
+                        task -> {
+                            boolean success = !task.isFaulted() && task.getResult();
+                            if (!success) {
+                                return unlinkFromInBackground(authType);
+                            }
+                            return task.makeVoid();
+                        });
     }
 
     private Task<Void> linkWithAsync(
@@ -1126,41 +1216,40 @@ public class ParseUser extends ParseObject {
             stripAnonymity();
             putAuthData(authType, authData);
 
-            return saveAsync(sessionToken, isLazy, toAwait).continueWithTask(task -> {
-                synchronized (mutex) {
-                    if (task.isFaulted() || task.isCancelled()) {
-                        removeAuthData(authType);
-                        restoreAnonymity(oldAnonymousData);
-                        return task;
-                    }
-                    return synchronizeAuthDataAsync(authType);
-                }
-            });
+            return saveAsync(sessionToken, isLazy, toAwait)
+                    .continueWithTask(
+                            task -> {
+                                synchronized (mutex) {
+                                    if (task.isFaulted() || task.isCancelled()) {
+                                        removeAuthData(authType);
+                                        restoreAnonymity(oldAnonymousData);
+                                        return task;
+                                    }
+                                    return synchronizeAuthDataAsync(authType);
+                                }
+                            });
         }
     }
 
-    //region Automatic User
+    // region Automatic User
 
     private Task<Void> linkWithAsync(
-            final String authType,
-            final Map<String, String> authData,
-            final String sessionToken) {
+            final String authType, final Map<String, String> authData, final String sessionToken) {
         return taskQueue.enqueue(task -> linkWithAsync(authType, authData, task, sessionToken));
     }
 
     /**
      * Links this user to a third party authentication source.
-     * <p/>
-     * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
-     * library.
+     *
+     * <p><strong>Note:</strong> This shouldn't be called directly unless developing a third party
+     * authentication library.
      *
      * @param authType The name of the third party authentication source.
      * @param authData The user credentials of the third party authentication source.
      * @return A {@code Task} is resolved when linking completes.
      * @see AuthenticationCallback
      */
-    public Task<Void> linkWithInBackground(
-            String authType, Map<String, String> authData) {
+    public Task<Void> linkWithInBackground(String authType, Map<String, String> authData) {
         if (authType == null) {
             throw new IllegalArgumentException("Invalid authType: " + null);
         }
@@ -1169,9 +1258,9 @@ public class ParseUser extends ParseObject {
 
     /**
      * Unlinks this user from a third party authentication source.
-     * <p/>
-     * <strong>Note:</strong> This shouldn't be called directly unless developing a third party authentication
-     * library.
+     *
+     * <p><strong>Note:</strong> This shouldn't be called directly unless developing a third party
+     * authentication library.
      *
      * @param authType The name of the third party authentication source.
      * @return A {@code Task} is resolved when unlinking completes.
@@ -1194,18 +1283,19 @@ public class ParseUser extends ParseObject {
 
     /**
      * Try to resolve a lazy user.
-     * <p>
-     * If {@code authData} is empty, we'll treat this just as a SignUp. Otherwise, we'll
-     * treat this as a SignUpOrLogIn. We'll merge the server result with this user, only if LDS is not
+     *
+     * <p>If {@code authData} is empty, we'll treat this just as a SignUp. Otherwise, we'll treat
+     * this as a SignUpOrLogIn. We'll merge the server result with this user, only if LDS is not
      * enabled.
      *
      * @param toAwait {@code Task} to wait for completion before running.
-     * @return A {@code Task} that will resolve to the current user. If this is a SignUp it'll be this
-     * {@code ParseUser} instance, otherwise it'll be a new {@code ParseUser} instance.
+     * @return A {@code Task} that will resolve to the current user. If this is a SignUp it'll be
+     *     this {@code ParseUser} instance, otherwise it'll be a new {@code ParseUser} instance.
      */
     /* package for tests */ Task<Void> resolveLazinessAsync(Task<Void> toAwait) {
         synchronized (mutex) {
-            if (getAuthData().size() == 0) { // TODO(grantland): Could we just check isDirty(KEY_AUTH_DATA)?
+            if (getAuthData().size()
+                    == 0) { // TODO(grantland): Could we just check isDirty(KEY_AUTH_DATA)?
                 // If there are no linked services, treat this as a SignUp.
                 return signUpAsync(toAwait);
             }
@@ -1213,35 +1303,50 @@ public class ParseUser extends ParseObject {
             final ParseOperationSet operations = startSave();
 
             // Otherwise, treat this as a SignUpOrLogIn
-            return toAwait.onSuccessTask(task -> getUserController().logInAsync(getState(), operations).onSuccessTask(task13 -> {
-                final State result = task13.getResult();
+            return toAwait.onSuccessTask(
+                    task ->
+                            getUserController()
+                                    .logInAsync(getState(), operations)
+                                    .onSuccessTask(
+                                            task13 -> {
+                                                final State result = task13.getResult();
 
-                Task<State> resultTask;
-                // We can't merge this user with the server if this is a LogIn because LDS might
-                // already be keeping track of the servers objectId.
-                if (Parse.isLocalDatastoreEnabled() && !result.isNew()) {
-                    resultTask = Task.forResult(result);
-                } else {
-                    resultTask = handleSaveResultAsync(result,
-                            operations).onSuccess(task12 -> result);
-                }
-                return resultTask.onSuccessTask(task1 -> {
-                    State result1 = task1.getResult();
-                    if (!result1.isNew()) {
-                        // If the result is not a new user, treat this as a fresh logIn with complete
-                        // serverData, and switch the current user to the new user.
-                        final ParseUser newUser = ParseObject.from(result1);
-                        return saveCurrentUserAsync(newUser);
-                    }
-                    return task1.makeVoid();
-                });
-            }));
+                                                Task<State> resultTask;
+                                                // We can't merge this user with the server if this
+                                                // is a LogIn because LDS might
+                                                // already be keeping track of the servers objectId.
+                                                if (Parse.isLocalDatastoreEnabled()
+                                                        && !result.isNew()) {
+                                                    resultTask = Task.forResult(result);
+                                                } else {
+                                                    resultTask =
+                                                            handleSaveResultAsync(
+                                                                            result, operations)
+                                                                    .onSuccess(task12 -> result);
+                                                }
+                                                return resultTask.onSuccessTask(
+                                                        task1 -> {
+                                                            State result1 = task1.getResult();
+                                                            if (!result1.isNew()) {
+                                                                // If the result is not a new user,
+                                                                // treat this as a fresh logIn with
+                                                                // complete
+                                                                // serverData, and switch the
+                                                                // current user to the new user.
+                                                                final ParseUser newUser =
+                                                                        ParseObject.from(result1);
+                                                                return saveCurrentUserAsync(
+                                                                        newUser);
+                                                            }
+                                                            return task1.makeVoid();
+                                                        });
+                                            }));
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-        /* package */ <T extends ParseObject> Task<T> fetchFromLocalDatastoreAsync() {
+    /* package */ <T extends ParseObject> Task<T> fetchFromLocalDatastoreAsync() {
         // Same as #fetch()
         if (isLazy()) {
             return Task.forResult((T) this);
@@ -1249,9 +1354,9 @@ public class ParseUser extends ParseObject {
         return super.fetchFromLocalDatastoreAsync();
     }
 
-    //endregion
+    // endregion
 
-    //region Parcelable
+    // region Parcelable
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -1267,9 +1372,9 @@ public class ParseUser extends ParseObject {
         setIsCurrentUser(savedState.getBoolean(PARCEL_KEY_IS_CURRENT_USER, false));
     }
 
-    //endregion
+    // endregion
 
-    //region Legacy/Revocable Session Tokens
+    // region Legacy/Revocable Session Tokens
 
     /* package */ Task<Void> upgradeToRevocableSessionAsync() {
         return taskQueue.enqueue(this::upgradeToRevocableSessionAsync);
@@ -1277,10 +1382,13 @@ public class ParseUser extends ParseObject {
 
     private Task<Void> upgradeToRevocableSessionAsync(Task<Void> toAwait) {
         final String sessionToken = getSessionToken();
-        return toAwait.continueWithTask(task -> ParseSession.upgradeToRevocableSessionAsync(sessionToken)).onSuccessTask(task -> {
-            String result = task.getResult();
-            return setSessionTokenInBackground(result);
-        });
+        return toAwait.continueWithTask(
+                        task -> ParseSession.upgradeToRevocableSessionAsync(sessionToken))
+                .onSuccessTask(
+                        task -> {
+                            String result = task.getResult();
+                            return setSessionTokenInBackground(result);
+                        });
     }
 
     static class State extends ParseObject.State {
@@ -1312,8 +1420,10 @@ public class ParseUser extends ParseObject {
             Map<String, Map<String, String>> authData =
                     (Map<String, Map<String, String>>) get(KEY_AUTH_DATA);
             if (authData == null) {
-                // We'll always return non-null for now since we don't have any null checking in place.
-                // Be aware not to get and set without checking size or else we'll be adding a value that
+                // We'll always return non-null for now since we don't have any null checking in
+                // place.
+                // Be aware not to get and set without checking size or else we'll be adding a value
+                // that
                 // wasn't there in the first place.
                 authData = new HashMap<>();
             }
@@ -1344,7 +1454,7 @@ public class ParseUser extends ParseObject {
             }
 
             @Override
-                /* package */ Builder self() {
+            /* package */ Builder self() {
                 return this;
             }
 
@@ -1387,5 +1497,5 @@ public class ParseUser extends ParseObject {
         }
     }
 
-    //endregion
+    // endregion
 }
