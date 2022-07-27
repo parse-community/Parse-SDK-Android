@@ -8,9 +8,9 @@
   "devDependencies": {
     "semantic-release": "19.0.3",
     "@semantic-release/changelog": "6.0.0",
-    "@semantic-release/commit-analyzer": "9.0.1",
-    "@semantic-release/git": "10.0.0",
-    "@semantic-release/release-notes-generator": "10.0.2",
-    "gradle-semantic-release-plugin": "1.5.0"
+    "@semantic-release/commit-analyzer": "9.0.2",
+    "@semantic-release/git": "10.0.1",
+    "@semantic-release/release-notes-generator": "10.0.3",
+    "gradle-semantic-release-plugin": "1.7.3"
   }
 }
