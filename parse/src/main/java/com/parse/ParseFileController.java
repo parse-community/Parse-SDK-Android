@@ -12,6 +12,8 @@ import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import org.json.JSONObject;
 
@@ -21,6 +23,8 @@ class ParseFileController {
     private final Object lock = new Object();
     private final ParseHttpClient restClient;
     private final File cachePath;
+    private final List<String> currentlyDownloadedFilesNames = new ArrayList<>();
+
 
     private ParseHttpClient fileClient;
 
@@ -168,64 +172,79 @@ class ParseFileController {
         if (cancellationToken != null && cancellationToken.isCancelled()) {
             return Task.cancelled();
         }
-        final File cacheFile = getCacheFile(state);
-        return Task.call(cacheFile::exists, ParseExecutors.io())
-                .continueWithTask(
-                        task -> {
-                            boolean result = task.getResult();
-                            if (result) {
-                                return Task.forResult(cacheFile);
-                            }
-                            if (cancellationToken != null && cancellationToken.isCancelled()) {
-                                return Task.cancelled();
-                            }
+        return Task.call(() -> {
+            final File cacheFile = getCacheFile(state);
 
-                            // Generate the temp file path for caching ParseFile content based on
-                            // ParseFile's url
-                            // The reason we do not write to the cacheFile directly is because there
-                            // is no way we can
-                            // verify if a cacheFile is complete or not. If download is interrupted
-                            // in the middle, next
-                            // time when we download the ParseFile, since cacheFile has already
-                            // existed, we will return
-                            // this incomplete cacheFile
-                            final File tempFile = getTempFile(state);
+            synchronized (lock) {
+                if (currentlyDownloadedFilesNames.contains(state.name())) {
+                    while (currentlyDownloadedFilesNames.contains(state.name())) {
+                        lock.wait();
+                    }
+                }
 
-                            // network
-                            final ParseFileRequest request =
-                                    new ParseFileRequest(
-                                            ParseHttpRequest.Method.GET, state.url(), tempFile);
+                if (cacheFile.exists()) {
+                    return cacheFile;
+                } else {
+                    currentlyDownloadedFilesNames.add(state.name());
+                }
+            }
 
-                            // We do not need to delete the temp file since we always try to
-                            // overwrite it
-                            return request.executeAsync(
-                                            fileClient(),
-                                            null,
-                                            downloadProgressCallback,
-                                            cancellationToken)
-                                    .continueWithTask(
-                                            task1 -> {
-                                                // If the top-level task was cancelled, don't
-                                                // actually set the data -- just move on.
-                                                if (cancellationToken != null
-                                                        && cancellationToken.isCancelled()) {
-                                                    throw new CancellationException();
-                                                }
-                                                if (task1.isFaulted()) {
-                                                    ParseFileUtils.deleteQuietly(tempFile);
-                                                    return task1.cast();
-                                                }
+            try {
+                if (cancellationToken != null && cancellationToken.isCancelled()) {
+                    throw new CancellationException();
+                }
 
-                                                // Since we give the cacheFile pointer to
-                                                // developers, it is not safe to guarantee
-                                                // cacheFile always does not exist here, so it is
-                                                // better to delete it manually,
-                                                // otherwise moveFile may throw an exception.
-                                                ParseFileUtils.deleteQuietly(cacheFile);
-                                                ParseFileUtils.moveFile(tempFile, cacheFile);
-                                                return Task.forResult(cacheFile);
-                                            },
-                                            ParseExecutors.io());
-                        });
+                // Generate the temp file path for caching ParseFile content based on
+                // ParseFile's url
+                // The reason we do not write to the cacheFile directly is because there
+                // is no way we can
+                // verify if a cacheFile is complete or not. If download is interrupted
+                // in the middle, next
+                // time when we download the ParseFile, since cacheFile has already
+                // existed, we will return
+                // this incomplete cacheFile
+                final File tempFile = getTempFile(state);
+
+                // network
+                final ParseFileRequest request =
+                    new ParseFileRequest(
+                        ParseHttpRequest.Method.GET, state.url(), tempFile);
+
+                // We do not need to delete the temp file since we always try to
+                // overwrite it
+                Task<Void> downloadTask = request.executeAsync(
+                    fileClient(),
+                    null,
+                    downloadProgressCallback,
+                    cancellationToken
+                );
+                ParseTaskUtils.wait(downloadTask);
+
+                // If the top-level task was cancelled, don't
+                // actually set the data -- just move on.
+                if (cancellationToken != null && cancellationToken.isCancelled()) {
+                    throw new CancellationException();
+                }
+                if (downloadTask.isFaulted()) {
+                    ParseFileUtils.deleteQuietly(tempFile);
+                    throw new RuntimeException(downloadTask.getError());
+                }
+
+                // Since we give the cacheFile pointer to
+                // developers, it is not safe to guarantee
+                // cacheFile always does not exist here, so it is
+                // better to delete it manually,
+                // otherwise moveFile may throw an exception.
+                ParseFileUtils.deleteQuietly(cacheFile);
+                ParseFileUtils.moveFile(tempFile, cacheFile);
+                return cacheFile;
+            } finally {
+                synchronized (lock) {
+                    currentlyDownloadedFilesNames.remove(state.name());
+                    lock.notifyAll();
+                }
+            }
+
+        }, ParseExecutors.io());
     }
 }

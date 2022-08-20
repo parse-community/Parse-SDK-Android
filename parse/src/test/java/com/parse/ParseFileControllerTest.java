@@ -28,6 +28,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -338,6 +341,66 @@ public class ParseFileControllerTest {
         assertThat(error, instanceOf(ParseException.class));
         assertEquals(ParseException.CONNECTION_FAILED, ((ParseException) error).getCode());
         assertEquals(0, root.listFiles().length);
+        assertFalse(controller.getTempFile(state).exists());
+    }
+
+
+    @Test
+    public void testFetchAsyncConcurrentCallsSuccess() throws Exception {
+        byte[] data = "hello".getBytes();
+        ParseHttpResponse mockResponse =
+            new ParseHttpResponse.Builder()
+                .setStatusCode(200)
+                .setTotalSize((long) data.length)
+                .setContent(new ByteArrayInputStream(data))
+                .build();
+
+        ParseHttpClient fileClient = mock(ParseHttpClient.class);
+        when(fileClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
+        // Make sure cache dir does not exist
+        File root = new File(temporaryFolder.getRoot(), "cache");
+        assertFalse(root.exists());
+        ParseFileController controller = new ParseFileController(null, root).fileClient(fileClient);
+
+        ParseFile.State state = new ParseFile.State.Builder().name("file_name").url("url").build();
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        AtomicReference<File> file1Ref = new AtomicReference<>();
+        AtomicReference<File> file2Ref = new AtomicReference<>();
+
+        new Thread(() -> {
+            try {
+                file1Ref.set(ParseTaskUtils.wait(controller.fetchAsync(state, null, null, null)));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } finally {
+                countDownLatch.countDown();
+            }
+        }).start();
+
+        new Thread(() -> {
+            try {
+                file2Ref.set(ParseTaskUtils.wait(controller.fetchAsync(state, null, null, null)));
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } finally {
+                countDownLatch.countDown();
+            }
+        }).start();
+
+        countDownLatch.await();
+
+        File result1 = file1Ref.get();
+        File result2 = file2Ref.get();
+
+
+        assertTrue(result1.exists());
+        assertEquals("hello", ParseFileUtils.readFileToString(result1, "UTF-8"));
+
+        assertTrue(result2.exists());
+        assertEquals("hello", ParseFileUtils.readFileToString(result2, "UTF-8"));
+
+        verify(fileClient, times(1)).execute(any(ParseHttpRequest.class));
         assertFalse(controller.getTempFile(state).exists());
     }
 
