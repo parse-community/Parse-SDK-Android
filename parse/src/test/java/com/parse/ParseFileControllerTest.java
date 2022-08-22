@@ -361,9 +361,7 @@ public class ParseFileControllerTest {
         File root = new File(temporaryFolder.getRoot(), "cache");
         assertFalse(root.exists());
         ParseFileController controller = new ParseFileController(null, root).fileClient(fileClient);
-
         ParseFile.State state = new ParseFile.State.Builder().name("file_name").url("url").build();
-
         CountDownLatch countDownLatch = new CountDownLatch(2);
         AtomicReference<File> file1Ref = new AtomicReference<>();
         AtomicReference<File> file2Ref = new AtomicReference<>();
