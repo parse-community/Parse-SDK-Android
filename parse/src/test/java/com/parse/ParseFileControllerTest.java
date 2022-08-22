@@ -392,14 +392,11 @@ public class ParseFileControllerTest {
 
         File result1 = file1Ref.get();
         File result2 = file2Ref.get();
-
-
+        
         assertTrue(result1.exists());
         assertEquals("hello", ParseFileUtils.readFileToString(result1, "UTF-8"));
-
         assertTrue(result2.exists());
         assertEquals("hello", ParseFileUtils.readFileToString(result2, "UTF-8"));
-
         verify(fileClient, times(1)).execute(any(ParseHttpRequest.class));
         assertFalse(controller.getTempFile(state).exists());
     }
