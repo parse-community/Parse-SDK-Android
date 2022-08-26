@@ -1,3 +1,14 @@
+# [4.1.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.0.0...4.1.0) (2022-08-26)
+
+
+### Bug Fixes
+
+* exception on concurrent download of `ParseFile` from multiple threads ([#1180](https://github.com/parse-community/Parse-SDK-Android/issues/1180)) ([44b1914](https://github.com/parse-community/Parse-SDK-Android/commit/44b191497a29429bca0ab6bf44fb63c69515b3c9))
+
+### Features
+
+* upgrade various dependencies ([#1181](https://github.com/parse-community/Parse-SDK-Android/issues/1181)) ([c455f4a](https://github.com/parse-community/Parse-SDK-Android/commit/c455f4a4c183c7c11f57c9662542829e82b207ad))
+
 # [4.0.0](https://github.com/parse-community/Parse-SDK-Android/compare/3.0.1...4.0.0) (2022-06-10)
 
 
