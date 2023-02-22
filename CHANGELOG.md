@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.1.0...4.2.0) (2023-02-22)
+
+
+### Features
+
+* Add support for Facebook SDK 15.x ([#1188](https://github.com/parse-community/Parse-SDK-Android/issues/1188)) ([5ebd443](https://github.com/parse-community/Parse-SDK-Android/commit/5ebd4437ff9554cf981b9437e593ed7e9deb3675))
+
 # [4.1.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.0.0...4.1.0) (2022-08-26)
 
 
