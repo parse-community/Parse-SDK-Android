@@ -19,6 +19,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -26,6 +29,7 @@ import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
 public class ParseRESTUserCommandTest {
+    private static final String ALLOWED_CHARACTERS = "0123456789qwertyuiopasdfghjklzxcvbnm";
 
     @Before
     public void setUp() throws MalformedURLException {
@@ -161,6 +165,45 @@ public class ParseRESTUserCommandTest {
         command.onResponseAsync(response, null);
 
         assertEquals(200, command.getStatusCode());
+    }
+
+    @Test
+    public void testRequestIdHeader() throws Exception {
+        JSONArray nestedJSONArray = new JSONArray().put(true).put(1).put("test");
+        JSONObject nestedJSON =
+            new JSONObject().put("bool", false).put("int", 2).put("string", "test");
+        String sessionToken = generateRandomString(32);
+        String installationId = generateRandomString(32);
+        String masterKey = generateRandomString(32);
+        JSONObject json =
+            new JSONObject()
+                .put("json", nestedJSON)
+                .put("jsonArray", nestedJSONArray)
+                .put("bool", true)
+                .put("int", 3)
+                .put("string", "test");
+
+        String jsonString = ParseRESTCommand.toDeterministicString(json);
+
+        JSONObject jsonAgain = new JSONObject(jsonString);
+        jsonAgain.put(ParseRESTCommand.HEADER_INSTALLATION_ID, installationId);
+        jsonAgain.put(ParseRESTCommand.HEADER_SESSION_TOKEN, sessionToken);
+        jsonAgain.put(ParseRESTCommand.HEADER_MASTER_KEY, masterKey);
+        ParseRESTCommand restCommand = new ParseRESTCommand.Builder().jsonParameters(json)
+            .installationId(installationId).sessionToken(sessionToken).masterKey(masterKey)
+            .build();
+
+        ParseHttpRequest.Builder builder = new ParseHttpRequest.Builder();
+        restCommand.addAdditionalHeaders(builder);
+        assertEquals(ParseDigestUtils.md5(ParseRESTCommand.toDeterministicString(jsonAgain)), builder.build().getHeader(ParseRESTCommand.HEADER_REQUEST_ID));
+    }
+
+    private static String generateRandomString(final int sizeOfRandomString) {
+        final Random random = new Random();
+        final StringBuilder sb = new StringBuilder(sizeOfRandomString);
+        for (int i = 0; i < sizeOfRandomString; ++i)
+            sb.append(ALLOWED_CHARACTERS.charAt(random.nextInt(ALLOWED_CHARACTERS.length())));
+        return sb.toString();
     }
 
     // endregion

@@ -35,9 +35,10 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     /* package */ static final String HEADER_OS_VERSION = "X-Parse-OS-Version";
 
     /* package */ static final String HEADER_INSTALLATION_ID = "X-Parse-Installation-Id";
+    /* package */ static final String HEADER_REQUEST_ID = "X-Parse-Request-Id";
     /* package */ static final String USER_AGENT = "User-Agent";
-    private static final String HEADER_SESSION_TOKEN = "X-Parse-Session-Token";
-    private static final String HEADER_MASTER_KEY = "X-Parse-Master-Key";
+    /* package */ static final String HEADER_SESSION_TOKEN = "X-Parse-Session-Token";
+    /* package */ static final String HEADER_MASTER_KEY = "X-Parse-Master-Key";
     private static final String PARAMETER_METHOD_OVERRIDE = "_method";
 
     // Set via Parse.initialize(Configuration)
@@ -214,6 +215,20 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
         }
         if (masterKey != null) {
             requestBuilder.addHeader(HEADER_MASTER_KEY, masterKey);
+        }
+        try {
+            JSONObject jsonObject = jsonParameters != null ? new JSONObject(jsonParameters.toString()) : new JSONObject();
+            // using header names so we don't override a parameter with the same key name,
+            // using all headers to insure the requestId generated doesn't conflict with the rest of the users
+            if (installationId != null)
+                jsonObject.put(HEADER_INSTALLATION_ID, installationId);
+            if (sessionToken != null)
+                jsonObject.put(HEADER_SESSION_TOKEN, sessionToken);
+            if (masterKey != null)
+                jsonObject.put(HEADER_MASTER_KEY, masterKey);
+            requestBuilder.addHeader(HEADER_REQUEST_ID, ParseDigestUtils.md5(toDeterministicString(jsonObject)));
+        } catch (JSONException e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 
