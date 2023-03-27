@@ -126,6 +126,7 @@ class AndroidKeyStoreProvider : Provider("AndroidKeyStore", 1.0, "") {
 
         private var lastSpec: AlgorithmParameterSpec? = null
 
+        // {@link KeyPair#toCertificate()} is used for generating JcaX509 certificates using org.bouncycastle library which might not be required now, but can be implemented when needed.
         override fun generateKeyPair(): KeyPair = wrapped.generateKeyPair().also { keyPair ->
             null
 //            AndroidKeyStore.storedKeys[lastSpec!!.keystoreAlias] = KeyStore.PrivateKeyEntry(keyPair.private, arrayOf(keyPair.toCertificate()))

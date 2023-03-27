@@ -5,30 +5,21 @@ import com.parse.boltsinternal.Task;
 
 import java.util.Arrays;
 
-public class ParseObjectStoreMigrator<T extends ParseObject> implements ParseObjectStore<T> {
+/**
+ * Use this utility class to migrate from one {@link ParseObjectStore} to another
+ */
+class ParseObjectStoreMigrator<T extends ParseObject> implements ParseObjectStore<T> {
 
-    private ParseObjectStore<T> store;
-    private ParseObjectStore<T> legacy;
+    private final ParseObjectStore<T> store;
+    private final ParseObjectStore<T> legacy;
 
+    /**
+     * @param store  the new {@link ParseObjectStore} to migrate to
+     * @param legacy the old {@link ParseObjectStore} to migrate from
+     */
     public ParseObjectStoreMigrator(ParseObjectStore<T> store, ParseObjectStore<T> legacy) {
         this.store = store;
         this.legacy = legacy;
-    }
-
-    private static <T extends ParseObject> Task<T> migrate(
-        final ParseObjectStore<T> from, final ParseObjectStore<T> to) {
-        return from.getAsync()
-            .onSuccessTask(
-                task -> {
-                    final T object = task.getResult();
-                    if (object == null) {
-                        return task;
-                    }
-
-                    return Task.whenAll(
-                            Arrays.asList(from.deleteAsync(), to.setAsync(object)))
-                        .continueWith(task1 -> object);
-                });
     }
 
     @Override
@@ -37,7 +28,14 @@ public class ParseObjectStoreMigrator<T extends ParseObject> implements ParseObj
             @Override
             public Task<T> then(Task<T> task) throws Exception {
                 if (task.getResult() != null) return task;
-                return migrate(legacy, store);
+                return legacy.getAsync().continueWithTask(new Continuation<T, Task<T>>() {
+                    @Override
+                    public Task<T> then(Task<T> task) throws Exception {
+                        T object = task.getResult();
+                        if (object == null) return task;
+                        return legacy.deleteAsync().continueWith(task1 -> ParseTaskUtils.wait(store.setAsync(object))).onSuccess(task1 -> object);
+                    }
+                });
             }
         });
     }
