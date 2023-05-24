@@ -45,18 +45,20 @@ The Parse Android SDK has the following Android API and [Gradle Plugin][gradle-p
 
 ## Add Dependency
 
-Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
+Add this line `maven { url 'https://www.jitpack.io' }` to your `settings.gradle` file, inside the repositories{} property. Like the example below :
 
 ```gradle
-allprojects {
+'''
+dependencyResolutionManagement {
+    '''
     repositories {
-        ...
-        maven { url "https://jitpack.io" }
+        '''
+        maven { url 'https://www.jitpack.io' }
     }
 }
 ```
 
-Then, add the library to your project `build.gradle`
+Then, add the library to your (Module:app) `build.gradle` 
 
 ```gradle
 ext {
