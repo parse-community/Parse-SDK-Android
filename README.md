@@ -45,6 +45,8 @@ The Parse Android SDK has the following Android API and [Gradle Plugin][gradle-p
 
 ## Add Dependency
 
+For Android Studio Bumblebee | 2021.1.1 or newer use the following steps. You can check your version by clicking on Help, then About in the top menu.
+
 Add this line `maven { url 'https://www.jitpack.io' }` to your `settings.gradle` file, inside the repositories{} property. Like the example below :
 
 ```gradle
@@ -59,6 +61,26 @@ dependencyResolutionManagement {
 ```
 
 Then, add the library to your (Module:app) `build.gradle` 
+
+<details>
+  <summary>Click to expand if you have an older version of Android Studio</summary>
+  We highly recommend updating Android Studio then use the Upgrade Assistant tool to upgrade your gradle files. However if unable, skip the above directions and start adding dependencies to your project here.
+  
+  Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
+
+  ```gradle
+  allprojects {
+      repositories {
+        ...
+          maven { url "https://jitpack.io" }
+      }
+  }
+  ```
+
+  Then, add the library to your project `build.gradle`
+
+</details>
+
 
 ```gradle
 ext {
