@@ -45,42 +45,39 @@ The Parse Android SDK has the following Android API and [Gradle Plugin][gradle-p
 
 ## Add Dependency
 
-For Android Studio Bumblebee | 2021.1.1 or newer use the following steps. You can check your version by clicking on Help, then About in the top menu.
-
-Add this line `maven { url 'https://www.jitpack.io' }` to your `settings.gradle` file, inside the repositories{} property. Like the example below :
+Add the line `maven { url 'https://www.jitpack.io' }` to your `settings.gradle` file, inside the `repositories` property, for example:
 
 ```gradle
-'''
 dependencyResolutionManagement {
-    '''
     repositories {
-        '''
         maven { url 'https://www.jitpack.io' }
     }
 }
 ```
 
-Then, add the library to your (Module:app) `build.gradle` 
+Older versions of Android studio require different steps. See the following list of Android Studio versions for alternative instructions. You can find the version of your Android Studio installation by clicking on *Help > About* in the top menu.
 
 <details>
-  <summary>Click to expand if you have an older version of Android Studio</summary>
-  We highly recommend updating Android Studio then use the Upgrade Assistant tool to upgrade your gradle files. However if unable, skip the above directions and start adding dependencies to your project here.
-  
-  Add this in your root `build.gradle` file (**not** your module `build.gradle` file):
+  <summary>Arctic Fox | 2020.3.1 or older</summary>
+  <br>
 
-  ```gradle
-  allprojects {
-      repositories {
-        ...
-          maven { url "https://jitpack.io" }
-      }
-  }
-  ```
-
-  Then, add the library to your project `build.gradle`
+  > 
+  > Add this in your root `build.gradle` file, **not** your module `build.gradle` file:
+  >
+  > ```gradle
+  > allprojects {
+  >    repositories {
+  >       ...
+  >         maven { url "https://jitpack.io" }
+  >     }
+  > }
+  > ```
+  >
+  > Then, add the library to your project `build.gradle` file.
 
 </details>
 
+Then, add the library to your (module:app) `build.gradle` file, replacing `latest.version.here` with the version of the Parse Android SDK you would like to use. We commend always updating your app to use the [latest release](https://github.com/parse-community/Parse-SDK-Android/releases) version.
 
 ```gradle
 ext {
@@ -104,8 +101,6 @@ dependencies {
     implementation "com.github.parse-community.Parse-SDK-Android:rxjava:$parseVersion"
 }
 ```
-
-replacing `latest.version.here` with the latest released version (see JitPack badge above).
 
 ## Setup
 
