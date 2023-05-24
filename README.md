@@ -61,7 +61,7 @@ Older versions of Android studio require different steps. See the following list
   <summary>Arctic Fox | 2020.3.1 or older</summary>
   <br>
 
-  > 
+  >
   > Add this in your root `build.gradle` file, **not** your module `build.gradle` file:
   >
   > ```gradle
