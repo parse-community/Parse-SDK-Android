@@ -8,6 +8,6 @@
 -keepattributes *Annotation*
 -keepattributes Signature
 
-# https://github.com/square/okio#proguard
--dontwarn okio.**
--dontwarn org.codehaus.mojo.animal_sniffer.*
+# Retracing stacktraces
+-keepattributes LineNumberTable,SourceFile
+-renamesourcefileattribute SourceFile
