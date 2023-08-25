@@ -1,3 +1,10 @@
+## [4.2.1](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.0...4.2.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* Missing Proguard rules for R8 in full mode ([#1196](https://github.com/parse-community/Parse-SDK-Android/issues/1196)) ([7db0965](https://github.com/parse-community/Parse-SDK-Android/commit/7db09650447db2e0f82247240ae51687189cd03f))
+
 # [4.2.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.1.0...4.2.0) (2023-02-22)
 
 
