@@ -1,4 +1,5 @@
 apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
 apply plugin: "maven-publish"
 apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
@@ -50,6 +51,7 @@ dependencies {
     api "androidx.core:core:1.8.0"
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
 
     testImplementation "org.junit.jupiter:junit-jupiter:$rootProject.ext.jupiterVersion"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
