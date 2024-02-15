@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.net.Uri;
+
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import java.io.File;
@@ -161,6 +163,49 @@ class ParseFileController {
                             return newState;
                         },
                         ParseExecutors.io());
+    }
+
+    public Task<ParseFile.State> saveAsync(
+        final ParseFile.State state,
+        final Uri uri,
+        String sessionToken,
+        ProgressCallback uploadProgressCallback,
+        Task<Void> cancellationToken) {
+        if (state.url() != null) { // !isDirty
+            return Task.forResult(state);
+        }
+        if (cancellationToken != null && cancellationToken.isCancelled()) {
+            return Task.cancelled();
+        }
+
+        final ParseRESTCommand command =
+            new ParseRESTFileCommand.Builder()
+                .fileName(state.name())
+                .uri(uri)
+                .contentType(state.mimeType())
+                .sessionToken(sessionToken)
+                .build();
+
+        return command.executeAsync(restClient, uploadProgressCallback, null, cancellationToken)
+            .onSuccess(
+                task -> {
+                    JSONObject result = task.getResult();
+                    ParseFile.State newState =
+                        new ParseFile.State.Builder(state)
+                            .name(result.getString("name"))
+                            .url(result.getString("url"))
+                            .build();
+
+                    // Write data to cache
+                    try {
+                        ParseFileUtils.writeUriToFile(getCacheFile(newState), uri);
+                    } catch (IOException e) {
+                        // do nothing
+                    }
+
+                    return newState;
+                },
+                ParseExecutors.io());
     }
 
     public Task<File> fetchAsync(

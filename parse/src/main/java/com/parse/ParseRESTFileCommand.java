@@ -8,6 +8,8 @@
  */
 package com.parse;
 
+import android.net.Uri;
+
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import java.io.File;
@@ -18,15 +20,23 @@ class ParseRESTFileCommand extends ParseRESTCommand {
     private final byte[] data;
     private final String contentType;
     private final File file;
+    private final Uri uri;
 
     public ParseRESTFileCommand(Builder builder) {
         super(builder);
         if (builder.file != null && builder.data != null) {
             throw new IllegalArgumentException("File and data can not be set at the same time");
         }
+        if (builder.uri != null && builder.data != null) {
+            throw new IllegalArgumentException("URI and data can not be set at the same time");
+        }
+        if (builder.file != null && builder.uri != null) {
+            throw new IllegalArgumentException("File and URI can not be set at the same time");
+        }
         this.data = builder.data;
         this.contentType = builder.contentType;
         this.file = builder.file;
+        this.uri = builder.uri;
     }
 
     @Override
@@ -35,13 +45,21 @@ class ParseRESTFileCommand extends ParseRESTCommand {
         // file
         // in ParseFileController
         if (progressCallback == null) {
-            return data != null
-                    ? new ParseByteArrayHttpBody(data, contentType)
-                    : new ParseFileHttpBody(file, contentType);
+            if (data != null) {
+                return new ParseByteArrayHttpBody(data, contentType);
+            } else if (uri != null) {
+                return new ParseUriHttpBody(uri, contentType);
+            } else {
+                return new ParseFileHttpBody(file, contentType);
+            }
         }
-        return data != null
-                ? new ParseCountingByteArrayHttpBody(data, contentType, progressCallback)
-                : new ParseCountingFileHttpBody(file, contentType, progressCallback);
+        if (data != null) {
+            return new ParseCountingByteArrayHttpBody(data, contentType, progressCallback);
+        } else if (uri != null) {
+            return new ParseCountingUriHttpBody(uri, contentType, progressCallback);
+        } else {
+            return new ParseCountingFileHttpBody(file, contentType, progressCallback);
+        }
     }
 
     public static class Builder extends Init<Builder> {
@@ -49,6 +67,7 @@ class ParseRESTFileCommand extends ParseRESTCommand {
         private byte[] data = null;
         private String contentType = null;
         private File file;
+        private Uri uri;
 
         public Builder() {
             // We only ever use ParseRESTFileCommand for file uploads, so default to POST.
@@ -71,6 +90,11 @@ class ParseRESTFileCommand extends ParseRESTCommand {
 
         public Builder file(File file) {
             this.file = file;
+            return this;
+        }
+
+        public Builder uri(Uri uri) {
+            this.uri = uri;
             return this;
         }
 

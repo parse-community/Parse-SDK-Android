@@ -20,6 +20,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.net.Uri;
+
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
 import com.parse.http.ParseHttpResponse;
@@ -186,6 +188,43 @@ public class ParseFileControllerTest {
         ParseFile.State state =
                 new ParseFile.State.Builder().name("file_name").mimeType("mime_type").build();
         Task<ParseFile.State> task = controller.saveAsync(state, file, null, null, null);
+        ParseFile.State result = ParseTaskUtils.wait(task);
+
+        verify(restClient, times(1)).execute(any(ParseHttpRequest.class));
+        assertEquals("new_file_name", result.name());
+        assertEquals("http://example.com", result.url());
+        File cachedFile = new File(root, "new_file_name");
+        assertTrue(cachedFile.exists());
+        assertTrue(file.exists());
+        assertEquals("content", ParseFileUtils.readFileToString(cachedFile, "UTF-8"));
+    }
+
+    @Test
+    public void testSaveAsyncSuccessWithUri() throws Exception {
+        JSONObject json = new JSONObject();
+        json.put("name", "new_file_name");
+        json.put("url", "http://example.com");
+        String content = json.toString();
+
+        ParseHttpResponse mockResponse =
+                new ParseHttpResponse.Builder()
+                        .setStatusCode(200)
+                        .setTotalSize((long) content.length())
+                        .setContent(new ByteArrayInputStream(content.getBytes()))
+                        .build();
+
+        ParseHttpClient restClient = mock(ParseHttpClient.class);
+        when(restClient.execute(any(ParseHttpRequest.class))).thenReturn(mockResponse);
+
+        File root = temporaryFolder.getRoot();
+        ParseFileController controller = new ParseFileController(restClient, root);
+
+        File file = new File(root, "test");
+        ParseFileUtils.writeStringToFile(file, "content", "UTF-8");
+        Uri uri = Uri.fromFile(file);
+        ParseFile.State state =
+                new ParseFile.State.Builder().name("file_name").mimeType("mime_type").build();
+        Task<ParseFile.State> task = controller.saveAsync(state, uri, null, null, null);
         ParseFile.State result = ParseTaskUtils.wait(task);
 
         verify(restClient, times(1)).execute(any(ParseHttpRequest.class));

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.net.Uri;
 import android.os.Parcel;
 import com.parse.boltsinternal.Task;
 import java.io.File;
@@ -58,6 +59,7 @@ public class ParseFileTest {
         byte[] data = "hello".getBytes();
         String contentType = "content_type";
         File file = temporaryFolder.newFile(name);
+        Uri uri = Uri.fromFile(file);
 
         // TODO(mengyan): After we have proper staging strategy, we should verify the staging file's
         // content is the same with the original file.
@@ -89,6 +91,10 @@ public class ParseFileTest {
 
         parseFile = new ParseFile(file, contentType);
         assertEquals(name, parseFile.getName()); // Default
+        assertEquals("content_type", parseFile.getState().mimeType());
+
+        parseFile = new ParseFile(name, uri, contentType);
+        assertEquals(name, parseFile.getName());
         assertEquals("content_type", parseFile.getState().mimeType());
     }
 
@@ -227,6 +233,46 @@ public class ParseFileTest {
         ParseCorePlugins.getInstance().registerFileController(controller);
 
         ParseFile parseFile = new ParseFile(file, contentType);
+        ParseTaskUtils.wait(parseFile.saveAsync(null, null, null));
+
+        // Verify controller get the correct data
+        ArgumentCaptor<ParseFile.State> stateCaptor =
+                ArgumentCaptor.forClass(ParseFile.State.class);
+        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File.class);
+        verify(controller, times(1))
+                .saveAsync(
+                        stateCaptor.capture(),
+                        fileCaptor.capture(),
+                        nullable(String.class),
+                        nullable(ProgressCallback.class),
+                        nullable(Task.class));
+        assertNull(stateCaptor.getValue().url());
+        assertEquals(name, stateCaptor.getValue().name());
+        assertEquals(contentType, stateCaptor.getValue().mimeType());
+        assertEquals(file, fileCaptor.getValue());
+        // Verify the state of ParseFile has been updated
+        assertEquals(url, parseFile.getUrl());
+    }
+
+    @Test
+    public void testSaveAsyncSuccessWithUri() throws Exception {
+        String name = "name";
+        File file = temporaryFolder.newFile(name);
+        Uri uri = Uri.fromFile(file);
+        String contentType = "content_type";
+        String url = "url";
+        ParseFile.State state = new ParseFile.State.Builder().url(url).build();
+        ParseFileController controller = mock(ParseFileController.class);
+        when(controller.saveAsync(
+                        any(ParseFile.State.class),
+                        any(File.class),
+                        nullable(String.class),
+                        nullable(ProgressCallback.class),
+                        nullable(Task.class)))
+                .thenReturn(Task.forResult(state));
+        ParseCorePlugins.getInstance().registerFileController(controller);
+
+        ParseFile parseFile = new ParseFile(name, uri, contentType);
         ParseTaskUtils.wait(parseFile.saveAsync(null, null, null));
 
         // Verify controller get the correct data

@@ -8,6 +8,7 @@
  */
 package com.parse;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.parse.boltsinternal.Continuation;
@@ -64,6 +65,7 @@ public class ParseFile implements Parcelable {
      */
     /* package for tests */ byte[] data;
     /* package for tests */ File file;
+    /* package for tests */ Uri uri;
     private State state;
 
     /**
@@ -100,6 +102,21 @@ public class ParseFile implements Parcelable {
     public ParseFile(String name, byte[] data, String contentType) {
         this(new State.Builder().name(name).mimeType(contentType).build());
         this.data = data;
+    }
+
+    /**
+     * Creates a new file from a content uri, file name, and content type. Content type will be used
+     * instead of auto-detection by file extension.
+     *
+     * @param name The file's name, ideally with extension. The file name must begin with an
+     *     alphanumeric character, and consist of alphanumeric characters, periods, spaces,
+     *     underscores, or dashes.
+     * @param uri The file uri.
+     * @param contentType The file's content type.
+     */
+    public ParseFile(String name, Uri uri, String contentType) {
+        this(new State.Builder().name(name).mimeType(contentType).build());
+        this.uri = uri;
     }
 
     /**
@@ -263,28 +280,38 @@ public class ParseFile implements Parcelable {
                         return Task.cancelled();
                     }
 
-                    Task<State> saveTask;
-                    if (data != null) {
-                        saveTask =
-                                getFileController()
-                                        .saveAsync(
-                                                state,
-                                                data,
-                                                sessionToken,
-                                                progressCallbackOnMainThread(
-                                                        uploadProgressCallback),
-                                                cancellationToken);
-                    } else {
-                        saveTask =
-                                getFileController()
-                                        .saveAsync(
-                                                state,
-                                                file,
-                                                sessionToken,
-                                                progressCallbackOnMainThread(
-                                                        uploadProgressCallback),
-                                                cancellationToken);
-                    }
+                Task<State> saveTask;
+                if (data != null) {
+                    saveTask =
+                        getFileController()
+                            .saveAsync(
+                                state,
+                                data,
+                                sessionToken,
+                                progressCallbackOnMainThread(
+                                    uploadProgressCallback),
+                                cancellationToken);
+                } else if (uri != null) {
+                    saveTask =
+                        getFileController()
+                            .saveAsync(
+                                state,
+                                uri,
+                                sessionToken,
+                                progressCallbackOnMainThread(
+                                    uploadProgressCallback),
+                                cancellationToken);
+                } else {
+                    saveTask =
+                        getFileController()
+                            .saveAsync(
+                                state,
+                                file,
+                                sessionToken,
+                                progressCallbackOnMainThread(
+                                    uploadProgressCallback),
+                                cancellationToken);
+                }
 
                     return saveTask.onSuccessTask(
                             task1 -> {
