@@ -11,8 +11,10 @@ package com.parse;
 import static com.parse.Parse.getApplicationContext;
 
 import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.provider.OpenableColumns;
 
 import com.parse.http.ParseHttpBody;
 
@@ -35,13 +37,24 @@ class ParseUriHttpBody extends ParseHttpBody {
 
     private static long getUriLength(Uri uri) {
         long length = -1;
-        try {
-            ParcelFileDescriptor parcelFileDescriptor = getApplicationContext().getContentResolver().openFileDescriptor(uri, "r");
-            if (parcelFileDescriptor != null) {
-                length = parcelFileDescriptor.getStatSize();
-                parcelFileDescriptor.close();
+
+        try (Cursor cursor = getApplicationContext().getContentResolver().query(uri, null, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
+                if (!cursor.isNull(sizeIndex)) {
+                    length = cursor.getLong(sizeIndex);
+                }
             }
-        } catch (IOException ignored) {
+        }
+        if (length == -1) {
+            try {
+                ParcelFileDescriptor parcelFileDescriptor = getApplicationContext().getContentResolver().openFileDescriptor(uri, "r");
+                if (parcelFileDescriptor != null) {
+                    length = parcelFileDescriptor.getStatSize();
+                    parcelFileDescriptor.close();
+                }
+            } catch (IOException ignored) {
+            }
         }
         if (length == -1) {
             try {
