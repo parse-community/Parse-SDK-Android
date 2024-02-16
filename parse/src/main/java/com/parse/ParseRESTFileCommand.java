@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.net.Uri;
-
 import com.parse.http.ParseHttpBody;
 import com.parse.http.ParseHttpRequest;
 import java.io.File;

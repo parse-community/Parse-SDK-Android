@@ -15,9 +15,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
-
 import com.parse.http.ParseHttpBody;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,7 +36,10 @@ class ParseUriHttpBody extends ParseHttpBody {
     private static long getUriLength(Uri uri) {
         long length = -1;
 
-        try (Cursor cursor = getApplicationContext().getContentResolver().query(uri, null, null, null, null, null)) {
+        try (Cursor cursor =
+                getApplicationContext()
+                        .getContentResolver()
+                        .query(uri, null, null, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
                 if (!cursor.isNull(sizeIndex)) {
@@ -48,7 +49,8 @@ class ParseUriHttpBody extends ParseHttpBody {
         }
         if (length == -1) {
             try {
-                ParcelFileDescriptor parcelFileDescriptor = getApplicationContext().getContentResolver().openFileDescriptor(uri, "r");
+                ParcelFileDescriptor parcelFileDescriptor =
+                        getApplicationContext().getContentResolver().openFileDescriptor(uri, "r");
                 if (parcelFileDescriptor != null) {
                     length = parcelFileDescriptor.getStatSize();
                     parcelFileDescriptor.close();
@@ -58,7 +60,10 @@ class ParseUriHttpBody extends ParseHttpBody {
         }
         if (length == -1) {
             try {
-                AssetFileDescriptor assetFileDescriptor = getApplicationContext().getContentResolver().openAssetFileDescriptor(uri, "r");
+                AssetFileDescriptor assetFileDescriptor =
+                        getApplicationContext()
+                                .getContentResolver()
+                                .openAssetFileDescriptor(uri, "r");
                 if (assetFileDescriptor != null) {
                     length = assetFileDescriptor.getLength();
                     assetFileDescriptor.close();
@@ -80,7 +85,8 @@ class ParseUriHttpBody extends ParseHttpBody {
             throw new IllegalArgumentException("Output stream can not be null");
         }
 
-        final InputStream fileInput = getApplicationContext().getContentResolver().openInputStream(uri);
+        final InputStream fileInput =
+                getApplicationContext().getContentResolver().openInputStream(uri);
         try {
             ParseIOUtils.copy(fileInput, out);
         } finally {

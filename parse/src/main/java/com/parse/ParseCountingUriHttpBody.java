@@ -9,7 +9,6 @@
 package com.parse;
 
 import android.net.Uri;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +25,7 @@ class ParseCountingUriHttpBody extends ParseUriHttpBody {
     }
 
     public ParseCountingUriHttpBody(
-        Uri uri, String contentType, ProgressCallback progressCallback) {
+            Uri uri, String contentType, ProgressCallback progressCallback) {
         super(uri, contentType);
         this.progressCallback = progressCallback;
     }
@@ -37,7 +36,8 @@ class ParseCountingUriHttpBody extends ParseUriHttpBody {
             throw new IllegalArgumentException("Output stream may not be null");
         }
 
-        final InputStream fileInput = Parse.getApplicationContext().getContentResolver().openInputStream(uri);
+        final InputStream fileInput =
+                Parse.getApplicationContext().getContentResolver().openInputStream(uri);
         try {
             byte[] buffer = new byte[DEFAULT_CHUNK_SIZE];
             int n;

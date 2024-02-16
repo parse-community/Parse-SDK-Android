@@ -280,38 +280,38 @@ public class ParseFile implements Parcelable {
                         return Task.cancelled();
                     }
 
-                Task<State> saveTask;
-                if (data != null) {
-                    saveTask =
-                        getFileController()
-                            .saveAsync(
-                                state,
-                                data,
-                                sessionToken,
-                                progressCallbackOnMainThread(
-                                    uploadProgressCallback),
-                                cancellationToken);
-                } else if (uri != null) {
-                    saveTask =
-                        getFileController()
-                            .saveAsync(
-                                state,
-                                uri,
-                                sessionToken,
-                                progressCallbackOnMainThread(
-                                    uploadProgressCallback),
-                                cancellationToken);
-                } else {
-                    saveTask =
-                        getFileController()
-                            .saveAsync(
-                                state,
-                                file,
-                                sessionToken,
-                                progressCallbackOnMainThread(
-                                    uploadProgressCallback),
-                                cancellationToken);
-                }
+                    Task<State> saveTask;
+                    if (data != null) {
+                        saveTask =
+                                getFileController()
+                                        .saveAsync(
+                                                state,
+                                                data,
+                                                sessionToken,
+                                                progressCallbackOnMainThread(
+                                                        uploadProgressCallback),
+                                                cancellationToken);
+                    } else if (uri != null) {
+                        saveTask =
+                                getFileController()
+                                        .saveAsync(
+                                                state,
+                                                uri,
+                                                sessionToken,
+                                                progressCallbackOnMainThread(
+                                                        uploadProgressCallback),
+                                                cancellationToken);
+                    } else {
+                        saveTask =
+                                getFileController()
+                                        .saveAsync(
+                                                state,
+                                                file,
+                                                sessionToken,
+                                                progressCallbackOnMainThread(
+                                                        uploadProgressCallback),
+                                                cancellationToken);
+                    }
 
                     return saveTask.onSuccessTask(
                             task1 -> {
