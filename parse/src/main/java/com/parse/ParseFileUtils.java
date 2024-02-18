@@ -16,6 +16,7 @@
  */
 package com.parse;
 
+import android.net.Uri;
 import androidx.annotation.NonNull;
 import java.io.File;
 import java.io.FileInputStream;
@@ -112,6 +113,30 @@ public class ParseFileUtils {
             out.write(data);
         } finally {
             ParseIOUtils.closeQuietly(out);
+        }
+    }
+
+    /**
+     * Writes a content uri to a file creating the file if it does not exist.
+     *
+     * <p>NOTE: As from v1.3, the parent directories of the file will be created if they do not
+     * exist.
+     *
+     * @param file the file to write to
+     * @param uri the content uri with data to write to the file
+     * @throws IOException in case of an I/O error
+     * @since Commons IO 1.1
+     */
+    public static void writeUriToFile(File file, Uri uri) throws IOException {
+        OutputStream out = null;
+        InputStream in = null;
+        try {
+            in = Parse.getApplicationContext().getContentResolver().openInputStream(uri);
+            out = openOutputStream(file);
+            ParseIOUtils.copyLarge(in, out);
+        } finally {
+            ParseIOUtils.closeQuietly(out);
+            ParseIOUtils.closeQuietly(in);
         }
     }
 
