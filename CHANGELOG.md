@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.1...4.3.0) (2024-02-18)
+
+
+### Features
+
+* Add support for uploading a `ParseFile` from a URI ([#1207](https://github.com/parse-community/Parse-SDK-Android/issues/1207)) ([83aec68](https://github.com/parse-community/Parse-SDK-Android/commit/83aec68cb7f95e0116b3878b8cda099fd3a2e200))
+
 ## [4.2.1](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.0...4.2.1) (2023-08-25)
 
 
