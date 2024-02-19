@@ -55,7 +55,7 @@ public class ParseRESTUserCommandTest {
     @Test
     public void testLogInUserCommand() throws Exception {
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.logInUserCommand("userName", "password", true);
+            ParseRESTUserCommand.logInUserCommand("userName", "password", true);
 
         assertEquals("login", command.httpPath);
         assertEquals(ParseHttpRequest.Method.GET, command.method);
@@ -68,7 +68,7 @@ public class ParseRESTUserCommandTest {
     @Test
     public void testResetPasswordResetCommand() throws Exception {
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.resetPasswordResetCommand("test@parse.com");
+            ParseRESTUserCommand.resetPasswordResetCommand("test@parse.com");
 
         assertEquals("requestPasswordReset", command.httpPath);
         assertEquals(ParseHttpRequest.Method.POST, command.method);
@@ -82,7 +82,7 @@ public class ParseRESTUserCommandTest {
         JSONObject parameters = new JSONObject();
         parameters.put("key", "value");
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
+            ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
 
         assertEquals("users", command.httpPath);
         assertEquals(ParseHttpRequest.Method.POST, command.method);
@@ -96,7 +96,7 @@ public class ParseRESTUserCommandTest {
         JSONObject parameters = new JSONObject();
         parameters.put("key", "value");
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.serviceLogInUserCommand(parameters, "sessionToken", true);
+            ParseRESTUserCommand.serviceLogInUserCommand(parameters, "sessionToken", true);
 
         assertEquals("users", command.httpPath);
         assertEquals(ParseHttpRequest.Method.POST, command.method);
@@ -110,7 +110,7 @@ public class ParseRESTUserCommandTest {
         Map<String, String> facebookAuthData = new HashMap<>();
         facebookAuthData.put("token", "test");
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.serviceLogInUserCommand("facebook", facebookAuthData, true);
+            ParseRESTUserCommand.serviceLogInUserCommand("facebook", facebookAuthData, true);
 
         assertEquals("users", command.httpPath);
         assertEquals(ParseHttpRequest.Method.POST, command.method);
@@ -132,7 +132,7 @@ public class ParseRESTUserCommandTest {
         JSONObject parameters = new JSONObject();
         parameters.put("key", "value");
         ParseRESTUserCommand command =
-                ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
+            ParseRESTUserCommand.signUpUserCommand(parameters, "sessionToken", true);
 
         ParseHttpRequest.Builder requestBuilder = new ParseHttpRequest.Builder();
         command.addAdditionalHeaders(requestBuilder);
@@ -153,11 +153,11 @@ public class ParseRESTUserCommandTest {
         int statusCode = 200;
 
         ParseHttpResponse response =
-                new ParseHttpResponse.Builder()
-                        .setContent(new ByteArrayInputStream(content.getBytes()))
-                        .setContentType(contentType)
-                        .setStatusCode(statusCode)
-                        .build();
+            new ParseHttpResponse.Builder()
+                .setContent(new ByteArrayInputStream(content.getBytes()))
+                .setContentType(contentType)
+                .setStatusCode(statusCode)
+                .build();
         command.onResponseAsync(response, null);
 
         assertEquals(200, command.getStatusCode());
