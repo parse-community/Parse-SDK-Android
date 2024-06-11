@@ -1,3 +1,17 @@
+# [4.3.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.1...4.3.0) (2024-02-18)
+
+
+### Features
+
+* Add support for uploading a `ParseFile` from a URI ([#1207](https://github.com/parse-community/Parse-SDK-Android/issues/1207)) ([83aec68](https://github.com/parse-community/Parse-SDK-Android/commit/83aec68cb7f95e0116b3878b8cda099fd3a2e200))
+
+## [4.2.1](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.0...4.2.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* Missing Proguard rules for R8 in full mode ([#1196](https://github.com/parse-community/Parse-SDK-Android/issues/1196)) ([7db0965](https://github.com/parse-community/Parse-SDK-Android/commit/7db09650447db2e0f82247240ae51687189cd03f))
+
 # [4.2.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.1.0...4.2.0) (2023-02-22)
 
 
