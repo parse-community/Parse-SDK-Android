@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    api "com.facebook.android:facebook-login:[13.2.0, 14.0["
+    api "com.facebook.android:facebook-login:[13.2.0, 17.0.0["
     implementation project(":parse")
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
