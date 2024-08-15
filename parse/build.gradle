@@ -78,7 +78,7 @@ afterEvaluate {
 apply plugin: "com.dicedmelon.gradle.jacoco-android"
 
 jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = rootProject.ext.jacocoVersion
 }
 
 tasks.withType(Test) {
