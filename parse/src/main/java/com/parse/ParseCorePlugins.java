@@ -142,7 +142,6 @@ class ParseCorePlugins {
                     new ParseObjectStoreMigrator<>(encryptedFileObjectStore, store);
             ParseCurrentUserController controller = new CachedCurrentUserController(storeMigrator);
             currentUserController.compareAndSet(null, controller);
-            currentUserController.compareAndSet(null, controller);
         }
         return currentUserController.get();
     }
