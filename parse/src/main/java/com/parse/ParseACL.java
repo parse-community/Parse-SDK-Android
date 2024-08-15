@@ -44,6 +44,7 @@ public class ParseACL implements Parcelable {
     // State
     private final Map<String, Permissions> permissionsById = new HashMap<>();
     private boolean shared;
+
     /** A lazy user that hasn't been saved to Parse. */
     // TODO (grantland): This should be a list for multiple lazy users with read/write permissions.
     private ParseUser unresolvedUser;

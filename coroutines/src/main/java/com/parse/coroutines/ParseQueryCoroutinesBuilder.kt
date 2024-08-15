@@ -13,7 +13,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 fun <T : ParseObject> CoroutineScope.launchQuery(
     query: ParseQuery<T>,
     context: CoroutineContext = EmptyCoroutineContext,
-    block: suspend ParseQueryOperation<T>.() -> Unit
+    block: suspend ParseQueryOperation<T>.() -> Unit,
 ): Job {
     return launch(context) {
         block.invoke(ParseQueryOperationImpl(query))

@@ -10,8 +10,11 @@ import kotlin.coroutines.suspendCoroutine
 suspend fun ParseObject.suspendSave() {
     return suspendCoroutine { continuation ->
         saveInBackground {
-            if (it == null) continuation.resume(Unit)
-            else continuation.resumeWithException(it)
+            if (it == null) {
+                continuation.resume(Unit)
+            } else {
+                continuation.resumeWithException(it)
+            }
         }
     }
 }
@@ -19,8 +22,11 @@ suspend fun ParseObject.suspendSave() {
 suspend fun ParseObject.suspendPin() {
     return suspendCoroutine { continuation ->
         pinInBackground {
-            if (it == null) continuation.resume(Unit)
-            else continuation.resumeWithException(it)
+            if (it == null) {
+                continuation.resume(Unit)
+            } else {
+                continuation.resumeWithException(it)
+            }
         }
     }
 }

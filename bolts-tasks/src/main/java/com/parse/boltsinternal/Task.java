@@ -28,8 +28,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Task<TResult> {
     /** An {@link java.util.concurrent.Executor} that executes tasks in parallel. */
     public static final ExecutorService BACKGROUND_EXECUTOR = BoltsExecutors.background();
+
     /** An {@link java.util.concurrent.Executor} that executes tasks on the UI thread. */
     public static final Executor UI_THREAD_EXECUTOR = AndroidExecutors.uiThread();
+
     /**
      * An {@link java.util.concurrent.Executor} that executes tasks in the current thread unless the
      * stack runs too deep, at which point it will delegate to {@link Task#BACKGROUND_EXECUTOR} in
@@ -541,28 +543,36 @@ public class Task<TResult> {
         }
     }
 
-    /** @return {@code true} if the task was cancelled, {@code false} otherwise. */
+    /**
+     * @return {@code true} if the task was cancelled, {@code false} otherwise.
+     */
     public boolean isCancelled() {
         synchronized (lock) {
             return cancelled;
         }
     }
 
-    /** @return {@code true} if the task has an error, {@code false} otherwise. */
+    /**
+     * @return {@code true} if the task has an error, {@code false} otherwise.
+     */
     public boolean isFaulted() {
         synchronized (lock) {
             return getError() != null;
         }
     }
 
-    /** @return The result of the task, if set. {@code null} otherwise. */
+    /**
+     * @return The result of the task, if set. {@code null} otherwise.
+     */
     public TResult getResult() {
         synchronized (lock) {
             return result;
         }
     }
 
-    /** @return The error for the task, if set. {@code null} otherwise. */
+    /**
+     * @return The error for the task, if set. {@code null} otherwise.
+     */
     public Exception getError() {
         synchronized (lock) {
             if (error != null) {

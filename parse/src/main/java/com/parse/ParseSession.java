@@ -122,7 +122,9 @@ public class ParseSession extends ParseObject {
         return !READ_ONLY_KEYS.contains(key);
     }
 
-    /** @return the session token for a user, if they are logged in. */
+    /**
+     * @return the session token for a user, if they are logged in.
+     */
     public String getSessionToken() {
         return getString(KEY_SESSION_TOKEN);
     }

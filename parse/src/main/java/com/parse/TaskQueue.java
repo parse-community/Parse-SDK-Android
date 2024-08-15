@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /** A helper class for enqueueing tasks */
 class TaskQueue {
     private final Lock lock = new ReentrantLock();
+
     /**
      * We only need to keep the tail of the queue. Cancelled tasks will just complete
      * normally/immediately when their turn arrives.

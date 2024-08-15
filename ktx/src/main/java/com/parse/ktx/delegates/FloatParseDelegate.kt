@@ -9,12 +9,18 @@ import kotlin.reflect.KProperty
  * A [Float] property delegation for [ParseObject].
  */
 class FloatParseDelegate(private val name: String?) {
-
-    operator fun getValue(parseObject: ParseObject, property: KProperty<*>): Float {
+    operator fun getValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+    ): Float {
         return parseObject.getDouble(name ?: property.name).toFloat()
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Float) {
+    operator fun setValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+        value: Float,
+    ) {
         parseObject.put(name ?: property.name, value)
     }
 }

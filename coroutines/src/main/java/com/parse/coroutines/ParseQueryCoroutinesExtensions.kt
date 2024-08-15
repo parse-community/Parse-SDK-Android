@@ -19,8 +19,11 @@ internal suspend fun <T : ParseObject> ParseQuery<T>.findInternal(): List<T> {
         }
 
         findInBackground { objects, e ->
-            if (e == null) continuation.resume(objects)
-            else continuation.resumeWithException(e)
+            if (e == null) {
+                continuation.resume(objects)
+            } else {
+                continuation.resumeWithException(e)
+            }
         }
     }
 }
@@ -36,8 +39,11 @@ internal suspend fun <T : ParseObject> ParseQuery<T>.getInternal(id: String): T 
         }
 
         getInBackground(id) { obj, e ->
-            if (e == null) continuation.resume(obj)
-            else continuation.resumeWithException(e)
+            if (e == null) {
+                continuation.resume(obj)
+            } else {
+                continuation.resumeWithException(e)
+            }
         }
     }
 }
@@ -53,8 +59,11 @@ internal suspend fun <T : ParseObject> ParseQuery<T>.firstInternal(): T {
         }
 
         getFirstInBackground { obj, e ->
-            if (e == null) continuation.resume(obj)
-            else continuation.resumeWithException(e)
+            if (e == null) {
+                continuation.resume(obj)
+            } else {
+                continuation.resumeWithException(e)
+            }
         }
     }
 }
@@ -70,8 +79,11 @@ internal suspend fun <T : ParseObject> ParseQuery<T>.countInternal(): Int {
         }
 
         countInBackground { count, e ->
-            if (e == null) continuation.resume(count)
-            else continuation.resumeWithException(e)
+            if (e == null) {
+                continuation.resume(count)
+            } else {
+                continuation.resumeWithException(e)
+            }
         }
     }
 }
