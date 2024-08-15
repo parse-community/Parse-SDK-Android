@@ -17,10 +17,12 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
+
 import android.content.Context;
 import androidx.security.crypto.EncryptedFile;
 import androidx.security.crypto.MasterKey;
 import androidx.test.platform.app.InstrumentationRegistry;
+import java.io.File;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
@@ -30,20 +32,21 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-import java.io.File;
-import kotlin.jvm.JvmStatic;
 
 @RunWith(RobolectricTestRunner.class)
 public class EncryptedFileObjectStoreTest {
 
-    @Rule
-    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Before
     public void setUp() {
         RobolectricKeyStore.INSTANCE.getSetup();
         ParseObject.registerSubclass(ParseUser.class);
-        Parse.initialize(new Parse.Configuration.Builder(InstrumentationRegistry.getInstrumentation().getTargetContext()).server("http://parse.com").build());
+        Parse.initialize(
+                new Parse.Configuration.Builder(
+                                InstrumentationRegistry.getInstrumentation().getTargetContext())
+                        .server("http://parse.com")
+                        .build());
     }
 
     @After
@@ -59,16 +62,24 @@ public class EncryptedFileObjectStoreTest {
         JSONObject json = new JSONObject();
         json.put("foo", "bar");
         ParseUserCurrentCoder coder = mock(ParseUserCurrentCoder.class);
-        when(coder.encode(eq(state), isNull(), any(PointerEncoder.class)))
-            .thenReturn(json);
-        EncryptedFileObjectStore<ParseUser> store = new EncryptedFileObjectStore<>(ParseUser.class, file, coder);
+        when(coder.encode(eq(state), isNull(), any(PointerEncoder.class))).thenReturn(json);
+        EncryptedFileObjectStore<ParseUser> store =
+                new EncryptedFileObjectStore<>(ParseUser.class, file, coder);
 
         ParseUser user = mock(ParseUser.class);
         when(user.getState()).thenReturn(state);
         ParseTaskUtils.wait(store.setAsync(user));
 
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        EncryptedFile encryptedFile = new EncryptedFile.Builder(context, file, new MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(), EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB).build();
+        EncryptedFile encryptedFile =
+                new EncryptedFile.Builder(
+                                context,
+                                file,
+                                new MasterKey.Builder(context)
+                                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                        .build(),
+                                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB)
+                        .build();
         JSONObject jsonAgain = ParseFileUtils.readFileToJSONObject(encryptedFile);
         assertEquals(json, jsonAgain, JSONCompareMode.STRICT);
     }
@@ -78,7 +89,15 @@ public class EncryptedFileObjectStoreTest {
         File file = new File(temporaryFolder.getRoot(), "test");
 
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
-        EncryptedFile encryptedFile = new EncryptedFile.Builder(context, file, new MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(), EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB).build();
+        EncryptedFile encryptedFile =
+                new EncryptedFile.Builder(
+                                context,
+                                file,
+                                new MasterKey.Builder(context)
+                                        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                                        .build(),
+                                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB)
+                        .build();
 
         JSONObject json = new JSONObject();
         ParseFileUtils.writeJSONObjectToFile(encryptedFile, json);
@@ -87,11 +106,12 @@ public class EncryptedFileObjectStoreTest {
         builder.put("foo", "bar");
         ParseUserCurrentCoder coder = mock(ParseUserCurrentCoder.class);
         when(coder.decode(
-            any(ParseUser.State.Builder.class),
-            any(JSONObject.class),
-            any(ParseDecoder.class)))
-            .thenReturn(builder);
-        EncryptedFileObjectStore<ParseUser> store = new EncryptedFileObjectStore<>(ParseUser.class, file, coder);
+                        any(ParseUser.State.Builder.class),
+                        any(JSONObject.class),
+                        any(ParseDecoder.class)))
+                .thenReturn(builder);
+        EncryptedFileObjectStore<ParseUser> store =
+                new EncryptedFileObjectStore<>(ParseUser.class, file, coder);
 
         ParseUser user = ParseTaskUtils.wait(store.getAsync());
         assertEquals("bar", user.getState().get("foo"));
@@ -100,7 +120,8 @@ public class EncryptedFileObjectStoreTest {
     @Test
     public void testExistsAsync() throws Exception {
         File file = temporaryFolder.newFile("test");
-        EncryptedFileObjectStore<ParseUser> store = new EncryptedFileObjectStore<>(ParseUser.class, file, null);
+        EncryptedFileObjectStore<ParseUser> store =
+                new EncryptedFileObjectStore<>(ParseUser.class, file, null);
         assertTrue(ParseTaskUtils.wait(store.existsAsync()));
 
         temporaryFolder.delete();
@@ -110,7 +131,8 @@ public class EncryptedFileObjectStoreTest {
     @Test
     public void testDeleteAsync() throws Exception {
         File file = temporaryFolder.newFile("test");
-        EncryptedFileObjectStore<ParseUser> store = new EncryptedFileObjectStore<>(ParseUser.class, file, null);
+        EncryptedFileObjectStore<ParseUser> store =
+                new EncryptedFileObjectStore<>(ParseUser.class, file, null);
         assertTrue(file.exists());
 
         ParseTaskUtils.wait(store.deleteAsync());

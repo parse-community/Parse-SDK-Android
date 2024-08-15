@@ -19,7 +19,6 @@ package com.parse;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.security.crypto.EncryptedFile;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -67,7 +66,6 @@ public class ParseFileUtils {
     // -----------------------------------------------------------------------
 
     /**
-     *
      * Reads the contents of an encrypted file into a byte array. The file is always closed.
      *
      * @param file the encrypted file to read, must not be <code>null</code>
@@ -75,7 +73,8 @@ public class ParseFileUtils {
      * @throws IOException in case of an I/O error
      * @throws GeneralSecurityException in case of an encryption related error
      */
-    public static byte[] readFileToByteArray(EncryptedFile file) throws IOException, GeneralSecurityException {
+    public static byte[] readFileToByteArray(EncryptedFile file)
+            throws IOException, GeneralSecurityException {
         InputStream in = null;
         try {
             in = file.openFileInput();
@@ -84,8 +83,6 @@ public class ParseFileUtils {
             ParseIOUtils.closeQuietly(in);
         }
     }
-
-
 
     /**
      * Opens a {@link FileInputStream} for the specified file, providing better error messages than
@@ -148,7 +145,8 @@ public class ParseFileUtils {
      * @throws IOException in case of an I/O error
      * @throws GeneralSecurityException in case of an encryption related error
      */
-    public static void writeByteArrayToFile(EncryptedFile file, byte[] data) throws IOException, GeneralSecurityException {
+    public static void writeByteArrayToFile(EncryptedFile file, byte[] data)
+            throws IOException, GeneralSecurityException {
         OutputStream out = null;
         try {
             out = file.openFileOutput();
@@ -157,8 +155,6 @@ public class ParseFileUtils {
             ParseIOUtils.closeQuietly(out);
         }
     }
-
-
 
     /**
      * Writes a content uri to a file creating the file if it does not exist.
@@ -596,26 +592,30 @@ public class ParseFileUtils {
     /**
      * @param file the encrypted file to read
      * @param encoding the file encoding used when written to disk
-     * @return Reads the contents of an encrypted file into a {@link String}. The file is always closed.
+     * @return Reads the contents of an encrypted file into a {@link String}. The file is always
+     *     closed.
      * @throws IOException thrown if an error occurred during writing of the file
-     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during the encryption of the file
+     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during
+     *     the encryption of the file
      */
-    public static String readFileToString(EncryptedFile file, Charset encoding) throws IOException, GeneralSecurityException {
+    public static String readFileToString(EncryptedFile file, Charset encoding)
+            throws IOException, GeneralSecurityException {
         return new String(readFileToByteArray(file), encoding);
     }
 
     /**
      * @param file the encrypted file to read
      * @param encoding the file encoding used when written to disk
-     * @return Reads the contents of an encrypted file into a {@link String}. The file is always closed.
+     * @return Reads the contents of an encrypted file into a {@link String}. The file is always
+     *     closed.
      * @throws IOException thrown if an error occurred during writing of the file
-     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during the encryption of the file
+     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during
+     *     the encryption of the file
      */
-    public static String readFileToString(EncryptedFile file, String encoding) throws IOException, GeneralSecurityException {
+    public static String readFileToString(EncryptedFile file, String encoding)
+            throws IOException, GeneralSecurityException {
         return readFileToString(file, Charset.forName(encoding));
     }
-
-
 
     // region String
 
@@ -638,28 +638,34 @@ public class ParseFileUtils {
     }
 
     /**
-     * Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already exists.
+     * Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already
+     * exists.
+     *
      * @param file the encrypted file to use for writing.
      * @param string the text to write.
      * @param encoding the encoding used for the text written.
      * @throws IOException thrown if an error occurred during writing of the file
-     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during the encryption of the file
+     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during
+     *     the encryption of the file
      */
     public static void writeStringToFile(EncryptedFile file, String string, Charset encoding)
-        throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException {
         writeByteArrayToFile(file, string.getBytes(encoding));
     }
 
     /**
-     * Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already exists.
+     * Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already
+     * exists.
+     *
      * @param file the encrypted file to use for writing.
      * @param string the text to write.
      * @param encoding the encoding used for the text written.
      * @throws IOException thrown if an error occurred during writing of the file
-     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during the encryption of the file
+     * @throws GeneralSecurityException thrown if there is an error with encryption keys or during
+     *     the encryption of the file
      */
     public static void writeStringToFile(EncryptedFile file, String string, String encoding)
-        throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException {
         writeStringToFile(file, string, Charset.forName(encoding));
     }
 
@@ -678,18 +684,23 @@ public class ParseFileUtils {
         ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes("UTF-8"));
     }
 
-    /** Reads the contents of an encrypted file into a {@link JSONObject}. The file is always closed. */
-    public static JSONObject readFileToJSONObject(EncryptedFile file) throws IOException, JSONException, GeneralSecurityException {
+    /**
+     * Reads the contents of an encrypted file into a {@link JSONObject}. The file is always closed.
+     */
+    public static JSONObject readFileToJSONObject(EncryptedFile file)
+            throws IOException, JSONException, GeneralSecurityException {
         String content = readFileToString(file, "UTF-8");
         return new JSONObject(content);
     }
 
-    /** Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already exists. */
-    public static void writeJSONObjectToFile(EncryptedFile file, JSONObject json) throws IOException, GeneralSecurityException {
+    /**
+     * Writes a {@link JSONObject} to an encrypted file, will throw an error if the file already
+     * exists.
+     */
+    public static void writeJSONObjectToFile(EncryptedFile file, JSONObject json)
+            throws IOException, GeneralSecurityException {
         ParseFileUtils.writeByteArrayToFile(file, json.toString().getBytes("UTF-8"));
     }
-
-
 
     // endregion
 }
