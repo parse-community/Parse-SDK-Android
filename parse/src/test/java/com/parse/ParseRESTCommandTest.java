@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -562,20 +561,20 @@ public class ParseRESTCommandTest {
         ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
         AtomicReference<String> requestIdAtomicReference = new AtomicReference<>();
         when(mockHttpClient.execute(
-            argThat(
-                argument -> {
-                    assertNotNull(
-                        argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID));
-                    if (requestIdAtomicReference.get() == null)
-                        requestIdAtomicReference.set(
-                            argument.getHeader(
-                                ParseRESTCommand.HEADER_REQUEST_ID));
-                    assertEquals(
-                        argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID),
-                        requestIdAtomicReference.get());
-                    return true;
-                })))
-            .thenThrow(new IOException());
+                        argThat(
+                                argument -> {
+                                    assertNotNull(
+                                            argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID));
+                                    if (requestIdAtomicReference.get() == null)
+                                        requestIdAtomicReference.set(
+                                                argument.getHeader(
+                                                        ParseRESTCommand.HEADER_REQUEST_ID));
+                                    assertEquals(
+                                            argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID),
+                                            requestIdAtomicReference.get());
+                                    return true;
+                                })))
+                .thenThrow(new IOException());
 
         ParseRESTCommand.server = new URL("http://parse.com");
         ParseRESTCommand command = new ParseRESTCommand.Builder().build();
@@ -583,6 +582,6 @@ public class ParseRESTCommandTest {
         task.waitForCompletion();
 
         verify(mockHttpClient, times(ParseRequest.DEFAULT_MAX_RETRIES + 1))
-            .execute(any(ParseHttpRequest.class));
+                .execute(any(ParseHttpRequest.class));
     }
 }
