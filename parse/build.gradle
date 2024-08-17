@@ -4,7 +4,8 @@ apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.parse'
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -15,6 +16,18 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+
+            all {
+                // Configure JaCoCo options
+                jacoco {
+                    includeNoLocationClasses = true
+                    excludes.add("jdk.internal.*")
+                }
+                // Configure test logging
+                testLogging {
+                    events("failed")
+                }
+            }
         }
     }
 
@@ -25,19 +38,23 @@ android {
     buildTypes {
         debug {
             testCoverageEnabled = true
-            buildConfigField("String","PARSE_VERSION","\"${version}\"")
+            buildConfigField("String", "PARSE_VERSION", "\"${version}\"")
         }
         release {
             minifyEnabled false
             testCoverageEnabled = false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            buildConfigField("String","PARSE_VERSION","\"${version}\"")
+            buildConfigField("String", "PARSE_VERSION", "\"${version}\"")
         }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -65,7 +82,7 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
+                from components.findByName('release')
             }
         }
     }
@@ -73,30 +90,15 @@ afterEvaluate {
 
 //endregion
 
-//region Code Coverage
-
-apply plugin: "com.dicedmelon.gradle.jacoco-android"
-
-jacoco {
-    toolVersion = rootProject.ext.jacocoVersion
-}
-
-tasks.withType(Test) {
-    jacoco.includeNoLocationClasses = true
-    jacoco.excludes = ['jdk.internal.*']
-    testLogging {
-        events "failed"
+tasks.withType(JacocoReport).configureEach {
+    jacoco.toolVersion = rootProject.ext.jacocoVersion
+    reports {
+        csv.required.set(false)
+        html.required.set(true)
+        xml.required.set(true)
     }
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
-
-jacocoAndroidUnitTestReport {
-    csv.enabled false
-    html.enabled true
-    xml.enabled true
-}
-
-//endregion
