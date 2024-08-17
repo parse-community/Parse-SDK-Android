@@ -65,7 +65,7 @@ jobs:
           path: ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
       - name: Run tests
-        run: ./gradlew --no-daemon clean jacocoTestReport --info
+        run: ./gradlew --no-daemon clean jacocoTestReport
       - name: Upload code coverage
         uses: codecov/codecov-action@v4
         with:
