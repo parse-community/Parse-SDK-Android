@@ -94,10 +94,6 @@ tasks.withType(Test) {
     }
 }
 
-// tasks.withType(Test) {
-//     useJUnitPlatform()
-// }
-
 jacocoAndroidUnitTestReport {
     csv.enabled false
     html.enabled true
