@@ -85,7 +85,7 @@ tasks.withType(Test) {
     jacoco.includeNoLocationClasses = true
     jacoco.excludes = ['jdk.internal.*']
     testLogging {
-        events "PASSED", "SKIPPED", "FAILED"
+        events "SKIPPED", "FAILED"
         showStandardStreams true
         showExceptions true
         showCauses true
