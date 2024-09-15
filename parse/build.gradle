@@ -51,6 +51,7 @@ dependencies {
     api "com.squareup.okhttp3:okhttp:$okhttpVersion"
     api project(':bolts-tasks')
 
+    testRuntimeOnly('org.junit.vintage:junit-vintage-engine:5.10.2')
     testImplementation "org.junit.jupiter:junit-jupiter:$rootProject.ext.jupiterVersion"
     testImplementation "org.skyscreamer:jsonassert:1.5.0"
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
