@@ -11,7 +11,7 @@ on:
 jobs:
   check-lint:
     name: Lint
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Fetch Sources
