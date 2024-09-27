@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     /* package */ static final String HEADER_APP_BUILD_VERSION = "X-Parse-App-Build-Version";
     /* package */ static final String HEADER_APP_DISPLAY_VERSION = "X-Parse-App-Display-Version";
     /* package */ static final String HEADER_OS_VERSION = "X-Parse-OS-Version";
+    /* package */ static final String HEADER_REQUEST_ID = "X-Parse-Request-Id";
 
     /* package */ static final String HEADER_INSTALLATION_ID = "X-Parse-Installation-Id";
     /* package */ static final String USER_AGENT = "User-Agent";
@@ -49,6 +51,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
     /* package */ String httpPath;
     private String installationId;
     private String operationSetUUID;
+    private final String requestId = UUID.randomUUID().toString();
     private String localId;
 
     public ParseRESTCommand(
@@ -215,6 +218,7 @@ class ParseRESTCommand extends ParseRequest<JSONObject> {
         if (masterKey != null) {
             requestBuilder.addHeader(HEADER_MASTER_KEY, masterKey);
         }
+        requestBuilder.addHeader(HEADER_REQUEST_ID, requestId);
     }
 
     @Override

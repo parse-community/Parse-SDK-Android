@@ -10,9 +10,11 @@ package com.parse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.After;
@@ -551,5 +554,34 @@ public class ParseRESTCommandTest {
         ParseCorePlugins.getInstance().reset();
         ParsePlugins.reset();
         Parse.destroy();
+    }
+
+    @Test
+    public void testIdempotencyLogic() throws Exception {
+        ParseHttpClient mockHttpClient = mock(ParseHttpClient.class);
+        AtomicReference<String> requestIdAtomicReference = new AtomicReference<>();
+        when(mockHttpClient.execute(
+                        argThat(
+                                argument -> {
+                                    assertNotNull(
+                                            argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID));
+                                    if (requestIdAtomicReference.get() == null)
+                                        requestIdAtomicReference.set(
+                                                argument.getHeader(
+                                                        ParseRESTCommand.HEADER_REQUEST_ID));
+                                    assertEquals(
+                                            argument.getHeader(ParseRESTCommand.HEADER_REQUEST_ID),
+                                            requestIdAtomicReference.get());
+                                    return true;
+                                })))
+                .thenThrow(new IOException());
+
+        ParseRESTCommand.server = new URL("http://parse.com");
+        ParseRESTCommand command = new ParseRESTCommand.Builder().build();
+        Task<Void> task = command.executeAsync(mockHttpClient).makeVoid();
+        task.waitForCompletion();
+
+        verify(mockHttpClient, times(ParseRequest.DEFAULT_MAX_RETRIES + 1))
+                .execute(any(ParseHttpRequest.class));
     }
 }

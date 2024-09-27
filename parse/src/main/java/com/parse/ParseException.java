@@ -102,6 +102,11 @@ public class ParseException extends Exception {
     public static final int FILE_DELETE_ERROR = 153;
     /** Error code indicating that the application has exceeded its request limit. */
     public static final int REQUEST_LIMIT_EXCEEDED = 155;
+    /**
+     * Error code indicating that the request was a duplicate and has been discarded due to
+     * idempotency rules.
+     */
+    public static final int DUPLICATE_REQUEST = 159;
     /** Error code indicating that the provided event name is invalid. */
     public static final int INVALID_EVENT_NAME = 160;
     /** Error code indicating that the username is missing or empty. */
