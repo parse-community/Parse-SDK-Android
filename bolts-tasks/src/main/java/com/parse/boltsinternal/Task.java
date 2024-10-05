@@ -541,28 +541,36 @@ public class Task<TResult> {
         }
     }
 
-    /** @return {@code true} if the task was cancelled, {@code false} otherwise. */
+    /**
+     * @return {@code true} if the task was cancelled, {@code false} otherwise.
+     */
     public boolean isCancelled() {
         synchronized (lock) {
             return cancelled;
         }
     }
 
-    /** @return {@code true} if the task has an error, {@code false} otherwise. */
+    /**
+     * @return {@code true} if the task has an error, {@code false} otherwise.
+     */
     public boolean isFaulted() {
         synchronized (lock) {
             return getError() != null;
         }
     }
 
-    /** @return The result of the task, if set. {@code null} otherwise. */
+    /**
+     * @return The result of the task, if set. {@code null} otherwise.
+     */
     public TResult getResult() {
         synchronized (lock) {
             return result;
         }
     }
 
-    /** @return The error for the task, if set. {@code null} otherwise. */
+    /**
+     * @return The error for the task, if set. {@code null} otherwise.
+     */
     public Exception getError() {
         synchronized (lock) {
             if (error != null) {

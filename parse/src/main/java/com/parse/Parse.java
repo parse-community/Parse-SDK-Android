@@ -288,7 +288,9 @@ public class Parse {
         allowCustomObjectId = false;
     }
 
-    /** @return {@code True} if {@link #initialize} has been called, otherwise {@code false}. */
+    /**
+     * @return {@code True} if {@link #initialize} has been called, otherwise {@code false}.
+     */
     static boolean isInitialized() {
         return ParsePlugins.get() != null;
     }
