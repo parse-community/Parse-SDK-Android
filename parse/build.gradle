@@ -89,6 +89,7 @@ afterEvaluate {
 }
 
 //endregion
+//region Testing
 
 tasks.withType(JacocoReport).configureEach {
     jacoco.toolVersion = rootProject.ext.jacocoVersion
@@ -102,3 +103,5 @@ tasks.withType(JacocoReport).configureEach {
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
+
+//endregion
