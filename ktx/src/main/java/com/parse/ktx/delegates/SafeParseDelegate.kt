@@ -12,15 +12,18 @@ import kotlin.reflect.KProperty
  * exceptions.
  */
 class SafeParseDelegate<T>(private val name: String?) {
-
     @Suppress("UNCHECKED_CAST")
-    operator fun getValue(parseObject: ParseObject, property: KProperty<*>): T? {
+    operator fun getValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+    ): T? {
         val name = name ?: property.name
-        val value = if (parseObject.has(name)) {
-            parseObject.get(name)
-        } else {
-            null
-        }
+        val value =
+            if (parseObject.has(name)) {
+                parseObject.get(name)
+            } else {
+                null
+            }
         return if (JSONObject.NULL == value) {
             null
         } else {
@@ -28,7 +31,11 @@ class SafeParseDelegate<T>(private val name: String?) {
         }
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, t: T?) {
+    operator fun setValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+        t: T?,
+    ) {
         parseObject.putOrRemove(property.name, t)
     }
 }

@@ -32,21 +32,26 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     private static final String TAG = "ParsePinningEventuallyQueue";
     private final Object connectionLock = new Object();
     private final ParseHttpClient httpClient;
+
     /** Lock to make sure all changes to the below parameters happen atomically. */
     private final Object taskQueueSyncLock = new Object();
+
     /** TCS that is held until a {@link ParseOperationSet} is completed. */
     private final HashMap<String, TaskCompletionSource<JSONObject>> pendingOperationSetUUIDTasks =
             new HashMap<>();
+
     /**
      * Queue for reading/writing eventually operations. Makes all reads/writes atomic operations.
      */
     private final TaskQueue taskQueue = new TaskQueue();
+
     /**
      * Queue for running *Eventually operations. It uses waitForOperationSetAndEventuallyPin to
      * synchronize {@link ParseObject#taskQueue} until they are both ready to process the same
      * ParseOperationSet.
      */
     private final TaskQueue operationSetTaskQueue = new TaskQueue();
+
     /**
      * List of {@link ParseOperationSet#uuid} that are currently queued in {@link
      * ParsePinningEventuallyQueue#operationSetTaskQueue}.
@@ -54,13 +59,17 @@ class ParsePinningEventuallyQueue extends ParseEventuallyQueue {
     private final ArrayList<String> eventuallyPinUUIDQueue = new ArrayList<>();
 
     private final ConnectivityNotifier notifier;
+
     /** Map of eventually operation UUID to TCS that is resolved when the operation is complete. */
     private final HashMap<String, TaskCompletionSource<JSONObject>> pendingEventuallyTasks =
             new HashMap<>();
+
     /** Map of eventually operation UUID to matching ParseOperationSet. */
     private final HashMap<String, ParseOperationSet> uuidToOperationSet = new HashMap<>();
+
     /** Map of eventually operation UUID to matching EventuallyPin. */
     private final HashMap<String, EventuallyPin> uuidToEventuallyPin = new HashMap<>();
+
     /**
      * TCS that is created when there is no internet connection and isn't resolved until
      * connectivity is achieved.

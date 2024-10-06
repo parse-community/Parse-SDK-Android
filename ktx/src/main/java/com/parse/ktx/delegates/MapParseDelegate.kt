@@ -10,10 +10,9 @@ import kotlin.reflect.KProperty
  * A [Map] property delegation for [ParseObject].
  */
 class MapParseDelegate<V>(private val name: String?) {
-
     operator fun getValue(
         parseObject: ParseObject,
-        property: KProperty<*>
+        property: KProperty<*>,
     ): MutableMap<String, V>? {
         return parseObject.getMap<V>(name ?: property.name) as? MutableMap<String, V>
     }
@@ -21,7 +20,7 @@ class MapParseDelegate<V>(private val name: String?) {
     operator fun setValue(
         parseObject: ParseObject,
         property: KProperty<*>,
-        value: MutableMap<String, V>?
+        value: MutableMap<String, V>?,
     ) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }

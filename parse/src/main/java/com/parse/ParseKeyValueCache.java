@@ -28,6 +28,7 @@ class ParseKeyValueCache {
     /* package */ static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES = 1000;
     private static final String TAG = "ParseKeyValueCache";
     private static final String DIR_NAME = "ParseKeyValueCache";
+
     /** Prevent multiple threads from modifying the cache at the same time. */
     private static final Object MUTEX_IO = new Object();
 

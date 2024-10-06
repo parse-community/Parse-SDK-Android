@@ -59,11 +59,13 @@ public class ParseFile implements Parcelable {
     /* package for tests */ final TaskQueue taskQueue = new TaskQueue();
     private final Set<TaskCompletionSource<?>> currentTasks =
             Collections.synchronizedSet(new HashSet<>());
+
     /**
      * Staging of {@code ParseFile}'s data is stored in memory until the {@code ParseFile} has been
      * successfully synced with the server.
      */
     /* package for tests */ byte[] data;
+
     /* package for tests */ File file;
     /* package for tests */ Uri uri;
     private State state;

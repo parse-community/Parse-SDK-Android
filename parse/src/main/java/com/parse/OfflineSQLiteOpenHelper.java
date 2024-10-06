@@ -27,6 +27,7 @@ class OfflineSQLiteOpenHelper extends ParseSQLiteOpenHelper {
     /** Various keys in the table of ParseObjects. */
     /* package */
     /* package */ static final String KEY_UUID = "uuid";
+
     /* package */ static final String KEY_CLASS_NAME = "className";
     /* package */ static final String KEY_OBJECT_ID = "objectId";
     /* package */ static final String KEY_JSON = "json";
@@ -38,6 +39,7 @@ class OfflineSQLiteOpenHelper extends ParseSQLiteOpenHelper {
     /** Various keys in the table of Dependencies. */
     // TODO (grantland): rename this since we use UUIDs as keys now. root_uuid?
     /* package */ static final String KEY_KEY = "key";
+
     // static final String KEY_UUID = "uuid";
 
     /** The SQLite Database name. */

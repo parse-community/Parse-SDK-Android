@@ -30,7 +30,10 @@ inline fun <T> ParseObject.getAsOrNull(key: String): T? {
 /**
  * [ParseObject.put] the value, doing nothing if the value is null
  */
-inline fun ParseObject.putOrIgnore(key: String, value: Any?) {
+inline fun ParseObject.putOrIgnore(
+    key: String,
+    value: Any?,
+) {
     if (value != null) {
         put(key, value)
     }
@@ -39,7 +42,10 @@ inline fun ParseObject.putOrIgnore(key: String, value: Any?) {
 /**
  * [ParseObject.put] the value, or [ParseObject.remove] it if the value is null
  */
-inline fun ParseObject.putOrRemove(key: String, value: Any?) {
+inline fun ParseObject.putOrRemove(
+    key: String,
+    value: Any?,
+) {
     if (value == null) {
         remove(key)
     } else {

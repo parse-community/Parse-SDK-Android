@@ -4,7 +4,8 @@ apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.parse.facebook'
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -32,6 +33,10 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
@@ -48,7 +53,7 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
+                from components.findByName('release')
             }
         }
     }

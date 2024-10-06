@@ -57,6 +57,7 @@ public class ParseObject implements Parcelable {
      * @see #unpin()
      */
     public static final String DEFAULT_PIN = "_default";
+
     /*
     REST JSON Keys
     */

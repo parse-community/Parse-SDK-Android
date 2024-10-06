@@ -468,6 +468,7 @@ public class ParseACLTest {
         assertTrue(acl.getWriteAccess(user));
         assertEquals(1, acl.getPermissionsById().size());
     }
+
     // endregion
 
     // region testGetAccess

@@ -5,7 +5,8 @@ apply plugin: "io.freefair.android-javadoc-jar"
 apply plugin: "io.freefair.android-sources-jar"
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    namespace 'com.parse.google'
+    compileSdk rootProject.ext.compileSdkVersion
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
@@ -37,6 +38,10 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
@@ -51,7 +56,7 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
+                from components.findByName('release')
             }
         }
     }

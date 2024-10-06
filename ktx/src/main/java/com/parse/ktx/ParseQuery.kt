@@ -1,4 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE", "unused")
+
 package com.parse.ktx
 
 import com.parse.ParseException
@@ -76,7 +77,7 @@ fun <T : ParseObject> ParseQuery<T>.selectKeys(keys: Collection<KProperty<Any?>>
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereContainedIn(
     key: KProperty<Any?>,
-    values: Collection<Any?>
+    values: Collection<Any?>,
 ): ParseQuery<T> {
     return whereContainedIn(key.name, values)
 }
@@ -86,7 +87,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereContainedIn(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereContains(
     key: KProperty<Any?>,
-    substring: String
+    substring: String,
 ): ParseQuery<T> {
     return whereContains(key.name, substring)
 }
@@ -96,7 +97,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereContains(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereContainsAll(
     key: KProperty<Any?>,
-    values: Collection<ParseObject>
+    values: Collection<ParseObject>,
 ): ParseQuery<T> {
     return whereContainsAll(key.name, values)
 }
@@ -106,7 +107,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereContainsAll(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereContainsAllStartsWith(
     key: KProperty<Any?>,
-    values: Collection<String>
+    values: Collection<String>,
 ): ParseQuery<T> {
     return whereContainsAllStartsWith(key.name, values)
 }
@@ -124,7 +125,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereDoesNotExist(key: KProperty<Any?
 inline fun <T : ParseObject> ParseQuery<T>.whereDoesNotMatchKeyInQuery(
     key: KProperty<Any?>,
     keyInQuery: KProperty<Any?>,
-    query: ParseQuery<ParseObject>
+    query: ParseQuery<ParseObject>,
 ): ParseQuery<T> {
     return whereDoesNotMatchKeyInQuery(key.name, keyInQuery.name, query)
 }
@@ -134,7 +135,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereDoesNotMatchKeyInQuery(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereDoesNotMatchQuery(
     key: KProperty<Any?>,
-    query: ParseQuery<out ParseObject>
+    query: ParseQuery<out ParseObject>,
 ): ParseQuery<T> {
     return whereDoesNotMatchQuery(key.name, query)
 }
@@ -144,7 +145,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereDoesNotMatchQuery(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereEndsWith(
     key: KProperty<Any?>,
-    suffix: String
+    suffix: String,
 ): ParseQuery<T> {
     return whereEndsWith(key.name, suffix)
 }
@@ -154,7 +155,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereEndsWith(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereEqualTo(
     key: KProperty<Any?>,
-    value: Any?
+    value: Any?,
 ): ParseQuery<T> {
     return whereEqualTo(key.name, value)
 }
@@ -171,7 +172,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereExists(key: KProperty<Any?>): Pa
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereFullText(
     key: KProperty<Any?>,
-    text: String
+    text: String,
 ): ParseQuery<T> {
     return whereFullText(key.name, text)
 }
@@ -181,7 +182,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereFullText(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereGreaterThan(
     key: KProperty<Any?>,
-    value: Any
+    value: Any,
 ): ParseQuery<T> {
     return whereGreaterThan(key.name, value)
 }
@@ -191,7 +192,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereGreaterThan(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereGreaterThanOrEqualTo(
     key: KProperty<Any?>,
-    value: Any
+    value: Any,
 ): ParseQuery<T> {
     return whereGreaterThanOrEqualTo(key.name, value)
 }
@@ -201,7 +202,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereGreaterThanOrEqualTo(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereLessThan(
     key: KProperty<Any?>,
-    value: Any
+    value: Any,
 ): ParseQuery<T> {
     return whereLessThan(key.name, value)
 }
@@ -211,7 +212,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereLessThan(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereLessThanOrEqualTo(
     key: KProperty<Any?>,
-    value: Any
+    value: Any,
 ): ParseQuery<T> {
     return whereLessThanOrEqualTo(key.name, value)
 }
@@ -221,7 +222,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereLessThanOrEqualTo(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereMatches(
     key: KProperty<Any?>,
-    regex: String
+    regex: String,
 ): ParseQuery<T> {
     return whereMatches(key.name, regex)
 }
@@ -232,7 +233,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereMatches(
 inline fun <T : ParseObject> ParseQuery<T>.whereMatches(
     key: KProperty<Any?>,
     regex: String,
-    modifiers: String
+    modifiers: String,
 ): ParseQuery<T> {
     return whereMatches(key.name, regex, modifiers)
 }
@@ -243,7 +244,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereMatches(
 inline fun <T : ParseObject> ParseQuery<T>.whereMatchesKeyInQuery(
     key: KProperty<Any?>,
     keyInQuery: KProperty<Any?>,
-    query: ParseQuery<ParseObject>
+    query: ParseQuery<ParseObject>,
 ): ParseQuery<T> {
     return whereMatchesKeyInQuery(key.name, keyInQuery.name, query)
 }
@@ -253,7 +254,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereMatchesKeyInQuery(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereMatchesQuery(
     key: KProperty<Any?>,
-    query: ParseQuery<out ParseObject>
+    query: ParseQuery<out ParseObject>,
 ): ParseQuery<T> {
     return whereMatchesQuery(key.name, query)
 }
@@ -263,7 +264,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereMatchesQuery(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereNear(
     key: KProperty<Any?>,
-    point: ParseGeoPoint
+    point: ParseGeoPoint,
 ): ParseQuery<T> {
     return whereNear(key.name, point)
 }
@@ -273,7 +274,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereNear(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereNotContainedIn(
     key: KProperty<Any?>,
-    values: Collection<Any?>
+    values: Collection<Any?>,
 ): ParseQuery<T> {
     return whereNotContainedIn(key.name, values)
 }
@@ -283,7 +284,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereNotContainedIn(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereNotEqualTo(
     key: KProperty<Any?>,
-    value: Any?
+    value: Any?,
 ): ParseQuery<T> {
     return whereNotEqualTo(key.name, value)
 }
@@ -293,7 +294,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereNotEqualTo(
  */
 inline fun <T : ParseObject> ParseQuery<T>.wherePolygonContains(
     key: KProperty<Any?>,
-    point: ParseGeoPoint
+    point: ParseGeoPoint,
 ): ParseQuery<T> {
     return wherePolygonContains(key.name, point)
 }
@@ -303,7 +304,7 @@ inline fun <T : ParseObject> ParseQuery<T>.wherePolygonContains(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereStartsWith(
     key: KProperty<Any?>,
-    prefix: String
+    prefix: String,
 ): ParseQuery<T> {
     return whereStartsWith(key.name, prefix)
 }
@@ -314,7 +315,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereStartsWith(
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinGeoBox(
     key: KProperty<Any?>,
     southwest: ParseGeoPoint,
-    northeast: ParseGeoPoint
+    northeast: ParseGeoPoint,
 ): ParseQuery<T> {
     return whereWithinGeoBox(key.name, southwest, northeast)
 }
@@ -325,7 +326,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereWithinGeoBox(
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinKilometers(
     key: KProperty<Any?>,
     point: ParseGeoPoint,
-    maxDistance: Double
+    maxDistance: Double,
 ): ParseQuery<T> {
     return whereWithinKilometers(key.name, point, maxDistance)
 }
@@ -336,7 +337,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereWithinKilometers(
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinMiles(
     key: KProperty<Any?>,
     point: ParseGeoPoint,
-    maxDistance: Double
+    maxDistance: Double,
 ): ParseQuery<T> {
     return whereWithinMiles(key.name, point, maxDistance)
 }
@@ -346,7 +347,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereWithinMiles(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinPolygon(
     key: KProperty<Any?>,
-    points: List<ParseGeoPoint>
+    points: List<ParseGeoPoint>,
 ): ParseQuery<T> {
     return whereWithinPolygon(key.name, points)
 }
@@ -356,7 +357,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereWithinPolygon(
  */
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinPolygon(
     key: KProperty<Any?>,
-    polygon: ParsePolygon
+    polygon: ParsePolygon,
 ): ParseQuery<T> {
     return whereWithinPolygon(key.name, polygon)
 }
@@ -367,7 +368,7 @@ inline fun <T : ParseObject> ParseQuery<T>.whereWithinPolygon(
 inline fun <T : ParseObject> ParseQuery<T>.whereWithinRadians(
     key: KProperty<Any?>,
     point: ParseGeoPoint,
-    maxDistance: Double
+    maxDistance: Double,
 ): ParseQuery<T> {
     return whereWithinRadians(key.name, point, maxDistance)
 }

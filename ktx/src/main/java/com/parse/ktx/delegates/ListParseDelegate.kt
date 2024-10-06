@@ -10,15 +10,17 @@ import kotlin.reflect.KProperty
  * A [List] property delegation for [ParseObject].
  */
 class ListParseDelegate<T>(private val name: String?) {
-
-    operator fun getValue(parseObject: ParseObject, property: KProperty<*>): MutableList<T>? {
+    operator fun getValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+    ): MutableList<T>? {
         return parseObject.getList<T>(name ?: property.name) as? MutableList<T>
     }
 
     operator fun setValue(
         parseObject: ParseObject,
         property: KProperty<*>,
-        value: MutableList<T>?
+        value: MutableList<T>?,
     ) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }

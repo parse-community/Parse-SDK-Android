@@ -11,12 +11,18 @@ import kotlin.reflect.KProperty
  * A [JSONObject] property delegation for [ParseObject].
  */
 class JsonObjectParseDelegate(private val name: String?) {
-
-    operator fun getValue(parseObject: ParseObject, property: KProperty<*>): JSONObject? {
+    operator fun getValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+    ): JSONObject? {
         return parseObject.getJSONObject(name ?: property.name)
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: JSONObject?) {
+    operator fun setValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+        value: JSONObject?,
+    ) {
         parseObject.putOrIgnore(name ?: property.name, value)
     }
 }
