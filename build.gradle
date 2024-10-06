@@ -1,6 +1,7 @@
 buildscript {
     ext.kotlin_version = "1.7.10"
     ext.jacocoVersion = '0.8.12'
+    ext.spotlessVersion = '6.25.0'
     repositories {
         google()
         mavenCentral()
@@ -11,13 +12,13 @@ buildscript {
         classpath "org.jacoco:org.jacoco.core:$jacocoVersion"
         classpath "com.dicedmelon.gradle:jacoco-android:0.1.5"
         classpath "io.freefair.gradle:android-gradle-plugins:4.2.0-m1"
-        classpath "com.diffplug.spotless:spotless-plugin-gradle:5.17.1"
+        classpath "com.diffplug.spotless:spotless-plugin-gradle:$spotlessVersion"
     }
 }
 
 plugins {
     id "com.github.ben-manes.versions" version "0.28.0"
-    id "com.diffplug.spotless" version "5.17.1"
+    id "com.diffplug.spotless" version "$spotlessVersion"
 }
 
 allprojects {
@@ -39,7 +40,7 @@ allprojects {
         }
         kotlin {
             target '**/*.kt'
-            ktlint().userData(["disabled_rules": "no-wildcard-imports"])
+            ktlint()
             trimTrailingWhitespace()
             indentWithSpaces()
             endWithNewline()

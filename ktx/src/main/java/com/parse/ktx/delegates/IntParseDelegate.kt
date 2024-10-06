@@ -9,12 +9,18 @@ import kotlin.reflect.KProperty
  * A [Int] property delegation for [ParseObject].
  */
 class IntParseDelegate(private val name: String?) {
-
-    operator fun getValue(parseObject: ParseObject, property: KProperty<*>): Int {
+    operator fun getValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+    ): Int {
         return parseObject.getInt(name ?: property.name)
     }
 
-    operator fun setValue(parseObject: ParseObject, property: KProperty<*>, value: Int) {
+    operator fun setValue(
+        parseObject: ParseObject,
+        property: KProperty<*>,
+        value: Int,
+    ) {
         parseObject.put(name ?: property.name, value)
     }
 }

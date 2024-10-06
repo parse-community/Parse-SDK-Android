@@ -641,6 +641,7 @@ public class ParsePushTest {
         assertTrue(state.channelSet().contains("test"));
         assertTrue(state.channelSet().contains("testAgain"));
     }
+
     // endregion
 
     // region testSendMessageInBackground

@@ -21,7 +21,6 @@ import com.parse.boltsinternal.TaskCompletionSource
  */
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 object ParseGoogleUtils {
-
     private const val AUTH_TYPE = "google"
     private lateinit var clientId: String
 
@@ -70,7 +69,11 @@ object ParseGoogleUtils {
      *      }
      */
     @JvmStatic
-    fun logIn(activity: Activity, launcher: ActivityResultLauncher<Intent>, callback: LogInCallback) {
+    fun logIn(
+        activity: Activity,
+        launcher: ActivityResultLauncher<Intent>,
+        callback: LogInCallback,
+    ) {
         checkInitialization()
         this.currentCallback = callback
         val googleSignInClient = buildGoogleSignInClient(activity)
@@ -86,7 +89,10 @@ object ParseGoogleUtils {
      * @return true if the result could be handled.
      */
     @JvmStatic
-    fun onActivityResult(resultCode: Int, data: Intent?): Boolean {
+    fun onActivityResult(
+        resultCode: Int,
+        data: Intent?,
+    ): Boolean {
         if (resultCode != Activity.RESULT_OK) {
             return false
         }
@@ -108,7 +114,10 @@ object ParseGoogleUtils {
      * @return A task that will be resolved when linking is complete.
      */
     @JvmStatic
-    fun unlinkInBackground(user: ParseUser, callback: SaveCallback): Task<Void> {
+    fun unlinkInBackground(
+        user: ParseUser,
+        callback: SaveCallback,
+    ): Task<Void> {
         return callbackOnMainThreadAsync(unlinkInBackground(user), callback, false)
     }
 
@@ -133,7 +142,10 @@ object ParseGoogleUtils {
      * @return A task that will be resolved when linking is complete.
      */
     @JvmStatic
-    fun linkInBackground(user: ParseUser, account: GoogleSignInAccount): Task<Void> {
+    fun linkInBackground(
+        user: ParseUser,
+        account: GoogleSignInAccount,
+    ): Task<Void> {
         return user.linkWithInBackground(AUTH_TYPE, getAuthData(account))
     }
 
@@ -182,21 +194,26 @@ object ParseGoogleUtils {
         return authData
     }
 
-    private fun onSignInCallbackResult(user: ParseUser?, exception: Exception?) {
-        val exceptionToThrow = when (exception) {
-            is ParseException -> exception
-            null -> null
-            else -> ParseException(exception)
-        }
+    private fun onSignInCallbackResult(
+        user: ParseUser?,
+        exception: Exception?,
+    ) {
+        val exceptionToThrow =
+            when (exception) {
+                is ParseException -> exception
+                null -> null
+                else -> ParseException(exception)
+            }
         currentCallback?.done(user, exceptionToThrow)
     }
 
     private fun buildGoogleSignInClient(context: Context): GoogleSignInClient {
-        val signInOptions = GoogleSignInOptions.Builder()
-            .requestId()
-            .requestEmail()
-            .requestIdToken(clientId)
-            .build()
+        val signInOptions =
+            GoogleSignInOptions.Builder()
+                .requestId()
+                .requestEmail()
+                .requestIdToken(clientId)
+                .build()
         return GoogleSignIn.getClient(context, signInOptions)
     }
 
@@ -207,7 +224,7 @@ object ParseGoogleUtils {
     private fun <T> callbackOnMainThreadAsync(
         task: Task<T>,
         callback: SaveCallback,
-        reportCancellation: Boolean
+        reportCancellation: Boolean,
     ): Task<T> {
         return callbackOnMainThreadInternalAsync(task, callback, reportCancellation)
     }
@@ -220,7 +237,7 @@ object ParseGoogleUtils {
     private fun <T> callbackOnMainThreadInternalAsync(
         task: Task<T>,
         callback: Any?,
-        reportCancellation: Boolean
+        reportCancellation: Boolean,
     ): Task<T> {
         if (callback == null) {
             return task
@@ -242,7 +259,8 @@ object ParseGoogleUtils {
                             callback.done(error as? ParseException)
                         } else if (callback is LogInCallback) {
                             callback.done(
-                                task2.result as? ParseUser, error as? ParseException
+                                task2.result as? ParseUser,
+                                error as? ParseException,
                             )
                         }
                     } finally {
@@ -260,7 +278,7 @@ object ParseGoogleUtils {
                     }
                 }
                 null
-            }
+            },
         )
         return tcs.task
     }

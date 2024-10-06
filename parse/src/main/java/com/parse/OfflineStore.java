@@ -34,15 +34,18 @@ class OfflineStore {
 
     /** SQLite has a max of 999 SQL variables in a single statement. */
     private static final int MAX_SQL_VARIABLES = 999;
+
     // Lock for all members of the store.
     private final Object lock = new Object();
     // Helper for accessing the database.
     private final OfflineSQLiteOpenHelper helper;
+
     /**
      * In-memory map of UUID -> ParseObject. This is used so that we can always return the same
      * instance for a given object. The only objects in this map are ones that are in the database.
      */
     private final WeakValueHashMap<String, ParseObject> uuidToObjectMap = new WeakValueHashMap<>();
+
     /**
      * In-memory map of ParseObject -> UUID. This is used to that when we see an unsaved ParseObject
      * that's already in the database, we can update the same record in the database. It stores a
@@ -50,12 +53,14 @@ class OfflineStore {
      * finished, there will be a row for this UUID in the database.
      */
     private final WeakHashMap<ParseObject, Task<String>> objectToUuidMap = new WeakHashMap<>();
+
     /**
      * In-memory set of ParseObjects that have been fetched from the local database already. If the
      * object is in the map, a fetch of it has been started. If the value is a finished task, then
      * the fetch was completed.
      */
     private final WeakHashMap<ParseObject, Task<ParseObject>> fetchedObjects = new WeakHashMap<>();
+
     /**
      * In-memory map of (className, objectId) -> ParseObject. This is used so that we can always
      * return the same instance for a given object. Objects in this map may or may not be in the

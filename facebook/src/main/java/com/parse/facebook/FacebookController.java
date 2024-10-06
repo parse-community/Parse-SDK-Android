@@ -40,6 +40,7 @@ class FacebookController {
 
     // Used as default activityCode. From FacebookSdk.java.
     public static final int DEFAULT_AUTH_ACTIVITY_CODE = 0xface;
+
     /** Precise date format required for auth expiration data. */
     private static final DateFormat PRECISE_DATE_FORMAT =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);

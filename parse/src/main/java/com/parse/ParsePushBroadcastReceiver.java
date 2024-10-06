@@ -84,14 +84,19 @@ public class ParsePushBroadcastReceiver extends BroadcastReceiver {
      * {@code null}.
      */
     public static final String KEY_PUSH_CHANNEL = "com.parse.Channel";
+
     /** The name of the Intent extra which contains the JSON payload of the Notification. */
     public static final String KEY_PUSH_DATA = "com.parse.Data";
+
     /** The name of the Intent fired when a push has been received. */
     public static final String ACTION_PUSH_RECEIVE = "com.parse.push.intent.RECEIVE";
+
     /** The name of the Intent fired when a notification has been opened. */
     public static final String ACTION_PUSH_OPEN = "com.parse.push.intent.OPEN";
+
     /** The name of the Intent fired when a notification has been dismissed. */
     public static final String ACTION_PUSH_DELETE = "com.parse.push.intent.DELETE";
+
     /** The name of the meta-data field used to override the icon used in Notifications. */
     public static final String PROPERTY_PUSH_ICON = "com.parse.push.notification_icon";
 
