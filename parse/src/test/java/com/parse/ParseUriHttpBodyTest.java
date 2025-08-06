@@ -12,6 +12,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import android.net.Uri;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +60,13 @@ public class ParseUriHttpBodyTest {
         File file = temporaryFolder.newFile("name");
         ParseFileUtils.writeByteArrayToFile(file, content);
         Uri uri = Uri.fromFile(file);
+        
+        // Register the Uri with Robolectric's ShadowContentResolver
+        ShadowContentResolver shadowContentResolver = 
+            Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(uri, 
+            new ByteArrayInputStream(content));
+        
         ParseUriHttpBody body = new ParseUriHttpBody(uri, contentType);
         assertArrayEquals(content, ParseIOUtils.toByteArray(body.getContent()));
         assertEquals(contentType, body.getContentType());
@@ -72,6 +80,13 @@ public class ParseUriHttpBodyTest {
         File file = temporaryFolder.newFile("name");
         ParseFileUtils.writeStringToFile(file, content, "UTF-8");
         Uri uri = Uri.fromFile(file);
+        
+        // Register the Uri with Robolectric's ShadowContentResolver
+        ShadowContentResolver shadowContentResolver = 
+            Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(uri, 
+            new ByteArrayInputStream(content.getBytes()));
+        
         ParseUriHttpBody body = new ParseUriHttpBody(uri, contentType);
 
         // Check content
