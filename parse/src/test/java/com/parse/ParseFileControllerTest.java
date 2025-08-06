@@ -39,6 +39,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 // For org.json
 @RunWith(RobolectricTestRunner.class)
@@ -48,6 +49,17 @@ public class ParseFileControllerTest {
 
     @Before
     public void setUp() throws MalformedURLException {
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId("test")
+                        .server("https://api.parse.com/1")
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
     }
 
@@ -56,6 +68,9 @@ public class ParseFileControllerTest {
         // TODO(grantland): Remove once we no longer rely on retry logic.
         ParseRequest.setDefaultInitialRetryDelay(ParseRequest.DEFAULT_INITIAL_RETRY_DELAY);
         ParseRESTCommand.server = null;
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        Parse.destroy();
     }
 
     @Test

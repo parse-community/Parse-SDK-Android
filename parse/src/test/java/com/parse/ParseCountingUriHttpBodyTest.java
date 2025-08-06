@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.Uri;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,13 +21,43 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
+import org.robolectric.shadows.ShadowContentResolver;
 
+@RunWith(RobolectricTestRunner.class)
 public class ParseCountingUriHttpBodyTest {
 
     @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Before
+    public void setUp() {
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(RuntimeEnvironment.application)
+                        .applicationId("test")
+                        .server("https://api.parse.com/1")
+                        .build();
+
+        ParsePlugins plugins = ParseTestUtils.mockParsePlugins(configuration);
+        Parse.initialize(configuration, plugins);
+    }
+
+    @After
+    public void tearDown() {
+        ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
+        Parse.destroy();
+    }
 
     private static String getData() {
         char[] chars = new char[64 << 14]; // 1MB
@@ -47,9 +78,18 @@ public class ParseCountingUriHttpBodyTest {
         final Semaphore didReportIntermediateProgress = new Semaphore(0);
         final Semaphore finish = new Semaphore(0);
 
+        Uri testUri = makeTestUri(temporaryFolder.getRoot());
+        
+        // Register the Uri with Robolectric's ShadowContentResolver
+        String testData = getData();
+        ShadowContentResolver shadowContentResolver = 
+            Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(testUri, 
+            new ByteArrayInputStream(testData.getBytes()));
+
         ParseCountingUriHttpBody body =
                 new ParseCountingUriHttpBody(
-                        makeTestUri(temporaryFolder.getRoot()),
+                        testUri,
                         new ProgressCallback() {
                             Integer maxProgressSoFar = 0;
 
@@ -75,7 +115,7 @@ public class ParseCountingUriHttpBodyTest {
         // Check content
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         body.writeTo(output);
-        assertArrayEquals(getData().getBytes(), output.toByteArray());
+        assertArrayEquals(testData.getBytes(), output.toByteArray());
         // Check progress callback
         assertTrue(didReportIntermediateProgress.tryAcquire(5, TimeUnit.SECONDS));
         assertTrue(finish.tryAcquire(5, TimeUnit.SECONDS));
@@ -83,8 +123,17 @@ public class ParseCountingUriHttpBodyTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWriteToWithNullOutput() throws Exception {
+        Uri testUri = makeTestUri(temporaryFolder.getRoot());
+        
+        // Register the Uri with Robolectric's ShadowContentResolver
+        String testData = getData();
+        ShadowContentResolver shadowContentResolver = 
+            Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(testUri, 
+            new ByteArrayInputStream(testData.getBytes()));
+            
         ParseCountingUriHttpBody body =
-                new ParseCountingUriHttpBody(makeTestUri(temporaryFolder.getRoot()), null);
+                new ParseCountingUriHttpBody(testUri, null);
         body.writeTo(null);
     }
 }
