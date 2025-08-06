@@ -46,3 +46,4 @@ jacoco.exec
 node_modules/
 npm-debug.log
 *.hprof
+/.vscode

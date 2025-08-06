@@ -15,6 +15,16 @@ android {
     testOptions {
         unitTests {
             includeAndroidResources = true
+            all {
+                jvmArgs '-Dnet.bytebuddy.experimental=true'
+                jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.io=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.util=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.text=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED'
+                jvmArgs '--add-opens=java.base/java.net=ALL-UNNAMED'
+            }
         }
     }
 
