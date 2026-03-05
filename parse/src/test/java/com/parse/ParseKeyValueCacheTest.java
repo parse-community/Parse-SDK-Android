@@ -132,4 +132,20 @@ public class ParseKeyValueCacheTest {
         assertEquals(customBytes, configuration.maxKeyValueCacheBytes);
         assertEquals(customFiles, configuration.maxKeyValueCacheFiles);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigurationBuilderRejectsNegativeCacheBytes() {
+        new Parse.Configuration.Builder(null)
+            .applicationId("test")
+            .maxKeyValueCacheBytes(-1)
+            .build();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testConfigurationBuilderRejectsNegativeCacheFiles() {
+        new Parse.Configuration.Builder(null)
+            .applicationId("test")
+            .maxKeyValueCacheFiles(-1)
+            .build();
+    }
 }

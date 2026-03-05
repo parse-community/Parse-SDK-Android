@@ -602,8 +602,14 @@ public class Parse {
 
         /** Allows for simple constructing of a {@code Configuration} object. */
         public static final class Builder {
+            /**
+             * The default maximum number of bytes to use for the Parse cache on disk.
+             */
             public static final int DEFAULT_MAX_KEY_VALUE_CACHE_BYTES =
                 ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
+            /**
+             * The default maximum number of files to store in the Parse cache on disk.
+             */
             public static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES =
                 ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
             private final Context context;
@@ -727,6 +733,9 @@ public class Parse {
              * @return The same builder, for easy chaining.
              */
             public Builder maxKeyValueCacheBytes(int maxKeyValueCacheBytes) {
+                if (maxKeyValueCacheBytes < 0) {
+                    throw new IllegalArgumentException("maxKeyValueCacheBytes must be >= 0");
+                }
                 this.maxKeyValueCacheBytes = maxKeyValueCacheBytes;
                 return this;
             }
@@ -739,6 +748,9 @@ public class Parse {
              * @return The same builder, for easy chaining.
              */
             public Builder maxKeyValueCacheFiles(int maxKeyValueCacheFiles) {
+                if (maxKeyValueCacheFiles < 0) {
+                    throw new IllegalArgumentException("maxKeyValueCacheFiles must be >= 0");
+                }
                 this.maxKeyValueCacheFiles = maxKeyValueCacheFiles;
                 return this;
             }
