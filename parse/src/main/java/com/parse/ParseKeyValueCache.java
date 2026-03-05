@@ -22,10 +22,10 @@ class ParseKeyValueCache {
 
     // We limit the cache to 2MB because that's about what the default browser
     // uses.
-    public static final int DEFAULT_MAX_KEY_VALUE_CACHE_BYTES = 2 * 1024 * 1024;
+    /* package */ static final int DEFAULT_MAX_KEY_VALUE_CACHE_BYTES = 2 * 1024 * 1024;
     // We limit to 1000 cache files to avoid taking too long while scanning the
     // cache
-    public static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES = 1000;
+    /* package */ static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES = 1000;
     private static final String TAG = "ParseKeyValueCache";
     private static final String DIR_NAME = "ParseKeyValueCache";
     /** Prevent multiple threads from modifying the cache at the same time. */

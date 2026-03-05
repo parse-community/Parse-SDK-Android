@@ -100,6 +100,10 @@ public class ParseKeyValueCacheTest {
             ParseKeyValueCache.maxKeyValueCacheBytes);
         assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
             ParseKeyValueCache.maxKeyValueCacheFiles);
+        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
+            Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES);
+        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
+            Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_FILES);
     }
 
     @Test
