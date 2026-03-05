@@ -171,6 +171,8 @@ public class Parse {
         if (configuration.localDataStoreEnabled) {
             offlineStore = new OfflineStore(configuration.context);
         } else {
+            ParseKeyValueCache.maxKeyValueCacheBytes = configuration.maxKeyValueCacheBytes;
+            ParseKeyValueCache.maxKeyValueCacheFiles = configuration.maxKeyValueCacheFiles;
             ParseKeyValueCache.initialize(configuration.context);
         }
 
@@ -582,6 +584,8 @@ public class Parse {
         final boolean allowCustomObjectId;
         final OkHttpClient.Builder clientBuilder;
         final int maxRetries;
+        final int maxKeyValueCacheBytes;
+        final int maxKeyValueCacheFiles;
 
         private Configuration(Builder builder) {
             this.context = builder.context;
@@ -592,6 +596,8 @@ public class Parse {
             this.allowCustomObjectId = builder.allowCustomObjectId;
             this.clientBuilder = builder.clientBuilder;
             this.maxRetries = builder.maxRetries;
+            this.maxKeyValueCacheBytes = builder.maxKeyValueCacheBytes;
+            this.maxKeyValueCacheFiles = builder.maxKeyValueCacheFiles;
         }
 
         /** Allows for simple constructing of a {@code Configuration} object. */
@@ -604,6 +610,8 @@ public class Parse {
             private boolean allowCustomObjectId;
             private OkHttpClient.Builder clientBuilder;
             private int maxRetries = DEFAULT_MAX_RETRIES;
+            private int maxKeyValueCacheBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
+            private int maxKeyValueCacheFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
 
             /**
              * Initialize a bulider with a given context.
@@ -704,6 +712,30 @@ public class Parse {
              */
             public Builder maxRetries(int maxRetries) {
                 this.maxRetries = maxRetries;
+                return this;
+            }
+
+            /**
+             * Set the maximum amount of bytes to use for the Parse cache on disk.
+             * Defaults to {@link ParseKeyValueCache#DEFAULT_MAX_KEY_VALUE_CACHE_BYTES}.
+             *
+             * @param maxKeyValueCacheBytes The maximum number of bytes to use for the cache.
+             * @return The same builder, for easy chaining.
+             */
+            public Builder maxKeyValueCacheBytes(int maxKeyValueCacheBytes) {
+                this.maxKeyValueCacheBytes = maxKeyValueCacheBytes;
+                return this;
+            }
+
+            /**
+             * Set the maximum number of files to store in the Parse cache on disk.
+             * Defaults to {@link ParseKeyValueCache#DEFAULT_MAX_KEY_VALUE_CACHE_FILES}.
+             *
+             * @param maxKeyValueCacheFiles The maximum number of files to store in the cache.
+             * @return The same builder, for easy chaining.
+             */
+            public Builder maxKeyValueCacheFiles(int maxKeyValueCacheFiles) {
+                this.maxKeyValueCacheFiles = maxKeyValueCacheFiles;
                 return this;
             }
 

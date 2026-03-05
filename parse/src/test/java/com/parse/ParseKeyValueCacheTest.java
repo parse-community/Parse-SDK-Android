@@ -93,4 +93,39 @@ public class ParseKeyValueCacheTest {
         // Verify size is zero
         assertEquals(0, ParseKeyValueCache.size());
     }
+
+    @Test
+    public void testDefaultCacheConfiguration() {
+        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
+            ParseKeyValueCache.maxKeyValueCacheBytes);
+        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
+            ParseKeyValueCache.maxKeyValueCacheFiles);
+    }
+
+    @Test
+    public void testCustomCacheSize() {
+        int customBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES + 1024;
+        int customFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES + 100;
+
+        ParseKeyValueCache.maxKeyValueCacheBytes = customBytes;
+        ParseKeyValueCache.maxKeyValueCacheFiles = customFiles;
+
+        assertEquals(customBytes, ParseKeyValueCache.maxKeyValueCacheBytes);
+        assertEquals(customFiles, ParseKeyValueCache.maxKeyValueCacheFiles);
+    }
+
+    @Test
+    public void testConfigurationBuilderCacheSize() {
+        int customBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES + 1024;
+        int customFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES + 100;
+
+        Parse.Configuration configuration = new Parse.Configuration.Builder(null)
+            .applicationId("test")
+            .maxKeyValueCacheBytes(customBytes)
+            .maxKeyValueCacheFiles(customFiles)
+            .build();
+
+        assertEquals(customBytes, configuration.maxKeyValueCacheBytes);
+        assertEquals(customFiles, configuration.maxKeyValueCacheFiles);
+    }
 }
