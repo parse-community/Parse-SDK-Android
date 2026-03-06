@@ -39,6 +39,9 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
+import org.robolectric.shadows.ShadowContentResolver;
 
 // For org.json
 @RunWith(RobolectricTestRunner.class)
@@ -49,6 +52,9 @@ public class ParseFileControllerTest {
     @Before
     public void setUp() throws MalformedURLException {
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        ParsePlugins.set(plugins);
     }
 
     @After
@@ -56,6 +62,7 @@ public class ParseFileControllerTest {
         // TODO(grantland): Remove once we no longer rely on retry logic.
         ParseRequest.setDefaultInitialRetryDelay(ParseRequest.DEFAULT_INITIAL_RETRY_DELAY);
         ParseRESTCommand.server = null;
+        ParsePlugins.reset();
     }
 
     @Test
@@ -221,6 +228,10 @@ public class ParseFileControllerTest {
         File file = new File(root, "test");
         ParseFileUtils.writeStringToFile(file, "content", "UTF-8");
         Uri uri = Uri.fromFile(file);
+        ShadowContentResolver shadowContentResolver =
+                Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(
+                uri, new ByteArrayInputStream("content".getBytes()));
         ParseFile.State state =
                 new ParseFile.State.Builder().name("file_name").mimeType("mime_type").build();
         Task<ParseFile.State> task = controller.saveAsync(state, uri, null, null, null);
