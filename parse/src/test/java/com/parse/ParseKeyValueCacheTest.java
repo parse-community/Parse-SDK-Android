@@ -96,14 +96,18 @@ public class ParseKeyValueCacheTest {
 
     @Test
     public void testDefaultCacheConfiguration() {
-        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
-            ParseKeyValueCache.maxKeyValueCacheBytes);
-        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
-            ParseKeyValueCache.maxKeyValueCacheFiles);
-        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
-            Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES);
-        assertEquals(ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
-            Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_FILES);
+        assertEquals(
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
+                ParseKeyValueCache.maxKeyValueCacheBytes);
+        assertEquals(
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
+                ParseKeyValueCache.maxKeyValueCacheFiles);
+        assertEquals(
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES,
+                Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES);
+        assertEquals(
+                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES,
+                Parse.Configuration.Builder.DEFAULT_MAX_KEY_VALUE_CACHE_FILES);
     }
 
     @Test
@@ -123,11 +127,12 @@ public class ParseKeyValueCacheTest {
         int customBytes = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES + 1024;
         int customFiles = ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES + 100;
 
-        Parse.Configuration configuration = new Parse.Configuration.Builder(null)
-            .applicationId("test")
-            .maxKeyValueCacheBytes(customBytes)
-            .maxKeyValueCacheFiles(customFiles)
-            .build();
+        Parse.Configuration configuration =
+                new Parse.Configuration.Builder(null)
+                        .applicationId("test")
+                        .maxKeyValueCacheBytes(customBytes)
+                        .maxKeyValueCacheFiles(customFiles)
+                        .build();
 
         assertEquals(customBytes, configuration.maxKeyValueCacheBytes);
         assertEquals(customFiles, configuration.maxKeyValueCacheFiles);
@@ -136,16 +141,16 @@ public class ParseKeyValueCacheTest {
     @Test(expected = IllegalArgumentException.class)
     public void testConfigurationBuilderRejectsNegativeCacheBytes() {
         new Parse.Configuration.Builder(null)
-            .applicationId("test")
-            .maxKeyValueCacheBytes(-1)
-            .build();
+                .applicationId("test")
+                .maxKeyValueCacheBytes(-1)
+                .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testConfigurationBuilderRejectsNegativeCacheFiles() {
         new Parse.Configuration.Builder(null)
-            .applicationId("test")
-            .maxKeyValueCacheFiles(-1)
-            .build();
+                .applicationId("test")
+                .maxKeyValueCacheFiles(-1)
+                .build();
     }
 }

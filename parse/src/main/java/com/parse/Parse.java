@@ -602,16 +602,13 @@ public class Parse {
 
         /** Allows for simple constructing of a {@code Configuration} object. */
         public static final class Builder {
-            /**
-             * The default maximum number of bytes to use for the Parse cache on disk.
-             */
+            /** The default maximum number of bytes to use for the Parse cache on disk. */
             public static final int DEFAULT_MAX_KEY_VALUE_CACHE_BYTES =
-                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
-            /**
-             * The default maximum number of files to store in the Parse cache on disk.
-             */
+                    ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_BYTES;
+            /** The default maximum number of files to store in the Parse cache on disk. */
             public static final int DEFAULT_MAX_KEY_VALUE_CACHE_FILES =
-                ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
+                    ParseKeyValueCache.DEFAULT_MAX_KEY_VALUE_CACHE_FILES;
+
             private final Context context;
             private String applicationId;
             private String clientKey;
@@ -726,8 +723,8 @@ public class Parse {
             }
 
             /**
-             * Set the maximum amount of bytes to use for the Parse cache on disk.
-             * Defaults to {@link Builder#DEFAULT_MAX_KEY_VALUE_CACHE_BYTES}.
+             * Set the maximum amount of bytes to use for the Parse cache on disk. Defaults to
+             * {@link Builder#DEFAULT_MAX_KEY_VALUE_CACHE_BYTES}.
              *
              * @param maxKeyValueCacheBytes The maximum number of bytes to use for the cache.
              * @return The same builder, for easy chaining.
@@ -741,8 +738,8 @@ public class Parse {
             }
 
             /**
-             * Set the maximum number of files to store in the Parse cache on disk.
-             * Defaults to {@link Builder#DEFAULT_MAX_KEY_VALUE_CACHE_FILES}.
+             * Set the maximum number of files to store in the Parse cache on disk. Defaults to
+             * {@link Builder#DEFAULT_MAX_KEY_VALUE_CACHE_FILES}.
              *
              * @param maxKeyValueCacheFiles The maximum number of files to store in the cache.
              * @return The same builder, for easy chaining.
