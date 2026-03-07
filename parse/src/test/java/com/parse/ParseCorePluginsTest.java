@@ -25,6 +25,7 @@ public class ParseCorePluginsTest extends ResetPluginsParseTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        Parse.setLocalDatastore(null);
         Parse.Configuration configuration =
                 new Parse.Configuration.Builder(null).applicationId("1234").build();
         ParsePlugins.initialize(null, configuration);

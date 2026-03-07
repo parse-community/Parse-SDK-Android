@@ -20,6 +20,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.ContentResolver;
+import android.content.Context;
 import android.net.Uri;
 import com.parse.boltsinternal.Task;
 import com.parse.http.ParseHttpRequest;
@@ -37,23 +39,24 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.Shadows;
-import org.robolectric.shadows.ShadowContentResolver;
 
 // For org.json
-@RunWith(RobolectricTestRunner.class)
 public class ParseFileControllerTest {
 
     @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+    private ParsePlugins plugins;
+
     @Before
     public void setUp() throws MalformedURLException {
         ParseRESTCommand.server = new URL("https://api.parse.com/1");
-        ParsePlugins plugins = mock(ParsePlugins.class);
-        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        plugins = mock(ParsePlugins.class);
+        Context context = mock(Context.class);
+        ContentResolver contentResolver = mock(ContentResolver.class);
+        when(context.getContentResolver()).thenReturn(contentResolver);
+        when(plugins.applicationContext()).thenReturn(context);
+        Parse.Configuration configuration = new Parse.Configuration.Builder(null).build();
+        when(plugins.configuration()).thenReturn(configuration);
         ParsePlugins.set(plugins);
     }
 
@@ -227,11 +230,11 @@ public class ParseFileControllerTest {
 
         File file = new File(root, "test");
         ParseFileUtils.writeStringToFile(file, "content", "UTF-8");
-        Uri uri = Uri.fromFile(file);
-        ShadowContentResolver shadowContentResolver =
-                Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
-        shadowContentResolver.registerInputStream(
-                uri, new ByteArrayInputStream("content".getBytes()));
+        Uri uri = mock(Uri.class);
+        ContentResolver contentResolver = mock(ContentResolver.class);
+        when(plugins.applicationContext().getContentResolver()).thenReturn(contentResolver);
+        when(contentResolver.openInputStream(uri))
+                .thenReturn(new ByteArrayInputStream("content".getBytes()));
         ParseFile.State state =
                 new ParseFile.State.Builder().name("file_name").mimeType("mime_type").build();
         Task<ParseFile.State> task = controller.saveAsync(state, uri, null, null, null);
