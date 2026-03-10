@@ -18,6 +18,7 @@ class ResetPluginsParseTest {
 
     @After
     public void tearDown() throws Exception {
+        Parse.setLocalDatastore(null);
         ParseCorePlugins.getInstance().reset();
         ParsePlugins.reset();
     }

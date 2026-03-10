@@ -11,8 +11,11 @@ package com.parse;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.net.Uri;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
@@ -20,13 +23,33 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
+import org.robolectric.shadows.ShadowContentResolver;
 
+@RunWith(RobolectricTestRunner.class)
 public class ParseCountingUriHttpBodyTest {
 
     @Rule public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+    @Before
+    public void setUp() {
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        ParsePlugins.set(plugins);
+    }
+
+    @After
+    public void tearDown() {
+        ParsePlugins.reset();
+    }
 
     private static String getData() {
         char[] chars = new char[64 << 14]; // 1MB
@@ -34,12 +57,17 @@ public class ParseCountingUriHttpBodyTest {
         return new String(chars);
     }
 
-    private static Uri makeTestUri(File root) throws IOException {
+    private Uri makeTestUri(File root) throws IOException {
         File file = new File(root, "test");
         FileWriter writer = new FileWriter(file);
         writer.write(getData());
         writer.close();
-        return Uri.fromFile(file);
+        Uri uri = Uri.fromFile(file);
+        ShadowContentResolver shadowContentResolver =
+                Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(
+                uri, new ByteArrayInputStream(getData().getBytes()));
+        return uri;
     }
 
     @Test

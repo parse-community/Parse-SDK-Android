@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.net.Uri;
 import android.os.Parcel;
 import com.parse.boltsinternal.Task;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -36,6 +37,9 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.Shadows;
+import org.robolectric.shadows.ShadowContentResolver;
 
 @RunWith(RobolectricTestRunner.class)
 public class ParseFileTest {
@@ -46,11 +50,15 @@ public class ParseFileTest {
     public void setup() {
         ParseCorePlugins.getInstance().reset();
         ParseTestUtils.setTestParseUser();
+        ParsePlugins plugins = mock(ParsePlugins.class);
+        when(plugins.applicationContext()).thenReturn(RuntimeEnvironment.application);
+        ParsePlugins.set(plugins);
     }
 
     @After
     public void tearDown() {
         ParseCorePlugins.getInstance().reset();
+        ParsePlugins.reset();
     }
 
     @Test
@@ -259,13 +267,16 @@ public class ParseFileTest {
         String name = "name";
         File file = temporaryFolder.newFile(name);
         Uri uri = Uri.fromFile(file);
+        ShadowContentResolver shadowContentResolver =
+                Shadows.shadowOf(RuntimeEnvironment.application.getContentResolver());
+        shadowContentResolver.registerInputStream(uri, new ByteArrayInputStream(new byte[0]));
         String contentType = "content_type";
         String url = "url";
         ParseFile.State state = new ParseFile.State.Builder().url(url).build();
         ParseFileController controller = mock(ParseFileController.class);
         when(controller.saveAsync(
                         any(ParseFile.State.class),
-                        any(File.class),
+                        any(Uri.class),
                         nullable(String.class),
                         nullable(ProgressCallback.class),
                         nullable(Task.class)))
@@ -278,19 +289,18 @@ public class ParseFileTest {
         // Verify controller get the correct data
         ArgumentCaptor<ParseFile.State> stateCaptor =
                 ArgumentCaptor.forClass(ParseFile.State.class);
-        ArgumentCaptor<File> fileCaptor = ArgumentCaptor.forClass(File.class);
+        ArgumentCaptor<Uri> uriCaptor = ArgumentCaptor.forClass(Uri.class);
         verify(controller, times(1))
                 .saveAsync(
                         stateCaptor.capture(),
-                        fileCaptor.capture(),
+                        uriCaptor.capture(),
                         nullable(String.class),
                         nullable(ProgressCallback.class),
                         nullable(Task.class));
         assertNull(stateCaptor.getValue().url());
         assertEquals(name, stateCaptor.getValue().name());
         assertEquals(contentType, stateCaptor.getValue().mimeType());
-        assertEquals(file, fileCaptor.getValue());
-        // Verify the state of ParseFile has been updated
+        assertEquals(uri, uriCaptor.getValue()); // Verify the state of ParseFile has been updated
         assertEquals(url, parseFile.getUrl());
     }
 
