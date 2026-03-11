@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.3.0...4.4.0) (2026-03-11)
+
+
+### Features
+
+* Add `maxKeyValueCacheBytes` and `maxKeyValueCacheFiles` to configuration to manage cache size ([#1227](https://github.com/parse-community/Parse-SDK-Android/issues/1227)) ([c19f02f](https://github.com/parse-community/Parse-SDK-Android/commit/c19f02fffb0d9cc44808408666b81e37e3a1d6ce))
+
 # [4.3.0](https://github.com/parse-community/Parse-SDK-Android/compare/4.2.1...4.3.0) (2024-02-18)
 
 
