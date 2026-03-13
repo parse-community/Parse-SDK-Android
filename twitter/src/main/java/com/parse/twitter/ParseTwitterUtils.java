@@ -108,7 +108,9 @@ public final class ParseTwitterUtils {
         }
     }
 
-    /** @return {@code true} if the user is linked to a Twitter account. */
+    /**
+     * @return {@code true} if the user is linked to a Twitter account.
+     */
     public static boolean isLinked(ParseUser user) {
         return user.isLinked(AUTH_TYPE);
     }

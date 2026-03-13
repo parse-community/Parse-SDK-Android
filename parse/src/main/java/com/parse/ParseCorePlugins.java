@@ -135,7 +135,12 @@ class ParseCorePlugins {
                     Parse.isLocalDatastoreEnabled()
                             ? new OfflineObjectStore<>(ParseUser.class, PIN_CURRENT_USER, fileStore)
                             : fileStore;
-            ParseCurrentUserController controller = new CachedCurrentUserController(store);
+            EncryptedFileObjectStore<ParseUser> encryptedFileObjectStore =
+                    new EncryptedFileObjectStore<>(
+                            ParseUser.class, file, ParseUserCurrentCoder.get());
+            ParseObjectStoreMigrator<ParseUser> storeMigrator =
+                    new ParseObjectStoreMigrator<>(encryptedFileObjectStore, store);
+            ParseCurrentUserController controller = new CachedCurrentUserController(storeMigrator);
             currentUserController.compareAndSet(null, controller);
         }
         return currentUserController.get();

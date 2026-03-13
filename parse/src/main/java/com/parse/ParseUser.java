@@ -717,7 +717,9 @@ public class ParseUser extends ParseObject {
         }
     }
 
-    /** @return the session token for a user, if they are logged in. */
+    /**
+     * @return the session token for a user, if they are logged in.
+     */
     public String getSessionToken() {
         return getState().sessionToken();
     }
