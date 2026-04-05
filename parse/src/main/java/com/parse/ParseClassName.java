@@ -21,6 +21,8 @@ import java.lang.annotation.Target;
 @Inherited
 @Documented
 public @interface ParseClassName {
-    /** @return The Parse class name associated with the ParseObject subclass. */
+    /**
+     * @return The Parse class name associated with the ParseObject subclass.
+     */
     String value();
 }

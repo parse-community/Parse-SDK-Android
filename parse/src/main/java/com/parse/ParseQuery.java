@@ -282,7 +282,9 @@ public class ParseQuery<T extends ParseObject> {
         return ParseTaskUtils.wait(getFirstInBackground());
     }
 
-    /** @return the caching policy. */
+    /**
+     * @return the caching policy.
+     */
     public CachePolicy getCachePolicy() {
         return builder.getCachePolicy();
     }

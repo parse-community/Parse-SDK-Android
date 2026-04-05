@@ -150,7 +150,9 @@ public class ManifestInfo {
         }
     }
 
-    /** @return A {@link Bundle} if meta-data is specified in AndroidManifest, otherwise null. */
+    /**
+     * @return A {@link Bundle} if meta-data is specified in AndroidManifest, otherwise null.
+     */
     public static Bundle getApplicationMetadata(Context context) {
         ApplicationInfo info = getApplicationInfo(context, PackageManager.GET_META_DATA);
         if (info != null) {
